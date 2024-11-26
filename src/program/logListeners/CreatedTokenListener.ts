@@ -67,10 +67,9 @@ export class CreatedTokenLogListener implements SubscibeProgramLogs {
       commitment: "confirmed",
     });
     if (!tx) {
-      console.error(
+      throw new Error(
         "Failed to fetch transaction with signature " + txSignature
       );
-      return;
     }
     return this.parseTokenLaunchInfo(programId, tx);
   }
@@ -87,6 +86,9 @@ export class CreatedTokenLogListener implements SubscibeProgramLogs {
       throw new Error("Failed to find lp init instruction in lp init tx");
     }
     console.dir(txData.meta?.innerInstructions, { depth: null });
+    if (initInstruction.accounts.length < 5) {
+      throw new Error("Instruction account length is too small");
+    }
     const creator = initInstruction.accounts[2];
     const mintAddress = initInstruction.accounts[3];
     const bondingCurve = initInstruction.accounts[4];
