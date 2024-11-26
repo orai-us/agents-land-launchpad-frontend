@@ -5,7 +5,7 @@ import { SwapAccounts, SwapArgs, swap } from './cli/instructions/swap';
 import * as anchor from '@coral-xyz/anchor';
 import { ASSOCIATED_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import { WalletContextState, useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { errorAlert } from '@/components/ToastGroup';
+import { errorAlert } from '@/components/others/ToastGroup';
 
 const curveSeed = 'CurveConfiguration';
 const POOL_SEED_PREFIX = 'liquidity_pool';

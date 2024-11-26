@@ -41,7 +41,6 @@ export const TVChartContainer = ({
             tvWidgetRef.current.remove();
         }
         const elem = chartContainerRef.current;
-        console.log("localhost host", location.host)
         if(name){
             const widgetOptions: ChartingLibraryWidgetOptions = {
                 symbol: name,

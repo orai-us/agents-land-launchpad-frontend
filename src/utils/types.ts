@@ -18,6 +18,7 @@ export type Chart = {
     closes: number[];
 };
 
+
 export interface userInfo {
     _id?: string,
     name: string,
@@ -28,6 +29,7 @@ export interface userInfo {
 }
 
 export interface coinInfo {
+    commit: any;
     _id?: string,
     name: string,
     creator: string | userInfo,
@@ -36,6 +38,7 @@ export interface coinInfo {
     reserveOne: number,
     reserveTwo: number,
     token: string,
+    marketcap?: number,
     presale?: number,
     replies?: number,
     description?: string,

@@ -26,13 +26,11 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [modalContent, setModalContent] = useState<ReactNode | null>(null);
 
   const openModal = (content: ReactNode) => {
-    console.log("Open Modal: ",content)
     setModalContent(content);
     document.body.classList.add("modal-open");
   };
 
   const closeModal = () => {
-    console.log("Close modal" )
     setModalContent(null);
     document.body.classList.remove("modal-open");
   };
@@ -55,7 +53,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 // Custom hook to access the modal context
 export const useModal = () => {
   const context = useContext(ModalContext);
-  
+
   if (!context) {
     throw new Error("useModal must be used within a ModalProvider");
   }

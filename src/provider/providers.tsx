@@ -25,6 +25,9 @@ export default function Providers({ children }: { children: ReactNode }) {
   const [coinId, setCoinId] = useState<string>('');
   const [newMsg, setNewMsg] = useState<msgInfo>({} as msgInfo);
   const [solPrice, setSolPrice] = useState<number>(0);
+  const [profileEditModal, setProfileEditModal] = useState<boolean>(false);
+  const [postReplyModal, setPostReplyModal] = useState<boolean>(false);
+
   return (
     <SolanaWalletProvider>
       <QueryClientProvider client={queryClient}>
@@ -50,6 +53,10 @@ export default function Providers({ children }: { children: ReactNode }) {
                 setLogin,
                 isLoading,
                 setIsLoading,
+                profileEditModal,
+                setProfileEditModal,
+                postReplyModal,
+                setPostReplyModal
               }}
             >
               <SocketProvider>

@@ -8,7 +8,7 @@ import type {
     SubscribeBarsCallback,
 } from "@/libraries/charting_library";
 
-import { queryClient } from "../providers";
+import { queryClient } from "../../provider/providers";
 import { Chart } from "@/utils/types";
 
 let socket: Socket | undefined = undefined;

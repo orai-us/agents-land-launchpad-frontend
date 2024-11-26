@@ -2,28 +2,26 @@ import { msgInfo, userInfo } from "@/utils/types";
 
 interface MessageFormProps {
   msg: msgInfo;
-  onClose: () => void
 }
 
-export const MessageForm: React.FC<MessageFormProps> = ({ msg, onClose }) => {
+export const MessageForm: React.FC<MessageFormProps> = ({ msg }) => {
   return (
-    <div className="my-2 py-1 bg-gray-900">
-      <div className="m-2">
-        <div className="flex my-2 ">
+    <div className="py-2 flex flex-col">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-row gap-2 items-center px-1">
           <img
             src={(msg.sender as userInfo)?.avatar}
             alt="Token IMG"
-            className="rounded"
-            width={40}
-            height={40}
+            className="rounded-full"
+            width={32}
+            height={32}
           />
-          <h3 className="bg-slate-600 mx-5 px-3 leading-10 rounded text-white text-lg ">
+          <div className="text-sm text-gray-300">
             {msg.sender && (msg.sender as userInfo).name}
-          </h3>
-          {msg.time && <h3 className="text-white leading-10">{msg.time.toString()}</h3>}
-          <p className="text-lg ml-4 hover:text-green-400 cursor-pointer text-white" onClick={onClose}>[Reply]</p>
+          </div>
+          {msg.time && <div className="text-sm text-gray-300">{msg.time.toString()}</div>}
         </div>
-        <div className="flex">
+        <div className="flex flex-row w-full border-[1px] border-[#143F72] rounded-lg object-cover overflow-hidden gap-1 items-start justify-start">
           {msg.img !== undefined && (
             <img
               src={msg.img}
@@ -33,8 +31,8 @@ export const MessageForm: React.FC<MessageFormProps> = ({ msg, onClose }) => {
               height={300}
             />
           )}
-          <div className=" text-white">
-            <p className="text-xl pl-4">{msg.msg}</p>
+          <div className="w-full h-full flex flex-col text-white font-semibold py-3 text-sm px-3">
+            {msg.msg}
           </div>
         </div>
       </div>

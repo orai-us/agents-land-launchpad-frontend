@@ -27,7 +27,6 @@ export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
 
     const [isScriptReady, setIsScriptReady] = useState(false);
     const [period, setPeriod] = useState<PeriodParams>({} as PeriodParams)
-    // console.log("tradingview chart", param)
     useEffect(() => {
         if (param.date !== undefined) {
             const newPeriod: PeriodParams = {
@@ -37,7 +36,6 @@ export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
                 firstDataRequest: true,
                 countBack: 2
             }
-            console.log(newPeriod, "tradingview")
             setPeriod(newPeriod);
         }
 

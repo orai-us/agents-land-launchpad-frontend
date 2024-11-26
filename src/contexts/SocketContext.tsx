@@ -4,7 +4,7 @@ import { createContext, useState, useEffect, useContext } from "react";
 import io, { Socket } from "socket.io-client";
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { useRouter } from "next/navigation";
-import { errorAlert, successAlert } from "@/components/ToastGroup";
+import { errorAlert, successAlert } from "@/components/others/ToastGroup";
 import { msgInfo } from "@/utils/types";
 import UserContext from "@/context/UserContext";
 

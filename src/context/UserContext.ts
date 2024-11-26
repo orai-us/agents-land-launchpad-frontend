@@ -30,7 +30,12 @@ const UserContext = createContext({
     newMsg: {} as msgInfo,
     setNewMsg: (value: msgInfo) => { },
     solPrice: 0,
-    setSolPrice: (value: number) => {}
+    setSolPrice: (value: number) => { },
+    profileEditModal: false,
+    setProfileEditModal: (value: boolean) => { },
+    postReplyModal: false,
+    setPostReplyModal: (value: boolean) => { },
+
 })
 
 export default UserContext;

@@ -1,15 +1,16 @@
 "use client";
-
 import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-
-import { successAlert, errorAlert, infoAlert } from "@/components/ToastGroup";
+import { successAlert, errorAlert, infoAlert } from "@/components/others/ToastGroup";
 import base58 from "bs58";
 import UserContext from "@/context/UserContext";
 import { confirmWallet, walletConnect } from "@/utils/util";
 import { userInfo } from "@/utils/types";
 import { useRouter } from "next/navigation";
+import { RiExchangeDollarLine } from "react-icons/ri";
+import { VscDebugDisconnect } from "react-icons/vsc";
+import { TbMoodEdit } from "react-icons/tb";
 
 export const ConnectButton: FC = () => {
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
@@ -35,8 +36,8 @@ export const ConnectButton: FC = () => {
   const sign = async (updatedUser: userInfo) => {
     try {
       const connection = await walletConnect({ data: updatedUser });
-      if(!connection) return;
-      if (connection.nonce===undefined) {
+      if (!connection) return;
+      if (connection.nonce === undefined) {
         const newUser = {
           name: connection.name,
           wallet: connection.wallet,
@@ -51,7 +52,7 @@ export const ConnectButton: FC = () => {
       const msg = new TextEncoder().encode(
         `Nonce to confirm: ${connection.nonce}`
       );
-      
+
       const sig = await signMessage?.(msg);
       const res = base58.encode(sig as Uint8Array);
       const signedWallet = { ...connection, signature: res };
@@ -82,37 +83,40 @@ export const ConnectButton: FC = () => {
   }
   return (
     <div>
-      <button className=" rounded-lg border-[0.75px] border-[#371111] bg-[#5b1717] shadow-btn-inner text-[#ffffff] tracking-[0.32px] h-[42px] px-2 group relative ">
-        {login  && publicKey ? (
+      <button className=" rflex flex-row gap-1 items-center justify-end text-white px-5 py-2 rounded-full border-[1px] border-[#143F72] bg-none group relative ">
+        {login && publicKey ? (
           <>
-            <div className="flex mr-3 items-center justify-center text-[16px] lg:text-md">
-             {(user.avatar !== undefined) && <img
+            <div className="flex items-center justify-center gap-2 text-[16px] lg:text-md">
+              {(user.avatar !== undefined) && <img
                 src={user.avatar}
                 alt="Token IMG"
-                className="rounded p-1"
+                className="rounded-full"
                 width={35}
                 height={35}
               />}
-              <div className="ml-3">
+              <div className="">
                 {publicKey.toBase58().slice(0, 4)}....
                 {publicKey.toBase58().slice(-4)}
               </div>
+              <TbMoodEdit onClick={() => handleToProfile(`/profile/${tempUser._id}`)} className="text-2xl" />
             </div>
-            <div className="w-[200px] absolute right-0 top-10 hidden group-hover:block">
-              <ul className="border-[0.75px] border-[#371111] rounded-lg bg-[#371111] p-2 ">
+            <div className="w-full absolute right-0 top-[52px] hidden bg-white/20 rounded-lg group-hover:block">
+              <ul className="border-[0.75px] border-[#143F72] rounded-lg bg-none object-cover overflow-hidden">
                 <li>
                   <div
-                    className="flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px]"
+                    className="flex flex-row gap-1 items-center mb-1 text-primary-100 text-md p-2 hover:bg-white/10"
                     onClick={() => setVisible(true)}
                   >
+                    <RiExchangeDollarLine />
                     Change Wallet
                   </div>
                 </li>
                 <li>
                   <div
-                    className="flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px]"
+                    className="flex gap-1 items-center text-primary-100 text-md p-2 hover:bg-white/10"
                     onClick={logOut}
                   >
+                    <VscDebugDisconnect />
                     Disconnect
                   </div>
                 </li>
@@ -128,13 +132,6 @@ export const ConnectButton: FC = () => {
           </div>
         )}
       </button>
-      <div>
-        {login && tempUser.wallet && (
-            <div onClick={() => handleToProfile(`/profile/${tempUser._id}`)} className="text-center py-1 text-md text-white cursor-pointer hover:bg-slate-800 hover:rounded-md active:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-300">
-              [View Profile]
-            </div>
-        )}
-      </div>
     </div>
   );
 };
