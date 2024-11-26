@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { FC, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PiLightning } from "react-icons/pi";
@@ -8,23 +8,38 @@ import { getCoinsInfo, getSolPriceInUSD } from "@/utils/util";
 import { CoinBlog } from "../cards/CoinBlog";
 import TopToken from "./TopToken";
 import FilterList from "./FilterList";
+import ListToken, { STATUS_TOKEN, TokenTab } from "./ListToken";
+import FilterListToken from "./FilterListToken";
 
 const HomePage: FC = () => {
-  const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } = useContext(UserContext);
+  const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } =
+    useContext(UserContext);
   const [totalStaked, setTotalStaked] = useState(0);
   const [token, setToken] = useState("");
   const [data, setData] = useState<coinInfo[]>([]);
   const [dataSort, setDataSort] = useState<string>("dump order");
   const [isSort, setIsSort] = useState(0);
-  const [order, setOrder] = useState("desc")
+  const [order, setOrder] = useState("desc");
   const [king, setKing] = useState<coinInfo>({} as coinInfo);
   const dropdownRef = useRef(null);
   const dropdownRef1 = useRef(null);
-  const router = useRouter()
+  const router = useRouter();
+  const [currentTab, setCurrentTab] = useState(STATUS_TOKEN.LUNCH);
 
   const handleToRouter = (id: string) => {
-    router.push(id)
-  }
+    router.push(id);
+  };
+
+  useEffect(() => {
+    if (
+      !Object.values(TokenTab)
+        .map((e) => e.value)
+        .includes(currentTab)
+    ) {
+      router.push(`/?tab=${STATUS_TOKEN.LUNCH}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTab]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -40,20 +55,19 @@ const HomePage: FC = () => {
       }
     };
     fetchData();
-
   }, []);
+
   const handleSortSelection = (option) => {
-    let sortOption: string = '';
+    let sortOption: string = "";
     let orderOption: string = "";
     let sortedData = [...data]; // Create a new array to prevent direct state mutation
     if (option == "desc" || option == "asc") {
       setOrder(option);
       sortOption = dataSort;
       orderOption = option;
-    }
-    else {
-      setDataSort(option)
-      sortOption = option
+    } else {
+      setDataSort(option);
+      sortOption = option;
       orderOption = order;
     }
     if (orderOption == "desc") {
@@ -71,7 +85,9 @@ const HomePage: FC = () => {
           sortedData.sort((a, b) => a.reserveOne - b.reserveOne);
           break;
         case "creation time":
-          sortedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
           break;
         default:
           sortedData = data;
@@ -92,7 +108,9 @@ const HomePage: FC = () => {
           sortedData.sort((a, b) => b.reserveOne - a.reserveOne);
           break;
         case "creation time":
-          sortedData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
           break;
         default:
           sortedData = data;
@@ -106,24 +124,28 @@ const HomePage: FC = () => {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
-        dropdownRef.current && !dropdownRef.current.contains(event.target) &&
-        dropdownRef1.current && !dropdownRef1.current.contains(event.target)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        dropdownRef1.current &&
+        !dropdownRef1.current.contains(event.target)
       ) {
         setIsSort(0);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef, dropdownRef1]);
 
   return (
     <div className="w-full h-full gap-4 flex flex-col">
-      <TopToken />
-      <FilterList />
+      {/* <TopToken />
+      <FilterList /> */}
+      <FilterListToken type={currentTab} setType={setCurrentTab} />
+      <ListToken type={currentTab} />
       {/* <div className="flex">
         <div ref={dropdownRef} className="mx-4">
           <button className="bg-green-600 w-[200px] h-[50px] font-medium rounded-md " onClick={() => setIsSort(1)}>
@@ -164,7 +186,11 @@ const HomePage: FC = () => {
       {data && (
         <div className="w-full h-full flex flex-wrap gap-2 items-center">
           {data.map((temp, index) => (
-            <div key={index} onClick={() => handleToRouter(`/trading/${temp._id}`)} className="cursor-pointer mx-auto w-[380px] shadow-lg shadow-[#143F72] rounded-lg">
+            <div
+              key={index}
+              onClick={() => handleToRouter(`/trading/${temp._id}`)}
+              className="cursor-pointer mx-auto w-[380px] shadow-lg shadow-[#143F72] rounded-lg"
+            >
               <CoinBlog coin={temp} componentKey="coin"></CoinBlog>
             </div>
           ))}

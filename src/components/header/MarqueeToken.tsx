@@ -1,0 +1,123 @@
+import Image from "next/image";
+import React, { FC } from "react";
+import Marquee from "react-fast-marquee";
+import coinImg from "@/assets/images/richoldman.png";
+import { twMerge } from "tailwind-merge";
+
+enum ACTION_TYPE {
+  Bought = "Bought",
+  Sold = "Sold",
+}
+
+export type RecentTokenAction = {
+  address: string;
+  type: ACTION_TYPE;
+  amount: string;
+  token: {
+    name: string;
+    img: any;
+  };
+};
+
+const RecentToken: FC<RecentTokenAction> = ({
+  address,
+  type,
+  amount,
+  token,
+}) => {
+  return (
+    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0]">
+      <span className="text-[#9192A0]">{address}</span>&nbsp;
+      <span
+        className={twMerge(
+          "text-[#9FF4CF]",
+          type === ACTION_TYPE.Sold && "text-[#E75787]"
+        )}
+      >
+        {type}
+      </span>
+      &nbsp;
+      {amount} SOL of {token.name}
+      <Image
+        src={token.img}
+        alt="tokenIMG"
+        className="w-5 h-5 rounded-full ml-2"
+      />
+    </div>
+  );
+};
+
+const MarqueeToken = () => {
+  return (
+    <div className="flex items-center justify-center w-full bg-[#1A1C28] p-4">
+      <div className="flex items-center justify-center max-w-[1216px]">
+        <div className="mr-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+          >
+            <path
+              d="M15.8333 6.66667V11.6667C17.25 11.6667 18.3333 10.5833 18.3333 9.16667C18.3333 7.75 17.25 6.66667 15.8333 6.66667ZM9.16662 5.83333H3.33329C2.41663 5.83333 1.66663 6.58333 1.66663 7.5V10.8333C1.66663 11.75 2.41663 12.5 3.33329 12.5H4.16663V15C4.16663 15.9167 4.91663 16.6667 5.83329 16.6667H7.49996V12.5H9.16662L12.5 15.8333H14.1666V2.5H12.5L9.16662 5.83333Z"
+              fill="#E4775D"
+            />
+          </svg>
+        </div>
+
+        <Marquee gradient gradientColor="#1A1C28">
+          {[
+            {
+              address: "THZu...HKcR",
+              type: ACTION_TYPE.Bought,
+              amount: "0.4",
+              token: {
+                name: "RIC",
+                img: coinImg,
+              },
+            },
+            {
+              address: "THZu...HKcR",
+              type: ACTION_TYPE.Sold,
+              amount: "0.01",
+              token: {
+                name: "MAX",
+                img: coinImg,
+              },
+            },
+            {
+              address: "THZu...HKcR",
+              type: ACTION_TYPE.Sold,
+              amount: "0.34",
+              token: {
+                name: "MAX",
+                img: coinImg,
+              },
+            },
+            {
+              address: "THZu...HKcR",
+              type: ACTION_TYPE.Sold,
+              amount: "0.22",
+              token: {
+                name: "MAX",
+                img: coinImg,
+              },
+            },
+          ].map((item, idx) => {
+            return (
+              <div
+                key={`id-noti-${item.address}-${idx}-${item.token.name}`}
+                className="flex"
+              >
+                <RecentToken {...item} />
+              </div>
+            );
+          })}
+        </Marquee>
+      </div>
+    </div>
+  );
+};
+
+export default MarqueeToken;

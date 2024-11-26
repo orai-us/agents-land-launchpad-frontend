@@ -2,7 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 @layer components {
   .container {
     @apply w-full mx-auto max-w-[1440px];
@@ -13,18 +12,19 @@
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
-  background: #140B56;
+  /* background: #140b56; */
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: #140B56;
+  /* background: #140b56; */
   border-radius: 5px;
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #2b7ee2;
+  background: #9192a0;
+  /* background: #2b7ee2; */
   border-radius: 5px;
 }
 
@@ -56,8 +56,8 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(180deg, #140B56, #01000B);
+  color: #e8e9ee;
+  background-color: #13141d;
 }
 
 @layer utilities {
@@ -80,7 +80,35 @@ input[type="number"] {
 }
 
 .text-gradient {
-  background: -webkit-linear-gradient(135deg, #2BBAF7, #0047CA);
+  background: -webkit-linear-gradient(135deg, #2bbaf7, #0047ca);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+.wallet-adapter-modal-title {
+  padding: 12px 48px 48px 0px;
+}
+
+.wallet-adapter-modal-wrapper {
+  padding: 12px;
+  max-width: 480px;
+  background: #13141d;
+}
+
+.wallet-adapter-modal-button-close {
+  background: #13141d;
+}
+
+.bg-banner {
+  background-image: url(../assets/images/banner.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+}
+
+.bg-barrie {
+  background-image: url(../assets/images/barie.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  /* animation: animatedImage ease-in 300ms infinite; */
 }
