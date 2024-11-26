@@ -57,7 +57,7 @@
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(180deg, #140B56, #01000B);
+  background: linear-gradient(180deg, #140B56, #01000B) #140B56;
 }
 
 @layer utilities {
