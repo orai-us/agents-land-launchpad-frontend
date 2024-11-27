@@ -86,21 +86,21 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
       mintUri: token.json.image || token.uri,
     };
 
-    const buyInstruction = this.findSellSolInstruction(
+    const soldInstruction = this.findSellSolInstruction(
       txData.meta?.innerInstructions,
       globalVaultPda
     );
 
-    if (buyInstruction) {
-      swapInfo.solAmountInLamports = buyInstruction.parsed.info.lamports;
+    if (soldInstruction) {
+      swapInfo.solAmountInLamports = soldInstruction.parsed.info.lamports;
       return swapInfo;
     }
-    const sellInstruction = this.findBuySolInstruction(
+    const boughtInstruction = this.findBuySolInstruction(
       txData.meta?.innerInstructions,
       globalVaultPda
     );
-    if (sellInstruction) {
-      swapInfo.solAmountInLamports = sellInstruction.parsed.info.lamports;
+    if (boughtInstruction) {
+      swapInfo.solAmountInLamports = boughtInstruction.parsed.info.lamports;
       swapInfo.direction = "Bought";
       return swapInfo;
     }
