@@ -146,7 +146,7 @@ export const ConnectButton: FC = () => {
                 </li>
                 <li>
                   <div
-                    className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+                    className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
                     onClick={logOut}
                   >
                     <VscDebugDisconnect />

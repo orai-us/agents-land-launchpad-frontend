@@ -140,6 +140,8 @@ const HomePage: FC = () => {
     };
   }, [dropdownRef, dropdownRef1]);
 
+  console.log("data", data);
+
   return (
     <div className="w-full h-full gap-4 flex flex-col">
       {/* <TopToken />

@@ -29,6 +29,9 @@ export const ListLaunchToken = () => {
   const handleToProfile = (id: string) => {
     router.push(`/profile/${id}`);
   };
+  const handleToRouter = (id: string) => {
+    router.push(id);
+  };
   return (
     <div className="mt-8 mb-14 grid grid-cols-4 gap-x-4 gap-y-8">
       {[...new Array(10)].map((e, ind) => {
@@ -36,6 +39,7 @@ export const ListLaunchToken = () => {
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] hover:scale-105"
             key={`item-token-${ind}`}
+            onClick={() => handleToRouter(`/trading/${e}`)}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
@@ -102,6 +106,9 @@ export const ListListedToken = () => {
   const handleToProfile = (id: string) => {
     router.push(`/profile/${id}`);
   };
+  const handleToRouter = (id: string) => {
+    router.push(id);
+  };
 
   return (
     <div className="mt-8 mb-14 grid grid-cols-4 gap-x-4 gap-y-8">
@@ -110,6 +117,7 @@ export const ListListedToken = () => {
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] hover:scale-105"
             key={`item-token-${ind}`}
+            onClick={() => handleToRouter(`/trading/${e}`)}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">

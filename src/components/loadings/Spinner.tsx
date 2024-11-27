@@ -1,4 +1,4 @@
-import { Circles } from "react-loader-spinner"
+import { Circles } from "react-loader-spinner";
 
 export const Spinner = () => {
   return (
@@ -8,7 +8,7 @@ export const Spinner = () => {
           <Circles
             height="80"
             width="80"
-            color="#4fa94d"
+            color="#E4775D"
             ariaLabel="circles-loading"
             wrapperStyle={{}}
             wrapperClass=""
@@ -17,6 +17,5 @@ export const Spinner = () => {
         </div>
       </div>
     </div>
-  )
-
-}
+  );
+};
