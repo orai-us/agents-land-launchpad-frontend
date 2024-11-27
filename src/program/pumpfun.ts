@@ -2723,6 +2723,45 @@ export type Pumpfun = {
         152,
         8
       ]
+    },
+    {
+      "name": "launchEvent",
+      "discriminator": [
+        27,
+        193,
+        47,
+        130,
+        115,
+        92,
+        239,
+        94
+      ]
+    },
+    {
+      "name": "swapEvent",
+      "discriminator": [
+        64,
+        198,
+        205,
+        232,
+        38,
+        8,
+        113,
+        226
+      ]
+    },
+    {
+      "name": "withdrawEvent",
+      "discriminator": [
+        22,
+        9,
+        133,
+        26,
+        160,
+        44,
+        71,
+        192
+      ]
     }
   ],
   "errors": [
@@ -2968,6 +3007,114 @@ export type Pumpfun = {
                 ]
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "launchEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bondingCurve",
+            "type": "pubkey"
+          },
+          {
+            "name": "metadata",
+            "type": "pubkey"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "tokenSupply",
+            "type": "u64"
+          },
+          {
+            "name": "reserveLamport",
+            "type": "u64"
+          },
+          {
+            "name": "reserveToken",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "swapEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bondingCurve",
+            "type": "pubkey"
+          },
+          {
+            "name": "amountIn",
+            "type": "u64"
+          },
+          {
+            "name": "direction",
+            "type": "u8"
+          },
+          {
+            "name": "minimumReceiveAmount",
+            "type": "u64"
+          },
+          {
+            "name": "amountOut",
+            "type": "u64"
+          },
+          {
+            "name": "reserveLamport",
+            "type": "u64"
+          },
+          {
+            "name": "reserveToken",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "withdrawEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bondingCurve",
+            "type": "pubkey"
+          },
+          {
+            "name": "solAmount",
+            "type": "u64"
+          },
+          {
+            "name": "tokenAmount",
+            "type": "u64"
           }
         ]
       }

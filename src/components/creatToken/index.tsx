@@ -97,9 +97,9 @@ export default function CreateToken() {
   ) => {
     let value = e.target.value;
 
-    // Validate input
     // Set the input value regardless of validation
     setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+    // Validate input
     const numericValue = parseFloat(value);
     if (numericValue > 10 || numericValue < 1) {
       errorAlert("Virtual SOL amount must be between 1 and 10 SOL");
@@ -270,7 +270,7 @@ export default function CreateToken() {
             />
           </div>
           <div>
-            <label htmlFor="presale" className="text-lg font-semibold text-white">
+            <label htmlFor="virtualReserves" className="text-lg font-semibold text-white">
               Virtual SOL Reserves (1 ~ 10 SOL) <span className="text-red-700">*</span>
             </label>
             <input

@@ -2717,6 +2717,45 @@
         152,
         8
       ]
+    },
+    {
+      "name": "LaunchEvent",
+      "discriminator": [
+        27,
+        193,
+        47,
+        130,
+        115,
+        92,
+        239,
+        94
+      ]
+    },
+    {
+      "name": "SwapEvent",
+      "discriminator": [
+        64,
+        198,
+        205,
+        232,
+        38,
+        8,
+        113,
+        226
+      ]
+    },
+    {
+      "name": "WithdrawEvent",
+      "discriminator": [
+        22,
+        9,
+        133,
+        26,
+        160,
+        44,
+        71,
+        192
+      ]
     }
   ],
   "errors": [
@@ -2962,6 +3001,114 @@
                 ]
               }
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "LaunchEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "metadata",
+            "type": "pubkey"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
+            "name": "token_supply",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_lamport",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_token",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SwapEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount_in",
+            "type": "u64"
+          },
+          {
+            "name": "direction",
+            "type": "u8"
+          },
+          {
+            "name": "minimum_receive_amount",
+            "type": "u64"
+          },
+          {
+            "name": "amount_out",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_lamport",
+            "type": "u64"
+          },
+          {
+            "name": "reserve_token",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "WithdrawEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "bonding_curve",
+            "type": "pubkey"
+          },
+          {
+            "name": "sol_amount",
+            "type": "u64"
+          },
+          {
+            "name": "token_amount",
+            "type": "u64"
           }
         ]
       }

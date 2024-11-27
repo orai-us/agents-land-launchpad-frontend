@@ -3,7 +3,8 @@ import { getTokenBalance, swapTx } from "@/program/web3";
 import { coinInfo } from "@/utils/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { useContext, useState } from "react";
+import { ChangeEvent, useContext, useState } from "react";
+import { errorAlert } from "../others/ToastGroup";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -11,7 +12,7 @@ interface TradingFormProps {
 
 export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [sol, setSol] = useState<string>('');
-  const [isBuy, setIsBuy] = useState<number>(2);
+  const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
   const { user } = useContext(UserContext);
   const wallet = useWallet();
@@ -22,14 +23,17 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     { id: "10", price: "10 sol" },
   ]
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+
     const value = e.target.value;
+    console.log("value--->", value)
     if (!isNaN(parseFloat(value))) {
       setSol(value);
     } else if (value === '') {
       setSol(''); // Allow empty string to clear the input
     }
   };
+
   const getBalance = async () => {
     try {
       const balance = await getTokenBalance(user.wallet, coin.token);
@@ -48,8 +52,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   return (
     <div className="p-3 rounded-lg bg-transparent border-[1px] border-[#143F72] text-white font-semibold">
       <div className="flex flex-row justify-center px-3 py-2">
-        < button className={`rounded-l-lg py-3 w-full ${isBuy === 2 ? 'bg-custom-gradient' : 'bg-slate-800 hover:bg-slate-300'}`
-        } onClick={() => setIsBuy(2)}> Buy</button >
+        < button className={`rounded-l-lg py-3 w-full ${isBuy === 0 ? 'bg-custom-gradient' : 'bg-slate-800 hover:bg-slate-300'}`
+        } onClick={() => setIsBuy(0)}> Buy</button >
         <button className={`rounded-r-lg py-3 w-full ${isBuy === 1 ? 'bg-custom-gradient' : 'bg-slate-800 hover:bg-slate-300'}`} onClick={() => setIsBuy(1)}>
           Sell
         </button>
@@ -61,23 +65,23 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         >
           Set max slippage
         </label>
-        <div className="w-full flex flex-row items-center bg-transparent border-[1px] border-[#143F72] text-white rounded-lg">
+        <div className="w-full flex flex-row items-center bg-transparent border-[1px] border-[#143F72]  rounded-lg">
           <input
-            type="text"
+            type="number"
             id="setTrade"
             value={sol}
             onChange={handleInputChange}
             pattern="\d*"
-            className="w-full outline-none p-2.5 capitalize rounded-l-lg"
+            className="w-full outline-none text-black p-2.5 capitalize rounded-l-lg"
             placeholder="0.0"
             required
           />
           <div className="flex flex-col text-center p-2.5 border-l-[1px] border-l-[#143F72] bg-custom-gradient rounded-r-md">
-            {isBuy === 2 ? 'SOL' : coin.name}
+            {isBuy === 0 ? 'SOL' : coin.name}
           </div>
         </div>
         {
-          isBuy === 2 ? (
+          isBuy === 0 ? (
             <div className="flex flex-row py-2 gap-3">
               {SolList.map((item: any, index: any) => {
                 return (
