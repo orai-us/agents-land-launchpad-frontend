@@ -77,7 +77,7 @@ const FilterListToken: FC<{ type; setType }> = ({ type, setType }) => {
               )}
             >
               <ul
-                className="py-2 text-sm text bg-[#1A1C28] border border-[rgba(88,90,107,0.24)] rounded-lg"
+                className="p-2 text-sm text bg-[#1A1C28] border border-[rgba(88,90,107,0.24)] rounded-lg"
                 aria-labelledby="dropdownHoverButton"
               >
                 {[
@@ -107,7 +107,7 @@ const FilterListToken: FC<{ type; setType }> = ({ type, setType }) => {
                     >
                       <span
                         className={twMerge(
-                          "p-2 flex justify-start bg-[#1A1C28] gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] hover:bg-[#13141D] text-[#F3F4F6]",
+                          "p-2 rounded-lg flex justify-start bg-[#1A1C28] gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] hover:bg-[#13141D] text-[#F3F4F6]",
                           e.value === filterState.value &&
                             "cursor-not-allowed pointer-events-none bg-[#13141D]"
                         )}

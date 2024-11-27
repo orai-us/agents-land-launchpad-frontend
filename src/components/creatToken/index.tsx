@@ -15,25 +15,36 @@ import UserContext from "@/context/UserContext";
 import { useSocket } from "@/contexts/SocketContext";
 import { creatFeePay } from "@/program/web3";
 import { coinInfo } from "@/utils/types";
-import { createNewCoin, uploadTokenImage } from "@/utils/util";
+import { createNewCoin, reduceString, uploadTokenImage } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
 import MountainImg from "@/assets/images/mount_guide.png";
+import AgentImg from "@/assets/images/richoldman.png";
 import DropzoneFile from "../uploadFile/DropzoneFile";
+import { twMerge } from "tailwind-merge";
+
+export enum STEP_TOKEN {
+  INFO,
+  BEHAVIOR,
+}
 
 export default function CreateToken() {
   const { user, isCreated, setIsCreated } = useContext(UserContext);
   const { isLoading, setIsLoading } = useSocket();
   const [newCoin, setNewCoin] = useState<coinInfo>({} as coinInfo);
+  const [agentPersonality, setAgentPersonality] = useState<string>();
+  const [agentStyle, setAgentStyle] = useState<string>();
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [getAmt, setGetAmt] = useState<number>(0);
+  const [step, setStep] = useState<STEP_TOKEN>(STEP_TOKEN.INFO);
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
     marketcap: false,
+    description: false,
     image: false,
   });
 
@@ -46,6 +57,7 @@ export default function CreateToken() {
     setErrors({
       name: !newCoin.name,
       ticker: !newCoin.ticker,
+      description: !newCoin.description,
       marketcap:
         !newCoin.marketcap ||
         newCoin.marketcap < 5000 ||
@@ -101,6 +113,7 @@ export default function CreateToken() {
     const validationErrors = {
       name: !newCoin.name,
       ticker: !newCoin.ticker,
+      description: !newCoin.description,
       marketcap:
         !newCoin.marketcap ||
         newCoin.marketcap < 5000 ||
@@ -149,6 +162,7 @@ export default function CreateToken() {
         setImageFile(null);
         setImagePreview(null);
         setSelectedFileName("");
+        setStep(STEP_TOKEN.INFO);
       } else {
         errorAlert("Failed to create token.");
       }
@@ -171,7 +185,7 @@ export default function CreateToken() {
   return (
     <div className="w-full m-auto px-3 my-24">
       <div onClick={() => handleToRouter("/")}>
-        <div className="uppercase cursor-pointer text-white text-2xl flex flex-row items-center gap-2 pb-2">
+        <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
@@ -193,66 +207,198 @@ export default function CreateToken() {
         Agent is set to go live.
       </div>
       <div className="flex justify-between items-start">
-        <div className="w-full flex flex-col gap-4">
-          <div className="flex flex-col gap-4">
-            <div>
-              <label
-                htmlFor="name"
-                className="text-lg font-semibold text-white"
-              >
-                Token Name (Max 30) <span className="text-red-700">*</span>
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={newCoin.name || ""}
-                onChange={handleChange}
-                className={`block w-full p-2.5 ${
-                  errors.name ? "border-red-700" : "border-gray-300"
-                } rounded-lg bg-gray-800 text-white`}
-              />
-            </div>
+        <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-8">
+          <div className="text-[#E8E9EE] text-[18px] font-medium">
+            {step === STEP_TOKEN.INFO ? "Project info" : "Agent Behaviors"}
+          </div>
+          {step === STEP_TOKEN.INFO && (
+            <div className="flex flex-col gap-6">
+              <div>
+                <div className="group relative cursor-pointer">
+                  <label
+                    htmlFor="name"
+                    className="text-[12px] font-medium text-[#84869A] flex items-center cursor-pointer"
+                  >
+                    AGENT (OPTIONAL)
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      className="ml-1"
+                    >
+                      <path
+                        d="M6 1.3125C3.41531 1.3125 1.3125 3.41531 1.3125 6C1.3125 8.58469 3.41531 10.6875 6 10.6875C8.58469 10.6875 10.6875 8.58469 10.6875 6C10.6875 3.41531 8.58469 1.3125 6 1.3125ZM6 3.23438C6.12052 3.23438 6.23834 3.27011 6.33855 3.33707C6.43876 3.40403 6.51687 3.4992 6.56299 3.61055C6.60911 3.7219 6.62118 3.84443 6.59767 3.96263C6.57415 4.08084 6.51612 4.18942 6.43089 4.27464C6.34567 4.35987 6.23709 4.4179 6.11888 4.44142C6.00068 4.46493 5.87815 4.45286 5.7668 4.40674C5.65545 4.36062 5.56028 4.28251 5.49332 4.1823C5.42636 4.08209 5.39062 3.96427 5.39062 3.84375C5.39062 3.68213 5.45483 3.52714 5.56911 3.41286C5.68339 3.29858 5.83838 3.23438 6 3.23438ZM7.125 8.53125H5.0625C4.96304 8.53125 4.86766 8.49174 4.79734 8.42142C4.72701 8.35109 4.6875 8.25571 4.6875 8.15625C4.6875 8.05679 4.72701 7.96141 4.79734 7.89108C4.86766 7.82076 4.96304 7.78125 5.0625 7.78125H5.71875V5.71875H5.34375C5.24429 5.71875 5.14891 5.67924 5.07859 5.60891C5.00826 5.53859 4.96875 5.44321 4.96875 5.34375C4.96875 5.24429 5.00826 5.14891 5.07859 5.07859C5.14891 5.00826 5.24429 4.96875 5.34375 4.96875H6.09375C6.19321 4.96875 6.28859 5.00826 6.35892 5.07859C6.42924 5.14891 6.46875 5.24429 6.46875 5.34375V7.78125H7.125C7.22446 7.78125 7.31984 7.82076 7.39017 7.89108C7.46049 7.96141 7.5 8.05679 7.5 8.15625C7.5 8.25571 7.46049 8.35109 7.39017 8.42142C7.31984 8.49174 7.22446 8.53125 7.125 8.53125Z"
+                        fill="#585A6B"
+                      />
+                    </svg>
+                  </label>
+                  <div className="pb-2 invisible group-hover:visible absolute bottom-full">
+                    <div className="bg-[#30344A] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg">
+                      Private intellegent created from mesh.distilled.ai
+                    </div>
+                  </div>
+                </div>
 
-            <div>
-              <label
-                htmlFor="ticker"
-                className="text-lg font-semibold text-white"
-              >
-                Ticker (Max 5) <span className="text-red-700">*</span>
-              </label>
-              <input
-                id="ticker"
-                type="text"
-                value={newCoin.ticker || ""}
-                onChange={handleChange}
-                className={`block w-full p-2.5 ${
-                  errors.ticker ? "border-red-700" : "border-gray-300"
-                } rounded-lg bg-gray-800 text-white`}
-              />
-            </div>
+                <div className="group relative cursor-pointer mt-3">
+                  <div className="flex items-center justify-between w-full px-3 border border-[#585A6B] rounded h-12">
+                    <div className="flex items-center">
+                      <Image
+                        src={AgentImg}
+                        alt="agentImg"
+                        width={32}
+                        height={32}
+                        className="border-[1.5px] border-[#ADADAD] rounded-full"
+                      />
+                      <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
+                        Jordan’s Investor Coach
+                      </div>
+                    </div>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
+                        fill="#9192A0"
+                      />
+                    </svg>
+                  </div>
+                  <div className="pt-2 invisible group-hover:visible absolute top-full w-full">
+                    <div className="bg-[#1A1C28] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg flex flex-col gap-2 overflow-y-auto max-h-52 h-100%">
+                      {[
+                        {
+                          img: AgentImg,
+                          name: "Jordan’s Investor Coach",
+                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+                        },
+                        {
+                          img: AgentImg,
+                          name: "Max",
+                          address:
+                            "2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt",
+                        },
+                        {
+                          img: AgentImg,
+                          name: "Max2",
+                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+                        },
+                        {
+                          img: AgentImg,
+                          name: "Max2",
+                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+                        },
+                        {
+                          img: AgentImg,
+                          name: "Max2",
+                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+                        },
+                        {
+                          img: AgentImg,
+                          name: "Max2",
+                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+                        },
+                      ].map((e, ind) => {
+                        return (
+                          <div
+                            className={twMerge(
+                              "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
+                              ind === 1 && "bg-[#13141D] cursor-not-allowed"
+                            )}
+                            key={`agent-item-${ind}`}
+                          >
+                            <div className="flex items-center">
+                              <Image
+                                src={e.img}
+                                alt="agentImg"
+                                width={32}
+                                height={32}
+                                className="border-[1.5px] border-[#ADADAD] rounded-full"
+                              />
+                              <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
+                                {e.name}
+                              </div>
+                            </div>
+                            <span className="text-[#585A6B] text-[14px] font-medium ">
+                              {reduceString(e.address, 4, 4)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <label
-                htmlFor="marketcap"
-                className="text-lg font-semibold text-white"
-              >
-                Marketcap (5K ~ 10K) <span className="text-red-700">*</span>
-              </label>
-              <input
-                id="marketcap"
-                type="number"
-                value={newCoin.marketcap || ""}
-                onChange={handleChange}
-                className={`block w-full p-2.5 ${
-                  errors.marketcap ? "border-red-700" : "border-gray-300"
-                } rounded-lg bg-gray-800 text-white`}
-              />
-            </div>
+              <div className="flex justify-between items-center">
+                <div>
+                  <label
+                    htmlFor="name"
+                    className="text-[12px] font-medium text-[#84869A]"
+                  >
+                    TOKEN NAME <span className="text-red-700">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    value={newCoin.name || ""}
+                    onChange={handleChange}
+                    className={twMerge(
+                      `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                      // errors.name && "border-red-700"
+                    )}
+                  />
+                </div>
 
-            <div>
+                <div>
+                  <label
+                    htmlFor="ticker"
+                    className="text-[12px] font-medium text-[#84869A]"
+                  >
+                    TOKEN SYMBOL <span className="text-red-700">*</span>
+                  </label>{" "}
+                  <input
+                    id="ticker"
+                    type="text"
+                    value={newCoin.ticker || ""}
+                    onChange={handleChange}
+                    className={twMerge(
+                      `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                      // errors.ticker && "border-red-700"
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="description"
+                  className="text-[12px] font-medium text-[#84869A]"
+                >
+                  TOKEN DESCRIPTION <span className="text-red-700">*</span>
+                </label>
+                <textarea
+                  id="description"
+                  value={newCoin.description || ""}
+                  onChange={handleChange}
+                  rows={4}
+                  className={twMerge(
+                    `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded text-[#E8E9EE] bg-transparent`
+                    // errors.description && "border-red-700"
+                  )}
+                />
+              </div>
+
+              {/* <div>
               <label
                 htmlFor="presale"
-                className="text-lg font-semibold text-white"
+                className="text-[12px] font-medium text-[#84869A]"
               >
                 Presale (0 ~ 1.5 SOL) <span className="text-red-700">*</span>
               </label>
@@ -261,27 +407,31 @@ export default function CreateToken() {
                 type="number"
                 value={newCoin.presale || ""}
                 onChange={handlePresaleChange}
-                className="block w-full p-2.5 rounded-lg bg-gray-800 text-white"
+                className="block w-full p-2.5 rounded-lg bg-gray-800 text-[#84869A]"
               />
-            </div>
+            </div> */}
 
-            <div className="w-full flex flex-col justify-between gap-6">
-              <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
-                <label
-                  htmlFor="fileUpload"
-                  className="block text-lg font-semibold text-white"
-                >
-                  Upload Image: <span className="text-red-700">*</span>
-                </label>
+              <div className="w-full flex flex-col justify-between gap-3">
+                <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
+                  <label
+                    htmlFor="fileUpload"
+                    className="block text-[12px] font-medium text-[#84869A]"
+                  >
+                    Upload Image: <span className="text-red-700">*</span>
+                  </label>
+                </div>
+                <DropzoneFile
+                  onDrop={onDrop}
+                  file={imageFile}
+                  setFile={setImageFile}
+                />
               </div>
-              <DropzoneFile onDrop={onDrop} />
-            </div>
 
-            <div className="w-full flex flex-col justify-between gap-6">
+              {/* <div className="w-full flex flex-col justify-between gap-6">
               <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
                 <label
                   htmlFor="fileUpload"
-                  className="block text-lg font-semibold text-white"
+                  className="block text-[12px] font-medium text-[#84869A]"
                 >
                   Upload Image: <span className="text-red-700">*</span>
                 </label>
@@ -294,7 +444,7 @@ export default function CreateToken() {
                   onChange={handleFileChange}
                 />
                 <button
-                  className="py-2 px-4 bg-gray-700 text-white rounded-lg"
+                  className="py-2 px-4 bg-gray-700 text-[#84869A] rounded-lg"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {selectedFileName || "Choose Image"}
@@ -316,24 +466,137 @@ export default function CreateToken() {
                   />
                 </div>
               )}
+            </div> */}
             </div>
-          </div>
+          )}
+          {step === STEP_TOKEN.BEHAVIOR && (
+            <div className="flex flex-col gap-6">
+              <div>
+                <label
+                  htmlFor="description"
+                  className="text-[12px] font-medium text-[#84869A] uppercase"
+                >
+                  Your Agent’s Personality
+                </label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {AGENT_PERSONALITY.map((e, idx) => {
+                    return (
+                      <div
+                        onClick={() => {
+                          setAgentPersonality(e.value);
+                        }}
+                        key={`${idx}-personality`}
+                        className={twMerge(
+                          "text-[#E8E9EE] flex items-center rounded-lg p-4 bg-[#080A14] border border-[#30344A] cursor-pointer",
+                          e.value === agentPersonality &&
+                            "border-2 border-[#E4775D]"
+                        )}
+                      >
+                        {e.label}
 
-          <button
-            onClick={createCoin}
-            disabled={!formValid || isLoading}
-            className={`mt-4 p-2 rounded-lg bg-blue-700 text-white ${
-              !formValid ? "opacity-50 cursor-not-allowed" : "hover:bg-blue-600"
-            }`}
-          >
-            {isLoading ? "Creating..." : "Create Coin"}
-          </button>
+                        <span className="ml-2">
+                          {e.value === agentPersonality && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M5 12L10 17L20 7"
+                                stroke="#E4775D"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="description"
+                  className="text-[12px] font-medium text-[#84869A] uppercase"
+                >
+                  Communication Style
+                </label>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {AGENT_STYLE.map((e, idx) => {
+                    return (
+                      <div
+                        onClick={() => {
+                          setAgentStyle(e.value);
+                        }}
+                        key={`${idx}-styles-agent`}
+                        className={twMerge(
+                          "text-[#E8E9EE] flex items-center rounded-lg text-[16px] p-4 bg-[#080A14] border border-[#30344A] cursor-pointer",
+                          e.value === agentStyle && "border-2 border-[#E4775D]"
+                        )}
+                      >
+                        {e.label}
+
+                        <span className="ml-2">
+                          {e.value === agentStyle && (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M5 12L10 17L20 7"
+                                stroke="#E4775D"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {step === STEP_TOKEN.INFO ? (
+            <button
+              onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
+              // disabled={!formValid || isLoading}
+              className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+            >
+              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
+                Next
+              </div>
+            </button>
+          ) : (
+            <button
+              disabled={!formValid || isLoading}
+              onClick={createCoin}
+              className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+            >
+              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
+                Launch
+              </div>
+            </button>
+          )}
         </div>
         <div className="w-full max-w-[490px] flex justify-end">
           <div className="">
             <div className="flex">
               <div className="relative translate-y-[0%]">
-                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]">
+                <div
+                  onClick={() => setStep(STEP_TOKEN.INFO)}
+                  className="cursor-pointer relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]"
+                >
                   1
                 </div>
                 <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute top-0 left-1/2 -translate-x-1/2"></div>
@@ -350,7 +613,13 @@ export default function CreateToken() {
             <div className="flex">
               <div className="relative translate-y-[0%] flex flex-col justify-end">
                 <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
-                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]">
+                <div
+                  className={twMerge(
+                    "relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]",
+                    step === STEP_TOKEN.BEHAVIOR &&
+                      " bg-[#E4775D] text-[#080A14]"
+                  )}
+                >
                   2
                 </div>
               </div>
@@ -372,3 +641,69 @@ export default function CreateToken() {
     </div>
   );
 }
+
+export const AGENT_PERSONALITY = [
+  {
+    label: "😊 Friendly",
+    value: "Friendly",
+  },
+  {
+    label: "💼 Professional",
+    value: "Professional",
+  },
+  {
+    label: "🤡 Humorous",
+    value: "Humorous",
+  },
+  {
+    label: "🛟 Supportive",
+    value: "Supportive",
+  },
+  {
+    label: "🥰 Empathetic",
+    value: "Empathetic",
+  },
+  {
+    label: "🤓 Informative",
+    value: "Informative",
+  },
+  {
+    label: "🤠 Adventurous",
+    value: "Adventurous",
+  },
+  {
+    label: "⭐️ Custom",
+    value: "Custom",
+  },
+];
+
+export const AGENT_STYLE = [
+  {
+    label: "👔 Formal",
+    value: "Formal",
+  },
+  {
+    label: "🧢 Casual",
+    value: "Casual",
+  },
+  {
+    label: "🔥 Enthusiastic",
+    value: "Enthusiastic",
+  },
+  {
+    label: "🍃 Calm",
+    value: "Calm",
+  },
+  {
+    label: "👀 Direct",
+    value: "Direct",
+  },
+  {
+    label: "📝 Storytelling",
+    value: "Informative",
+  },
+  {
+    label: "⭐️ Custom",
+    value: "Custom",
+  },
+];

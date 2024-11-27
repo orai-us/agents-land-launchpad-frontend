@@ -1,12 +1,20 @@
 import Image from "next/image";
-import React, { FC } from "react";
+import React, { FC, useEffect, useState } from "react";
 import Marquee from "react-fast-marquee";
 import coinImg from "@/assets/images/richoldman.png";
 import { twMerge } from "tailwind-merge";
+import { coinInfo, SwapInfo } from "@/utils/types";
+import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
+import { connection } from "@/program/web3";
+import { PROGRAM_ID_IDL } from "@/program/cli/programId";
+import dayjs from "dayjs";
+import { reduceString } from "@/utils/util";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
 enum ACTION_TYPE {
   Bought = "Bought",
   Sold = "Sold",
+  Created = "Created",
 }
 
 export type RecentTokenAction = {
@@ -17,16 +25,57 @@ export type RecentTokenAction = {
     name: string;
     img: any;
   };
+  time: number;
 };
 
-const RecentToken: FC<RecentTokenAction> = ({
+const RecentToken: FC<Partial<RecentTokenAction>> = ({
   address,
   type,
   amount,
   token,
+  time,
 }) => {
+  return type === ACTION_TYPE.Created ? (
+    <RecentTokenCreated
+      address={address}
+      type={type}
+      token={token}
+      time={time}
+    />
+  ) : (
+    <RecentTokenSwap
+      address={address}
+      type={type}
+      token={token}
+      amount={amount}
+    />
+  );
+};
+
+const RecentTokenCreated: FC<
+  Pick<RecentTokenAction, "address" | "type" | "time" | "token">
+> = ({ address, type, token, time }) => {
   return (
-    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0]">
+    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
+      <span className="text-[#9192A0]">{address}</span>&nbsp;
+      <span className={twMerge("text-[#AEE67F]")}>{type}</span>
+      &nbsp;
+      {token.name}
+      <Image
+        src={token.img}
+        alt="tokenIMG"
+        className="w-5 h-5 rounded-full ml-2"
+      />{" "}
+      &nbsp;on <span className="mr-4">{dayjs(time).format("DD/MM/YYYY")}</span>
+    </div>
+  );
+};
+
+const RecentTokenSwap: FC<
+  Pick<RecentTokenAction, "address" | "type" | "amount" | "token">
+> = ({ address, type, amount, token }) => {
+  return (
+    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
       <span className="text-[#9192A0]">{address}</span>&nbsp;
       <span
         className={twMerge(
@@ -35,19 +84,76 @@ const RecentToken: FC<RecentTokenAction> = ({
         )}
       >
         {type}
-      </span>
+      </span>{" "}
       &nbsp;
       {amount} SOL of {token.name}
       <Image
         src={token.img}
         alt="tokenIMG"
-        className="w-5 h-5 rounded-full ml-2"
+        className="w-5 h-5 rounded-full ml-2 mr-4"
       />
     </div>
   );
 };
 
 const MarqueeToken = () => {
+  const [notificationList, setListNotifications] = useState(MOCK_DATA);
+  // const [latestCreatedToken, setLatestCreatedToken] =
+  //   useState<coinInfo>(undefined);
+  // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
+
+  useEffect(() => {
+    const listener = new AgentsLandListener(connection);
+    listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
+      const newCoinInfo: coinInfo = {
+        creator: basicTokenInfo.creator,
+        name: basicTokenInfo.metadata.name,
+        url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
+        ticker: basicTokenInfo.metadata.symbol,
+        reserveOne: 0,
+        reserveTwo: 0,
+        token: basicTokenInfo.mintAddress,
+        commit: "",
+      };
+      console.log("new coin info: ", newCoinInfo);
+      // setLatestCreatedToken(newCoinInfo);
+      setListNotifications((prevList) => [
+        {
+          address:
+            newCoinInfo.creator["name"] ||
+            reduceString(newCoinInfo.creator as string, 4, 4),
+          type: ACTION_TYPE.Created,
+          token: {
+            name: newCoinInfo.name,
+            img: newCoinInfo.url,
+          },
+        } as any,
+        ...prevList.slice(0, -1),
+      ]);
+    });
+    listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
+      // setLatestSwapInfo(swapInfo);
+      setListNotifications((prevList) => [
+        {
+          address: reduceString(swapInfo.creator, 4, 4),
+          type: swapInfo.direction,
+          amount: (swapInfo.solAmountInLamports / LAMPORTS_PER_SOL).toFixed(9),
+          token: {
+            name: swapInfo.mintSymbol,
+            img: swapInfo.mintUri,
+          },
+        } as any,
+        ...prevList.slice(0, -1),
+      ]);
+    });
+
+    const subId = listener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58());
+
+    return () => {
+      connection.removeOnLogsListener(subId);
+    };
+  }, []);
+
   return (
     <div className="flex items-center justify-center w-full bg-[#1A1C28] p-4">
       <div className="flex items-center justify-center max-w-[1216px]">
@@ -66,58 +172,68 @@ const MarqueeToken = () => {
           </svg>
         </div>
 
-        <Marquee gradient gradientColor="#1A1C28">
-          {[
-            {
-              address: "THZu...HKcR",
-              type: ACTION_TYPE.Bought,
-              amount: "0.4",
-              token: {
-                name: "RIC",
-                img: coinImg,
-              },
-            },
-            {
-              address: "THZu...HKcR",
-              type: ACTION_TYPE.Sold,
-              amount: "0.01",
-              token: {
-                name: "MAX",
-                img: coinImg,
-              },
-            },
-            {
-              address: "THZu...HKcR",
-              type: ACTION_TYPE.Sold,
-              amount: "0.34",
-              token: {
-                name: "MAX",
-                img: coinImg,
-              },
-            },
-            {
-              address: "THZu...HKcR",
-              type: ACTION_TYPE.Sold,
-              amount: "0.22",
-              token: {
-                name: "MAX",
-                img: coinImg,
-              },
-            },
-          ].map((item, idx) => {
+        {/* <Marquee
+          pauseOnClick
+          pauseOnHover
+          gradient
+          gradientColor="#1A1C28"
+          gradientWidth={50}
+        > */}
+        <div className="w-full flex items-center overflow-x-auto no-scrollbar">
+          {notificationList.map((item, idx) => {
             return (
               <div
                 key={`id-noti-${item.address}-${idx}-${item.token.name}`}
-                className="flex"
+                className="flex cursor-pointer"
               >
                 <RecentToken {...item} />
               </div>
             );
           })}
-        </Marquee>
+        </div>
+        {/* </Marquee> */}
       </div>
     </div>
   );
 };
 
 export default MarqueeToken;
+
+const MOCK_DATA = [
+  {
+    address: "THZu...HKcR",
+    type: ACTION_TYPE.Bought,
+    amount: "0.4",
+    token: {
+      name: "RIC",
+      img: coinImg,
+    },
+  },
+  {
+    address: "THZu...HKcR",
+    type: ACTION_TYPE.Sold,
+    amount: "0.01",
+    token: {
+      name: "MAX",
+      img: coinImg,
+    },
+  },
+  {
+    address: "THZu...HKcR",
+    type: ACTION_TYPE.Sold,
+    amount: "0.34",
+    token: {
+      name: "MAX",
+      img: coinImg,
+    },
+  },
+  {
+    address: "THZu...HKcR",
+    type: ACTION_TYPE.Sold,
+    amount: "0.22",
+    token: {
+      name: "MAX",
+      img: coinImg,
+    },
+  },
+];
