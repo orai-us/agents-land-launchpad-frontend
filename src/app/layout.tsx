@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/provider/providers";
 import "dotenv/config.js";
 import Header from "@/components/header/Header";
+import Footer from "@/components/footer/Footer";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
@@ -32,6 +33,7 @@ export default function RootLayout({
           <div className="m-auto w-screen max-w-[1216px] px-2 sm:px-0">
             {children}
           </div>
+          <Footer></Footer>
         </Providers>
       </body>
     </html>

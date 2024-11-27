@@ -329,41 +329,43 @@ export default function CreateToken() {
             {isLoading ? "Creating..." : "Create Coin"}
           </button>
         </div>
-        <div className="w-full max-w-[490px] ml-3">
-          <div className="flex">
-            <div className="relative translate-y-[0%]">
-              <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]">
-                1
+        <div className="w-full max-w-[490px] flex justify-end">
+          <div className="">
+            <div className="flex">
+              <div className="relative translate-y-[0%]">
+                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]">
+                  1
+                </div>
+                <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute top-0 left-1/2 -translate-x-1/2"></div>
               </div>
-              <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute top-0 left-1/2 -translate-x-1/2"></div>
-            </div>
-            <div className="ml-4 pb-5">
-              <div className="text-[#E8E9EE] font-medium text-[18px]">
-                Agent info
-              </div>
-              <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                Information to help the community identify you.
-              </span>
-            </div>
-          </div>
-          <div className="flex">
-            <div className="relative translate-y-[0%] flex flex-col justify-end">
-              <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
-              <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]">
-                2
+              <div className="ml-4 pb-5">
+                <div className="text-[#E8E9EE] font-medium text-[18px]">
+                  Agent info
+                </div>
+                <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
+                  Information to help the community identify you.
+                </span>
               </div>
             </div>
-            <div className="ml-4">
-              <div className="text-[#E8E9EE] font-medium text-[18px]">
-                Agent Behaviors
+            <div className="flex">
+              <div className="relative translate-y-[0%] flex flex-col justify-end">
+                <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
+                <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]">
+                  2
+                </div>
               </div>
-              <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                Set unique behaviors your agent
-              </span>
+              <div className="ml-4">
+                <div className="text-[#E8E9EE] font-medium text-[18px]">
+                  Agent Behaviors
+                </div>
+                <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
+                  Set unique behaviors your agent
+                </span>
+              </div>
             </div>
-          </div>
-          <div className="mt-[72px]">
-            <Image src={MountainImg} alt="MountainImg" />
+            <div className="mt-[72px]">
+              <Image src={MountainImg} alt="MountainImg" />
+            </div>
           </div>
         </div>
       </div>
