@@ -2,6 +2,7 @@ import { Connection, Logs, PublicKey } from "@solana/web3.js";
 import { ProcessProgramLogs, SubscibeProgramLogs } from "./types";
 import { findLogEntry } from "./utils";
 import { CreatedTokenProgramLogsHandler } from "./CreatedTokenHandler";
+import { TokenSwapProgramHandler } from "./TokenSwapHandler";
 
 export const ACCEPTED_NEEDLES = {
   LAUNCH: "Launch",
@@ -27,6 +28,12 @@ export class AgentsLandListener implements SubscibeProgramLogs {
           callback
         );
         break;
+      case "Swap":
+        this.logHandlers[needle] = new TokenSwapProgramHandler(
+          this.connection,
+          callback
+        );
+        break;
       default:
         throw new Error(`Needle ${needle} is not supported`);
     }
@@ -48,7 +55,7 @@ export class AgentsLandListener implements SubscibeProgramLogs {
             console.log("Data subscribe program logs", data);
           }
         } catch (error) {
-          await this.connection.removeOnLogsListener(subId);
+          // await this.connection.removeOnLogsListener(subId);
           console.error("err Created Token Log Listener: ", error);
         }
       },
