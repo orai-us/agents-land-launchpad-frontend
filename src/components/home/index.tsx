@@ -146,8 +146,12 @@ const HomePage: FC = () => {
     <div className="w-full h-full gap-4 flex flex-col">
       {/* <TopToken />
       <FilterList /> */}
-      <FilterListToken type={currentTab} setType={setCurrentTab} />
-      <ListToken type={currentTab} />
+      <FilterListToken
+        type={currentTab}
+        setType={setCurrentTab}
+        setSearch={setToken}
+      />
+      <ListToken type={currentTab} data={data} />
       {/* <div className="flex">
         <div ref={dropdownRef} className="mx-4">
           <button className="bg-green-600 w-[200px] h-[50px] font-medium rounded-md " onClick={() => setIsSort(1)}>
@@ -185,7 +189,7 @@ const HomePage: FC = () => {
           }
         </div>
       </div> */}
-      {data && (
+      {/* {data && (
         <div className="w-full h-full flex flex-wrap gap-2 items-center">
           {data.map((temp, index) => (
             <div
@@ -197,7 +201,7 @@ const HomePage: FC = () => {
             </div>
           ))}
         </div>
-      )}
+      )} */}
     </div>
   );
 };

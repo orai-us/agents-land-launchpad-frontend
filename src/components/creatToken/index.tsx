@@ -35,6 +35,7 @@ export default function CreateToken() {
   const [newCoin, setNewCoin] = useState<coinInfo>({} as coinInfo);
   const [agentPersonality, setAgentPersonality] = useState<string>();
   const [agentStyle, setAgentStyle] = useState<string>();
+  const [showOptional, setShowOptional] = useState<boolean>(false);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -336,8 +337,8 @@ export default function CreateToken() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center">
-                <div>
+              <div className="flex justify-between items-center w-full gap-4">
+                <div className="flex-1">
                   <label
                     htmlFor="name"
                     className="text-[12px] font-medium text-[#84869A]"
@@ -356,7 +357,7 @@ export default function CreateToken() {
                   />
                 </div>
 
-                <div>
+                <div className="flex-1">
                   <label
                     htmlFor="ticker"
                     className="text-[12px] font-medium text-[#84869A]"
@@ -426,6 +427,111 @@ export default function CreateToken() {
                   setFile={setImageFile}
                 />
               </div>
+
+              <div
+                className="flex cursor-pointer"
+                onClick={() => setShowOptional(!showOptional)}
+              >
+                More optional{" "}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
+                    fill="#9192A0"
+                  />
+                </svg>
+              </div>
+
+              {showOptional && (
+                <div>
+                  <div className="flex justify-between items-center w-full gap-4">
+                    <div className="flex-1">
+                      <label
+                        htmlFor="name"
+                        className="text-[12px] font-medium text-[#84869A]"
+                      >
+                        TWITTER
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={newCoin.name || ""}
+                        onChange={handleChange}
+                        className={twMerge(
+                          `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                          // errors.name && "border-red-700"
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex-1">
+                      <label
+                        htmlFor="ticker"
+                        className="text-[12px] font-medium text-[#84869A]"
+                      >
+                        TELEGRAM
+                      </label>{" "}
+                      <input
+                        id="ticker"
+                        type="text"
+                        value={newCoin.ticker || ""}
+                        onChange={handleChange}
+                        className={twMerge(
+                          `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                          // errors.ticker && "border-red-700"
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center w-full mt-4 gap-4">
+                    <div className="flex-1">
+                      <label
+                        htmlFor="name"
+                        className="text-[12px] font-medium text-[#84869A]"
+                      >
+                        DISCORD
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={newCoin.name || ""}
+                        onChange={handleChange}
+                        className={twMerge(
+                          `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                          // errors.name && "border-red-700"
+                        )}
+                      />
+                    </div>
+
+                    <div className="flex-1">
+                      <label
+                        htmlFor="ticker"
+                        className="text-[12px] font-medium text-[#84869A]"
+                      >
+                        WEBSITE
+                      </label>{" "}
+                      <input
+                        id="ticker"
+                        type="text"
+                        value={newCoin.ticker || ""}
+                        onChange={handleChange}
+                        className={twMerge(
+                          `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
+                          // errors.ticker && "border-red-700"
+                        )}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* <div className="w-full flex flex-col justify-between gap-6">
               <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">

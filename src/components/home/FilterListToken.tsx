@@ -5,7 +5,11 @@ import { twMerge } from "tailwind-merge";
 import { STATUS_TOKEN, TokenTab } from "./ListToken";
 import { BiSearchAlt } from "react-icons/bi";
 
-const FilterListToken: FC<{ type; setType }> = ({ type, setType }) => {
+const FilterListToken: FC<{ type; setType; setSearch }> = ({
+  type,
+  setType,
+  setSearch,
+}) => {
   // const {
   //   filterState,
   //   setFilterState,
@@ -21,7 +25,7 @@ const FilterListToken: FC<{ type; setType }> = ({ type, setType }) => {
     value: "featured",
   });
 
-  const [token, setToken] = useState("");
+  // const [token, setToken] = useState("");
 
   const searchToken = () => {};
 
@@ -130,9 +134,9 @@ const FilterListToken: FC<{ type; setType }> = ({ type, setType }) => {
           />
           <input
             type="text"
-            value={token}
+            // value={token}
             placeholder="Search Tokens"
-            onChange={(e) => setToken(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className=" bg-[#13141D] w-full py-1 outline-none bg-transparent text-[14px] placeholder:text-[#585A6B]"
           />
         </div>

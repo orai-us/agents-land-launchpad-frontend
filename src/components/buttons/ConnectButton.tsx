@@ -135,13 +135,26 @@ export const ConnectButton: FC = () => {
             </div>
             <div className="w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
               <ul className="border border-[rgba(88,90,107,0.24)] rounded bg-[#1A1C28] p-2 ">
-                <li>
+                {/* <li>
                   <div
                     className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
                     onClick={() => setVisible(true)}
                   >
                     <RiExchangeDollarLine />
                     Change Wallet
+                  </div>
+                </li> */}
+                <li>
+                  <div
+                    className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+                    onClick={() =>
+                      handleToProfile(
+                        `/profile/${tempUser._id || "6746eb08d90318c6a4b2a386"}`
+                      )
+                    }
+                  >
+                    <RiExchangeDollarLine />
+                    View Profile
                   </div>
                 </li>
                 <li>
