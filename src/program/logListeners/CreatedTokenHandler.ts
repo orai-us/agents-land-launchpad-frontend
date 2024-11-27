@@ -24,6 +24,7 @@ export class CreatedTokenProgramLogsHandler implements ProcessProgramLogs {
       programId,
       txLogs.signature
     );
+    if (!data) return;
     await this.processProgramLogsCallBack(data);
     return data;
   }
@@ -36,7 +37,7 @@ export class CreatedTokenProgramLogsHandler implements ProcessProgramLogs {
       commitment: "confirmed",
     });
     if (!tx) {
-      throw new Error(
+      console.error(
         "Failed to fetch transaction with signature " + txSignature
       );
     }
