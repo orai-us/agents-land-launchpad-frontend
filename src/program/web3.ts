@@ -13,7 +13,6 @@ export const commitmentLevel = "processed";
 export const endpoint =
   process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl("devnet");
 export const connection = new Connection(endpoint, commitmentLevel);
-
 export const pumpProgramId = new PublicKey(idl.address);
 export const pumpProgramInterface = JSON.parse(JSON.stringify(idl));
 
@@ -29,11 +28,12 @@ export const createToken = async (wallet: WalletContextState, coinData: launchDa
   ) as Program<Pumpfun>;
 
   console.log('========Fee Pay==============');
+
   // check the connection
   if (!wallet.publicKey || !connection) {
-    errorAlert('Wallet Not Connected');
-    console.log('Warning: Wallet not connected');
-    return 'WalletError';
+    errorAlert("Wallet Not Connected");
+    console.log("Warning: Wallet not connected");
+    return "WalletError";
   }
 
   try {
@@ -101,15 +101,15 @@ export const createToken = async (wallet: WalletContextState, coinData: launchDa
         {
           signature,
           blockhash: blockhash.blockhash,
-          lastValidBlockHeight: blockhash.lastValidBlockHeight
+          lastValidBlockHeight: blockhash.lastValidBlockHeight,
         },
-        'confirmed'
+        "confirmed"
       );
-      console.log('Successfully initialized.\n Signature: ', signature);
+      console.log("Successfully initialized.\n Signature: ", signature);
       return res;
     }
   } catch (error) {
-    console.log('----', error);
+    console.log("----", error);
     return false;
   }
 };
@@ -117,9 +117,10 @@ export const createToken = async (wallet: WalletContextState, coinData: launchDa
 // Swap transaction
 export const swapTx = async (mint: PublicKey, wallet: WalletContextState, amount: string, type: number): Promise<any> => {
   console.log('========trade swap==============');
+
   // check the connection
   if (!wallet.publicKey || !connection) {
-    console.log('Warning: Wallet not connected');
+    console.log("Warning: Wallet not connected");
     return;
   }
   const provider = new anchor.AnchorProvider(connection, wallet, { preflightCommitment: "confirmed" })
@@ -157,24 +158,27 @@ export const swapTx = async (mint: PublicKey, wallet: WalletContextState, amount
     if (wallet.signTransaction) {
       const signedTx = await wallet.signTransaction(transaction);
       const sTx = signedTx.serialize();
-      console.log('----', await connection.simulateTransaction(signedTx));
-      const signature = await connection.sendRawTransaction(sTx, { preflightCommitment: 'confirmed', skipPreflight: false });
+      console.log("----", await connection.simulateTransaction(signedTx));
+      const signature = await connection.sendRawTransaction(sTx, {
+        preflightCommitment: "confirmed",
+        skipPreflight: false,
+      });
       const blockhash = await connection.getLatestBlockhash();
 
       const res = await connection.confirmTransaction(
         {
           signature,
           blockhash: blockhash.blockhash,
-          lastValidBlockHeight: blockhash.lastValidBlockHeight
+          lastValidBlockHeight: blockhash.lastValidBlockHeight,
         },
-        'confirmed'
+        "confirmed"
       );
-      console.log('Successfully initialized.\n Signature: ', signature);
+      console.log("Successfully initialized.\n Signature: ", signature);
       return res;
     }
 
   } catch (error) {
-    console.log('Error in swap transaction', error);
+    console.log("Error in swap transaction", error);
   }
 };
 export const getTokenBalance = async (walletAddress: string, tokenMintAddress: string) => {
