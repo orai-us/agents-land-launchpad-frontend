@@ -4,10 +4,11 @@ import { ConnectButton } from "../buttons/ConnectButton";
 import { useRouter } from "next/navigation";
 import { PiLightning } from "react-icons/pi";
 import { PROGRAM_ID_IDL } from "@/program/cli/programId";
-import { CreatedTokenLogListener } from "@/program/logListeners/CreatedTokenListener";
+import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
 import { connection } from "@/program/web3";
 import { coinInfo } from "@/utils/types";
 import Link from "next/link";
+import { CreatedTokenProgramLogsHandler } from "@/program/logListeners/CreatedTokenHandler";
 
 const Header: FC = () => {
   const router = useRouter()
@@ -19,8 +20,8 @@ const Header: FC = () => {
   const [latestCreatedToken, setLatestCreatedToken] = useState<coinInfo>(undefined);
 
   useEffect(() => {
-    const createdTokenListener = new CreatedTokenLogListener(connection);
-    const subId = createdTokenListener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58(), { Launch: (basicTokenInfo: any) => {
+    const listener = new AgentsLandListener(connection);
+    listener.setProgramLogsCallback('Launch', (basicTokenInfo: any) => {
       const newCoinInfo:coinInfo = {
         creator: basicTokenInfo.creator,
         name: basicTokenInfo.metadata.name,
@@ -33,7 +34,8 @@ const Header: FC = () => {
       };
       console.log("new coin info: ", newCoinInfo)
       setLatestCreatedToken(newCoinInfo);
-    }});
+    });
+    const subId = listener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58());
 
     return () => {
       connection.removeOnLogsListener(subId);

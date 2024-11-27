@@ -5,58 +5,27 @@ import {
   PartiallyDecodedInstruction,
   PublicKey,
 } from "@solana/web3.js";
-import { SubscibeProgramLogs } from "./types";
-import { findLogEntry, findInstructionByProgramId } from "./utils";
+import { ProcessProgramLogs } from "./types";
+import { findInstructionByProgramId } from "./utils";
 import { Metaplex } from "@metaplex-foundation/js";
 
-export class CreatedTokenLogListener implements SubscibeProgramLogs {
+export class CreatedTokenProgramLogsHandler implements ProcessProgramLogs {
   private metaplex: Metaplex;
 
   constructor(
     private readonly connection: Connection,
-    private seenTransactions: string[] = []
+    private readonly processProgramLogsCallBack: Function
   ) {
     this.metaplex = Metaplex.make(this.connection);
   }
 
-  private LOG_ENTRY_NEEDLES = {
-    SWAP: "Swap",
-    LAUNCH: "Launch",
-  };
-
-  subscribeProgramLogs(
-    programId: string,
-    callbacks: Record<string, Function>
-  ): number {
-    const subId = this.connection.onLogs(
-      new PublicKey(programId),
-      async (txLogs: Logs) => {
-        if (this.seenTransactions.includes(txLogs.signature)) {
-          return;
-        }
-
-        try {
-          for (const [needle, callback] of Object.entries(callbacks)) {
-            if (!findLogEntry(needle, txLogs.logs)) continue;
-
-            if (needle === this.LOG_ENTRY_NEEDLES.LAUNCH) {
-              const data = await this.fetchAgentsLandLaunchInfo(
-                programId,
-                txLogs.signature
-              );
-              console.log("Launch info", data);
-              callback(data);
-            }
-          }
-        } catch (error) {
-          await this.connection.removeOnLogsListener(subId);
-          console.error("err Created Token Log Listener: ", error);
-        }
-      },
-      "confirmed"
+  async processProgramLogs(programId: string, txLogs: Logs): Promise<any> {
+    const data = await this.fetchAgentsLandLaunchInfo(
+      programId,
+      txLogs.signature
     );
-    console.log("Listening to new Agents.land tokens...");
-    return subId;
+    await this.processProgramLogsCallBack(data);
+    return data;
   }
 
   private async fetchAgentsLandLaunchInfo(
