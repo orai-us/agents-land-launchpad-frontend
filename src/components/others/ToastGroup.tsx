@@ -40,7 +40,7 @@ export const warningAlert = (text: string) => {
 
 export const successAlert = (text: string) => {
   toast.success(text, {
-    position: "bottom-right",
+    position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -52,7 +52,7 @@ export const successAlert = (text: string) => {
 
 export const infoAlert = (text: string) => {
   toast.info(text, {
-    position: "bottom-right",
+    position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,

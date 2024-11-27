@@ -1,4 +1,5 @@
 import { PublicKey } from "@solana/web3.js"
+import BN from "bn.js";
 
 export type ChartTable = {
     table: {
@@ -28,6 +29,17 @@ export interface userInfo {
     signature?: string,
 }
 
+export interface metadataInfo {
+    name: string,
+    symbol: string,
+    image: string,
+    description: string,
+    createdOn:string, 
+    twitter?: string,
+    website?: string,
+    telegram?: string,
+}
+
 export interface coinInfo {
     commit: any;
     _id?: string,
@@ -43,7 +55,31 @@ export interface coinInfo {
     replies?: number,
     description?: string,
     twitter?: string,
+    website?: string,
+    telegram?: string,
     date?: Date,
+}
+export interface createCoinInfo {
+    name: string,
+    ticker: string,
+    url: string,
+    description: string,
+    presale: number,
+    tokenSupply: number,
+    virtualReserves: number,
+    twitter?: string,
+    website?: string,
+    telegram?: string,
+}
+
+export interface launchDataInfo {
+    name: string,
+    symbol: string,
+    uri: string,
+    tokenSupply: number,
+    virtualReserves: number,
+    presale: number,
+    decimals: number
 }
 export interface msgInfo {
     coinId: string | coinInfo,
@@ -63,7 +99,7 @@ export interface holderInfo {
     slice: string;
     owner: string;
     amount: number
-  }
+}
 
 export interface recordInfo {
     holder: userInfo,

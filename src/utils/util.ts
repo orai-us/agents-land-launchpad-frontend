@@ -53,15 +53,6 @@ export const confirmWallet = async ({ data }: { data: userInfo }): Promise<any> 
   }
 };
 
-export const createNewCoin = async (data: coinInfo) => {
-  try {
-    const response = await axios.post(`${BACKEND_URL}/coin/`, data, config);
-    return response.data;
-  } catch (err) {
-    return { error: 'error setting up the request' };
-  }
-};
-
 export const getCoinsInfo = async (): Promise<coinInfo[]> => {
   const res = await axios.get(`${BACKEND_URL}/coin`, config);
   return res.data;
@@ -168,41 +159,5 @@ export const getSolPriceInUSD = async () => {
   } catch (error) {
     console.error('Error fetching SOL price:', error);
     throw error;
-  }
-};
-
-// ===========================Functions=====================================
-const JWT = process.env.NEXT_PUBLIC_PINATA_PRIVATE_KEY;
-
-export const pinFileToIPFS = async (blob: File) => {
-  try {
-    const data = new FormData();
-    data.append('file', blob);
-    const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${JWT}`
-      },
-      body: data
-    });
-    const resData = await res.json();
-    return resData;
-  } catch (error) {
-    console.log(error);
-  }
-};
-export const uploadImage = async (url: string) => {
-  const res = await fetch(url);
-  console.log(res.blob);
-  const blob = await res.blob();
-
-  const imageFile = new File([blob], 'image.png', { type: 'image/png' });
-  console.log(imageFile);
-  const resData = await pinFileToIPFS(imageFile);
-  console.log(resData, 'RESDATA>>>>');
-  if (resData) {
-    return `https://gateway.pinata.cloud/ipfs/${resData.IpfsHash}`;
-  } else {
-    return false;
   }
 };

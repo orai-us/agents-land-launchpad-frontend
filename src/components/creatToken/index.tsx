@@ -12,25 +12,27 @@ import { Spinner } from "@/components/loadings/Spinner";
 import { errorAlert, infoAlert } from "@/components/others/ToastGroup";
 import UserContext from "@/context/UserContext";
 import { useSocket } from "@/contexts/SocketContext";
-import { creatFeePay } from "@/program/web3";
-import { coinInfo } from "@/utils/types";
-import { createNewCoin, uploadTokenImage } from "@/utils/util";
+import { createToken } from "@/program/web3";
+import { coinInfo, createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
+import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
+import { MdDescription } from "react-icons/md";
 
 export default function CreateToken() {
   const { user, isCreated, setIsCreated } = useContext(UserContext);
+  const [imageUrl, setIamgeUrl] = useState<string>("");
   const { isLoading, setIsLoading } = useSocket();
-  const [newCoin, setNewCoin] = useState<coinInfo>({} as coinInfo);
+  const [newCoin, setNewCoin] = useState<createCoinInfo>({} as createCoinInfo);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [getAmt, setGetAmt] = useState<number>(0);
+  const [visible, setVisible] = useState<Boolean>(false);
+
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
-    marketcap: false,
     image: false,
   });
 
@@ -43,10 +45,9 @@ export default function CreateToken() {
     setErrors({
       name: !newCoin.name,
       ticker: !newCoin.ticker,
-      marketcap: !newCoin.marketcap || newCoin.marketcap < 5000 || newCoin.marketcap > 10000,
-      image: !imageFile,
+      image: !imageUrl,
     });
-  }, [newCoin, imageFile]);
+  }, [newCoin, imageUrl]);
 
   const handleToRouter = (path: string) => {
     router.push(path);
@@ -61,23 +62,58 @@ export default function CreateToken() {
   const handlePresaleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const value = Number(e.target.value);
-    if (isNaN(value) || value > 1.5) {
+    let value = e.target.value;
+
+    // Validate input
+    const numericValue = parseFloat(value);
+    if (numericValue > 1.5 || numericValue < 0) {
       errorAlert("Presale amount must be between 0 and 1.5 SOL");
       return;
     }
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+
     const getAmount =
-      1_000_000_000 - (30 * 1_000_000_000) / (30 + (value * 99) / 100);
+      1_000_000_000 - (30 * 1_000_000_000) / (30 + (numericValue * 99) / 100);
+
     setGetAmt(getAmount);
-    setNewCoin({ ...newCoin, [e.target.id]: value });
+  };
+  const handleTokenSupplyChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let value = e.target.value;
+
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+    // Validate input
+    const numericValue = parseFloat(value);
+    if (numericValue < 5000 || numericValue > 2000000) {
+      errorAlert("Token Supply amount  input must be between 5000 and 2000000");
+      return;
+    }
+  };
+  const handleVirtualReservesChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let value = e.target.value;
+
+    // Validate input
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+    const numericValue = parseFloat(value);
+    if (numericValue > 10 || numericValue < 1) {
+      errorAlert("Virtual SOL amount must be between 1 and 10 SOL");
+      return;
+    }
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log("file--->", file)
     if (file) {
       setSelectedFileName(file.name);
-      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setIamgeUrl(URL.createObjectURL(file));
     }
   };
 
@@ -85,14 +121,18 @@ export default function CreateToken() {
     const validationErrors = {
       name: !newCoin.name,
       ticker: !newCoin.ticker,
-      marketcap: !newCoin.marketcap || newCoin.marketcap < 5000 || newCoin.marketcap > 10000,
-      image: !imageFile,
+      description: !newCoin.description,
+      image: !imageUrl,
+      tokenSupply: !newCoin.tokenSupply,
+      virtualReserves: !newCoin.virtualReserves,
+      preSale: !newCoin.presale
     };
     setErrors(validationErrors);
     return !Object.values(validationErrors).includes(true);
   };
 
   const createCoin = async () => {
+    console.log("imageUrl--->", imageUrl, imagePreview)
     if (!validateForm()) {
       errorAlert("Please fix the errors before submitting.");
       return;
@@ -100,39 +140,48 @@ export default function CreateToken() {
 
     try {
       setIsLoading(true);
-
       // Process image upload
-      const uploadedImageUrl = await uploadTokenImage(imageFile!);
+      const uploadedImageUrl = await uploadImage(imageUrl);
       if (!uploadedImageUrl) {
         errorAlert("Image upload failed.");
         setIsLoading(false);
         return;
       }
+      const jsonData: metadataInfo = {
+        name: newCoin.name,
+        symbol: newCoin.ticker,
+        image: uploadedImageUrl,
+        description: newCoin.description,
+        createdOn: "https://test.com",
+        twitter: newCoin.twitter || undefined,   // Only assign if it exists
+        website: newCoin.website || undefined,   // Only assign if it exists
+        telegram: newCoin.telegram || undefined   // Only assign if it exists
+      }
+      // Process metadata upload
+      const uploadMetadataUrl = await uploadMetadata(jsonData);
+      if (!uploadMetadataUrl) {
+        errorAlert("Metadata upload failed.");
+        setIsLoading(false);
+        return;
+      }
+      const coinData: launchDataInfo = {
+        name: newCoin.name,
+        symbol: newCoin.ticker,
+        uri: uploadMetadataUrl,
+        tokenSupply: newCoin.tokenSupply,
+        virtualReserves: newCoin.virtualReserves,
+        presale: newCoin.presale,
+        decimals: 6,
+      }
+      console.log("coinData--->", coinData)
 
-      const res = await creatFeePay(wallet, newCoin.presale || 0);
+      const res = await createToken(wallet, coinData);
       if (res === "WalletError" || !res) {
         errorAlert("Payment failed or was rejected.");
         setIsLoading(false);
         return;
       }
-
-      const coin: coinInfo = {
-        ...newCoin,
-        creator: user._id.toString(),
-        url: uploadedImageUrl,
-      };
-
-      const created = await createNewCoin(coin);
-      if (created) {
-        infoAlert("Token created successfully!");
-        setIsCreated(true);
-        setNewCoin({} as coinInfo);
-        setImageFile(null);
-        setImagePreview(null);
-        setSelectedFileName("");
-      } else {
-        errorAlert("Failed to create token.");
-      }
+      router.push("/");
     } catch (error) {
       errorAlert("An unexpected error occurred.");
       console.error(error);
@@ -144,10 +193,11 @@ export default function CreateToken() {
   const formValid =
     newCoin.name &&
     newCoin.ticker &&
-    newCoin.marketcap &&
-    newCoin.marketcap >= 5000 &&
-    newCoin.marketcap <= 10000 &&
-    imageFile;
+    newCoin.description &&
+    newCoin.presale &&
+    newCoin.tokenSupply &&
+    newCoin.virtualReserves &&
+    imageUrl
 
   return (
     <div className="w-full max-w-[500px] m-auto px-3">
@@ -176,7 +226,7 @@ export default function CreateToken() {
               type="text"
               value={newCoin.name || ""}
               onChange={handleChange}
-              className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white`}
+              className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
             />
           </div>
 
@@ -192,27 +242,45 @@ export default function CreateToken() {
               type="text"
               value={newCoin.ticker || ""}
               onChange={handleChange}
-              className={`block w-full p-2.5 ${errors.ticker ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white`}
+              className={`block w-full p-2.5 ${errors.ticker ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
             />
           </div>
-
           <div>
-            <label
-              htmlFor="marketcap"
-              className="text-lg font-semibold text-white"
-            >
-              Marketcap (5K ~ 10K) <span className="text-red-700">*</span>
+            <label htmlFor="description" className="text-lg font-semibold text-white">
+              Description <span className="text-red-700">*</span>
+            </label>
+            <textarea
+              id="description"
+              rows={2}
+              value={newCoin.description || ""}
+              onChange={handleChange}
+              className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
+            />
+          </div>
+          <div>
+            <label htmlFor="presale" className="text-lg font-semibold text-white">
+              Token Suppy (5000 ~ 2000000) * (10^6)<span className="text-red-700">*</span>
             </label>
             <input
-              id="marketcap"
+              id="tokenSupply"
               type="number"
-              value={newCoin.marketcap || ""}
-              onChange={handleChange}
-              className={`block w-full p-2.5 ${errors.marketcap ? "border-red-700" : "border-gray-300"
-                } rounded-lg bg-gray-800 text-white`}
+              value={newCoin.tokenSupply || ''}
+              onChange={handleTokenSupplyChange}
+              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white outline-none"
             />
           </div>
-
+          <div>
+            <label htmlFor="presale" className="text-lg font-semibold text-white">
+              Virtual SOL Reserves (1 ~ 10 SOL) <span className="text-red-700">*</span>
+            </label>
+            <input
+              id="virtualReserves"
+              type="number"
+              value={newCoin.virtualReserves || ''}
+              onChange={handleVirtualReservesChange}
+              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white outline-none"
+            />
+          </div>
           <div>
             <label htmlFor="presale" className="text-lg font-semibold text-white">
               Presale (0 ~ 1.5 SOL) <span className="text-red-700">*</span>
@@ -220,12 +288,11 @@ export default function CreateToken() {
             <input
               id="presale"
               type="number"
-              value={newCoin.presale || ""}
+              value={newCoin.presale || ''}
               onChange={handlePresaleChange}
-              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white"
+              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white outline-none"
             />
           </div>
-
           <div className="w-full flex flex-col justify-between gap-6">
             <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
               <label
@@ -267,7 +334,54 @@ export default function CreateToken() {
             )}
           </div>
         </div>
-
+        <div className="font-xl m-auto mt-5">
+          <h1
+            className="hover:text-gray-400 cursor-pointer text-white"
+            onClick={() => setVisible(!visible)}
+          >
+            more option
+          </h1>
+        </div>
+        {visible && (
+          <>
+            <div>
+              <label htmlFor="name" className="text-lg font-semibold text-white">
+                Website
+              </label>
+              <input
+                type="text"
+                id="website"
+                value={newCoin.website || ""}
+                onChange={handleChange}
+                className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
+              />
+            </div>
+            <div>
+              <label htmlFor="name" className="text-lg font-semibold text-white">
+                Twitter
+              </label>
+              <input
+                type="text"
+                id="twitter"
+                value={newCoin.twitter || ""}
+                onChange={handleChange}
+                className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
+              />
+            </div>
+            <div>
+              <label htmlFor="name" className="text-lg font-semibold text-white">
+                Telegram
+              </label>
+              <input
+                type="text"
+                id="telegram"
+                value={newCoin.telegram || ""}
+                onChange={handleChange}
+                className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
+              />
+            </div>
+          </>
+        )}
         <button
           onClick={createCoin}
           disabled={!formValid || isLoading}
@@ -278,6 +392,5 @@ export default function CreateToken() {
         </button>
       </div>
     </div>
-
   );
 }

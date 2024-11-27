@@ -1,22 +1,35 @@
-import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SYSVAR_RENT_PUBKEY, Signer, SystemProgram, Transaction, TransactionResponse, VersionedTransaction, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
-import { PROGRAM_ID } from './cli/programId';
-import { AccountType, TOKEN_PROGRAM_ID, getAssociatedTokenAddress, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
-import { SwapAccounts, SwapArgs, swap } from './cli/instructions/swap';
+import { ComputeBudgetProgram, Connection, Keypair, PublicKey, SYSVAR_RENT_PUBKEY, SystemProgram, Transaction, clusterApiUrl } from '@solana/web3.js';
+import { Pumpfun } from './pumpfun'
+import idl from "./pumpfun.json"
+import { PROGRAM_ID } from './programId';
+import { TOKEN_PROGRAM_ID, getAssociatedTokenAddress, ASSOCIATED_TOKEN_PROGRAM_ID } from '@solana/spl-token';
 import * as anchor from '@coral-xyz/anchor';
 import { ASSOCIATED_PROGRAM_ID } from '@coral-xyz/anchor/dist/cjs/utils/token';
 import { WalletContextState, useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { errorAlert } from '@/components/others/ToastGroup';
+import { AnchorProvider, Program, Wallet } from '@coral-xyz/anchor';
+import { SEED_CONFIG } from './seed';
+import { BN } from 'bn.js';
+import { launchDataInfo } from '@/utils/types';
 
 const curveSeed = 'CurveConfiguration';
 const POOL_SEED_PREFIX = 'liquidity_pool';
 
-export const connection = new Connection(process.env.NEXT_PUBLIC_SOLANA_RPC || 'https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd');
-// export const connection = new Connection("https://white-aged-glitter.solana-mainnet.quiknode.pro/743d4e1e3949c3127beb7f7815cf2ca9743b43a6")
+export const commitmentLevel = "processed";
 
-// const privateKey = base58.decode(process.env.PRIVATE_KEY!);
+export const endpoint =
+  process.env.NEXT_PUBLIC_SOLANA_RPC_URL || clusterApiUrl("devnet");
+export const connection = new Connection(endpoint, commitmentLevel);
 
-// export const adminKeypair = web3.Keypair.fromSecretKey(privateKey);
-// const adminWallet = new NodeWallet(adminKeypair);
+export const pumpProgramId = new PublicKey(idl.address);
+export const pumpProgramInterface = JSON.parse(JSON.stringify(idl));
+
+// const provider = new AnchorProvider(connection, wallet, {
+//   preflightCommitment: commitmentLevel,
+// });
+
+
+
 
 export const getTokenBalance = async (walletAddress: string, tokenMintAddress: string) => {
   const wallet = new PublicKey(walletAddress);
@@ -36,12 +49,22 @@ export const getTokenBalance = async (walletAddress: string, tokenMintAddress: s
   const tokenAccountInfo = await connection.getTokenAccountBalance(response.value[0].pubkey);
 
   // Convert the balance from integer to decimal format
+
   console.log(`Token Balance: ${tokenAccountInfo.value.uiAmount}`);
 
   return tokenAccountInfo.value.uiAmount;
 };
+
 // Send Fee to the Fee destination
-export const creatFeePay = async (wallet: WalletContextState, amount: number) => {
+export const createToken = async (wallet: WalletContextState, coinData: launchDataInfo) => {
+
+  const provider = new anchor.AnchorProvider(connection, wallet, { preflightCommitment: "confirmed" })
+  anchor.setProvider(provider);
+  const program = new Program(
+    pumpProgramInterface,
+    provider
+  ) as Program<Pumpfun>;
+
   console.log('========Fee Pay==============');
   // check the connection
   if (!wallet.publicKey || !connection) {
@@ -49,34 +72,70 @@ export const creatFeePay = async (wallet: WalletContextState, amount: number) =>
     console.log('Warning: Wallet not connected');
     return 'WalletError';
   }
-  let solAmt = 0;
-  const toWallet = new PublicKey('FMkyrmt9Uo575MDFGAovfDsv2Tht4akLs1mXbxPPqauf');
+  let solAmt = coinData.presale;
 
-  console.log('Amount:   ', amount, Number(amount), '     : Types:   ', typeof amount);
-  if (amount !== undefined) solAmt = amount;
   try {
     console.log('==========@@', solAmt, Math.floor((0.02 + Number(solAmt)) * Math.pow(10, 9)));
 
-    const transaction = new Transaction().add(
-      ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 100_000 }),
-      SystemProgram.transfer({
-        fromPubkey: wallet.publicKey,
-        toPubkey: toWallet,
-        lamports: Math.floor((0.02 + Number(solAmt)) * Math.pow(10, 9)) // 1 SOL (Solana has 9 decimal places)
-      })
+    const [configPda] = PublicKey.findProgramAddressSync(
+      [Buffer.from(SEED_CONFIG)],
+      program.programId
     );
+    const configAccount = await program.account.config.fetch(configPda);
 
+    const mintKp = Keypair.generate();
+
+    const transaction = new Transaction()
+    const updateCpIx = ComputeBudgetProgram.setComputeUnitPrice({ microLamports: 1_000_000 });
+    const updateCuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
+    const createIx = await program.methods
+      .launch(
+        coinData.decimals,
+        new anchor.BN(coinData.tokenSupply * Math.pow(10, 6)),
+        new anchor.BN(coinData.virtualReserves * Math.pow(10, 9)),
+        coinData.name,
+        coinData.symbol,
+        coinData.uri
+      )
+      .accounts({
+        creator: wallet.publicKey,
+        token: mintKp.publicKey,
+        teamWallet: configAccount.teamWallet
+      })
+      .instruction();
+
+    transaction.add(updateCpIx, updateCuIx, createIx);
+
+    const swapIx = await program.methods.swap(
+      new anchor.BN(coinData.presale * Math.pow(10, 9)),
+      0,
+      new anchor.BN(0),)
+      .accounts({
+        teamWallet: configAccount.teamWallet,
+        user: wallet.publicKey,
+        tokenMint: mintKp.publicKey,
+      })
+      .instruction()
+    transaction.add(swapIx)
     transaction.feePayer = wallet.publicKey;
     const blockhash = await connection.getLatestBlockhash();
-
     transaction.recentBlockhash = blockhash.blockhash;
+
+    transaction.sign(mintKp);
+    console.log("--------------------------------------");
+    console.log(transaction);
 
     if (wallet.signTransaction) {
       const signedTx = await wallet.signTransaction(transaction);
       const sTx = signedTx.serialize();
       console.log('----', await connection.simulateTransaction(signedTx));
-      const signature = await connection.sendRawTransaction(sTx, { preflightCommitment: 'confirmed', skipPreflight: false });
-
+      const signature = await connection.sendRawTransaction(
+        sTx,
+        {
+          preflightCommitment: 'confirmed',
+          skipPreflight: false
+        }
+      );
       const res = await connection.confirmTransaction(
         {
           signature,
@@ -93,6 +152,7 @@ export const creatFeePay = async (wallet: WalletContextState, amount: number) =>
     return false;
   }
 };
+
 // Swap transaction
 export const swapTx = async (mint1: PublicKey, wallet: WalletContextState, amount: string, type: number): Promise<any> => {
   console.log('========trade swap==============');
@@ -119,20 +179,7 @@ export const swapTx = async (mint1: PublicKey, wallet: WalletContextState, amoun
       style: new anchor.BN(type)
     };
 
-    const acc: SwapAccounts = {
-      dexConfigurationAccount: curveConfig,
-      pool: poolPda,
-      globalAccount,
-      mintTokenOne: mint1,
-      poolTokenAccountOne: poolTokenOne,
-      userTokenAccountOne: destinationAccounts[0],
-      user: wallet.publicKey,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      associatedTokenProgram: ASSOCIATED_PROGRAM_ID,
-      rent: SYSVAR_RENT_PUBKEY,
-      systemProgram: SystemProgram.programId
-    };
-
+   
     const dataIx = swap(args, acc, PROGRAM_ID);
     const tx = new Transaction();
     if (instructions.length !== 0) tx.add(...instructions);
