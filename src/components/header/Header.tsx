@@ -1,9 +1,13 @@
 "use client";
 
+import { PROGRAM_ID_IDL } from "@/program/cli/programId";
+import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
+import { connection } from "@/program/web3";
+import { coinInfo } from "@/utils/types";
 import Link from "next/link";
-import { FC } from "react";
-import { ConnectButton } from "../buttons/ConnectButton";
 import { usePathname, useRouter } from "next/navigation";
+import { FC, useEffect, useState } from "react";
+import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
 
 interface HeaderProps {
@@ -12,6 +16,37 @@ interface HeaderProps {
 
 const Header: FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleToRouter = (id: string) => {
+    router.push(id);
+  };
+
+  const [latestCreatedToken, setLatestCreatedToken] =
+    useState<coinInfo>(undefined);
+
+  useEffect(() => {
+    const listener = new AgentsLandListener(connection);
+    listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
+      const newCoinInfo: coinInfo = {
+        creator: basicTokenInfo.creator,
+        name: basicTokenInfo.metadata.name,
+        url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
+        ticker: basicTokenInfo.metadata.symbol,
+        reserveOne: 0,
+        reserveTwo: 0,
+        token: basicTokenInfo.mintAddress,
+        commit: "",
+      };
+      console.log("new coin info: ", newCoinInfo);
+      setLatestCreatedToken(newCoinInfo);
+    });
+    const subId = listener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58());
+
+    return () => {
+      connection.removeOnLogsListener(subId);
+    };
+  }, []);
 
   return (
     <>
