@@ -21,6 +21,9 @@ export class AgentsLandListener implements SubscibeProgramLogs {
   private logHandlers: Record<string, ProcessProgramLogs> = {};
 
   setProgramLogsCallback(needle: AcceptedNeedle, callback: Function) {
+    if (!needle || !callback) {
+      throw new Error("Needle and / or callback is empty");
+    }
     switch (needle) {
       case "Launch":
         this.logHandlers[needle] = new CreatedTokenProgramLogsHandler(
@@ -40,9 +43,21 @@ export class AgentsLandListener implements SubscibeProgramLogs {
   }
 
   subscribeProgramLogs(programId: string): number {
+    if (!programId) {
+      console.error("Program Id is empty");
+      return;
+    }
     const subId = this.connection.onLogs(
       new PublicKey(programId),
       async (txLogs: Logs) => {
+        if (!txLogs.signature) {
+          console.error("tx logs has no signature");
+          return;
+        }
+        if (!txLogs.logs) {
+          console.error("tx logs has no logs");
+          return;
+        }
         if (this.seenTransactions.includes(txLogs.signature)) {
           return;
         }
