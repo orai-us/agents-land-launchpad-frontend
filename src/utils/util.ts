@@ -7,6 +7,7 @@ import {
   replyInfo,
   userInfo,
 } from "./types";
+import { BN } from "@coral-xyz/anchor";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -251,4 +252,12 @@ export const reduceString = (str: string, from: number, end: number) => {
   return str
     ? str.substring(0, from) + "..." + str.substring(str.length - end)
     : "-";
+};
+
+export const toBig = (value: number, decimals: number): BN => {
+  return new BN(value).mul(new BN(10 ** decimals));
+};
+
+export const fromBig = (value: BN, decimals: number): number => {
+  return value.div(new BN(10 ** decimals)).toNumber();
 };

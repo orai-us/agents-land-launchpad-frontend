@@ -17,6 +17,7 @@ import { twMerge } from "tailwind-merge";
 import { ACTION_TYPE } from "./MarqueeToken";
 import dayjs from "dayjs";
 import { numberWithCommas } from "@/utils/format";
+import { BN } from "@coral-xyz/anchor";
 
 const Header: FC = () => {
   const pathname = usePathname();
@@ -42,10 +43,11 @@ const Header: FC = () => {
         name: basicTokenInfo.metadata.name,
         url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
         ticker: basicTokenInfo.metadata.symbol,
-        reserveOne: 0,
-        reserveTwo: 0,
+        tokenReserves: new BN(0),
+        lamportReserves: new BN(0),
         token: basicTokenInfo.mintAddress,
         commit: "",
+        decimals: 6,
       };
       console.log("new coin info: ", newCoinInfo);
       setLatestCreatedToken(newCoinInfo);

@@ -36,7 +36,7 @@ export default function TradingPage() {
       setCoinId(parameter);
       const data = await getCoinInfo(parameter);
 
-      const bondingCurvePercent = new BigNumber(data.reserveTwo || 0)
+      const bondingCurvePercent = new BigNumber(data.lamportReserves || 0)
         .multipliedBy(100)
         .div(BONDING_CURVE_LIMIT)
         .toNumber();
@@ -44,8 +44,8 @@ export default function TradingPage() {
       console.log("bondingCurvePercent", bondingCurvePercent);
       // const solPrice = await getSolPriceInUSD();
       // const prog =
-      //   (data.reserveTwo * 1000000 * solPrice) /
-      //   (data.reserveOne * data.marketcap);
+      //   (data.lamportReserves * 1000000 * solPrice) /
+      //   (data.tokenReserves * data.marketcap);
       setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
       setCoin(data);
     };
@@ -90,9 +90,10 @@ export default function TradingPage() {
               progression increases as the price goes up.
             </p>
             <p className="text-sm text-white px-2">
-              there are {coin.reserveOne} tokens still available for sale in the
-              bonding curve and there is {coin.reserveTwo / 1000_000_000 - 30}{" "}
-              SOL in the bonding curve.
+              there are {coin.tokenReserves.toNumber()} tokens still available
+              for sale in the bonding curve and there is{" "}
+              {coin.lamportReserves.toNumber() / 1000_000_000 - 30} SOL in the
+              bonding curve.
             </p>
           </div>
           <TokenDistribution data={coin} />

@@ -1,4 +1,5 @@
 import { recordInfo } from "@/utils/types";
+import { fromBig } from "@/utils/util";
 import { useRouter } from "next/navigation";
 import React from "react";
 interface TradePropsInfo {
@@ -6,7 +7,6 @@ interface TradePropsInfo {
 }
 
 export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
-  console.log("trade", trade);
   const router = useRouter();
 
   const handleToRouter = (id: string) => {
@@ -26,9 +26,16 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
         <div className="text-lg">{trade.holder.name}</div>
       </td>
       <td className="text-center py-2">
-        {trade.holdingStatus == 2 ? "BUY" : "SELL"}
+        {trade["holdingStatus"] == 2 ? "BUY" : "SELL"}
       </td>
-      <td className="text-center py-2">{trade.amount}</td>
+      <td className="text-center py-2">
+        {trade.swapDirection == 0 ? "BUY" : "SELL"}
+      </td>
+      <td className="text-center py-2">
+        {trade.swapDirection === 0
+          ? fromBig(trade.lamportAmount, 9)
+          : fromBig(trade.tokenAmount, 6)}
+      </td>
       <td className="text-center py-2">{trade.time.toString()}</td>
       <td className="text-center py-2">
         <p

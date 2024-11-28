@@ -1,5 +1,5 @@
+import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
-import BN from "bn.js";
 
 export type ChartTable = {
   table: {
@@ -49,8 +49,8 @@ export interface coinInfo {
   creator: string | userInfo;
   ticker: string;
   url: string;
-  reserveOne: number;
-  reserveTwo: number;
+  tokenReserves: BN;
+  lamportReserves: BN;
   token: string;
   marketcap?: number;
   presale?: number;
@@ -60,6 +60,7 @@ export interface coinInfo {
   website?: string;
   telegram?: string;
   date?: Date;
+  decimals: number;
 }
 export interface createCoinInfo {
   name: string;
@@ -104,9 +105,11 @@ export interface holderInfo {
 
 export interface recordInfo {
   holder: userInfo;
-  holdingStatus: number;
   time: Date;
-  amount: number;
+  tokenAmount: BN;
+  lamportAmount: BN;
+  swapDirection: 0 | 1;
+  price: number;
   tx: string;
 }
 export interface CharTable {

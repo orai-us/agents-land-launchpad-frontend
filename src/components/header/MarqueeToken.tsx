@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import { reduceString } from "@/utils/util";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "@/config";
+import { BN } from "bn.js";
 
 export enum ACTION_TYPE {
   Bought = "Bought",
@@ -130,10 +131,11 @@ const MarqueeToken = () => {
         name: basicTokenInfo.metadata.name,
         url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
         ticker: basicTokenInfo.metadata.symbol,
-        reserveOne: 0,
-        reserveTwo: 0,
+        tokenReserves: new BN(0),
+        lamportReserves: new BN(0),
         token: basicTokenInfo.mintAddress,
         commit: "",
+        decimals: 6,
       };
       console.log("new coin info: ", newCoinInfo);
       // setLatestCreatedToken(newCoinInfo);

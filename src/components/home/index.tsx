@@ -46,7 +46,7 @@ const HomePage: FC = () => {
       const coins = await getCoinsInfo();
       const price = await getSolPriceInUSD();
       if (coins !== null) {
-        coins.sort((a, b) => a.reserveOne - b.reserveOne);
+        coins.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
 
         setData(coins);
         setIsLoading(true);
@@ -73,16 +73,16 @@ const HomePage: FC = () => {
     if (orderOption == "desc") {
       switch (sortOption) {
         case "bump order":
-          sortedData.sort((a, b) => a.reserveOne - b.reserveOne);
+          sortedData.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
           break;
         case "last reply":
-          sortedData.sort((a, b) => a.reserveOne - b.reserveOne);
+          sortedData.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
           break;
         case "reply count":
-          sortedData.sort((a, b) => a.reserveOne - b.reserveOne);
+          sortedData.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
           break;
         case "market cap":
-          sortedData.sort((a, b) => a.reserveOne - b.reserveOne);
+          sortedData.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
           break;
         case "creation time":
           sortedData.sort(
@@ -96,16 +96,16 @@ const HomePage: FC = () => {
     } else {
       switch (sortOption) {
         case "bump order":
-          sortedData.sort((a, b) => b.reserveOne - a.reserveOne);
+          sortedData.sort((a, b) => +b.tokenReserves - +a.tokenReserves);
           break;
         case "last reply":
-          sortedData.sort((a, b) => b.reserveOne - a.reserveOne);
+          sortedData.sort((a, b) => +b.tokenReserves - +a.tokenReserves);
           break;
         case "reply count":
-          sortedData.sort((a, b) => b.reserveOne - a.reserveOne);
+          sortedData.sort((a, b) => +b.tokenReserves - +a.tokenReserves);
           break;
         case "market cap":
-          sortedData.sort((a, b) => b.reserveOne - a.reserveOne);
+          sortedData.sort((a, b) => +b.tokenReserves - +a.tokenReserves);
           break;
         case "creation time":
           sortedData.sort(
