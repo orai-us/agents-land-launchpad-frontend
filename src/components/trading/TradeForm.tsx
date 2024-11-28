@@ -66,10 +66,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
     const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+
     return res;
   };
 
-  console.log("coin", coin);
   return (
     <div className="p-6 rounded-lg bg-[#13141D] text-[#9192A0]">
       <div className="flex flex-row justify-center items-center w-full gap-2 text-[#E8E9EE] uppercase text-[14px]">
@@ -151,7 +151,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               {isBuy !== 0
                 ? numberWithCommas(tokenBal)
                 : numberWithCommas(solBalance)}{" "}
-              {isBuy === 0 ? "SOL" : coin.name}
+              {isBuy === 0 ? "SOL" : coin.ticker}
             </span>
           </div>
 

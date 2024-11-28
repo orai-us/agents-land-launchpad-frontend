@@ -63,7 +63,7 @@ const Banner = () => {
                   Marketcap&nbsp;
                   <span className="text-[#E8E9EE] ">$6.75k(0.31%)</span>
                 </div>
-                <div className="w-full max-w-[235px]: mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
+                <div className="w-full max-w-[235px] mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
                   <div
                     className="rounded-[999px] h-2 bg-barrie"
                     style={{ width: "80%" }}

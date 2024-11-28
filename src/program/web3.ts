@@ -172,9 +172,10 @@ export class Web3SolanaProgramInteraction {
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
+      const coinDecimal = type === 0 ? 9 : 6;
       const swapIx = await program.methods
         .swap(
-          new anchor.BN(parseFloat(amount) * Math.pow(10, 9)),
+          new anchor.BN(parseFloat(amount) * Math.pow(10, coinDecimal)),
           type,
           new anchor.BN(0)
         )

@@ -14,10 +14,9 @@ import { reduceString } from "@/utils/util";
 import { formatNumberKMB } from "@/utils/format";
 import BigNumber from "bignumber.js";
 import { BONDING_CURVE_LIMIT } from "@/config";
-import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
-
+import dayjs from "dayjs";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -125,8 +124,8 @@ export const ListLaunchToken = ({ data }) => {
                       handleToProfile(ind as any);
                     }}
                   >
-                    {coinItem.creator["wallet"]
-                      ? reduceString(coinItem.creator["wallet"], 4, 4)
+                    {coinItem.creator?.["wallet"]
+                      ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
                       : coinItem.creator.toString()}
                   </span>
                 </div>

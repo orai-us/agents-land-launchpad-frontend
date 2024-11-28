@@ -105,6 +105,14 @@ input[type="number"] {
   background-position: center center;
 }
 
+.bg-hill {
+  background-image: url(../assets/images/hill_progress.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  /* animation: animatedImage ease-in 300ms infinite; */
+}
+
 .bg-barrie {
   background-image: url(../assets/images/barie.png);
   background-repeat: no-repeat;

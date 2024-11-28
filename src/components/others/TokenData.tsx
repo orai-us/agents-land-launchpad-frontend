@@ -9,7 +9,7 @@ interface TokenDataProps {
 
 const TokenData: FC<TokenDataProps> = ({ coinData }) => {
   return (
-    <div className="flex flex-col gap-3 px-2">
+    <div className="flex flex-col gap-3 px-2 mt-4">
       <img
         src={coinData.url}
         className="rounded-lg w-full"
