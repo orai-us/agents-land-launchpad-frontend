@@ -102,7 +102,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           )
         ) : (
           <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
-            <table className="w-full h-full">
+            <table className="w-full h-full scroll-table">
               <thead className="w-full text-white">
                 <tr className="text-lg">
                   <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
@@ -127,7 +127,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="h-screen max-h-[450px] overflow-y-auto">
+              <tbody className="">
                 {trades.record &&
                   trades.record
                     .filter((item) => {
