@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { coinInfo } from "@/utils/types";
 import { FC, useContext, useState } from "react";
 import { BiLineChart } from "react-icons/bi";
@@ -8,9 +8,9 @@ import { BsFilterSquare } from "react-icons/bs";
 const FilterListButton: FC = () => {
   const [data, setData] = useState<coinInfo[]>([]);
   const [dataSort, setDataSort] = useState<string>("creation time");
-  const [order, setOrder] = useState("desc")
+  const [order, setOrder] = useState("desc");
   const [isSort, setIsSort] = useState(0);
-  const [currentFilterm, setCurrentFilter] = useState<string>("creation time")
+  const [currentFilterm, setCurrentFilter] = useState<string>("creation time");
   const FilterText = [
     { id: "last reply", text: "Last Reply" },
     { id: "creation time", text: "Creation Time" },
@@ -18,18 +18,17 @@ const FilterListButton: FC = () => {
   ];
 
   const handleSortSelection = (option: any) => {
-    setCurrentFilter(option)
-    let sortOption: string = '';
+    setCurrentFilter(option);
+    let sortOption: string = "";
     let orderOption: string = "";
-    let sortedData = [...data]; // Create a new array to prevent direct state mutation
+    let sortedData: any = [...data]; // Create a new array to prevent direct state mutation
     if (option == "desc" || option == "asc") {
       setOrder(option);
       sortOption = dataSort;
       orderOption = option;
-    }
-    else {
-      setDataSort(option)
-      sortOption = option
+    } else {
+      setDataSort(option);
+      sortOption = option;
       orderOption = order;
     }
     if (orderOption == "desc") {
@@ -41,7 +40,9 @@ const FilterListButton: FC = () => {
           sortedData.sort((a, b) => a.tokenReserves - b.tokenReserves);
           break;
         case "creation time":
-          sortedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
           break;
         default:
           sortedData = data;
@@ -56,7 +57,9 @@ const FilterListButton: FC = () => {
           sortedData.sort((a, b) => b.tokenReserves - a.tokenReserves);
           break;
         case "creation time":
-          sortedData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
           break;
         default:
           sortedData = data;
