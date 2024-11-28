@@ -1,4 +1,5 @@
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey } from "@solana/web3.js"
+import BN from "bn.js";
 
 export type ChartTable = {
   table: {
@@ -27,22 +28,57 @@ export interface userInfo {
   signature?: string;
 }
 
+export interface metadataInfo {
+    name: string,
+    symbol: string,
+    image: string,
+    description: string,
+    createdOn:string, 
+    twitter?: string,
+    website?: string,
+    telegram?: string,
+}
+
 export interface coinInfo {
-  commit: any;
-  _id?: string;
-  name: string;
-  creator: string | userInfo;
-  ticker: string;
-  url: string;
-  reserveOne: number;
-  reserveTwo: number;
-  token: string;
-  marketcap?: number;
-  presale?: number;
-  replies?: number;
-  description?: string;
-  twitter?: string;
-  date?: Date;
+    commit: any;
+    _id?: string,
+    name: string,
+    creator: string | userInfo,
+    ticker: string,
+    url: string,
+    reserveOne: number,
+    reserveTwo: number,
+    token: string,
+    marketcap?: number,
+    presale?: number,
+    replies?: number,
+    description?: string,
+    twitter?: string,
+    website?: string,
+    telegram?: string,
+    date?: Date,
+}
+export interface createCoinInfo {
+    name: string,
+    ticker: string,
+    url: string,
+    description: string,
+    presale: number,
+    tokenSupply: number,
+    virtualReserves: number,
+    twitter?: string,
+    website?: string,
+    telegram?: string,
+}
+
+export interface launchDataInfo {
+    name: string,
+    symbol: string,
+    uri: string,
+    tokenSupply: number,
+    virtualReserves: number,
+    presale: number,
+    decimals: number
 }
 export interface msgInfo {
   coinId: string | coinInfo;
@@ -58,9 +94,9 @@ export interface tradeInfo {
 }
 
 export interface holderInfo {
-  slice: string;
-  owner: string;
-  amount: number;
+    slice: string;
+    owner: string;
+    amount: number
 }
 
 export interface recordInfo {

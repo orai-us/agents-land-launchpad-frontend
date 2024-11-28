@@ -76,15 +76,6 @@ export const confirmWallet = async ({
   }
 };
 
-export const createNewCoin = async (data: coinInfo) => {
-  try {
-    const response = await axios.post(`${BACKEND_URL}/coin/`, data, config);
-    return response.data;
-  } catch (err) {
-    return { error: "error setting up the request" };
-  }
-};
-
 export const getCoinsInfo = async (): Promise<coinInfo[]> => {
   const res = await axios.get(`${BACKEND_URL}/coin`, config);
   return res.data;

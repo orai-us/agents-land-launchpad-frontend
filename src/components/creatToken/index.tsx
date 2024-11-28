@@ -13,16 +13,23 @@ import { Spinner } from "@/components/loadings/Spinner";
 import { errorAlert, infoAlert } from "@/components/others/ToastGroup";
 import UserContext from "@/context/UserContext";
 import { useSocket } from "@/contexts/SocketContext";
-import { creatFeePay } from "@/program/web3";
-import { coinInfo } from "@/utils/types";
-import { createNewCoin, reduceString, uploadTokenImage } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
+import { reduceString, uploadTokenImage } from "@/utils/util";
 import MountainImg from "@/assets/images/mount_guide.png";
 import AgentImg from "@/assets/images/richoldman.png";
 import DropzoneFile from "../uploadFile/DropzoneFile";
 import { twMerge } from "tailwind-merge";
+import { createToken } from "@/program/web3";
+import {
+  coinInfo,
+  createCoinInfo,
+  launchDataInfo,
+  metadataInfo,
+} from "@/utils/types";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
+import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
+import { MdDescription } from "react-icons/md";
 
 export enum STEP_TOKEN {
   INFO,
@@ -31,11 +38,12 @@ export enum STEP_TOKEN {
 
 export default function CreateToken() {
   const { user, isCreated, setIsCreated } = useContext(UserContext);
+  const [imageUrl, setIamgeUrl] = useState<string>("");
   const { isLoading, setIsLoading } = useSocket();
-  const [newCoin, setNewCoin] = useState<coinInfo>({} as coinInfo);
   const [agentPersonality, setAgentPersonality] = useState<string>();
   const [agentStyle, setAgentStyle] = useState<string>();
   const [showOptional, setShowOptional] = useState<boolean>(false);
+  const [newCoin, setNewCoin] = useState<createCoinInfo>({} as createCoinInfo);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -44,7 +52,6 @@ export default function CreateToken() {
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
-    marketcap: false,
     description: false,
     image: false,
   });
@@ -59,13 +66,9 @@ export default function CreateToken() {
       name: !newCoin.name,
       ticker: !newCoin.ticker,
       description: !newCoin.description,
-      marketcap:
-        !newCoin.marketcap ||
-        newCoin.marketcap < 5000 ||
-        newCoin.marketcap > 10000,
-      image: !imageFile,
+      image: !imageUrl,
     });
-  }, [newCoin, imageFile]);
+  }, [newCoin, imageUrl]);
 
   const handleToRouter = (path: string) => {
     router.push(path);
@@ -80,23 +83,58 @@ export default function CreateToken() {
   const handlePresaleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const value = Number(e.target.value);
-    if (isNaN(value) || value > 1.5) {
+    let value = e.target.value;
+
+    // Validate input
+    const numericValue = parseFloat(value);
+    if (numericValue > 1.5 || numericValue < 0) {
       errorAlert("Presale amount must be between 0 and 1.5 SOL");
       return;
     }
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+
     const getAmount =
-      1_000_000_000 - (30 * 1_000_000_000) / (30 + (value * 99) / 100);
+      1_000_000_000 - (30 * 1_000_000_000) / (30 + (numericValue * 99) / 100);
+
     setGetAmt(getAmount);
-    setNewCoin({ ...newCoin, [e.target.id]: value });
+  };
+  const handleTokenSupplyChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let value = e.target.value;
+
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+    // Validate input
+    const numericValue = parseFloat(value);
+    if (numericValue < 5000 || numericValue > 2000000) {
+      errorAlert("Token Supply amount  input must be between 5000 and 2000000");
+      return;
+    }
+  };
+  const handleVirtualReservesChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    let value = e.target.value;
+
+    // Set the input value regardless of validation
+    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
+    // Validate input
+    const numericValue = parseFloat(value);
+    if (numericValue > 10 || numericValue < 1) {
+      errorAlert("Virtual SOL amount must be between 1 and 10 SOL");
+      return;
+    }
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    console.log("file--->", file);
     if (file) {
       setSelectedFileName(file.name);
-      setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setIamgeUrl(URL.createObjectURL(file));
     }
   };
 
@@ -115,17 +153,17 @@ export default function CreateToken() {
       name: !newCoin.name,
       ticker: !newCoin.ticker,
       description: !newCoin.description,
-      marketcap:
-        !newCoin.marketcap ||
-        newCoin.marketcap < 5000 ||
-        newCoin.marketcap > 10000,
-      image: !imageFile,
+      image: !imageUrl,
+      tokenSupply: !newCoin.tokenSupply,
+      virtualReserves: !newCoin.virtualReserves,
+      preSale: !newCoin.presale,
     };
     setErrors(validationErrors);
     return !Object.values(validationErrors).includes(true);
   };
 
   const createCoin = async () => {
+    console.log("imageUrl--->", imageUrl, imagePreview);
     if (!validateForm()) {
       errorAlert("Please fix the errors before submitting.");
       return;
@@ -133,40 +171,67 @@ export default function CreateToken() {
 
     try {
       setIsLoading(true);
-
       // Process image upload
-      const uploadedImageUrl = await uploadTokenImage(imageFile!);
+      const uploadedImageUrl = await uploadImage(imageUrl);
       if (!uploadedImageUrl) {
         errorAlert("Image upload failed.");
         setIsLoading(false);
         return;
       }
+      const jsonData: metadataInfo = {
+        name: newCoin.name,
+        symbol: newCoin.ticker,
+        image: uploadedImageUrl,
+        description: newCoin.description,
+        createdOn: "https://test.com",
+        twitter: newCoin.twitter || undefined, // Only assign if it exists
+        website: newCoin.website || undefined, // Only assign if it exists
+        telegram: newCoin.telegram || undefined, // Only assign if it exists
+      };
+      // Process metadata upload
+      const uploadMetadataUrl = await uploadMetadata(jsonData);
+      if (!uploadMetadataUrl) {
+        errorAlert("Metadata upload failed.");
+        setIsLoading(false);
+        return;
+      }
+      const coinData: launchDataInfo = {
+        name: newCoin.name,
+        symbol: newCoin.ticker,
+        uri: uploadMetadataUrl,
+        tokenSupply: newCoin.tokenSupply,
+        virtualReserves: newCoin.virtualReserves,
+        presale: newCoin.presale,
+        decimals: 6,
+      };
+      console.log("coinData--->", coinData);
 
-      const res = await creatFeePay(wallet, newCoin.presale || 0);
+      const res = await createToken(wallet, coinData);
       if (res === "WalletError" || !res) {
         errorAlert("Payment failed or was rejected.");
         setIsLoading(false);
         return;
       }
 
-      const coin: coinInfo = {
-        ...newCoin,
-        creator: user._id.toString(),
-        url: uploadedImageUrl,
-      };
+      // const coin: coinInfo = {
+      //   ...newCoin,
+      //   creator: user._id.toString(),
+      //   url: uploadedImageUrl,
+      // };
 
-      const created = await createNewCoin(coin);
-      if (created) {
-        infoAlert("Token created successfully!");
-        setIsCreated(true);
-        setNewCoin({} as coinInfo);
-        setImageFile(null);
-        setImagePreview(null);
-        setSelectedFileName("");
-        setStep(STEP_TOKEN.INFO);
-      } else {
-        errorAlert("Failed to create token.");
-      }
+      // const created = await createNewCoin(coin);
+      // if (created) {
+      //   infoAlert("Token created successfully!");
+      //   setIsCreated(true);
+      //   setNewCoin({} as coinInfo);
+      //   setImageFile(null);
+      //   setImagePreview(null);
+      //   setSelectedFileName("");
+      //   setStep(STEP_TOKEN.INFO);
+      // } else {
+      //   errorAlert("Failed to create token.");
+      // }
+      router.push("/");
     } catch (error) {
       errorAlert("An unexpected error occurred.");
       console.error(error);
@@ -178,10 +243,11 @@ export default function CreateToken() {
   const formValid =
     newCoin.name &&
     newCoin.ticker &&
-    newCoin.marketcap &&
-    newCoin.marketcap >= 5000 &&
-    newCoin.marketcap <= 10000 &&
-    imageFile;
+    newCoin.description &&
+    newCoin.presale &&
+    newCoin.tokenSupply &&
+    newCoin.virtualReserves &&
+    imageUrl;
 
   return (
     <div className="w-full m-auto px-3 my-24">
