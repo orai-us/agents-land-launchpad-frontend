@@ -4,7 +4,12 @@ import { TradeForm } from "@/components/trading/TradeForm";
 import { TradingChart } from "@/components/TVChart/TradingChart";
 import UserContext from "@/context/UserContext";
 import { coinInfo } from "@/utils/types";
-import { getCoinInfo, getCoinTrade, getCoinsInfoBy, getSolPriceInUSD } from "@/utils/util";
+import {
+  getCoinInfo,
+  getCoinTrade,
+  getCoinsInfoBy,
+  getSolPriceInUSD,
+} from "@/utils/util";
 import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -13,12 +18,12 @@ import TokenData from "../others/TokenData";
 import TokenDistribution from "../others/TokenDistribution";
 
 export default function TradingPage() {
-  const { coinId, setCoinId } = useContext(UserContext)
+  const { coinId, setCoinId } = useContext(UserContext);
   const pathname = usePathname();
-  const [param, setParam] = useState<string>('');
+  const [param, setParam] = useState<string>("");
   const [progress, setProgress] = useState<Number>(60);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
-  const router = useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,17 +34,19 @@ export default function TradingPage() {
       setCoinId(parameter);
       const data = await getCoinInfo(parameter);
       const solPrice = await getSolPriceInUSD();
-      const prog = data.reserveTwo * 1000000 * solPrice / (data.reserveOne * data.marketcap);
+      const prog =
+        (data.reserveTwo * 1000000 * solPrice) /
+        (data.reserveOne * data.marketcap);
       setProgress(prog > 1 ? 100 : Math.round(prog * 100000) / 1000);
       setCoin(data);
-    }
-    fetchData()
+    };
+    fetchData();
   }, [pathname]);
 
   return (
     <div className="w-full flex flex-col px-3 mx-auto gap-5">
       <div className="text-center">
-        <div onClick={() => router.push('/')}>
+        <div onClick={() => router.push("/")}>
           <div className="cursor-pointer text-white text-2xl flex flex-row items-center gap-2 pb-2">
             <IoMdArrowRoundBack />
             Back
@@ -75,7 +82,8 @@ export default function TradingPage() {
             </p>
             <p className="text-sm text-white px-2">
               there are {coin.reserveOne} tokens still available for sale in the
-              bonding curve and there is {coin.reserveTwo / 1000_000_000 - 30} SOL in the bonding curve.
+              bonding curve and there is {coin.reserveTwo / 1000_000_000 - 30}{" "}
+              SOL in the bonding curve.
             </p>
           </div>
           <TokenDistribution data={coin} />
