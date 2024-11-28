@@ -75,12 +75,16 @@ export const ListLaunchToken = ({ data }) => {
   ) : (
     <div className="mt-8 mb-14 grid grid-cols-4 gap-x-4 gap-y-8 w-full">
       {data.map((coinItem: coinInfo, ind) => {
-        const bondingCurvePercent = new BigNumber(
+        const bondingCurvePercentOrg = new BigNumber(
           (coinItem.lamportReserves || 0).toString() || 0
         )
           .multipliedBy(100)
-          .div(BONDING_CURVE_LIMIT)
-          .toFixed(2, 1);
+          .div(BONDING_CURVE_LIMIT);
+
+        const bondingCurvePercent =
+          bondingCurvePercentOrg.isGreaterThanOrEqualTo(100)
+            ? 100
+            : bondingCurvePercentOrg.toFixed(2, 1);
 
         return (
           <div

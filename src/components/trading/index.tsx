@@ -203,6 +203,7 @@ export default function TradingPage() {
             <div>
               <p className="text-[#E8E9EE] text-[24px] font-medium">
                 {0.000026} SOL
+                {/* FIXME: update price simulate */}
               </p>
               <p
                 className={twMerge(
