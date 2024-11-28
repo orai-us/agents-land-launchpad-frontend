@@ -1,14 +1,16 @@
 import UserContext from "@/context/UserContext";
-import { getTokenBalance, swapTx } from "@/program/web3";
 import { coinInfo } from "@/utils/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { errorAlert } from "../others/ToastGroup";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
 }
+
+const web3Solana = new Web3SolanaProgramInteraction();
 
 export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [sol, setSol] = useState<string>("");
@@ -35,7 +37,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
 
   const getBalance = async () => {
     try {
-      const balance = await getTokenBalance(user.wallet, coin.token);
+      const balance = await web3Solana.getTokenBalance(user.wallet, coin.token);
       setTokenBal(balance ? balance : 0);
     } catch (error) {
       setTokenBal(0);
@@ -48,8 +50,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
 
   const handlTrade = async () => {
     const mint = new PublicKey(coin.token);
-    const userWallet = new PublicKey(user.wallet);
-    const res = await swapTx(mint, wallet, sol, isBuy);
+    // const userWallet = new PublicKey(user.wallet);
+    const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
   };
   return (
     <div className="p-3 rounded-lg bg-transparent border-[1px] border-[#143F72] text-white font-semibold">

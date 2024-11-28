@@ -168,6 +168,7 @@ export default function CreateToken() {
         symbol: newCoin.ticker,
         uri: uploadMetadataUrl,
         presale: newCoin.presale,
+        metadata: jsonData,
         decimals: 6,
       };
       console.log("coinData--->", coinData);

@@ -81,6 +81,7 @@ export interface launchDataInfo {
   uri: string;
   presale: number;
   decimals: number;
+  metadata: metadataInfo;
 }
 export interface msgInfo {
   coinId: string | coinInfo;
