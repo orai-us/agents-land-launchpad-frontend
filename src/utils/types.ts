@@ -105,9 +105,11 @@ export interface holderInfo {
 
 export interface recordInfo {
   holder: userInfo;
-  holdingStatus: number;
   time: Date;
-  amount: number;
+  tokenAmount: BN;
+  lamportAmount: BN;
+  swapDirection: 0 | 1;
+  price: number;
   tx: string;
 }
 export interface CharTable {
