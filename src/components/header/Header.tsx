@@ -3,12 +3,12 @@ import { FC, useContext, useEffect, useMemo, useState } from "react";
 import { ConnectButton } from "../buttons/ConnectButton";
 import { useRouter } from "next/navigation";
 import { PiLightning } from "react-icons/pi";
-import { PROGRAM_ID_IDL } from "@/program/cli/programId";
 import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
-import { connection } from "@/program/web3";
 import { coinInfo, SwapInfo } from "@/utils/types";
 import Link from "next/link";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { PROGRAM_ID } from "@/config";
+import { commitmentLevel, endpoint } from "@/program/web3";
 
 const Header: FC = () => {
   const router = useRouter()
@@ -21,6 +21,10 @@ const Header: FC = () => {
   const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
 
   useEffect(() => {
+    const connection = new Connection(endpoint, {
+      commitment: commitmentLevel,
+      wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+    });
     const listener = new AgentsLandListener(connection);
     listener.setProgramLogsCallback('Launch', (basicTokenInfo: any) => {
       const newCoinInfo:coinInfo = {
@@ -40,7 +44,7 @@ const Header: FC = () => {
       setLatestSwapInfo(swapInfo)
     })
 
-    const subId = listener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58());
+    const subId = listener.subscribeProgramLogs(new PublicKey(PROGRAM_ID).toBase58());
 
     return () => {
       connection.removeOnLogsListener(subId);

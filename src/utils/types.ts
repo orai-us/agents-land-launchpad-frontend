@@ -75,8 +75,6 @@ export interface launchDataInfo {
     name: string,
     symbol: string,
     uri: string,
-    tokenSupply: number,
-    virtualReserves: number,
     presale: number,
     decimals: number
 }

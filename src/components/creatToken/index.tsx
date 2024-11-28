@@ -9,19 +9,16 @@ import {
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Spinner } from "@/components/loadings/Spinner";
-import { errorAlert, infoAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
+import { errorAlert } from "@/components/others/ToastGroup";
 import { useSocket } from "@/contexts/SocketContext";
-import { createToken } from "@/program/web3";
-import { coinInfo, createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
 import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
-import { MdDescription } from "react-icons/md";
 
 export default function CreateToken() {
-  const { user, isCreated, setIsCreated } = useContext(UserContext);
   const [imageUrl, setIamgeUrl] = useState<string>("");
   const { isLoading, setIsLoading } = useSocket();
   const [newCoin, setNewCoin] = useState<createCoinInfo>({} as createCoinInfo);
@@ -77,34 +74,6 @@ export default function CreateToken() {
       1_000_000_000 - (30 * 1_000_000_000) / (30 + (numericValue * 99) / 100);
 
     setGetAmt(getAmount);
-  };
-  const handleTokenSupplyChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let value = e.target.value;
-
-    // Set the input value regardless of validation
-    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
-    // Validate input
-    const numericValue = parseFloat(value);
-    if (numericValue < 5000 || numericValue > 2000000) {
-      errorAlert("Token Supply amount  input must be between 5000 and 2000000");
-      return;
-    }
-  };
-  const handleVirtualReservesChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let value = e.target.value;
-
-    // Set the input value regardless of validation
-    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
-    // Validate input
-    const numericValue = parseFloat(value);
-    if (numericValue > 10 || numericValue < 1) {
-      errorAlert("Virtual SOL amount must be between 1 and 10 SOL");
-      return;
-    }
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -168,14 +137,13 @@ export default function CreateToken() {
         name: newCoin.name,
         symbol: newCoin.ticker,
         uri: uploadMetadataUrl,
-        tokenSupply: newCoin.tokenSupply,
-        virtualReserves: newCoin.virtualReserves,
         presale: newCoin.presale,
         decimals: 6,
       }
       console.log("coinData--->", coinData)
 
-      const res = await createToken(wallet, coinData);
+      const web3Solana = new Web3SolanaProgramInteraction();
+      const res = await web3Solana.createToken(wallet, coinData);
       if (res === "WalletError" || !res) {
         errorAlert("Payment failed or was rejected.");
         setIsLoading(false);
@@ -195,8 +163,6 @@ export default function CreateToken() {
     newCoin.ticker &&
     newCoin.description &&
     newCoin.presale &&
-    newCoin.tokenSupply &&
-    newCoin.virtualReserves &&
     imageUrl
 
   return (
@@ -255,30 +221,6 @@ export default function CreateToken() {
               value={newCoin.description || ""}
               onChange={handleChange}
               className={`block w-full p-2.5 ${errors.name ? "border-red-700" : "border-gray-300"} rounded-lg bg-gray-800 text-white outline-none`}
-            />
-          </div>
-          <div>
-            <label htmlFor="presale" className="text-lg font-semibold text-white">
-              Token Suppy (5000 ~ 2000000) * (10^6)<span className="text-red-700">*</span>
-            </label>
-            <input
-              id="tokenSupply"
-              type="number"
-              value={newCoin.tokenSupply || ''}
-              onChange={handleTokenSupplyChange}
-              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white outline-none"
-            />
-          </div>
-          <div>
-            <label htmlFor="virtualReserves" className="text-lg font-semibold text-white">
-              Virtual SOL Reserves (1 ~ 10 SOL) <span className="text-red-700">*</span>
-            </label>
-            <input
-              id="virtualReserves"
-              type="number"
-              value={newCoin.virtualReserves || ''}
-              onChange={handleVirtualReservesChange}
-              className="block w-full p-2.5 rounded-lg bg-gray-800 text-white outline-none"
             />
           </div>
           <div>
