@@ -12,6 +12,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
+import { reduceString } from "@/utils/util";
+import { twMerge } from "tailwind-merge";
+import { ACTION_TYPE } from "./MarqueeToken";
+import dayjs from "dayjs";
+import { numberWithCommas } from "@/utils/format";
 
 const Header: FC = () => {
   const pathname = usePathname();
@@ -90,50 +95,81 @@ const Header: FC = () => {
             {latestSwapInfo && (
               <div>
                 <Link
-                  className="bg-green-600 w-[200px] h-[50px] font-medium rounded-md "
+                  className=""
                   href={`/trading/${latestSwapInfo.mintAddress}`}
                 >
-                  <div style={{ display: "flex", flexDirection: "row" }}>
-                    <span>{`${latestSwapInfo.creator} ${
-                      latestSwapInfo.direction
-                    } ${(
-                      latestSwapInfo.solAmountInLamports / LAMPORTS_PER_SOL
-                    ).toFixed(9)} SOL of ${latestSwapInfo.mintSymbol}`}</span>
-                    <Image
-                      alt="latestImageTokenTrade"
-                      src={latestSwapInfo.mintUri}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        marginRight: "10px",
-                        borderRadius: "50%",
-                      }}
-                    />
+                  <div
+                    style={{ display: "flex", flexDirection: "row" }}
+                    className="animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center"
+                  >
+                    <span>
+                      {reduceString(latestSwapInfo.creator, 4, 4)}&nbsp;
+                    </span>
+                    <span
+                      className={twMerge(
+                        "text-[#9FF4CF]",
+                        latestSwapInfo.direction === ACTION_TYPE.Sold &&
+                          "text-[#E75787]"
+                      )}
+                    >
+                      {latestSwapInfo.direction}&nbsp;
+                    </span>
+                    <span>
+                      {numberWithCommas(
+                        latestSwapInfo.solAmountInLamports / LAMPORTS_PER_SOL
+                      )}
+                      &nbsp;SOL of ${latestSwapInfo.mintSymbol}
+                    </span>
+                    {typeof latestSwapInfo.mintUri === "string" ? (
+                      <img
+                        src={latestSwapInfo.mintUri}
+                        alt="tokenIMG"
+                        className="w-5 h-5 rounded-full ml-2"
+                      />
+                    ) : (
+                      <Image
+                        src={latestSwapInfo.mintUri}
+                        alt="tokenIMG"
+                        className="w-5 h-5 rounded-full ml-2"
+                      />
+                    )}
                   </div>
                 </Link>
               </div>
             )}
             {latestCreatedToken && (
               <div>
-                <Link
-                  className="bg-green-600 w-[200px] h-[50px] font-medium rounded-md "
-                  href={`/trading/${latestCreatedToken.token}`}
-                >
-                  <div style={{ display: "flex", flexDirection: "row" }}>
-                    <span>{`${latestCreatedToken.creator} created `}</span>
-                    <Image
-                      alt="latestImageTokenCreated"
-                      src={latestCreatedToken.url}
-                      style={{
-                        width: "30px",
-                        height: "30px",
-                        marginRight: "10px",
-                        borderRadius: "50%",
-                      }}
-                    />
-                    <span>{`${
-                      latestCreatedToken.name
-                    } on ${new Date().toDateString()}`}</span>
+                <Link href={`/trading/${latestCreatedToken.token}`}>
+                  <div className="animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center">
+                    <span className="text-[#9192A0]">
+                      {reduceString(
+                        latestCreatedToken.creator ||
+                          latestCreatedToken.creator["name"],
+                        4,
+                        4
+                      )}
+                    </span>
+                    &nbsp;
+                    <span className={twMerge("text-[#AEE67F]")}>Created</span>
+                    &nbsp;
+                    {latestCreatedToken.name}
+                    {typeof latestCreatedToken.url === "string" ? (
+                      <img
+                        src={latestCreatedToken.url}
+                        alt="tokenIMG"
+                        className="w-5 h-5 rounded-full ml-2"
+                      />
+                    ) : (
+                      <Image
+                        src={latestCreatedToken.url}
+                        alt="tokenIMG"
+                        className="w-5 h-5 rounded-full ml-2"
+                      />
+                    )}
+                    &nbsp; &nbsp;on&nbsp;
+                    <span className="mr-4">
+                      {dayjs(new Date()).format("DD/MM/YYYY")}
+                    </span>
                   </div>
                 </Link>
               </div>

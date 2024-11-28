@@ -347,8 +347,8 @@ export default function CreateToken() {
                             key={`agent-item-${ind}`}
                           >
                             <div className="flex items-center">
-                              <Image
-                                src={e.img}
+                              <img
+                                src={e.img as any}
                                 alt="agentImg"
                                 width={32}
                                 height={32}

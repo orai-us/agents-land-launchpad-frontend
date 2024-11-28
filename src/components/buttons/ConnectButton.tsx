@@ -120,7 +120,7 @@ export const ConnectButton: FC = () => {
                 />
               )} */}
               {icon && (
-                <Image
+                <img
                   src={icon}
                   alt="Token IMG"
                   className="rounded-full"

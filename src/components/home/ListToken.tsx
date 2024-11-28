@@ -90,7 +90,7 @@ export const ListLaunchToken = ({ data }) => {
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
                 <div>
-                  <Image
+                  <img
                     src={coinItem.url}
                     alt="logoCoinImg"
                     width={112}

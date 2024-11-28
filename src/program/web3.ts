@@ -2,6 +2,7 @@ import {
   ComputeBudgetProgram,
   Connection,
   Keypair,
+  LAMPORTS_PER_SOL,
   PublicKey,
   Transaction,
 } from "@solana/web3.js";
@@ -13,6 +14,7 @@ import { errorAlert } from "@/components/others/ToastGroup";
 import { Program } from "@coral-xyz/anchor";
 import { SEED_CONFIG } from "./seed";
 import { launchDataInfo } from "@/utils/types";
+import BigNumber from "bignumber.js";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -217,6 +219,7 @@ export class Web3SolanaProgramInteraction {
       console.log("Error in swap transaction", error);
     }
   };
+
   getTokenBalance = async (walletAddress: string, tokenMintAddress: string) => {
     const wallet = new PublicKey(walletAddress);
     const tokenMint = new PublicKey(tokenMintAddress);
@@ -241,5 +244,14 @@ export class Web3SolanaProgramInteraction {
     console.log(`Token Balance: ${tokenAccountInfo.value.uiAmount}`);
 
     return tokenAccountInfo.value.uiAmount;
+  };
+
+  getSolanaBalance = async (publicKey: PublicKey) => {
+    const balance = await this.connection.getBalance(publicKey);
+    const balanceSolana = new BigNumber(balance)
+      .dividedBy(LAMPORTS_PER_SOL)
+      .toNumber();
+
+    return balanceSolana;
   };
 }

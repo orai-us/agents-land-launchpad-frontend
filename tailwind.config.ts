@@ -8,43 +8,43 @@ const config: Config = {
   ],
   theme: {
     screens: {
-      '4xs': '280px',
+      "4xs": "280px",
       // => @media (min-width: 280px) { ... }
-      '3.5xs': '320px',
+      "3.5xs": "320px",
       // => @media (min-width: 320px) { ... }
-      '3xs': '375px',
+      "3xs": "375px",
       // => @media (min-width: 375px) { ... }
-      '2xs': '414px',
+      "2xs": "414px",
       // => @media (min-width: 414px) { ... }
-      xs: '520px',
+      xs: "520px",
       // => @media (min-width: 414px) { ... }
-      sm: '640px',
+      sm: "640px",
       // => @media (min-width: 640px) { ... }
-      sm2: '724px',
+      sm2: "724px",
       // => @media (min-width: 724px) { ... }
-      md: '768px',
+      md: "768px",
       // => @media (min-width: 768px) { ... }
-      md2: '896px',
+      md2: "896px",
       // => @media (min-width: 896px) { ... }
-      lg: '1024px',
+      lg: "1024px",
       // => @media (min-width: 1024px) { ... }
-      lg2: '1158px',
+      lg2: "1158px",
       // => @media (min-width: 1024px) { ... }
-      xl: '1280px',
+      xl: "1280px",
       // => @media (min-width: 1280px) { ... }
-      '1.5xl': '1348px',
+      "1.5xl": "1348px",
       // => @media (min-width: 1348px) { ... }
-      '2xl': '1536px',
+      "2xl": "1536px",
       // => @media (min-width: 1536px) { ... }
-      '3xl': '1820px'
+      "3xl": "1820px",
       // => @media (min-width: 1820px) { ... }
     },
     extend: {
       backgroundImage: {
-        'custom-gradient': 'linear-gradient(180deg, #147EDF, #0047CA)',
+        "custom-gradient": "linear-gradient(180deg, #147EDF, #0047CA)",
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animated")],
 };
 export default config;

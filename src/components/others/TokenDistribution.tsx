@@ -42,7 +42,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
               >
                 <div className="flex flex-row gap-1 items-center">
                   <div className="">{index + 1}.</div>
-                  <Image
+                  <img
                     src={item.creator?.avatar || defaultUserImg}
                     alt="holderImg"
                     className="w-5 h-5 rounded-full"

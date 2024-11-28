@@ -11,7 +11,7 @@ import { reduceString } from "@/utils/util";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "@/config";
 
-enum ACTION_TYPE {
+export enum ACTION_TYPE {
   Bought = "Bought",
   Sold = "Sold",
   Created = "Created",
@@ -61,11 +61,19 @@ const RecentTokenCreated: FC<
       <span className={twMerge("text-[#AEE67F]")}>{type}</span>
       &nbsp;
       {token.name}
-      <Image
-        src={token.img}
-        alt="tokenIMG"
-        className="w-5 h-5 rounded-full ml-2"
-      />{" "}
+      {typeof token.img === "string" ? (
+        <img
+          src={token.img}
+          alt="tokenIMG"
+          className="w-5 h-5 rounded-full ml-2 mr-4"
+        />
+      ) : (
+        <Image
+          src={token.img}
+          alt="tokenIMG"
+          className="w-5 h-5 rounded-full ml-2 mr-4"
+        />
+      )}{" "}
       &nbsp;on <span className="mr-4">{dayjs(time).format("DD/MM/YYYY")}</span>
     </div>
   );
@@ -87,11 +95,19 @@ const RecentTokenSwap: FC<
       </span>{" "}
       &nbsp;
       {amount} SOL of {token.name}
-      <Image
-        src={token.img}
-        alt="tokenIMG"
-        className="w-5 h-5 rounded-full ml-2 mr-4"
-      />
+      {typeof token.img === "string" ? (
+        <img
+          src={token.img}
+          alt="tokenIMG"
+          className="w-5 h-5 rounded-full ml-2 mr-4"
+        />
+      ) : (
+        <Image
+          src={token.img}
+          alt="tokenIMG"
+          className="w-5 h-5 rounded-full ml-2 mr-4"
+        />
+      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
-"use client"
+"use client";
 import { coinInfo } from "@/utils/types";
+import Image from "next/image";
 import { FC, useContext, useState } from "react";
 
 interface TokenDataProps {
@@ -7,7 +8,6 @@ interface TokenDataProps {
 }
 
 const TokenData: FC<TokenDataProps> = ({ coinData }) => {
-
   return (
     <div className="flex flex-col gap-3 px-2">
       <img

@@ -5,6 +5,9 @@ import { PublicKey } from "@solana/web3.js";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { errorAlert } from "../others/ToastGroup";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { numberWithCommas } from "@/utils/format";
+import solIcon from "@/assets/icons/sol_ic.svg";
+import Image from "next/image";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -16,6 +19,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [sol, setSol] = useState<string>("");
   const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
+  const [solBalance, setSolBalance] = useState<number>(0);
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
@@ -36,31 +40,44 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   };
 
   const getBalance = async () => {
+    if (!wallet.publicKey || !coin.token) {
+      return;
+    }
+
     try {
-      const balance = await web3Solana.getTokenBalance(user.wallet, coin.token);
-      setTokenBal(balance ? balance : 0);
+      const [tokenBal, solBal] = await Promise.all([
+        web3Solana.getTokenBalance(wallet.publicKey.toString(), coin.token),
+        web3Solana.getSolanaBalance(wallet.publicKey),
+      ]);
+      setTokenBal(tokenBal ? tokenBal : 0);
+      setSolBalance(solBal ? solBal : 0);
     } catch (error) {
-      setTokenBal(0);
+      console.log("error", error);
+      // setTokenBal(0);
+      // setSolBalance(0);
     }
   };
 
   useEffect(() => {
     getBalance();
-  }, []);
+  }, [coin]);
 
   const handlTrade = async () => {
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
     const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+    return res;
   };
+
+  console.log("coin", coin);
   return (
-    <div className="p-3 rounded-lg bg-transparent border-[1px] border-[#143F72] text-white font-semibold">
-      <div className="flex flex-row justify-center px-3 py-2">
+    <div className="p-6 rounded-lg bg-[#13141D] text-[#9192A0]">
+      <div className="flex flex-row justify-center items-center w-full gap-2 text-[#E8E9EE] uppercase text-[14px]">
         <button
-          className={`rounded-l-lg py-3 w-full ${
+          className={`uppercase rounded py-2 h-12 w-full ${
             isBuy === 0
-              ? "bg-custom-gradient"
-              : "bg-slate-800 hover:bg-slate-300"
+              ? "bg-[#9FF4CF] text-[#080A14]"
+              : "bg-[#1A1C28] hover:brightness-125"
           }`}
           onClick={() => setIsBuy(0)}
         >
@@ -68,43 +85,104 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           Buy
         </button>
         <button
-          className={`rounded-r-lg py-3 w-full ${
+          className={`uppercase rounded py-2 h-12 w-full ${
             isBuy === 1
-              ? "bg-custom-gradient"
-              : "bg-slate-800 hover:bg-slate-300"
+              ? "bg-[#E75787] text-[#080A14]"
+              : "bg-[#1A1C28] hover:brightness-125"
           }`}
           onClick={() => setIsBuy(1)}
         >
           Sell
         </button>
       </div>
-      <div className="px-4 flex flex-col relative">
-        <label
-          htmlFor="name py-[20px]"
-          className="rounded bg-transparent w-[150px] p-2 block mb-2 text-ml font-medium text-white dark:text-white"
-        >
-          Set max slippage
-        </label>
-        <div className="w-full flex flex-row items-center bg-transparent border-[1px] border-[#143F72]  rounded-lg">
-          <input
-            type="number"
-            id="setTrade"
-            value={sol}
-            onChange={handleInputChange}
-            pattern="\d*"
-            className="w-full outline-none text-black p-2.5 capitalize rounded-l-lg"
-            placeholder="0.0"
-            required
-          />
-          <div className="flex flex-col text-center p-2.5 border-l-[1px] border-l-[#143F72] bg-custom-gradient rounded-r-md">
-            {isBuy === 0 ? "SOL" : coin.name}
+      <div className="flex flex-col relative">
+        <div className="flex justify-between items-center mt-6 mb-3">
+          <label
+            htmlFor="name"
+            className="rounded bg-transparent text-ml font-medium text-[#9192A0] text-[12px] flex"
+          >
+            Switch to {coin.ticker} &nbsp;
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <path
+                fillRule="evenodd"
+                clipRule="evenodd"
+                d="M10.3949 2.16715C10.1721 1.94431 9.81088 1.94428 9.58805 2.16707C9.36521 2.38986 9.36518 2.75111 9.58797 2.97394L12.0523 5.4388H2.57054C2.25544 5.4388 2 5.69424 2 6.00935C2 6.32445 2.25544 6.57989 2.57054 6.57989L13.1993 6.57989C13.2389 6.57989 13.2775 6.57586 13.3148 6.5682C13.4962 6.60522 13.6921 6.55339 13.8328 6.4127C14.0557 6.18991 14.0557 5.82866 13.8329 5.60583L10.3949 2.16715ZM13.4294 10.1294C13.7445 10.1294 14 9.87393 14 9.55882C14 9.24372 13.7445 8.98828 13.4294 8.98828L2.80064 8.98828C2.76223 8.98828 2.72471 8.99208 2.68843 8.99931C2.50617 8.96105 2.30881 9.01267 2.16729 9.15417C1.94446 9.37696 1.94442 9.7382 2.16721 9.96104L5.60522 13.3997C5.82801 13.6226 6.18926 13.6226 6.41209 13.3998C6.63492 13.177 6.63496 12.8158 6.41217 12.5929L3.94909 10.1294H13.4294Z"
+                fill="#9192A0"
+              />
+            </svg>
+          </label>
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className="cursor-pointer"
+            >
+              <path
+                d="M16.2617 10C16.2617 9.17969 16.7734 8.48047 17.5 8.19922C17.3086 7.39844 16.9922 6.64844 16.5742 5.96875C16.3242 6.07812 16.0586 6.13672 15.7891 6.13672C15.2969 6.13672 14.8047 5.94922 14.4258 5.57422C13.8438 4.99219 13.7148 4.13672 14.0273 3.42578C13.3516 3.00781 12.5977 2.69141 11.8008 2.5C11.5234 3.22266 10.8203 3.73828 10 3.73828C9.17969 3.73828 8.47656 3.22266 8.19922 2.5C7.39844 2.69141 6.64844 3.00781 5.96875 3.42578C6.28516 4.13281 6.15234 4.99219 5.57031 5.57422C5.19531 5.94922 4.69922 6.13672 4.20703 6.13672C3.9375 6.13672 3.67188 6.08203 3.42187 5.96875C3.00781 6.65234 2.69141 7.40234 2.5 8.20312C3.22266 8.48047 3.73828 9.17969 3.73828 10.0039C3.73828 10.8242 3.22656 11.5234 2.50391 11.8047C2.69531 12.6055 3.01172 13.3555 3.42969 14.0352C3.67969 13.9258 3.94531 13.8711 4.21094 13.8711C4.70313 13.8711 5.19531 14.0586 5.57422 14.4336C6.15234 15.0117 6.28516 15.8711 5.97266 16.5781C6.65234 16.9961 7.40625 17.3125 8.20312 17.5039C8.48047 16.7812 9.17969 16.2695 10 16.2695C10.8203 16.2695 11.5195 16.7812 11.7969 17.5039C12.5977 17.3125 13.3477 16.9961 14.0273 16.5781C13.7148 15.8711 13.8477 15.0156 14.4258 14.4336C14.8008 14.0586 15.293 13.8711 15.7891 13.8711C16.0547 13.8711 16.3242 13.9258 16.5703 14.0352C16.9883 13.3555 17.3047 12.6016 17.4961 11.8047C16.7773 11.5234 16.2617 10.8242 16.2617 10ZM10.0352 13.1211C8.30469 13.1211 6.91016 11.7188 6.91016 9.99609C6.91016 8.27344 8.30469 6.87109 10.0352 6.87109C11.7656 6.87109 13.1602 8.27344 13.1602 9.99609C13.1602 11.7188 11.7656 13.1211 10.0352 13.1211Z"
+                fill="#9192A0"
+              />
+            </svg>
           </div>
+        </div>
+        <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
+          <div className="py-2">
+            <input
+              type="number"
+              id="setTrade"
+              value={sol}
+              onChange={handleInputChange}
+              pattern="\d*"
+              className="w-full outline-none capitalize bg-transparent text-[#E8E9EE] placeholder:text-[#585A6B] text-[24px]"
+              placeholder="0.0"
+              required
+            />
+
+            <span className="text-[10px] text-[#E8E9EE] font-medium">
+              Balance:{" "}
+              {isBuy !== 0
+                ? numberWithCommas(tokenBal)
+                : numberWithCommas(solBalance)}{" "}
+              {isBuy === 0 ? "SOL" : coin.name}
+            </span>
+          </div>
+
+          {isBuy === 0 ? (
+            <div className="flex w-fit text-[#E8E9EE] text-[14px] rounded-[32px] bg-[#080A14] py-1 px-4 justify-center items-center h-8">
+              SOL
+              <Image
+                src={solIcon}
+                alt="solIcon"
+                className="ml-1 w-5 h-5 rounded-full border border-[#30344A]"
+              />
+            </div>
+          ) : (
+            <div className="flex w-fit text-[#E8E9EE] text-[14px] rounded-[32px] bg-[#080A14] py-1 px-4 justify-center items-center h-8">
+              {coin.ticker}
+              {coin.url && (
+                <img
+                  src={coin.url}
+                  alt="coinIcon"
+                  className="ml-1 w-5 h-5 rounded-full border border-[#30344A]"
+                />
+              )}
+            </div>
+          )}
         </div>
         {isBuy === 0 ? (
           <div className="flex flex-row py-2 gap-3">
             {SolList.map((item: any, index: any) => {
               return (
                 <div
+                  key={`list-sol-${index}`}
                   className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
                   onClick={() => setSol(item.id)}
                 >
