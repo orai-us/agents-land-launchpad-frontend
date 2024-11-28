@@ -167,7 +167,7 @@ export default function CreateToken() {
         name: newCoin.name,
         symbol: newCoin.ticker,
         uri: uploadMetadataUrl,
-        presale: newCoin.presale || 1,
+        presale: newCoin.presale,
         decimals: 6,
       };
       console.log("coinData--->", coinData);
@@ -431,23 +431,23 @@ export default function CreateToken() {
                 />
               </div>
 
-              {/* <div>
-              <label
-                htmlFor="presale"
-                className="text-[12px] font-medium text-[#84869A]"
-              >
-                Presale (0 ~ 1.5 SOL) <span className="text-red-700">*</span>
-              </label>
-              <input
-                    role="presentation"
-                    autoComplete="off"
-                id="presale"
-                type="number"
-                value={newCoin.presale || ""}
-                onChange={handlePresaleChange}
-                className="block w-full p-2.5 rounded-lg bg-gray-800 text-[#84869A]"
-              />
-            </div> */}
+              <div>
+                <label
+                  htmlFor="description"
+                  className="text-[12px] font-medium text-[#84869A]"
+                >
+                  Presale (0 ~ 1.5 SOL)
+                </label>
+                <input
+                  role="presentation"
+                  autoComplete="off"
+                  id="presale"
+                  type="number"
+                  value={newCoin.presale || ""}
+                  onChange={handlePresaleChange}
+                  className="outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent"
+                />
+              </div>
 
               <div className="w-full flex flex-col justify-between gap-3">
                 <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">

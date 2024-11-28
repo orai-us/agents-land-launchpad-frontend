@@ -83,19 +83,22 @@ export class Web3SolanaProgramInteraction {
 
       transaction.add(updateCpIx, updateCuIx, createIx);
 
-      const swapIx = await program.methods
-        .swap(
-          new anchor.BN(coinData.presale * Math.pow(10, 9)),
-          0,
-          new anchor.BN(0)
-        )
-        .accounts({
-          teamWallet: configAccount.teamWallet,
-          user: wallet.publicKey,
-          tokenMint: mintKp.publicKey,
-        })
-        .instruction();
-      transaction.add(swapIx);
+      if (coinData.presale) {
+        const swapIx = await program.methods
+          .swap(
+            new anchor.BN(coinData.presale * Math.pow(10, 9)),
+            0,
+            new anchor.BN(0)
+          )
+          .accounts({
+            teamWallet: configAccount.teamWallet,
+            user: wallet.publicKey,
+            tokenMint: mintKp.publicKey,
+          })
+          .instruction();
+        transaction.add(swapIx);
+      }
+
       transaction.feePayer = wallet.publicKey;
       const blockhash = await this.connection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash.blockhash;
