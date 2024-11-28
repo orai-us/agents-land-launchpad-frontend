@@ -1,35 +1,19 @@
 "use client";
-import {
-  ChangeEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Spinner } from "@/components/loadings/Spinner";
-import { errorAlert, infoAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
-import { useSocket } from "@/contexts/SocketContext";
-import { reduceString, uploadTokenImage } from "@/utils/util";
 import MountainImg from "@/assets/images/mount_guide.png";
 import AgentImg from "@/assets/images/richoldman.png";
-import DropzoneFile from "../uploadFile/DropzoneFile";
-import { twMerge } from "tailwind-merge";
-import { createToken } from "@/program/web3";
-import {
-  coinInfo,
-  createCoinInfo,
-  launchDataInfo,
-  metadataInfo,
-} from "@/utils/types";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
+import { Spinner } from "@/components/loadings/Spinner";
+import { errorAlert } from "@/components/others/ToastGroup";
+import { useSocket } from "@/contexts/SocketContext";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
-import { MdDescription } from "react-icons/md";
+import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
+import { reduceString } from "@/utils/util";
+import { useWallet } from "@solana/wallet-adapter-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import DropzoneFile from "../uploadFile/DropzoneFile";
 
 export enum STEP_TOKEN {
   INFO,
@@ -37,7 +21,6 @@ export enum STEP_TOKEN {
 }
 
 export default function CreateToken() {
-  const { user, isCreated, setIsCreated } = useContext(UserContext);
   const [imageUrl, setIamgeUrl] = useState<string>("");
   const { isLoading, setIsLoading } = useSocket();
   const [agentPersonality, setAgentPersonality] = useState<string>();
@@ -99,34 +82,6 @@ export default function CreateToken() {
 
     setGetAmt(getAmount);
   };
-  const handleTokenSupplyChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let value = e.target.value;
-
-    // Set the input value regardless of validation
-    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
-    // Validate input
-    const numericValue = parseFloat(value);
-    if (numericValue < 5000 || numericValue > 2000000) {
-      errorAlert("Token Supply amount  input must be between 5000 and 2000000");
-      return;
-    }
-  };
-  const handleVirtualReservesChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    let value = e.target.value;
-
-    // Set the input value regardless of validation
-    setNewCoin((prevState) => ({ ...prevState, [e.target.id]: value }));
-    // Validate input
-    const numericValue = parseFloat(value);
-    if (numericValue > 10 || numericValue < 1) {
-      errorAlert("Virtual SOL amount must be between 1 and 10 SOL");
-      return;
-    }
-  };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -145,8 +100,18 @@ export default function CreateToken() {
       setSelectedFileName(file.name);
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setIamgeUrl(URL.createObjectURL(file));
     }
   }, []);
+
+  console.log("newCoin", {
+    newCoin,
+    imageUrl,
+    imagePreview,
+    imageFile,
+    agentPersonality,
+    agentStyle,
+  });
 
   const validateForm = () => {
     const validationErrors = {
@@ -154,9 +119,9 @@ export default function CreateToken() {
       ticker: !newCoin.ticker,
       description: !newCoin.description,
       image: !imageUrl,
-      tokenSupply: !newCoin.tokenSupply,
-      virtualReserves: !newCoin.virtualReserves,
-      preSale: !newCoin.presale,
+      // tokenSupply: !newCoin.tokenSupply,
+      // virtualReserves: !newCoin.virtualReserves,
+      // preSale: !newCoin.presale,
     };
     setErrors(validationErrors);
     return !Object.values(validationErrors).includes(true);
@@ -183,10 +148,13 @@ export default function CreateToken() {
         symbol: newCoin.ticker,
         image: uploadedImageUrl,
         description: newCoin.description,
+        agentPersonality: agentPersonality || undefined,
+        agentStyle: agentStyle || undefined,
         createdOn: "https://test.com",
         twitter: newCoin.twitter || undefined, // Only assign if it exists
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
+        discord: newCoin.telegram || undefined, // Only assign if it exists
       };
       // Process metadata upload
       const uploadMetadataUrl = await uploadMetadata(jsonData);
@@ -199,14 +167,13 @@ export default function CreateToken() {
         name: newCoin.name,
         symbol: newCoin.ticker,
         uri: uploadMetadataUrl,
-        tokenSupply: newCoin.tokenSupply,
-        virtualReserves: newCoin.virtualReserves,
-        presale: newCoin.presale,
+        presale: newCoin.presale || 1,
         decimals: 6,
       };
       console.log("coinData--->", coinData);
 
-      const res = await createToken(wallet, coinData);
+      const web3Solana = new Web3SolanaProgramInteraction();
+      const res = await web3Solana.createToken(wallet, coinData);
       if (res === "WalletError" || !res) {
         errorAlert("Payment failed or was rejected.");
         setIsLoading(false);
@@ -240,14 +207,12 @@ export default function CreateToken() {
     }
   };
 
+  // newCoin.presale &&
+  // newCoin.virtualReserves &&
+  // newCoin.tokenSupply &&
+
   const formValid =
-    newCoin.name &&
-    newCoin.ticker &&
-    newCoin.description &&
-    newCoin.presale &&
-    newCoin.tokenSupply &&
-    newCoin.virtualReserves &&
-    imageUrl;
+    newCoin.name && newCoin.ticker && newCoin.description && imageUrl;
 
   return (
     <div className="w-full m-auto px-3 my-24">
@@ -330,8 +295,8 @@ export default function CreateToken() {
                       fill="none"
                     >
                       <path
-                        fill-rule="evenodd"
-                        clip-rule="evenodd"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
                         d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
                         fill="#9192A0"
                       />
@@ -412,6 +377,8 @@ export default function CreateToken() {
                     TOKEN NAME <span className="text-red-700">*</span>
                   </label>
                   <input
+                    role="presentation"
+                    autoComplete="off"
                     id="name"
                     type="text"
                     value={newCoin.name || ""}
@@ -431,6 +398,8 @@ export default function CreateToken() {
                     TOKEN SYMBOL <span className="text-red-700">*</span>
                   </label>{" "}
                   <input
+                    role="presentation"
+                    autoComplete="off"
                     id="ticker"
                     type="text"
                     value={newCoin.ticker || ""}
@@ -470,6 +439,8 @@ export default function CreateToken() {
                 Presale (0 ~ 1.5 SOL) <span className="text-red-700">*</span>
               </label>
               <input
+                    role="presentation"
+                    autoComplete="off"
                 id="presale"
                 type="number"
                 value={newCoin.presale || ""}
@@ -490,7 +461,12 @@ export default function CreateToken() {
                 <DropzoneFile
                   onDrop={onDrop}
                   file={imageFile}
-                  setFile={setImageFile}
+                  setFile={(file: File) => {
+                    setSelectedFileName(file?.name);
+                    setImageFile(file);
+                    setImagePreview(!file ? "" : URL.createObjectURL(file));
+                    setIamgeUrl(!file ? "" : URL.createObjectURL(file));
+                  }}
                 />
               </div>
 
@@ -507,8 +483,8 @@ export default function CreateToken() {
                   fill="none"
                 >
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
+                    fillRule="evenodd"
+                    clipRule="evenodd"
                     d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
                     fill="#9192A0"
                   />
@@ -526,9 +502,11 @@ export default function CreateToken() {
                         TWITTER
                       </label>
                       <input
-                        id="name"
+                        role="presentation"
+                        autoComplete="off"
+                        id="twitter"
                         type="text"
-                        value={newCoin.name || ""}
+                        value={newCoin.twitter || ""}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -545,9 +523,11 @@ export default function CreateToken() {
                         TELEGRAM
                       </label>{" "}
                       <input
-                        id="ticker"
+                        role="presentation"
+                        autoComplete="off"
+                        id="telegram"
                         type="text"
-                        value={newCoin.ticker || ""}
+                        value={newCoin.telegram || ""}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -566,9 +546,11 @@ export default function CreateToken() {
                         DISCORD
                       </label>
                       <input
-                        id="name"
+                        role="presentation"
+                        autoComplete="off"
+                        id="discord"
                         type="text"
-                        value={newCoin.name || ""}
+                        value={newCoin.discord || ""}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -585,9 +567,11 @@ export default function CreateToken() {
                         WEBSITE
                       </label>{" "}
                       <input
-                        id="ticker"
+                        role="presentation"
+                        autoComplete="off"
+                        id="website"
                         type="text"
-                        value={newCoin.ticker || ""}
+                        value={newCoin.website || ""}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -598,47 +582,6 @@ export default function CreateToken() {
                   </div>
                 </div>
               )}
-
-              {/* <div className="w-full flex flex-col justify-between gap-6">
-              <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
-                <label
-                  htmlFor="fileUpload"
-                  className="block text-[12px] font-medium text-[#84869A]"
-                >
-                  Upload Image: <span className="text-red-700">*</span>
-                </label>
-                <input
-                  id="fileUpload"
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-                <button
-                  className="py-2 px-4 bg-gray-700 text-[#84869A] rounded-lg"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {selectedFileName || "Choose Image"}
-                </button>
-              </div>
-
-              {imagePreview ? (
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="w-full border rounded-lg overflow-hidden mx-auto"
-                />
-              ) : (
-                <div className="w-full border rounded-lg overflow-hidden">
-                  <Image
-                    src={ImgIcon}
-                    alt="Default Avatar"
-                    className="flex object-cover w-full h-full mx-auto"
-                  />
-                </div>
-              )}
-            </div> */}
             </div>
           )}
           {step === STEP_TOKEN.BEHAVIOR && (
@@ -678,9 +621,9 @@ export default function CreateToken() {
                               <path
                                 d="M5 12L10 17L20 7"
                                 stroke="#E4775D"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                               />
                             </svg>
                           )}
@@ -724,9 +667,9 @@ export default function CreateToken() {
                               <path
                                 d="M5 12L10 17L20 7"
                                 stroke="#E4775D"
-                                stroke-width="2"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                               />
                             </svg>
                           )}

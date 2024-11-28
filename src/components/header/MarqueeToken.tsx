@@ -5,11 +5,11 @@ import coinImg from "@/assets/images/richoldman.png";
 import { twMerge } from "tailwind-merge";
 import { coinInfo, SwapInfo } from "@/utils/types";
 import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
-import { connection } from "@/program/web3";
-import { PROGRAM_ID_IDL } from "@/program/cli/programId";
+import { commitmentLevel, endpoint } from "@/program/web3";
 import dayjs from "dayjs";
 import { reduceString } from "@/utils/util";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { PROGRAM_ID } from "@/config";
 
 enum ACTION_TYPE {
   Bought = "Bought",
@@ -103,6 +103,10 @@ const MarqueeToken = () => {
   // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
 
   useEffect(() => {
+    const connection = new Connection(endpoint, {
+      commitment: commitmentLevel,
+      wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+    });
     const listener = new AgentsLandListener(connection);
     listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
       const newCoinInfo: coinInfo = {
@@ -147,7 +151,9 @@ const MarqueeToken = () => {
       ]);
     });
 
-    const subId = listener.subscribeProgramLogs(PROGRAM_ID_IDL.toBase58());
+    const subId = listener.subscribeProgramLogs(
+      new PublicKey(PROGRAM_ID).toBase58()
+    );
 
     return () => {
       connection.removeOnLogsListener(subId);

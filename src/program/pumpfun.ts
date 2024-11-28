@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pumpfun.json`.
  */
 export type Pumpfun = {
-  "address": "4A6oRJjP26UrZt7zUyAs7hthY1RnaoMPNc7dfAZVcA6k",
+  "address": "3uHJMHzeiqdqQ3LNc5bNVxuCp224HGtStPkv1JUEcabr",
   "metadata": {
     "name": "pumpfun",
     "version": "0.1.0",
@@ -623,18 +623,6 @@ export type Pumpfun = {
         }
       ],
       "args": [
-        {
-          "name": "decimals",
-          "type": "u8"
-        },
-        {
-          "name": "tokenSupply",
-          "type": "u64"
-        },
-        {
-          "name": "virtualLamportReserves",
-          "type": "u64"
-        },
         {
           "name": "name",
           "type": "string"
@@ -2833,51 +2821,6 @@ export type Pumpfun = {
   ],
   "types": [
     {
-      "name": "amountConfig",
-      "generics": [
-        {
-          "kind": "type",
-          "name": "t"
-        }
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "range",
-            "fields": [
-              {
-                "name": "min",
-                "type": {
-                  "option": {
-                    "generic": "t"
-                  }
-                }
-              },
-              {
-                "name": "max",
-                "type": {
-                  "option": {
-                    "generic": "t"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "enum",
-            "fields": [
-              {
-                "vec": {
-                  "generic": "t"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "bondingCurve",
       "type": {
         "kind": "struct",
@@ -2968,45 +2911,15 @@ export type Pumpfun = {
           },
           {
             "name": "lamportAmountConfig",
-            "type": {
-              "defined": {
-                "name": "amountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u64"
-                  }
-                ]
-              }
-            }
+            "type": "u64"
           },
           {
             "name": "tokenSupplyConfig",
-            "type": {
-              "defined": {
-                "name": "amountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u64"
-                  }
-                ]
-              }
-            }
+            "type": "u64"
           },
           {
             "name": "tokenDecimalsConfig",
-            "type": {
-              "defined": {
-                "name": "amountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u8"
-                  }
-                ]
-              }
-            }
+            "type": "u8"
           }
         ]
       }

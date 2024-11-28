@@ -1,5 +1,5 @@
 {
-  "address": "4A6oRJjP26UrZt7zUyAs7hthY1RnaoMPNc7dfAZVcA6k",
+  "address": "3uHJMHzeiqdqQ3LNc5bNVxuCp224HGtStPkv1JUEcabr",
   "metadata": {
     "name": "pumpfun",
     "version": "0.1.0",
@@ -617,18 +617,6 @@
         }
       ],
       "args": [
-        {
-          "name": "decimals",
-          "type": "u8"
-        },
-        {
-          "name": "token_supply",
-          "type": "u64"
-        },
-        {
-          "name": "virtual_lamport_reserves",
-          "type": "u64"
-        },
         {
           "name": "name",
           "type": "string"
@@ -2827,51 +2815,6 @@
   ],
   "types": [
     {
-      "name": "AmountConfig",
-      "generics": [
-        {
-          "kind": "type",
-          "name": "T"
-        }
-      ],
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "Range",
-            "fields": [
-              {
-                "name": "min",
-                "type": {
-                  "option": {
-                    "generic": "T"
-                  }
-                }
-              },
-              {
-                "name": "max",
-                "type": {
-                  "option": {
-                    "generic": "T"
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "name": "Enum",
-            "fields": [
-              {
-                "vec": {
-                  "generic": "T"
-                }
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
       "name": "BondingCurve",
       "type": {
         "kind": "struct",
@@ -2962,45 +2905,15 @@
           },
           {
             "name": "lamport_amount_config",
-            "type": {
-              "defined": {
-                "name": "AmountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u64"
-                  }
-                ]
-              }
-            }
+            "type": "u64"
           },
           {
             "name": "token_supply_config",
-            "type": {
-              "defined": {
-                "name": "AmountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u64"
-                  }
-                ]
-              }
-            }
+            "type": "u64"
           },
           {
             "name": "token_decimals_config",
-            "type": {
-              "defined": {
-                "name": "AmountConfig",
-                "generics": [
-                  {
-                    "kind": "type",
-                    "type": "u8"
-                  }
-                ]
-              }
-            }
+            "type": "u8"
           }
         ]
       }
