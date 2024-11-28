@@ -16,6 +16,8 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import SocialList from "../others/socialList";
 import TokenData from "../others/TokenData";
 import TokenDistribution from "../others/TokenDistribution";
+import BigNumber from "bignumber.js";
+import { BONDING_CURVE_LIMIT } from "@/config";
 
 export default function TradingPage() {
   const { coinId, setCoinId } = useContext(UserContext);
@@ -33,11 +35,18 @@ export default function TradingPage() {
       setParam(parameter);
       setCoinId(parameter);
       const data = await getCoinInfo(parameter);
-      const solPrice = await getSolPriceInUSD();
-      const prog =
-        (data.reserveTwo * 1000000 * solPrice) /
-        (data.reserveOne * data.marketcap);
-      setProgress(prog > 1 ? 100 : Math.round(prog * 100000) / 1000);
+
+      const bondingCurvePercent = new BigNumber(data.reserveTwo || 0)
+        .multipliedBy(100)
+        .div(BONDING_CURVE_LIMIT)
+        .toNumber();
+
+      console.log("bondingCurvePercent", bondingCurvePercent);
+      // const solPrice = await getSolPriceInUSD();
+      // const prog =
+      //   (data.reserveTwo * 1000000 * solPrice) /
+      //   (data.reserveOne * data.marketcap);
+      setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
       setCoin(data);
     };
     fetchData();
@@ -66,7 +75,7 @@ export default function TradingPage() {
           <div className="flex flex-col gap-3">
             <div className="w-full flex flex-col gap-2 px-3 py-2 border-[1px] border-[#2b7ee2] rounded-lg">
               <p className="text-white text-xl">
-                bonding curve progress : {progress.toString()}%
+                Bonding curve progress : {progress.toFixed(2)}%
               </p>
               <div className="bg-white rounded-full h-2 relative">
                 <div
