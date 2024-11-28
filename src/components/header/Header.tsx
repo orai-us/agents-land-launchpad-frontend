@@ -12,6 +12,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
+import { BN } from "@coral-xyz/anchor";
 
 const Header: FC = () => {
   const pathname = usePathname();
@@ -37,10 +38,11 @@ const Header: FC = () => {
         name: basicTokenInfo.metadata.name,
         url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
         ticker: basicTokenInfo.metadata.symbol,
-        reserveOne: 0,
-        reserveTwo: 0,
+        tokenReserves: new BN(0),
+        lamportReserves: new BN(0),
         token: basicTokenInfo.mintAddress,
         commit: "",
+        decimals: 6,
       };
       console.log("new coin info: ", newCoinInfo);
       setLatestCreatedToken(newCoinInfo);

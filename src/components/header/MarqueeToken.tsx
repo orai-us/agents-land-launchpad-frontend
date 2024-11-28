@@ -114,8 +114,8 @@ const MarqueeToken = () => {
         name: basicTokenInfo.metadata.name,
         url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
         ticker: basicTokenInfo.metadata.symbol,
-        reserveOne: 0,
-        reserveTwo: 0,
+        tokenReserves: 0,
+        lamportReserves: 0,
         token: basicTokenInfo.mintAddress,
         commit: "",
       };

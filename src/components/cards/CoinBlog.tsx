@@ -1,5 +1,5 @@
 import { coinInfo, userInfo } from "@/utils/types";
-import { getSolPriceInUSD, getUserInfo } from "@/utils/util";
+import { fromBig, getSolPriceInUSD, getUserInfo } from "@/utils/util";
 import { FC, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import UserContext from "@/context/UserContext";
@@ -23,7 +23,7 @@ export const CoinBlog: React.FC<CoinBlogProps> = ({ coin, componentKey }) => {
   }
 
   const getMarketCapData = async (coin: coinInfo) => {
-    const prog = coin.reserveTwo * 1000000 * solPrice / (coin.reserveOne * coin.marketcap);
+    const prog = fromBig(coin.lamportReserves, 9) * 1000000 * solPrice / (fromBig(coin.tokenReserves, coin.decimals) * coin.marketcap);
     setMarketCapValue(prog > 1 ? 100 : Math.round(prog * 100000) / 1000);
   }
 
@@ -72,7 +72,7 @@ export const CoinBlog: React.FC<CoinBlogProps> = ({ coin, componentKey }) => {
           <div className="flex flex-row gap-1 items-center">
             Market Cap
             <div className="text-gradient font-bold">
-              {(coin.reserveTwo / coin.reserveOne * 1000 * solPrice).toFixed(2)}
+              {coin.marketcap || 0}
               {/* {marketCapValue !== 100 && "K"} */}
             </div>
             {`(${marketCapValue}%)`}
