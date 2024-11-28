@@ -23,10 +23,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
-    { id: "", price: "reset" },
-    { id: "1", price: "1 sol" },
-    { id: "5", price: "5 sol" },
-    { id: "10", price: "10 sol" },
+    { id: "", price: "Reset" },
+    { id: "0.1", price: "0.1 SOL" },
+    { id: "0.5", price: "0.5 SOL" },
+    { id: "1", price: "1 SOL" },
   ];
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -183,7 +183,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               return (
                 <div
                   key={`list-sol-${index}`}
-                  className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+                  className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
                   onClick={() => setSol(item.id)}
                 >
                   {item.price}
@@ -194,31 +194,31 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         ) : (
           <div className="flex flex-row py-2 gap-3">
             <div
-              className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol("")}
             >
-              reset
+              Reset
             </div>
             <div
-              className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 10).toString())}
             >
               10%
             </div>
             <div
-              className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 4).toString())}
             >
               25%
             </div>
             <div
-              className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 2).toString())}
             >
               50%
             </div>
             <div
-              className="rounded-lg px-2 py-1 border-[1px] border-[#143F72] hover:bg-[#143F72]/30 cursor-pointer"
+              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol(tokenBal.toString())}
             >
               100%
@@ -226,18 +226,21 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           </div>
         )}
 
-        {progress === 100 ? (
+        {/* {progress === 100 ? (
           <div className="border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
             Place Trade
           </div>
-        ) : (
-          <div
-            className="border-[1px] border-[#143F72] cursor-pointer hover:bg-[#143F72]/30 w-full text-center rounded-lg py-2"
-            onClick={handlTrade}
-          >
+        ) : ( */}
+        <button
+          disabled={progress === 100 || !sol}
+          onClick={handlTrade}
+          className="mt-8 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+        >
+          <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
             Place Trade
           </div>
-        )}
+        </button>
+        {/* )} */}
       </div>
     </div>
   );
