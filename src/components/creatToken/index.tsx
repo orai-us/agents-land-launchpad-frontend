@@ -347,13 +347,23 @@ export default function CreateToken() {
                             key={`agent-item-${ind}`}
                           >
                             <div className="flex items-center">
-                              <img
-                                src={e.img as any}
-                                alt="agentImg"
-                                width={32}
-                                height={32}
-                                className="border-[1.5px] border-[#ADADAD] rounded-full"
-                              />
+                              {typeof e.img === "string" ? (
+                                <img
+                                  src={e.img as any}
+                                  alt="agentImg"
+                                  width={32}
+                                  height={32}
+                                  className="border-[1.5px] border-[#ADADAD] rounded-full"
+                                />
+                              ) : (
+                                <Image
+                                  src={e.img as any}
+                                  alt="agentImg"
+                                  width={32}
+                                  height={32}
+                                  className="border-[1.5px] border-[#ADADAD] rounded-full"
+                                />
+                              )}
                               <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
                                 {e.name}
                               </div>

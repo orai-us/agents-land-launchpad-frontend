@@ -90,10 +90,12 @@ export default function TradingPage() {
               progression increases as the price goes up.
             </p>
             <p className="text-sm text-white px-2">
-              there are {coin.tokenReserves?.toNumber() || 0} tokens still
+              there are {coin.tokenReserves?.toString() || 0} tokens still
               available for sale in the bonding curve and there is{" "}
-              {(coin.lamportReserves?.toNumber() || 0) / 1000_000_000 - 30} SOL
-              in the bonding curve.
+              {new BigNumber(coin.lamportReserves?.toString() || 0).toNumber() /
+                1000_000_000 -
+                30}{" "}
+              SOL in the bonding curve.
             </p>
           </div>
           <TokenDistribution data={coin} />
