@@ -127,7 +127,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                   </th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="h-screen max-h-[450px] overflow-y-auto">
                 {trades.record &&
                   trades.record
                     .filter((item) => {

@@ -1,16 +1,19 @@
+import UserImg from "@/assets/images/user-avatar.png";
 import UserContext from "@/context/UserContext";
 import { userInfo } from "@/utils/types";
-import { updateUser, uploadImage } from "@/utils/util";
+import { reduceString, updateUser } from "@/utils/util";
 import React, { ChangeEvent, useContext, useRef, useState } from "react";
 import { errorAlert, successAlert } from "../others/ToastGroup";
-import UserImg from "@/assets/images/user-avatar.png";
-import Image from "next/image";
+import { uploadImage } from "@/utils/fileUpload";
+import { useSocket } from "@/contexts/SocketContext";
+import { Spinner } from "../loadings/Spinner";
 
 interface ModalProps {
   data: userInfo;
 }
 
 const Modal: React.FC<ModalProps> = ({ data }) => {
+  const { isLoading, setIsLoading } = useSocket();
   const { setProfileEditModal, setImageUrl, setUser, user } =
     useContext(UserContext);
   const [index, setIndex] = useState<userInfo>(data);
@@ -42,16 +45,28 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
 
   const sendUpdate = async () => {
     try {
+      setIsLoading(true);
       let uploadedUrl: string = index.avatar || ""; // Ensure it starts as a string
 
       if (imagePreview && imagePreview !== index.avatar) {
-        const uploadResult = await uploadImage(imagePreview);
-        uploadedUrl = uploadResult || ""; // If uploadImage returns false, fallback to an empty string
+        const uploadedImageUrl = await uploadImage(imagePreview);
+
+        if (!uploadedImageUrl) {
+          setIsLoading(false);
+          errorAlert("Image upload failed.");
+          return;
+        }
+        uploadedUrl = uploadedImageUrl || ""; // If uploadImage returns false, fallback to an empty string
       }
 
+      const { name, wallet, isLedger, signature } = index;
+
       const updatedUser = {
-        ...index,
         avatar: uploadedUrl,
+        name,
+        wallet,
+        isLedger,
+        signature,
       };
 
       const result = await updateUser(index._id, updatedUser);
@@ -63,23 +78,29 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
         setUser(updatedUser);
         setProfileEditModal(false);
       }
+      setIsLoading(false);
     } catch (error) {
+      setIsLoading(false);
       errorAlert("An error occurred while updating your profile.");
     }
   };
 
-  const uploadImage = async (image: string): Promise<string> => {
-    // Your logic here
-    const uploadSuccess = true; // Example logic
-    return uploadSuccess ? "uploaded-image-url" : "";
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      successAlert("Copied to clipboard!");
+    } catch (err) {
+      errorAlert("Failed to copy!");
+    }
   };
 
   return (
     <div className="fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md">
-      <div className="flex w-full max-w-[300px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#140B56] border-[1px] border-white text-white relative">
+      {isLoading && Spinner()}
+      <div className="flex w-full max-w-[300px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#13141D] text-[#E8E9EE] relative">
         <button
           onClick={() => setProfileEditModal(false)}
-          className="absolute top-2 right-2 text-gray-600"
+          className="absolute top-6 right-6 text-gray-600"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -96,75 +117,100 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
             />
           </svg>
         </button>
-        <h2 className="text-center text-2xl font-bold">Edit Profile</h2>
-        <div className="w-full flex flex-col">
-          <label className="block text-lg font-medium" htmlFor="name">
-            Username:
-          </label>
-          <input
-            className="w-full p-2 rounded-lg outline-none bg-transparent border-[1px] border-white"
-            type="text"
-            id="name"
-            value={index.name || ""}
-            onChange={handleChange}
-          />
-        </div>
+        <h2 className="text-[18px] font-medium mb-6">Edit Profile</h2>
 
-        <div className="w-full flex flex-col md:flex-row justify-between gap-3 md:pr-6">
-          <div>
-            <label
-              htmlFor="fileUpload"
-              className="block text-lg font-medium mb-2 text-white"
-            >
-              Upload Image:
-            </label>
-            <label
-              htmlFor="fileUpload"
-              className="w-full p-2 rounded-lg outline-none bg-transparent border-[1px] border-white text-center text-white cursor-pointer hover:bg-white hover:text-black transition mx-auto flex"
-            >
-              {fileName || "Choose an Image"}
-            </label>
-            <input
-              id="fileUpload"
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-              ref={fileInputRef}
-            />
+        <div className="w-full gap-3">
+          <div className="flex justify-between bg-[#080A14] p-4 rounded-lg mb-6">
+            <div className="flex items-center">
+              {imagePreview ? (
+                <div className="w-12 h-12 rounded-lg overflow-hidden">
+                  <img
+                    src={imagePreview as string} // Ensure it's a string
+                    alt="Selected Preview"
+                    className="flex object-cover w-full h-full mx-auto"
+                  />
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded-lg overflow-hidden">
+                  <img
+                    src={UserImg.src as any}
+                    alt="Default Avatar"
+                    className="flex object-cover w-full h-full mx-auto"
+                  />
+                </div>
+              )}
+              <div className="flex items-center ml-2">
+                <p className="mr-2 text-[14px] text-[#9192A0]">
+                  {reduceString(index?.wallet || "", 4, 4)}
+                </p>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  className="cursor-pointer hover:brightness-125"
+                  onClick={() => copyToClipboard(index?.wallet)}
+                >
+                  <path
+                    d="M14.1665 14.6676H5.99988C5.86727 14.6676 5.74009 14.615 5.64632 14.5212C5.55256 14.4274 5.49988 14.3003 5.49988 14.1676V6.00098C5.49988 5.86837 5.55256 5.74119 5.64632 5.64742C5.74009 5.55365 5.86727 5.50098 5.99988 5.50098H14.1665C14.2992 5.50098 14.4263 5.55365 14.5201 5.64742C14.6139 5.74119 14.6665 5.86837 14.6665 6.00098V14.1676C14.6665 14.3003 14.6139 14.4274 14.5201 14.5212C14.4263 14.615 14.2992 14.6676 14.1665 14.6676Z"
+                    stroke="#585A6B"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M10.4999 5.50065V1.83398C10.4999 1.70138 10.4472 1.5742 10.3535 1.48043C10.2597 1.38666 10.1325 1.33398 9.99992 1.33398H1.83325C1.70064 1.33398 1.57347 1.38666 1.4797 1.48043C1.38593 1.5742 1.33325 1.70138 1.33325 1.83398V10.0006C1.33325 10.1333 1.38593 10.2604 1.4797 10.3542C1.57347 10.448 1.70064 10.5007 1.83325 10.5007H5.49992"
+                    stroke="#585A6B"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <label
+                htmlFor="fileUpload"
+                className="uppercase w-full p-2 rounded outline-none bg-[#1A1C28] text-center text-[12px] text-white cursor-pointer hover:brightness-125 flex items-center"
+              >
+                Upload
+              </label>
+              <input
+                id="fileUpload"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+              />
+            </div>
           </div>
 
-          {imagePreview ? (
-            <div className="w-48 h-48 border rounded-lg overflow-hidden justify-center mx-auto">
-              <img
-                src={imagePreview as string} // Ensure it's a string
-                alt="Selected Preview"
-                className="flex object-cover w-full h-full mx-auto"
-              />
-            </div>
-          ) : (
-            <div className="w-48 h-48 border rounded-lg overflow-hidden p-3">
-              <img
-                src={UserImg as any}
-                alt="Default Avatar"
-                className="flex object-cover w-full h-full rounded-full mx-auto"
-              />
-            </div>
-          )}
+          <div className="w-full flex flex-col">
+            <label
+              className="block text-[12px] font-medium uppercase text-[#84869A] mb-3"
+              htmlFor="name"
+            >
+              Username:
+            </label>
+            <input
+              className="w-full px-4 h-12 rounded-lg outline-none bg-transparent border-[1px] border-[#585A6B]"
+              type="text"
+              id="name"
+              value={index.name || ""}
+              onChange={handleChange}
+            />
+          </div>
         </div>
 
-        <div className="flex justify-around">
+        <div className="flex w-full">
           <button
-            className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md"
+            disabled={!index.name}
+            className="w-full hover:brightness-125 disabled:cursor-not-allowed disabled:brightness-75 disabled:pointer-events-none cursor-pointer bg-[#1A1C28] rounded-lg h-12 flex items-center justify-center mt-6"
             onClick={sendUpdate}
           >
-            Save
-          </button>
-          <button
-            className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md"
-            onClick={() => setProfileEditModal(false)}
-          >
-            Cancel
+            SAVE
           </button>
         </div>
       </div>

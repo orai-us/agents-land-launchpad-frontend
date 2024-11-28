@@ -2,7 +2,7 @@
 import { coinInfo, holderInfo } from "@/utils/types";
 import { FC, useContext, useEffect, useState } from "react";
 import { findHolders } from "@/utils/util";
-import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import defaultUserImg from "@/assets/images/user-avatar.png";
 import Image from "next/image";
 
 interface ModalProps {
@@ -62,7 +62,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
             holders
               .sort((a, b) => b.amount - a.amount)
               .map((item: any, index: number) => {
-                const imgSrc = item.creator?.avatar || defaultUserImg;
+                const imgSrc = item.creator?.avatar || defaultUserImg.src;
 
                 return (
                   <div

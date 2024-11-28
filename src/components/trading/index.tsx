@@ -20,7 +20,7 @@ import TokenDistribution from "../others/TokenDistribution";
 import BigNumber from "bignumber.js";
 import { BONDING_CURVE_LIMIT } from "@/config";
 import { twMerge } from "tailwind-merge";
-import defaultAgentAvt from "@/assets/images/user-avatar.png";
+import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import Image from "next/image";
 
 export default function TradingPage() {
@@ -31,7 +31,7 @@ export default function TradingPage() {
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const router = useRouter();
 
-  const imgSrc = coin.url || defaultAgentAvt;
+  const imgSrc = coin.url || defaultUserImg.src;
   // FIXME: need to integrate agent
 
   useEffect(() => {
@@ -82,7 +82,7 @@ export default function TradingPage() {
                   <img
                     src={imgSrc}
                     alt="agentAvt"
-                    className="w-[60px] h-[60px] rounded-full"
+                    className="w-[60px] h-[60px] rounded-full border border-[#E8E9EE]"
                   />
                 ) : (
                   <Image

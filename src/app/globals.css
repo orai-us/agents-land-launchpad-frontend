@@ -133,3 +133,17 @@ input[type="number"] {
     scrollbar-width: none; /* Firefox */
   }
 }
+
+table.scroll-table tbody {
+  padding-right: 10px;
+  display: block;
+  max-height: 350px;
+  overflow-y: scroll;
+}
+
+table.scroll-table thead,
+table.scroll-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}

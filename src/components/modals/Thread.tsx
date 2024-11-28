@@ -1,6 +1,6 @@
 import UserContext from "@/context/UserContext";
 import { coinInfo, replyInfo, tradeInfo, userInfo } from "@/utils/types";
-import { postReply, updateUser, uploadImage } from "@/utils/util";
+import { postReply } from "@/utils/util";
 import React, {
   ChangeEvent,
   useContext,
@@ -12,6 +12,7 @@ import { errorAlert, successAlert } from "../others/ToastGroup";
 import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
 
 import Image from "next/image";
+import { uploadImage } from "@/utils/fileUpload";
 
 interface ThreadProps {
   data: coinInfo;
@@ -69,12 +70,6 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
       setFileName(file.name || ""); // Ensure it's always a string
       setImageUrl(url); // URL.createObjectURL always returns a string
     }
-  };
-
-  const uploadImage = async (image: string): Promise<string> => {
-    // Your logic here
-    const uploadSuccess = true; // Example logic
-    return uploadSuccess ? "uploaded-image-url" : "";
   };
 
   return (

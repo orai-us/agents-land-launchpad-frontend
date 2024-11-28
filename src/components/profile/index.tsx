@@ -4,22 +4,51 @@ import Modal from "@/components/modals/Modal";
 import { errorAlert, successAlert } from "@/components/others/ToastGroup";
 import UserContext from "@/context/UserContext";
 import { coinInfo, userInfo } from "@/utils/types";
-import { getCoinsInfoBy, getUser } from "@/utils/util";
+import { getCoinsInfoBy, getUser, reduceString } from "@/utils/util";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useContext } from "react";
 import { LuFileEdit } from "react-icons/lu";
 import { MdContentCopy } from "react-icons/md";
 import { ProfileMenuList } from "@/config/TextData";
+import nodataImg from "@/assets/icons/nodata.svg";
+import defaultUserImg from "@/assets/images/user-avatar.png";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { twMerge } from "tailwind-merge";
+import ListToken, { STATUS_TOKEN } from "../home/ListToken";
+import Image from "next/image";
+import { formatNumberKMB, numberWithCommas } from "@/utils/format";
+import dayjs from "dayjs";
 
 export default function ProfilePage() {
-  const { user, setProfileEditModal, profileEditModal } = useContext(UserContext);
+  const { user, setProfileEditModal, profileEditModal } =
+    useContext(UserContext);
   const pathname = usePathname();
   const [param, setParam] = useState<string | null>(null);
   const [userData, setUserData] = useState<userInfo>({} as userInfo);
   const [option, setOption] = useState<number>(1);
+  const [ownedToken, setOwnedToken] = useState<{
+    uniqueTokenCount: number;
+    tokenDetails: any;
+  }>({ uniqueTokenCount: 0, tokenDetails: [] });
   const [coins, setCoins] = useState<coinInfo[]>([]);
   const [copySuccess, setCopySuccess] = useState<string>("");
   const router = useRouter();
+  const { publicKey } = useWallet();
+
+  useEffect(() => {
+    if (!publicKey) {
+      return;
+    }
+    (async () => {
+      const { uniqueTokenCount, tokenDetails } =
+        await new Web3SolanaProgramInteraction().getNumberOfOwnedToken(
+          publicKey
+        );
+
+      setOwnedToken({ uniqueTokenCount, tokenDetails });
+    })();
+  }, [publicKey]);
 
   const handleToRouter = (id: string) => {
     if (id.startsWith("http")) {
@@ -41,6 +70,7 @@ export default function ProfilePage() {
   const fetchCoinsData = async (userId: string) => {
     try {
       const coinsBy = await getCoinsInfoBy(userId);
+
       setCoins(coinsBy);
     } catch (error) {
       console.error("Error fetching coins:", error);
@@ -57,7 +87,7 @@ export default function ProfilePage() {
   }, [pathname]);
 
   useEffect(() => {
-    if (option === 4 && param) {
+    if (option === 2 && param) {
       fetchCoinsData(param);
     }
   }, [option, param]);
@@ -74,75 +104,241 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 px-2">
-      <div className="grid gap-6 justify-center">
-        <div className="flex flex-col xs:flex-row gap-6 m-auto justify-center">
+    <div className="w-full h-full flex items-start gap-8 px-2 mt-16">
+      <div className="w-full max-w-[350px] bg-[#13141D] p-6 rounded-lg">
+        <div className="flex flex-col gap-6">
           <img
-            src={userData.avatar || "/placeholder-avatar.png"}
+            src={userData.avatar || defaultUserImg.src}
             alt="Avatar"
-            className="object-cover w-28 h-28 rounded-full mx-auto"
+            className="object-cover w-16 h-16 rounded-lg"
           />
-          <div className="w-full flex flex-col text-white font-bold gap-2">
-            <div className="flex flex-row items-center text-xl gap-2 justify-center xs:justify-start">
+          <div className="w-full flex flex-col text-white font-medium gap-2">
+            <div className="text-[24px] text-[#E8E9EE]">
               @{userData.name}
-              <LuFileEdit
+              {/* <LuFileEdit
                 onClick={() => setProfileEditModal(true)}
                 className="cursor-pointer text-2xl hover:text-[#143F72] text-white"
-              />
+              /> */}
             </div>
-            <div
+            {/* <div
               className="flex flex-col w-[165px] text-lg cursor-pointer border-b-[1px] hover:text-[#143F72] text-white hover:border-b-[#143F72] border-b-white px-2 justify-center xs:justify-start"
-              onClick={() => handleToRouter(`https://solscan.io/account/${userData.wallet}`)}
+              onClick={() =>
+                handleToRouter(`https://solscan.io/account/${userData.wallet}`)
+              }
             >
               View on Solscan
+            </div> */}
+            <div className="flex items-center">
+              <p className="mr-2 text-[14px] text-[#9192A0]">
+                {reduceString(userData?.wallet || "", 4, 4)}
+              </p>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="cursor-pointer hover:brightness-125"
+                onClick={() => copyToClipboard(userData?.wallet)}
+              >
+                <path
+                  d="M14.1665 14.6676H5.99988C5.86727 14.6676 5.74009 14.615 5.64632 14.5212C5.55256 14.4274 5.49988 14.3003 5.49988 14.1676V6.00098C5.49988 5.86837 5.55256 5.74119 5.64632 5.64742C5.74009 5.55365 5.86727 5.50098 5.99988 5.50098H14.1665C14.2992 5.50098 14.4263 5.55365 14.5201 5.64742C14.6139 5.74119 14.6665 5.86837 14.6665 6.00098V14.1676C14.6665 14.3003 14.6139 14.4274 14.5201 14.5212C14.4263 14.615 14.2992 14.6676 14.1665 14.6676Z"
+                  stroke="#585A6B"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M10.4999 5.50065V1.83398C10.4999 1.70138 10.4472 1.5742 10.3535 1.48043C10.2597 1.38666 10.1325 1.33398 9.99992 1.33398H1.83325C1.70064 1.33398 1.57347 1.38666 1.4797 1.48043C1.38593 1.5742 1.33325 1.70138 1.33325 1.83398V10.0006C1.33325 10.1333 1.38593 10.2604 1.4797 10.3542C1.57347 10.448 1.70064 10.5007 1.83325 10.5007H5.49992"
+                  stroke="#585A6B"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
           </div>
         </div>
-        <div className="w-[94%] flex flex-row items-center gap-2 border-[1px] border-[#143F72] rounded-lg px-2 xs:px-3 py-1 xs:py-2 font-semibold text-white mx-auto object-cover overflow-hidden">
-          <p className="w-[90%] object-cover overflow-hidden truncate ">{userData.wallet}</p>
-          <MdContentCopy
-            className="text-2xl hover:text-[#143F72] text-white cursor-pointer"
-            onClick={() => copyToClipboard(userData.wallet)}
-          />
+        <div className="w-full flex flex-row pt-6 items-center justify-between">
+          <div className="w-fit flex flex-col justify-center gap-1 text-center">
+            <div className="text-[12px] text-[#9192A0] uppercase">
+              TOKEN HELD
+            </div>
+            <div className="text-[16px] text-white font-medium">
+              {ownedToken.uniqueTokenCount || 0}
+            </div>
+          </div>
+          <div className="w-fit flex flex-col justify-center gap-1 text-center">
+            <div className="text-[12px] text-[#9192A0] uppercase">
+              followers
+            </div>
+            <div className="text-[16px] text-white font-medium">--</div>
+          </div>
+          <div className="w-fit flex flex-col justify-center gap-1 text-center">
+            <div className="text-[12px] text-[#9192A0] uppercase">
+              Following
+            </div>
+            <div className="text-[16px] text-white font-medium">--</div>
+          </div>
         </div>
-        <div className="w-full flex flex-row border-t-4 border-t-[#0F3159] border-b-4 border-b-[#0F3159] py-2 xs:py-3 items-center justify-between">
-          <div className="w-full flex flex-col justify-center gap-1 xs:gap-3 text-center">
-            <div className="text-md xs:text-lg text-[#B0B0B0]">Followers</div>
-            <div className="text-lg xs:text-2xl text-white font-extrabold">10.1K</div>
-          </div>
-          <div className="w-full flex flex-col justify-center gap-1 xs:gap-3 text-center">
-            <div className="text-md xs:text-lg text-[#B0B0B0]">Following</div>
-            <div className="text-lg xs:text-2xl text-white font-extrabold">452</div>
-          </div>
+        <div
+          className="cursor-pointer bg-[#1A1C28] rounded-lg h-12 flex items-center justify-center mt-6"
+          onClick={() => setProfileEditModal(true)}
+        >
+          EDIT PROFILE
         </div>
       </div>
-      <div className="flex flex-wrap gap-1 xs:gap-3 rounded-lg xs:rounded-full p-1 xs:p-3 text-white text-sm sm:text-lg font-semibold bg-[#0F3159] mx-auto">
-        {ProfileMenuList.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => setOption(item.id)}
-            className={`${option === item.id ? "bg-custom-gradient" : "bg-none"
-              } rounded-lg xs:rounded-full px-5 py-2 font-semibold cursor-pointer mx-auto capitalize `}
-          >
-            {item.text}
-          </div>
-        ))}
-      </div>
-      {profileEditModal && <Modal data={userData} />}
-      <div>
-        {option === 4 && (
-          <div className="flex justify-center">
-            {coins.map((coin) => (
-              <div
-                key={coin.token}
-                onClick={() => handleToRouter(`/trading/${coin.token}`)}
-                className="cursor-pointer"
-              >
-                <CoinBlog coin={coin} componentKey="coin" />
-              </div>
-            ))}
-          </div>
-        )}
+      <div className="w-full">
+        <div className="flex">
+          {ProfileMenuList.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => setOption(item.id)}
+              className={twMerge(
+                "cursor-pointer uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                option === item.id && "bg-[#585A6B] text-[#E8E9EE]"
+              )}
+            >
+              {item.text}
+            </div>
+          ))}
+        </div>
+        <div className="w-full">
+          {option === 2 && (
+            <div className="flex flex-wrap">
+              {!coins.length ? (
+                <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-12 px-8 flex flex-col justify-center items-center">
+                  <Image src={nodataImg} alt="nodata" />
+                  <p className="mt-4 text-[#E8E9EE] text-[16px]">No Token</p>
+                  <p className="mt-2 text-[#585A6B] text-[14px]">
+                    No Token Held
+                  </p>
+                </div>
+              ) : (
+                <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
+                  <table className="w-full h-full scroll-table">
+                    <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
+                      <tr className="text-lg">
+                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
+                          Token
+                        </th>
+                        {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                        Price
+                      </th> */}
+                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                          Marketcap
+                        </th>
+                        {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                      CHANGE
+                      </th> */}
+                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
+                          Date Created
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="">
+                      {coins.map((coin, index) => (
+                        <tr
+                          key={`${index}-tk-details`}
+                          className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
+                        >
+                          <td className="flex flex-row gap-2 items-center py-4">
+                            <div className="text-lg flex items-center">
+                              <img
+                                src={coin.url}
+                                alt="coinUrl"
+                                className="rounded-full w-6 h-6 border border-[#E8E9EE]"
+                              />
+                              &nbsp;
+                              {coin.ticker}
+                            </div>
+                          </td>
+                          {/* <td className="py-2 text-right">
+                            {numberWithCommas(coin.balance || 0)}
+                          </td> */}
+                          <td className="py-2 text-right">
+                            {" "}
+                            {formatNumberKMB(Number(coin.marketcap || 0))}
+                          </td>
+                          {/* <td className="py-2 text-right">
+                            {numberWithCommas(coin.balance || 0)}
+                          </td> */}
+                          <td className="py-2 text-right">
+                            {dayjs(coin.date || Date.now()).format(
+                              "DD/MM/YYYY"
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                // coins.map((coin) => (
+                //   <div
+                //     key={coin.token}
+                //     onClick={() => handleToRouter(`/trading/${coin.token}`)}
+                //     className="cursor-pointer"
+                //   >
+                //     <CoinBlog coin={coin} componentKey="coin" />
+                //   </div>
+                // ))
+              )}
+            </div>
+          )}
+          {option === 1 && (
+            <div className="">
+              {!ownedToken.tokenDetails.length ? (
+                <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-12 px-8 flex flex-col justify-center items-center">
+                  <Image src={nodataImg} alt="nodata" />
+                  <p className="mt-4 text-[#E8E9EE] text-[16px]">No Token</p>
+                  <p className="mt-2 text-[#585A6B] text-[14px]">
+                    No Token Held
+                  </p>
+                </div>
+              ) : (
+                <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
+                  <table className="w-full h-full scroll-table">
+                    <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
+                      <tr className="text-lg">
+                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
+                          Token Address
+                        </th>
+                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
+                          Balance
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="">
+                      {ownedToken.tokenDetails
+                        .filter((tk) => tk.balance)
+                        .sort((a, b) => b.balance - a.balance)
+                        .map((tk, index) => (
+                          <tr
+                            key={`${index}-tk-details`}
+                            className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
+                          >
+                            <td className="flex flex-row gap-2 items-center py-4">
+                              <a
+                                href={`https://solscan.io/account/${tk.mint}`}
+                                target="_blank"
+                                className="text-lg underline hover:cursor-pointer"
+                              >
+                                {reduceString(tk.mint || "", 4, 4)}
+                              </a>
+                            </td>
+                            <td className="py-2 text-right">
+                              {numberWithCommas(tk.balance || 0)}
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        {profileEditModal && <Modal data={userData} />}
       </div>
     </div>
   );

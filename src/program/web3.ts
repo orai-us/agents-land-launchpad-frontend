@@ -255,4 +255,50 @@ export class Web3SolanaProgramInteraction {
 
     return balanceSolana;
   };
+
+  getNumberOfOwnedToken = async (walletPublicKey: PublicKey) => {
+    try {
+      // // Convert the wallet address to PublicKey
+      // const walletPublicKey = new PublicKey(walletAddress);
+
+      // Fetch all token accounts owned by the wallet
+      const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
+        walletPublicKey,
+        {
+          programId: new PublicKey(
+            "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+          ), // SPL Token Program ID
+        }
+      );
+
+      // Process token accounts to list balances and mint addresses
+      const tokens = tokenAccounts.value
+        .map((tokenAccount) => {
+          const info = tokenAccount.account.data.parsed.info;
+          const mint = info.mint; // Mint address (unique for each token)
+          const balance = info.tokenAmount.uiAmount; // Human-readable balance
+
+          return { mint, balance };
+        })
+        .filter((token) => token.balance > 0); // Filter out zero-balance tokens
+
+      // Count unique tokens and log the results
+      const uniqueTokens = new Set(tokens.map((token) => token.mint));
+      console.log(`You hold ${uniqueTokens.size} unique tokens:`);
+      // tokens.forEach((token) => {
+      //   console.log(`Token Mint: ${token.mint}, Balance: ${token.balance}`);
+      // });
+
+      return {
+        uniqueTokenCount: uniqueTokens.size,
+        tokenDetails: tokens,
+      };
+    } catch (error) {
+      console.error("Error fetching token balances:", error);
+      return {
+        uniqueTokenCount: 0,
+        tokenDetails: [],
+      };
+    }
+  };
 }

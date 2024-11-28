@@ -1,11 +1,18 @@
-import UserContext from '@/context/UserContext';
-import { coinInfo, replyInfo, tradeInfo, userInfo } from '@/utils/types';
-import { postReply, updateUser, uploadImage } from '@/utils/util';
-import React, { ChangeEvent, useContext, useMemo, useRef, useState } from 'react';
-import { errorAlert, successAlert } from '../others/ToastGroup';
+import UserContext from "@/context/UserContext";
+import { coinInfo, replyInfo, tradeInfo, userInfo } from "@/utils/types";
+import { postReply } from "@/utils/util";
+import React, {
+  ChangeEvent,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { errorAlert, successAlert } from "../others/ToastGroup";
 import ImgIcon from "@/../public/assets/images/imce-logo.jpg";
 
-import Image from 'next/image';
+import Image from "next/image";
+import { uploadImage } from "@/utils/fileUpload";
 
 interface ModalProps {
   data: coinInfo;
@@ -24,15 +31,15 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
     if (imageUrl) {
       const url = await uploadImage(imageUrl);
       if (url && user._id) {
-        console.log("user._id: ", user._id)
-        console.log("url: ", url)
+        console.log("user._id: ", user._id);
+        console.log("url: ", url);
 
         reply = {
           coinId: data._id,
           sender: user._id,
           msg: msg,
-          img: url
-        }
+          img: url,
+        };
       }
     } else {
       if (user._id) {
@@ -40,12 +47,12 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
           coinId: data._id,
           sender: user._id,
           msg: msg,
-        }
+        };
       }
     }
     handleModalToggle();
     await postReply(reply);
-  }
+  };
 
   const handleModalToggle = () => {
     setPostReplyModal(!postReplyModal);
@@ -54,25 +61,18 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        successAlert('Please select a valid image file.');
+      if (!file.type.startsWith("image/")) {
+        successAlert("Please select a valid image file.");
         return;
       }
       const url = URL.createObjectURL(file);
-      setFileName(file.name || ''); // Ensure it's always a string
+      setFileName(file.name || ""); // Ensure it's always a string
       setImageUrl(url); // URL.createObjectURL always returns a string
     }
   };
 
-  const uploadImage = async (image: string): Promise<string> => {
-    // Your logic here
-    const uploadSuccess = true; // Example logic
-    return uploadSuccess ? 'uploaded-image-url' : '';
-  };
-
-
   return (
-    <div className='fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md'>
+    <div className="fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md">
       <div className="flex w-full max-w-[300px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#140B56] border-[1px] border-white text-white relative">
         <h2 className="text-center text-2xl font-bold">Post Reply</h2>
         <div className=" w-full px-2 flex flex-col">
@@ -104,7 +104,7 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
               htmlFor="fileUpload"
               className="w-full p-2 rounded-lg outline-none bg-transparent border-[1px] border-white text-center text-white cursor-pointer hover:bg-white hover:text-black transition mx-auto flex"
             >
-              {fileName || 'Choose an Image'}
+              {fileName || "Choose an Image"}
             </label>
             <input
               id="fileUpload"
@@ -135,8 +135,18 @@ const ReplyModal: React.FC<ModalProps> = ({ data }) => {
           )}
         </div>
         <div className="flex justify-around p-3">
-          <button onClick={replyPost} className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md">POST</button>
-          <button onClick={handleModalToggle} className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md">Cancel</button>
+          <button
+            onClick={replyPost}
+            className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md"
+          >
+            POST
+          </button>
+          <button
+            onClick={handleModalToggle}
+            className="mt-2 px-4 py-2 bg-custom-gradient text-white rounded-md"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>

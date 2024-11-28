@@ -27,7 +27,7 @@ export const test = async () => {
 export const getUser = async ({ id }: { id: string }): Promise<any> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/user/${id}`, config);
-    console.log("response:", response.data);
+    // console.log("response:", response.data);
     return response.data;
   } catch (err) {
     return { error: "error setting up the request" };
@@ -225,7 +225,7 @@ export const pinFileToIPFS = async (blob: File) => {
     console.log(error);
   }
 };
-export const uploadImage = async (url: string) => {
+export const uploadImagePinata = async (url: string) => {
   const res = await fetch(url);
   console.log(res.blob);
   const blob = await res.blob();
