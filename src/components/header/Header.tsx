@@ -48,6 +48,7 @@ const Header: FC = () => {
         token: basicTokenInfo.mintAddress,
         commit: "",
         decimals: 6,
+        bondingCurveLimit: new BN(0),
       };
       console.log("new coin info: ", newCoinInfo);
       setLatestCreatedToken(newCoinInfo);

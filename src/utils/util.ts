@@ -37,9 +37,16 @@ export const getUser = async ({ id }: { id: string }): Promise<userInfo> => {
   }
 };
 
-export const getUserByWalletAddress = async ({ wallet }: { wallet: string }): Promise<userInfo> => {
+export const getUserByWalletAddress = async ({
+  wallet,
+}: {
+  wallet: string;
+}): Promise<userInfo> => {
   try {
-    const response = await axios.get(`${BACKEND_URL}/user/wallet/${wallet}`, config);
+    const response = await axios.get(
+      `${BACKEND_URL}/user/wallet/${wallet}`,
+      config
+    );
     // console.log("response:", response.data);
     return response.data;
   } catch (err) {
@@ -299,10 +306,13 @@ export const toBig = (value: number, decimals: number): BN => {
 export const fromBig = (value: BN, decimals: number = 6): number => {
   if (!value) return 0;
   if (!(value instanceof BN)) {
-    value = new BN(value)
+    value = new BN(value);
   }
-  const divmodResult = value.divmod(new BN(10**decimals));
-  const result = divmodResult.div.toString() + "." + divmodResult.mod.toString().padStart(decimals, "0");
+  const divmodResult = value.divmod(new BN(10 ** decimals));
+  const result =
+    divmodResult.div.toString() +
+    "." +
+    divmodResult.mod.toString().padStart(decimals, "0");
   return parseFloat(result);
 };
 
@@ -313,12 +323,29 @@ export const calculateTokenPrice = (
   solPriceinUSD: number
 ): number => {
   if (!(tokenReserves instanceof BN)) {
-    tokenReserves = new BN(tokenReserves)
+    tokenReserves = new BN(tokenReserves);
   }
   if (!(lamportReserves instanceof BN)) {
-    lamportReserves = new BN(lamportReserves)
+    lamportReserves = new BN(lamportReserves);
   }
   const tokenReservesNum = fromBig(tokenReserves, tokenDecimals);
   const lamportReservesNum = fromBig(lamportReserves, 9);
   return (solPriceinUSD * lamportReservesNum) / tokenReservesNum;
 };
+
+export function calculateKotHProgress(
+  lamportReserves: BN,
+  bondingCurveLimit: BN
+) {
+  if (!(lamportReserves instanceof BN)) {
+    lamportReserves = new BN(lamportReserves);
+  }
+  if (!(bondingCurveLimit instanceof BN)) {
+    bondingCurveLimit = new BN(bondingCurveLimit);
+  }
+  if (bondingCurveLimit.toNumber() === 0) return 0;
+  let currentKotHProgress =
+    (fromBig(lamportReserves, 9) / (fromBig(bondingCurveLimit, 9) / 2)) * 100;
+  if (currentKotHProgress > 100) currentKotHProgress = 100;
+  return currentKotHProgress;
+}

@@ -51,6 +51,7 @@ export interface coinInfo {
   url: string;
   tokenReserves: BN;
   lamportReserves: BN;
+  bondingCurveLimit: BN;
   token: string;
   marketcap?: number;
   presale?: number;
