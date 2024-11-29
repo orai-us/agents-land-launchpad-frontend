@@ -103,14 +103,14 @@ export const ListLaunchToken = ({ data }) => {
                     className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
                   />
                 </div>
-                <div
+                {/* <div
                   className={twMerge(
                     "px-[6px] py-[3px] flex items-center justify-center absolute top-0 right-4 rounded-sm bg-[#9FF4CF] text-[#052E1C]",
                     ind % 2 && "bg-[#E75787] text-[#2A0411]"
                   )}
                 >
                   {ind % 2 ? "" : "-"}1.12%
-                </div>
+                </div> */}
               </div>
               <div className="absolute bottom-0">
                 <Image src={cloudIslandImg} alt="cloudIslandImg" />
@@ -193,14 +193,14 @@ export const ListListedToken = ({ data }) => {
                     className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
                   />
                 </div>
-                <div
+                {/* <div
                   className={twMerge(
                     "px-[6px] py-[3px] flex items-center justify-center absolute top-0 right-4 rounded-sm bg-[#9FF4CF] text-[#052E1C]",
                     ind % 2 && "bg-[#E75787] text-[#2A0411]"
                   )}
                 >
                   {ind % 2 ? "" : "-"}1.12%
-                </div>
+                </div> */}
               </div>
               <div className="absolute bottom-0">
                 <Image

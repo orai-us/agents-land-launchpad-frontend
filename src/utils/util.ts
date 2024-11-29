@@ -148,7 +148,7 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
     return response.data;
   } catch (err) {
     console.log("err get message by coin: ", err);
-    throw new Error(err);
+    // throw new Error(err);
   }
 };
 
@@ -169,7 +169,20 @@ export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
     };
   } catch (err) {
     console.log("err get coin trade: ", err);
-    throw new Error(err);
+    // throw new Error(err);
+  }
+};
+
+export const getKoth = async (): Promise<coinInfo> => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/coin/king/koth`, config);
+    console.log("koth response::", response);
+    return {
+      ...response.data,
+    };
+  } catch (err) {
+    console.log("err get coin king: ", err);
+    // throw new Error(err);
   }
 };
 

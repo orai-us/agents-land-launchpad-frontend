@@ -69,7 +69,7 @@ export const ConnectButton: FC = () => {
       }
 
       const msg = new TextEncoder().encode(
-        `Nonce to confirm: ${connection.nonce}`
+        `Sign in to Agent.land: ${connection.nonce}`
       );
 
       const sig = await signMessage?.(msg);
