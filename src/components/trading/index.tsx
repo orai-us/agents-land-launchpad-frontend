@@ -30,7 +30,7 @@ export default function TradingPage() {
   const { coinId, setCoinId } = useContext(UserContext);
   const pathname = usePathname();
   const [param, setParam] = useState<string>("");
-  const [progress, setProgress] = useState<Number>(60);
+  const [progress, setProgress] = useState<Number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const router = useRouter();
 
@@ -51,7 +51,11 @@ export default function TradingPage() {
         .div(new BN(BONDING_CURVE_LIMIT))
         .toNumber();
 
-      console.log("bondingCurvePercent", bondingCurvePercent);
+      console.log(
+        "bondingCurvePercent",
+        data.lamportReserves,
+        bondingCurvePercent
+      );
       // const solPrice = await getSolPriceInUSD();
       // const prog =
       //   (data.lamportReserves * 1000000 * solPrice) /
@@ -250,10 +254,11 @@ export default function TradingPage() {
               progression increases as the price goes up.
             </p>
             <p className="text-[14px] text-[#585A6B]">
-              there are {formatLargeNumber(fromBig(coin.tokenReserves, coin.decimals))} tokens still
-              available for sale in the bonding curve and there is{" "}
-              {formatLargeNumber(fromBig(coin.lamportReserves, 9))}{" "}
-              SOL in the bonding curve.
+              there are{" "}
+              {formatLargeNumber(fromBig(coin.tokenReserves, coin.decimals))}{" "}
+              tokens still available for sale in the bonding curve and there is{" "}
+              {formatLargeNumber(fromBig(coin.lamportReserves, 9))} SOL in the
+              bonding curve.
             </p>
           </div>
           <TokenDistribution data={coin} />

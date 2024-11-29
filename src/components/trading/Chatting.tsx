@@ -2,7 +2,14 @@ import { coinInfo, recordInfo, tradeInfo } from "@/utils/types";
 import { MessageForm } from "../MessageForm";
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from "react";
 import { Trade } from "./Trade";
-import { calculateTokenPrice, getCoinTrade, getMessageByCoin, getSolPriceInUSD, getUser, getUserByWalletAddress } from "@/utils/util";
+import {
+  calculateTokenPrice,
+  getCoinTrade,
+  getMessageByCoin,
+  getSolPriceInUSD,
+  getUser,
+  getUserByWalletAddress,
+} from "@/utils/util";
 import UserContext from "@/context/UserContext";
 import ReplyModal from "../modals/ReplyModal";
 import { BiSort } from "react-icons/bi";
@@ -36,30 +43,50 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   // subscribe to real-time swap txs on trade
   useEffect(() => {
     if (_.isEmpty(trades) || _.isEmpty(coin)) return;
-      const connection = new Connection(endpoint, {
-        commitment: commitmentLevel,
-        wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
-      });
-      const listener = new AgentsLandEventListener(connection);
-      listener.setProgramEventCallback("swapEvent", async (result: ResultType) => {
+    const connection = new Connection(endpoint, {
+      commitment: commitmentLevel,
+      wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+    });
+    const listener = new AgentsLandEventListener(connection);
+    listener.setProgramEventCallback(
+      "swapEvent",
+      async (result: ResultType) => {
         const solPrice = await getSolPriceInUSD();
-        const userInfo = await getUserByWalletAddress({wallet: result.user});
-        const tx = await connection.getTransaction(result.tx, {commitment: 'confirmed', maxSupportedTransactionVersion: 0});
-        const newRecordInfo: recordInfo = {holder: userInfo, lamportAmount: result.lamportAmount, tokenAmount: result.tokenAmount, time: new Date(tx.blockTime), tx: result.tx, price: calculateTokenPrice(result.tokenReserves, result.lamportReserves, coin.decimals, solPrice), swapDirection: result.swapDirection as any};
-  
-        const newTradeRecords = [newRecordInfo, ...trades.record]
-        setTrades(({...trades, record: newTradeRecords}));
-      }, []);
-  
-      const {program, listenerIds} = listener.listenProgramEvents(
-        new PublicKey(PROGRAM_ID).toBase58()
-      );
-  
-      return () => {
-        if (!program) return;
-        console.log("ready to remove listeners");
-        Promise.all(listenerIds.map(id => program.removeEventListener(id)));
-      };
+        const userInfo = await getUserByWalletAddress({ wallet: result.user });
+        const tx = await connection.getTransaction(result.tx, {
+          commitment: "confirmed",
+          maxSupportedTransactionVersion: 0,
+        });
+        const newRecordInfo: recordInfo = {
+          holder: userInfo,
+          lamportAmount: result.lamportAmount,
+          tokenAmount: result.tokenAmount,
+          time: new Date(tx.blockTime),
+          tx: result.tx,
+          price: calculateTokenPrice(
+            result.tokenReserves,
+            result.lamportReserves,
+            coin.decimals,
+            solPrice
+          ),
+          swapDirection: result.swapDirection as any,
+        };
+
+        const newTradeRecords = [newRecordInfo, ...trades.record];
+        setTrades({ ...trades, record: newTradeRecords });
+      },
+      []
+    );
+
+    const { program, listenerIds } = listener.listenProgramEvents(
+      new PublicKey(PROGRAM_ID).toBase58()
+    );
+
+    return () => {
+      if (!program) return;
+      console.log("ready to remove listeners");
+      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+    };
   }, [trades, coin]);
 
   useEffect(() => {
@@ -129,14 +156,19 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
               <div className="mt-4 mb-12 h-screen max-h-[450px] overflow-y-auto">
                 {messages &&
-                  messages.map((message, index) => (
-                    <MessageForm key={index} msg={message}></MessageForm>
-                  ))}
+                  messages
+                    .sort(
+                      (a, b) =>
+                        new Date(b.time).getTime() - new Date(a.time).getTime()
+                    )
+                    .map((message, index) => (
+                      <MessageForm key={index} msg={message}></MessageForm>
+                    ))}
               </div>
             </div>
           )
         ) : (
-          <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
+          <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4 mb-12">
             <table className="w-full h-full scroll-table">
               <thead className="w-full text-white">
                 <tr className="text-lg">
@@ -165,6 +197,11 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
               <tbody className="">
                 {trades.record &&
                   trades.record
+                    .filter(
+                      (trans) =>
+                        trans.tokenAmount?.toNumber() &&
+                        trans.lamportAmount?.toNumber()
+                    )
                     .map((trade, index) => (
                       <Trade key={index} trade={trade}></Trade>
                     ))}

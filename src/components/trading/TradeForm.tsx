@@ -3,10 +3,11 @@ import { coinInfo } from "@/utils/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { ChangeEvent, useContext, useEffect, useState } from "react";
-import { errorAlert } from "../others/ToastGroup";
+import { errorAlert, successAlert } from "../others/ToastGroup";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { numberWithCommas } from "@/utils/format";
 import solIcon from "@/assets/icons/sol_ic.svg";
+import LoadingImg from "@/assets/icons/loading-button.svg";
 import Image from "next/image";
 interface TradingFormProps {
   coin: coinInfo;
@@ -16,6 +17,7 @@ interface TradingFormProps {
 const web3Solana = new Web3SolanaProgramInteraction();
 
 export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
+  const [loading, setLoading] = useState<boolean>(false);
   const [sol, setSol] = useState<string>("");
   const [isBuy, setIsBuy] = useState<number>(0);
   const [tokenBal, setTokenBal] = useState<number>(0);
@@ -63,10 +65,20 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   }, [coin]);
 
   const handlTrade = async () => {
+    setLoading(true);
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
     const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
 
+    if (res) {
+      console.log("res", res);
+      successAlert("Transaction successfully!");
+      getBalance();
+    } else {
+      errorAlert("Transaction Failed!");
+    }
+
+    setLoading(false);
     return res;
   };
 
@@ -228,16 +240,16 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
 
         {/* {progress === 100 ? (
           <div className="border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
-            Place Trade
+            Trade
           </div>
         ) : ( */}
         <button
-          disabled={progress === 100 || !sol}
+          disabled={progress === 100 || !sol || !wallet.publicKey}
           onClick={handlTrade}
           className="mt-8 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
-          <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
-            Place Trade
+          <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
+            {loading && <img src={LoadingImg.src} />}&nbsp;Trade
           </div>
         </button>
         {/* )} */}

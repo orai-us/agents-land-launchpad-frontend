@@ -291,9 +291,10 @@ export const uploadImagePinata = async (url: string) => {
  */
 export const reduceString = (str: string, from: number, end: number) => {
   if (!str) {
-    return "";
+    return "-";
   }
-  return str
+
+  return str && typeof str.substring === "function"
     ? str.substring(0, from) + "..." + str.substring(str.length - end)
     : "-";
 };

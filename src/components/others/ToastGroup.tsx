@@ -3,13 +3,13 @@ import "react-toastify/dist/ReactToastify.css";
 
 export const errorAlert = (text: string) => {
   toast.error(text, {
-    position: "bottom-right",
+    position: "top-right",
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "colored",
+    theme: "dark",
   });
 };
 
@@ -21,7 +21,7 @@ export const errorAlertCenter = (text: string) => {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "colored",
+    theme: "dark",
   });
 };
 
@@ -34,7 +34,7 @@ export const warningAlert = (text: string) => {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "colored",
+    theme: "dark",
   });
 };
 
@@ -46,7 +46,7 @@ export const successAlert = (text: string) => {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "colored",
+    theme: "dark",
   });
 };
 
@@ -58,6 +58,6 @@ export const infoAlert = (text: string) => {
     closeOnClick: true,
     pauseOnHover: true,
     draggable: true,
-    theme: "colored",
+    theme: "dark",
   });
 };

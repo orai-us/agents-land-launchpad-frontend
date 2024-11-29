@@ -136,6 +136,7 @@ const MarqueeToken = () => {
         token: basicTokenInfo.mintAddress,
         commit: "",
         decimals: 6,
+        bondingCurveLimit: new BN(0),
       };
       console.log("new coin info: ", newCoinInfo);
       // setLatestCreatedToken(newCoinInfo);
@@ -159,7 +160,10 @@ const MarqueeToken = () => {
         {
           address: reduceString(swapInfo.creator, 4, 4),
           type: swapInfo.direction,
-          amount: (swapInfo.solAmountInLamports / LAMPORTS_PER_SOL).toFixed(9),
+          amount: (
+            (swapInfo.solAmountInLamports || new BN(0)).toNumber() /
+            LAMPORTS_PER_SOL
+          ).toFixed(9),
           token: {
             name: swapInfo.mintSymbol,
             img: swapInfo.mintUri,

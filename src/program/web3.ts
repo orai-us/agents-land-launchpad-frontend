@@ -5,6 +5,7 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   Transaction,
+  TransactionExpiredTimeoutError,
 } from "@solana/web3.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
@@ -152,7 +153,7 @@ export class Web3SolanaProgramInteraction {
       return;
     }
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: "confirmed",
+      preflightCommitment: "processed",
     });
     anchor.setProvider(provider);
     const program = new Program(
@@ -200,7 +201,7 @@ export class Web3SolanaProgramInteraction {
           await this.connection.simulateTransaction(signedTx)
         );
         const signature = await this.connection.sendRawTransaction(sTx, {
-          preflightCommitment: "confirmed",
+          preflightCommitment: "processed",
           skipPreflight: false,
         });
         const blockhash = await this.connection.getLatestBlockhash();
@@ -211,13 +212,22 @@ export class Web3SolanaProgramInteraction {
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          "confirmed"
+          "processed" // FIXME: trick lord confirmed / finalized;
         );
         console.log("Successfully initialized.\n Signature: ", signature);
+
         return res;
       }
     } catch (error) {
-      console.log("Error in swap transaction", error);
+      console.log("Error in swap transaction", error, error.error);
+      const { transaction = "", result } = await this.handleTransactionError({
+        error,
+      });
+
+      if (result) {
+        console.log("----confirm----", { transaction, result });
+        return { transaction, result };
+      }
     }
   };
 
@@ -299,6 +309,38 @@ export class Web3SolanaProgramInteraction {
         uniqueTokenCount: 0,
         tokenDetails: [],
       };
+    }
+  };
+
+  isTransactionExpiredTimeoutError(error: any) {
+    return error instanceof TransactionExpiredTimeoutError;
+  }
+
+  handleTransactionError = async ({
+    error,
+  }: {
+    error: TransactionExpiredTimeoutError;
+  }) => {
+    try {
+      if (this.isTransactionExpiredTimeoutError(error) || error["signature"]) {
+        const result = await this.connection.getSignatureStatus(
+          error.signature,
+          {
+            searchTransactionHistory: true,
+          }
+        );
+
+        if (result?.value?.confirmationStatus) {
+          console.log(result);
+
+          return { transaction: error.signature, result };
+        }
+      }
+
+      return null;
+    } catch (e) {
+      console.log(e);
+      return null;
     }
   };
 }
