@@ -41,7 +41,7 @@ const Header: FC = () => {
       const newCoinInfo: coinInfo = {
         creator: basicTokenInfo.creator,
         name: basicTokenInfo.metadata.name,
-        url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
+        url: basicTokenInfo.metadata.json?.image ?? basicTokenInfo.metadata.uri,
         ticker: basicTokenInfo.metadata.symbol,
         tokenReserves: new BN(0),
         lamportReserves: new BN(0),
@@ -65,6 +65,9 @@ const Header: FC = () => {
       connection.removeOnLogsListener(subId);
     };
   }, []);
+
+  console.log("latestCreatedToken", { latestCreatedToken });
+  console.log("latestSwapInfo", { latestSwapInfo });
 
   return (
     <>
@@ -118,7 +121,9 @@ const Header: FC = () => {
                       {latestSwapInfo.direction}&nbsp;
                     </span>
                     <span>
-                      {formatLargeNumber(fromBig(latestSwapInfo.solAmountInLamports, 9))}
+                      {formatLargeNumber(
+                        fromBig(latestSwapInfo.solAmountInLamports, 9)
+                      )}
                       &nbsp;SOL of ${latestSwapInfo.mintSymbol}
                     </span>
                     {typeof latestSwapInfo.mintUri === "string" ? (
@@ -144,8 +149,9 @@ const Header: FC = () => {
                   <div className="animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center">
                     <span className="text-[#9192A0]">
                       {reduceString(
-                        latestCreatedToken.creator ||
-                          latestCreatedToken.creator["name"],
+                        new PublicKey(
+                          latestCreatedToken.creator as any
+                        ).toString(),
                         4,
                         4
                       )}
@@ -153,7 +159,7 @@ const Header: FC = () => {
                     &nbsp;
                     <span className={twMerge("text-[#AEE67F]")}>Created</span>
                     &nbsp;
-                    {latestCreatedToken.name}
+                    {latestCreatedToken.ticker}
                     {typeof latestCreatedToken.url === "string" ? (
                       <img
                         src={latestCreatedToken.url}
@@ -167,7 +173,7 @@ const Header: FC = () => {
                         className="w-5 h-5 rounded-full ml-2"
                       />
                     )}
-                    &nbsp; &nbsp;on&nbsp;
+                    &nbsp;on&nbsp;
                     <span className="mr-4">
                       {dayjs(new Date()).format("DD/MM/YYYY")}
                     </span>

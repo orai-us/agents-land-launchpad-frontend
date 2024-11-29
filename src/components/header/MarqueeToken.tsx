@@ -114,7 +114,7 @@ const RecentTokenSwap: FC<
 };
 
 const MarqueeToken = () => {
-  const [notificationList, setListNotifications] = useState(MOCK_DATA);
+  const [notificationList, setListNotifications] = useState([]);
   // const [latestCreatedToken, setLatestCreatedToken] =
   //   useState<coinInfo>(undefined);
   // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
@@ -182,6 +182,8 @@ const MarqueeToken = () => {
     };
   }, []);
 
+  if (!notificationList?.length) return null;
+
   return (
     <div className="flex items-center justify-center w-full bg-[#1A1C28] p-4">
       <div className="flex items-center justify-center max-w-[1216px]">
@@ -199,15 +201,14 @@ const MarqueeToken = () => {
             />
           </svg>
         </div>
-
-        {/* <Marquee
+        <Marquee
           pauseOnClick
           pauseOnHover
           gradient
           gradientColor="#1A1C28"
           gradientWidth={50}
-        > */}
-        <div className="w-full flex items-center overflow-x-auto no-scrollbar">
+        >
+          {/* <div className="w-full flex items-center overflow-x-auto no-scrollbar"> */}
           {notificationList.map((item, idx) => {
             return (
               <div
@@ -218,8 +219,8 @@ const MarqueeToken = () => {
               </div>
             );
           })}
-        </div>
-        {/* </Marquee> */}
+          {/* </div> */}
+        </Marquee>
       </div>
     </div>
   );

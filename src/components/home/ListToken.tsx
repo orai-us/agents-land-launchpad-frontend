@@ -90,7 +90,7 @@ export const ListLaunchToken = ({ data }) => {
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] hover:scale-105"
             key={`item-token-${ind}`}
-            onClick={() => handleToRouter(`/trading/${coinItem._id}`)}
+            onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">

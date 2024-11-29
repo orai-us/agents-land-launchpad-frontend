@@ -127,7 +127,7 @@ export class Web3SolanaProgramInteraction {
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          commitmentLevel
+          "finalized"
         );
         console.log("Successfully initialized.\n Signature: ", signature);
         return res;
@@ -230,11 +230,12 @@ export class Web3SolanaProgramInteraction {
       }
     } catch (error) {
       console.log("Error in swap transaction", error, error.error);
-      const { transaction = "", result } = await this.handleTransaction({
-        error,
-      });
+      const { transaction = "", result } =
+        (await this.handleTransaction({
+          error,
+        })) || {};
 
-      if (result) {
+      if (result?.value?.confirmationStatus) {
         console.log("----confirm----", { transaction, result });
         return { transaction, result };
       }
