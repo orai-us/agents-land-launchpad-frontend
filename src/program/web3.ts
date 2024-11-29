@@ -153,7 +153,7 @@ export class Web3SolanaProgramInteraction {
       return;
     }
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: "processed",
+      preflightCommitment: "confirmed",
     });
     anchor.setProvider(provider);
     const program = new Program(
@@ -201,7 +201,7 @@ export class Web3SolanaProgramInteraction {
           await this.connection.simulateTransaction(signedTx)
         );
         const signature = await this.connection.sendRawTransaction(sTx, {
-          preflightCommitment: "processed",
+          preflightCommitment: "confirmed",
           skipPreflight: false,
         });
         const blockhash = await this.connection.getLatestBlockhash();
@@ -212,15 +212,25 @@ export class Web3SolanaProgramInteraction {
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          "processed" // FIXME: trick lord confirmed / finalized;
+          "confirmed" // FIXME: trick lord confirmed / finalized;
         );
-        console.log("Successfully initialized.\n Signature: ", signature);
 
+        console.log("Successfully initialized.\n Signature: ", signature);
         return res;
+
+        // const { result } = await this.handleTransaction({
+        //   error: { signature } as any,
+        // });
+
+        // console.log("result", result);
+        // if (result?.value?.confirmationStatus) {
+        //   console.log("Successfully initialized.\n Signature: ", signature);
+        //   return { signature, result };
+        // }
       }
     } catch (error) {
       console.log("Error in swap transaction", error, error.error);
-      const { transaction = "", result } = await this.handleTransactionError({
+      const { transaction = "", result } = await this.handleTransaction({
         error,
       });
 
@@ -316,7 +326,7 @@ export class Web3SolanaProgramInteraction {
     return error instanceof TransactionExpiredTimeoutError;
   }
 
-  handleTransactionError = async ({
+  handleTransaction = async ({
     error,
   }: {
     error: TransactionExpiredTimeoutError;

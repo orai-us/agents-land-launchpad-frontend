@@ -44,16 +44,27 @@ const HomePage: FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       const coins = await getCoinsInfo();
-      const price = await getSolPriceInUSD();
       if (coins !== null) {
         coins.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
 
         setData(coins);
         setIsLoading(true);
         setKing(coins[0]);
-        setSolPrice(price);
       }
     };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const price = await getSolPriceInUSD();
+        setSolPrice(price);
+      } catch (error) {
+        console.log("error sol price", error);
+      }
+    };
+
     fetchData();
   }, []);
 
@@ -151,7 +162,14 @@ const HomePage: FC = () => {
         setType={setCurrentTab}
         setSearch={setToken}
       />
-      <ListToken type={currentTab} data={data} />
+      <ListToken
+        type={currentTab}
+        data={data.filter(
+          (elm) =>
+            elm.ticker.toLowerCase().includes(token) ||
+            elm.name.toLowerCase().includes(token)
+        )}
+      />
       {/* <div className="flex">
         <div ref={dropdownRef} className="mx-4">
           <button className="bg-green-600 w-[200px] h-[50px] font-medium rounded-md " onClick={() => setIsSort(1)}>

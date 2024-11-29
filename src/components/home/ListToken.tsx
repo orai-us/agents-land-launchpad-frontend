@@ -94,13 +94,13 @@ export const ListLaunchToken = ({ data }) => {
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
-                <div>
+                <div className="w-[112px] h-[112px]">
                   <img
                     src={coinItem.url}
                     alt="logoCoinImg"
                     width={112}
                     height={112}
-                    className="border-4 border-[#E8E9EE] rounded-full"
+                    className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
                   />
                 </div>
                 <div
@@ -184,13 +184,13 @@ export const ListListedToken = ({ data }) => {
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
-                <div>
+                <div className="w-[112px] h-[112px]">
                   <Image
                     src={logoCoinImg}
                     alt="logoCoinImg"
                     width={112}
                     height={112}
-                    className="border-4 border-[#E8E9EE] rounded-full"
+                    className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
                   />
                 </div>
                 <div

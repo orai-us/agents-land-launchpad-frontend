@@ -163,6 +163,8 @@ export default function CreateToken() {
         setIsLoading(false);
         return;
       }
+
+      console.log("uploadMetadataUrl", uploadedImageUrl, uploadMetadataUrl);
       const coinData: launchDataInfo = {
         name: newCoin.name,
         symbol: newCoin.ticker,
