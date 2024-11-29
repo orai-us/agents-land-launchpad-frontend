@@ -14,6 +14,7 @@ import { findInstructionByProgramId } from "./utils";
 import { Metaplex } from "@metaplex-foundation/js";
 import { GLOBAL_VAULT } from "./constants";
 import { SwapInfo } from "@/utils/types";
+import { BN } from "@coral-xyz/anchor";
 
 export class TokenSwapProgramHandler implements ProcessProgramLogs {
   private metaplex: Metaplex;
@@ -78,12 +79,12 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
     );
     let swapInfo: SwapInfo = {
       creator: creator.toBase58(),
-      solAmountInLamports: 0,
+      solAmountInLamports: new BN(0),
       direction: "Sold",
       mintAddress: mintAddress.toBase58(),
       mintName: token.name,
       mintSymbol: token.symbol,
-      mintUri: token.json.image || token.uri,
+      mintUri: token.json?.image || token.uri,
     };
 
     const soldInstruction = this.findSellSolInstruction(
@@ -92,7 +93,7 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
     );
 
     if (soldInstruction) {
-      swapInfo.solAmountInLamports = soldInstruction.parsed.info.lamports;
+      swapInfo.solAmountInLamports = new BN(soldInstruction.parsed.info.lamports);
       return swapInfo;
     }
     const boughtInstruction = this.findBuySolInstruction(
@@ -100,7 +101,7 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
       globalVaultPda
     );
     if (boughtInstruction) {
-      swapInfo.solAmountInLamports = boughtInstruction.parsed.info.lamports;
+      swapInfo.solAmountInLamports = new BN(boughtInstruction.parsed.info.lamports);
       swapInfo.direction = "Bought";
       return swapInfo;
     }

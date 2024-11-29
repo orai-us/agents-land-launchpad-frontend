@@ -12,12 +12,12 @@ import { usePathname, useRouter } from "next/navigation";
 import { FC, useEffect, useState } from "react";
 import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
-import { reduceString } from "@/utils/util";
+import { fromBig, reduceString } from "@/utils/util";
 import { twMerge } from "tailwind-merge";
 import { ACTION_TYPE } from "./MarqueeToken";
 import dayjs from "dayjs";
-import { numberWithCommas } from "@/utils/format";
 import { BN } from "@coral-xyz/anchor";
+import { formatLargeNumber } from "@/utils/format";
 
 const Header: FC = () => {
   const pathname = usePathname();
@@ -117,9 +117,7 @@ const Header: FC = () => {
                       {latestSwapInfo.direction}&nbsp;
                     </span>
                     <span>
-                      {numberWithCommas(
-                        latestSwapInfo.solAmountInLamports / LAMPORTS_PER_SOL
-                      )}
+                      {formatLargeNumber(fromBig(latestSwapInfo.solAmountInLamports, 9))}
                       &nbsp;SOL of ${latestSwapInfo.mintSymbol}
                     </span>
                     {typeof latestSwapInfo.mintUri === "string" ? (

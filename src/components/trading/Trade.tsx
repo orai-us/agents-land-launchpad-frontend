@@ -1,10 +1,10 @@
-import { numberWithCommas } from "@/utils/format";
-import { recordInfo } from "@/utils/types";
+import { formatLargeNumber } from "@/utils/format";
+import { coinInfo, recordInfo, SwapInfo } from "@/utils/types";
 import { fromBig, reduceString } from "@/utils/util";
-import BigNumber from "bignumber.js";
+import { BN } from "@coral-xyz/anchor";
 import dayjs from "dayjs";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 import { twMerge } from "tailwind-merge";
 interface TradePropsInfo {
   trade: recordInfo;
@@ -40,26 +40,14 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
         {trade.swapDirection == 0 ? "BUY" : "SELL"}
       </td>
       <td className="py-2 text-right">
-        {numberWithCommas(
-          trade.swapDirection === 0
-            ? new BigNumber((trade.lamportAmount || 0).toString())
-                .div(10 ** 9)
-                .toNumber()
-            : new BigNumber((trade.tokenAmount || 0).toString())
-                .div(10 ** 6)
-                .toNumber()
-        )}
+        {
+            formatLargeNumber(fromBig(trade.lamportAmount || new BN(0), 9))
+        }
       </td>
       <td className="py-2 text-right">
-        {numberWithCommas(
-          trade.swapDirection !== 0
-            ? new BigNumber((trade.lamportAmount || 0).toString())
-                .div(10 ** 9)
-                .toNumber()
-            : new BigNumber((trade.tokenAmount || 0).toString())
-                .div(10 ** 6)
-                .toNumber()
-        )}
+        {
+          formatLargeNumber(fromBig(trade.tokenAmount || new BN(0), 6))
+        }
       </td>
       <td className="py-2 text-right">
         {dayjs(trade.time || Date.now()).format("YYYY-MM-DD HH:mm:ss")}

@@ -56,3 +56,14 @@ export const numberWithCommas = (
 };
 
 export const isNegative = (number) => number <= 0;
+
+export function formatLargeNumber(number: number) {
+  if (!number || number === 0) return "0";
+  const suffixes = ['', 'K', 'M', 'B', 'T']; // '', Thousand, Million, Billion, Trillion
+  const tier = Math.floor(Math.log10(Math.abs(number)) / 3);
+
+  if (tier <= 0) return number.toString(); // No suffix for numbers less than 1,000
+
+  const scaledNumber = number / Math.pow(10, tier * 3);
+  return scaledNumber.toFixed(2) + suffixes[tier];
+}

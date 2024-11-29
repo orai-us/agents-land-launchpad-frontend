@@ -1,3 +1,4 @@
+import { BN } from "@coral-xyz/anchor";
 import { Logs } from "@solana/web3.js";
 
 export interface SubscibeProgramLogs {
@@ -13,4 +14,15 @@ export interface SubscibeProgramLogs {
 
 export interface ProcessProgramLogs {
   processProgramLogs(programId: string, txLogs: Logs): Promise<any>;
+}
+
+export interface ResultType {
+  tx: string;
+  mint: string;
+  user: string;
+  swapDirection: number;
+  lamportAmount: BN;
+  tokenAmount: BN;
+  tokenReserves: BN;
+  lamportReserves: BN;
 }

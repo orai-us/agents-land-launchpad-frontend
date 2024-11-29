@@ -4,7 +4,9 @@ import {
   coinInfo,
   holderInfo,
   msgInfo,
+  recordInfo,
   replyInfo,
+  tradeInfo,
   userInfo,
 } from "./types";
 import { BN } from "@coral-xyz/anchor";
@@ -24,15 +26,28 @@ export const test = async () => {
   const data = await res.json();
   console.log(data);
 };
-export const getUser = async ({ id }: { id: string }): Promise<any> => {
+export const getUser = async ({ id }: { id: string }): Promise<userInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/user/${id}`, config);
     // console.log("response:", response.data);
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    console.log("err getting user: ", err);
+    throw new Error(err);
   }
 };
+
+export const getUserByWalletAddress = async ({ wallet }: { wallet: string }): Promise<userInfo> => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/user/wallet/${wallet}`, config);
+    // console.log("response:", response.data);
+    return response.data;
+  } catch (err) {
+    console.log("err getting user: ", err);
+    throw new Error(err);
+  }
+};
+
 export const updateUser = async (id: string, data: userInfo): Promise<any> => {
   try {
     console.log(`${BACKEND_URL}/user/update/${id}`);
@@ -86,14 +101,23 @@ export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
     `${BACKEND_URL}/coin/user/${id}`,
     config
   );
-  return res.data;
+  return res.data.map((info) => ({
+    ...info,
+    tokenReserves: new BN(info.tokenReserves),
+    lamportReserves: new BN(info.lamportReserves),
+  }));
 };
-export const getCoinInfo = async (data: string): Promise<any> => {
+export const getCoinInfo = async (data: string): Promise<coinInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/coin/${data}`, config);
-    return response.data;
+    return {
+      ...response.data,
+      tokenReserves: new BN(response.data.tokenReserves),
+      lamportReserves: new BN(response.data.lamportReserves),
+    };
   } catch (err) {
-    return { error: "error setting up the request" };
+    console.log("err get coin info: ", err);
+    throw new Error(err);
   }
 };
 
@@ -102,7 +126,8 @@ export const getUserInfo = async (data: string): Promise<any> => {
     const response = await axios.get(`${BACKEND_URL}/user/${data}`, config);
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    console.log("err get user info: ", err);
+    throw new Error(err);
   }
 };
 
@@ -115,20 +140,29 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
     console.log("messages:", response.data);
     return response.data;
   } catch (err) {
-    return [];
+    console.log("err get message by coin: ", err);
+    throw new Error(err);
   }
 };
 
-export const getCoinTrade = async (data: string): Promise<any> => {
+export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
   try {
     const response = await axios.get(
       `${BACKEND_URL}/cointrade/${data}`,
       config
     );
     console.log("trade response::", response);
-    return response.data;
+    return {
+      ...response.data,
+      record: response.data.record.map((r: recordInfo) => ({
+        ...r,
+        lamportAmount: new BN(r.lamportAmount),
+        tokenAmount: new BN(r.tokenAmount),
+      })),
+    };
   } catch (err) {
-    return { error: "error setting up the request" };
+    console.log("err get coin trade: ", err);
+    throw new Error(err);
   }
 };
 
@@ -258,9 +292,33 @@ export const reduceString = (str: string, from: number, end: number) => {
 };
 
 export const toBig = (value: number, decimals: number): BN => {
+  if (!value) return new BN(0);
   return new BN(value).mul(new BN(10 ** decimals));
 };
 
-export const fromBig = (value: BN, decimals: number): number => {
-  return value.div(new BN(10 ** decimals)).toNumber();
+export const fromBig = (value: BN, decimals: number = 6): number => {
+  if (!value) return 0;
+  if (!(value instanceof BN)) {
+    value = new BN(value)
+  }
+  const divmodResult = value.divmod(new BN(10**decimals));
+  const result = divmodResult.div.toString() + "." + divmodResult.mod.toString().padStart(decimals, "0");
+  return parseFloat(result);
+};
+
+export const calculateTokenPrice = (
+  tokenReserves: BN,
+  lamportReserves: BN,
+  tokenDecimals: number,
+  solPriceinUSD: number
+): number => {
+  if (!(tokenReserves instanceof BN)) {
+    tokenReserves = new BN(tokenReserves)
+  }
+  if (!(lamportReserves instanceof BN)) {
+    lamportReserves = new BN(lamportReserves)
+  }
+  const tokenReservesNum = fromBig(tokenReserves, tokenDecimals);
+  const lamportReservesNum = fromBig(lamportReserves, 9);
+  return (solPriceinUSD * lamportReservesNum) / tokenReservesNum;
 };

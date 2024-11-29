@@ -93,7 +93,7 @@ export interface msgInfo {
 }
 
 export interface tradeInfo {
-  creator: string | coinInfo;
+  coinInfo: string | coinInfo;
   record: recordInfo[];
 }
 
@@ -145,7 +145,7 @@ export interface PeriodParamsInfo {
 
 export type SwapInfo = {
   creator: string;
-  solAmountInLamports: number;
+  solAmountInLamports: BN;
   direction: "Bought" | "Sold";
   mintAddress: string;
   mintName: string;

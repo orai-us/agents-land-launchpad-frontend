@@ -59,6 +59,7 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
         uploadedUrl = uploadedImageUrl || ""; // If uploadImage returns false, fallback to an empty string
       }
 
+      console.log("data: ", data)
       const { name, wallet, isLedger, signature } = index;
 
       const updatedUser = {

@@ -1,13 +1,19 @@
-import { coinInfo, tradeInfo } from "@/utils/types";
+import { coinInfo, recordInfo, tradeInfo } from "@/utils/types";
 import { MessageForm } from "../MessageForm";
 import { ChangeEvent, useContext, useEffect, useMemo, useState } from "react";
 import { Trade } from "./Trade";
-import { getCoinTrade, getMessageByCoin } from "@/utils/util";
+import { calculateTokenPrice, getCoinTrade, getMessageByCoin, getSolPriceInUSD, getUser, getUserByWalletAddress } from "@/utils/util";
 import UserContext from "@/context/UserContext";
 import ReplyModal from "../modals/ReplyModal";
 import { BiSort } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";
 import ThreadSection from "../modals/Thread";
+import { PROGRAM_ID } from "@/config";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
+import { endpoint, commitmentLevel } from "@/program/web3";
+import { Connection, PublicKey } from "@solana/web3.js";
+import _ from "lodash";
 
 interface ChattingProps {
   param: string | null;
@@ -26,6 +32,35 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
   const [isTrades, setIsTrades] = useState<Boolean>(true);
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
+
+  // subscribe to real-time swap txs on trade
+  useEffect(() => {
+    if (_.isEmpty(trades) || _.isEmpty(coin)) return;
+      const connection = new Connection(endpoint, {
+        commitment: commitmentLevel,
+        wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+      });
+      const listener = new AgentsLandEventListener(connection);
+      listener.setProgramEventCallback("swapEvent", async (result: ResultType) => {
+        const solPrice = await getSolPriceInUSD();
+        const userInfo = await getUserByWalletAddress({wallet: result.user});
+        const tx = await connection.getTransaction(result.tx, {commitment: 'confirmed', maxSupportedTransactionVersion: 0});
+        const newRecordInfo: recordInfo = {holder: userInfo, lamportAmount: result.lamportAmount, tokenAmount: result.tokenAmount, time: new Date(tx.blockTime), tx: result.tx, price: calculateTokenPrice(result.tokenReserves, result.lamportReserves, coin.decimals, solPrice), swapDirection: result.swapDirection as any};
+  
+        const newTradeRecords = [newRecordInfo, ...trades.record]
+        setTrades(({...trades, record: newTradeRecords}));
+      }, []);
+  
+      const {program, listenerIds} = listener.listenProgramEvents(
+        new PublicKey(PROGRAM_ID).toBase58()
+      );
+  
+      return () => {
+        if (!program) return;
+        console.log("ready to remove listeners");
+        Promise.all(listenerIds.map(id => program.removeEventListener(id)));
+      };
+  }, [trades, coin]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,9 +165,6 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
               <tbody className="">
                 {trades.record &&
                   trades.record
-                    .filter((item) => {
-                      return item.lamportAmount || item.tokenAmount;
-                    })
                     .map((trade, index) => (
                       <Trade key={index} trade={trade}></Trade>
                     ))}

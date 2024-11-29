@@ -5,6 +5,7 @@ import { TradingChart } from "@/components/TVChart/TradingChart";
 import UserContext from "@/context/UserContext";
 import { coinInfo } from "@/utils/types";
 import {
+  fromBig,
   getCoinInfo,
   getCoinTrade,
   getCoinsInfoBy,
@@ -22,6 +23,8 @@ import { BONDING_CURVE_LIMIT } from "@/config";
 import { twMerge } from "tailwind-merge";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import Image from "next/image";
+import { BN } from "@coral-xyz/anchor";
+import { formatLargeNumber } from "@/utils/format";
 
 export default function TradingPage() {
   const { coinId, setCoinId } = useContext(UserContext);
@@ -43,9 +46,9 @@ export default function TradingPage() {
       setCoinId(parameter);
       const data = await getCoinInfo(parameter);
 
-      const bondingCurvePercent = new BigNumber(data.lamportReserves || 0)
-        .multipliedBy(100)
-        .div(BONDING_CURVE_LIMIT)
+      const bondingCurvePercent = (data.lamportReserves || new BN(0))
+        .mul(new BN(100))
+        .div(new BN(BONDING_CURVE_LIMIT))
         .toNumber();
 
       console.log("bondingCurvePercent", bondingCurvePercent);
@@ -247,11 +250,9 @@ export default function TradingPage() {
               progression increases as the price goes up.
             </p>
             <p className="text-[14px] text-[#585A6B]">
-              there are {coin.tokenReserves?.toString() || 0} tokens still
+              there are {formatLargeNumber(fromBig(coin.tokenReserves, coin.decimals))} tokens still
               available for sale in the bonding curve and there is{" "}
-              {new BigNumber(coin.lamportReserves?.toString() || 0).toNumber() /
-                1000_000_000 -
-                30}{" "}
+              {formatLargeNumber(fromBig(coin.lamportReserves, 9))}{" "}
               SOL in the bonding curve.
             </p>
           </div>
