@@ -108,7 +108,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         </button>
       </div>
       <div className="flex flex-col relative">
-        <div className="flex justify-between items-center mt-6 mb-3">
+        <div className="flex justify-between items-center mt-3 mb-3">
           <label
             htmlFor="name"
             className="rounded bg-transparent text-ml font-medium text-[#9192A0] text-[12px] flex"
@@ -130,7 +130,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             </svg> */}
           </label>
           <div>
-            <svg
+            {/* <svg
               xmlns="http://www.w3.org/2000/svg"
               width="20"
               height="20"
@@ -142,7 +142,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
                 d="M16.2617 10C16.2617 9.17969 16.7734 8.48047 17.5 8.19922C17.3086 7.39844 16.9922 6.64844 16.5742 5.96875C16.3242 6.07812 16.0586 6.13672 15.7891 6.13672C15.2969 6.13672 14.8047 5.94922 14.4258 5.57422C13.8438 4.99219 13.7148 4.13672 14.0273 3.42578C13.3516 3.00781 12.5977 2.69141 11.8008 2.5C11.5234 3.22266 10.8203 3.73828 10 3.73828C9.17969 3.73828 8.47656 3.22266 8.19922 2.5C7.39844 2.69141 6.64844 3.00781 5.96875 3.42578C6.28516 4.13281 6.15234 4.99219 5.57031 5.57422C5.19531 5.94922 4.69922 6.13672 4.20703 6.13672C3.9375 6.13672 3.67188 6.08203 3.42187 5.96875C3.00781 6.65234 2.69141 7.40234 2.5 8.20312C3.22266 8.48047 3.73828 9.17969 3.73828 10.0039C3.73828 10.8242 3.22656 11.5234 2.50391 11.8047C2.69531 12.6055 3.01172 13.3555 3.42969 14.0352C3.67969 13.9258 3.94531 13.8711 4.21094 13.8711C4.70313 13.8711 5.19531 14.0586 5.57422 14.4336C6.15234 15.0117 6.28516 15.8711 5.97266 16.5781C6.65234 16.9961 7.40625 17.3125 8.20312 17.5039C8.48047 16.7812 9.17969 16.2695 10 16.2695C10.8203 16.2695 11.5195 16.7812 11.7969 17.5039C12.5977 17.3125 13.3477 16.9961 14.0273 16.5781C13.7148 15.8711 13.8477 15.0156 14.4258 14.4336C14.8008 14.0586 15.293 13.8711 15.7891 13.8711C16.0547 13.8711 16.3242 13.9258 16.5703 14.0352C16.9883 13.3555 17.3047 12.6016 17.4961 11.8047C16.7773 11.5234 16.2617 10.8242 16.2617 10ZM10.0352 13.1211C8.30469 13.1211 6.91016 11.7188 6.91016 9.99609C6.91016 8.27344 8.30469 6.87109 10.0352 6.87109C11.7656 6.87109 13.1602 8.27344 13.1602 9.99609C13.1602 11.7188 11.7656 13.1211 10.0352 13.1211Z"
                 fill="#9192A0"
               />
-            </svg>
+            </svg> */}
           </div>
         </div>
         <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
@@ -173,7 +173,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               <Image
                 src={solIcon}
                 alt="solIcon"
-                className="ml-1 w-5 h-5 rounded-full border border-[#30344A]"
+                width={20}
+                height={20}
+                className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover"
               />
             </div>
           ) : (
@@ -183,7 +185,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
                 <img
                   src={coin.url}
                   alt="coinIcon"
-                  className="ml-1 w-5 h-5 rounded-full border border-[#30344A]"
+                  width={20}
+                  height={20}
+                  className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover"
                 />
               )}
             </div>
