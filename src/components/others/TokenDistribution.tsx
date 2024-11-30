@@ -1,7 +1,14 @@
 "use client";
 import { coinInfo, holderInfo, recordInfo } from "@/utils/types";
 import { FC, useContext, useEffect, useState } from "react";
-import { calculateKotHProgress, calculateTokenPrice, findHolders, fromBig, getSolPriceInUSD, getUserByWalletAddress } from "@/utils/util";
+import {
+  calculateKotHProgress,
+  calculateTokenPrice,
+  findHolders,
+  fromBig,
+  getSolPriceInUSD,
+  getUserByWalletAddress,
+} from "@/utils/util";
 import defaultUserImg from "@/assets/images/user-avatar.png";
 import Image from "next/image";
 import { BN } from "@coral-xyz/anchor";
@@ -22,12 +29,19 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (data) {
-        console.log(data, "===========");
         const holderData = await findHolders(data.token);
         setHolders(holderData ? holderData : []);
-        const currentKotHProgress = calculateKotHProgress(data.lamportReserves, data.bondingCurveLimit);
+        const currentKotHProgress = calculateKotHProgress(
+          data.lamportReserves,
+          data.bondingCurveLimit
+        );
         setKotHProgress(currentKotHProgress);
-        console.log("current koth progress: ", currentKotHProgress, fromBig(data.lamportReserves, 9), fromBig(data.bondingCurveLimit, 9))
+        console.log(
+          "current koth progress: ",
+          currentKotHProgress,
+          fromBig(data.lamportReserves, 9),
+          fromBig(data.bondingCurveLimit, 9)
+        );
       }
     };
     fetchData();
@@ -41,19 +55,26 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
     });
     const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback("swapEvent", async (result: ResultType) => {
-      const currentKotHProgress = calculateKotHProgress(result.lamportReserves, data.bondingCurveLimit);
-      setKotHProgress(currentKotHProgress);
-    }, []);
+    listener.setProgramEventCallback(
+      "swapEvent",
+      async (result: ResultType) => {
+        const currentKotHProgress = calculateKotHProgress(
+          result.lamportReserves,
+          data.bondingCurveLimit
+        );
+        setKotHProgress(currentKotHProgress);
+      },
+      []
+    );
 
-    const {program, listenerIds} = listener.listenProgramEvents(
+    const { program, listenerIds } = listener.listenProgramEvents(
       new PublicKey(PROGRAM_ID).toBase58()
     );
 
     return () => {
       if (!program) return;
       console.log("ready to remove listeners");
-      Promise.all(listenerIds.map(id => program.removeEventListener(id)));
+      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [data]);
 

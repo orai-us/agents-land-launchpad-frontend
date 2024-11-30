@@ -151,11 +151,14 @@ const HomePage: FC = () => {
       />
       <ListToken
         type={currentTab}
-        data={data.filter(
-          (elm) =>
-            elm.ticker.toLowerCase().includes(token) ||
-            elm.name.toLowerCase().includes(token)
-        )}
+        data={data.filter((elm) => {
+          if (!token) return true;
+
+          return (
+            elm.ticker.toLowerCase().includes(token.toLowerCase()) ||
+            elm.name.toLowerCase().includes(token.toLowerCase())
+          );
+        })}
       />
       {/* <div className="flex">
         <div ref={dropdownRef} className="mx-4">

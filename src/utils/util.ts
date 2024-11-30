@@ -202,12 +202,14 @@ export const findHolders = async (mint: string) => {
   // allOwners will store all the addresses that hold the token
   let allOwners: holderInfo[] = [];
 
+  // TODO: FIXME: helius rpc here: https://docs.helius.dev/compression-and-das-api/digital-asset-standard-das-api/get-token-accounts
+  const HELIUS_RPC =
+    "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd";
   while (true) {
     const response = await fetch(
-      process.env.NEXT_PUBLIC_SOLANA_RPC ||
-        "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd",
+      // process.env.NEXT_PUBLIC_SOLANA_RPC ||
+      HELIUS_RPC,
       {
-        //   const response = await fetch("https://white-aged-glitter.solana-mainnet.quiknode.pro/743d4e1e3949c3127beb7f7815cf2ca9743b43a6/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
