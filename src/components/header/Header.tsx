@@ -19,11 +19,13 @@ import dayjs from "dayjs";
 import { BN } from "@coral-xyz/anchor";
 import { formatLargeNumber } from "@/utils/format";
 import UserContext from "@/context/UserContext";
+import HowItWorkModal from "../modals/HowItWork";
 
 const Header: FC = () => {
   const { solPrice, setSolPrice } = useContext(UserContext);
   const pathname = usePathname();
   const router = useRouter();
+  const [showStepWork, setShowStepWork] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,22 +98,29 @@ const Header: FC = () => {
               {
                 link: "/create-coin",
                 text: "Launch",
+                onclick: () => handleToRouter("/create-coin"),
               },
               {
                 link: "/how-it-work",
                 text: "How it works?",
+                onclick: () => setShowStepWork(true),
               },
             ].map((item, key) => {
               return (
-                <Link
-                  href={item.link}
+                <button
+                  // href={item.link}
+                  onClick={item.onclick}
                   key={`${item.link}-${key}`}
                   className="flex items-center px-4 h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
                 >
                   {item.text}
-                </Link>
+                </button>
               );
             })}
+            <HowItWorkModal
+              isOpen={showStepWork}
+              closeModal={() => setShowStepWork(false)}
+            />
 
             {latestSwapInfo && (
               <div>
