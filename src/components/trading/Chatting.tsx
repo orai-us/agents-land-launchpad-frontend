@@ -35,6 +35,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     coinId,
     postReplyModal,
     setPostReplyModal,
+    solPrice,
   } = useContext(UserContext);
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
   const [isTrades, setIsTrades] = useState<Boolean>(true);
@@ -51,7 +52,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     listener.setProgramEventCallback(
       "swapEvent",
       async (result: ResultType) => {
-        const solPrice = await getSolPriceInUSD();
+        // const solPrice = await getSolPriceInUSD();
         const userInfo = await getUserByWalletAddress({ wallet: result.user });
         const tx = await connection.getTransaction(result.tx, {
           commitment: "confirmed",

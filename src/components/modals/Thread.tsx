@@ -52,7 +52,10 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
     }
     console.log("first", user, reply);
     // handleModalToggle();
-    await postReply(reply);
+    const res = await postReply(reply);
+    if (res) {
+      setMsg("");
+    }
   };
 
   const handleModalToggle = () => {

@@ -1,6 +1,8 @@
 import Image from "next/image";
 import richManImg from "@/assets/images/richoldman.png";
 import badgeImg from "@/assets/images/badge.png";
+import badgeKothImg from "@/assets/images/peak_evolution.svg";
+import crownImg from "@/assets/icons/crown.svg";
 import MarqueeToken from "./MarqueeToken";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -60,15 +62,26 @@ const Banner = () => {
             </div>
           </div>
           {kothCoin && (
-            <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
-              <div className="bg-[linear-gradient(180deg,_#080A14_0%,_#292D46_100%)] rounded-xl flex justify-between items-center gap-3 px-6 py-4">
+            // <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
+            <div className="relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px]">
+              <Image
+                src={badgeKothImg}
+                alt="badgeKothImg"
+                className="absolute bottom-0 left-[6px] translate-y-1/2"
+              />
+              <Image
+                src={crownImg}
+                alt="crownImg"
+                className="absolute top-0 right-[6px] -translate-y-1/2 translate-x-1/2"
+              />
+              <div className="bg-[linear-gradient(180deg,_#080A14_0%,_#292D46_100%)] rounded-xl flex items-center gap-3 px-6 py-4">
                 <div className="">
                   <img
                     src={kothCoin.url}
                     alt="richolman"
                     className="border-[3px] solid rounded-full border-[#E8E9EE] w-[78px] h-[78px]"
                   />
-                  <div className="relative flex justify-center items-center -mt-3">
+                  {/* <div className="relative flex justify-center items-center -mt-3">
                     <span className="relative z-10 text-[10px] font-semibold leading-[13px] uppercase text-[#312A05]">
                       KOTH
                     </span>
@@ -77,7 +90,7 @@ const Banner = () => {
                       alt="badge"
                       className="absolute -top-1/2 left-1/2 -translate-x-1/2"
                     />
-                  </div>
+                  </div> */}
                 </div>
                 <div className="flex flex-col text-[#E8E9EE]">
                   <div className="text-[#84869A] uppercase text-[12px]">
@@ -87,10 +100,11 @@ const Banner = () => {
                     </span>
                   </div>
                   <div className="text-[16px] font-medium leading-6 mt-2">
-                    Vanga the prophet (${kothCoin.ticker})
+                    {/* Vanga the prophet (${kothCoin.ticker}) */}
+                    {kothCoin.name} (${kothCoin.ticker})
                   </div>
-                  <div className="text-[#9192A0] text-[12px] leading-3 uppercase mt-4">
-                    Marketcap&nbsp;
+                  <div className="text-[#9192A0] text-[12px] uppercase mt-4 ">
+                    Marketcap&nbsp;&nbsp;
                     <span className="text-[#E8E9EE]">
                       {formatNumberKMB(Number(kothCoin.marketcap || 0))}(
                       {bondingCurvePercent}%)

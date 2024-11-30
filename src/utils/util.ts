@@ -249,7 +249,8 @@ export const getSolPriceInUSD = async () => {
   try {
     // Fetch the price data from CoinGecko
     const response = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+      // "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+      "https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd"
     );
     const solPriceInUSD = response.data.solana.usd;
     return solPriceInUSD;
@@ -334,7 +335,7 @@ export const calculateTokenPrice = (
   tokenReserves: BN,
   lamportReserves: BN,
   tokenDecimals: number,
-  solPriceinUSD: number
+  solPriceinUSD?: number
 ): number => {
   if (!(tokenReserves instanceof BN)) {
     tokenReserves = new BN(tokenReserves);
@@ -344,7 +345,7 @@ export const calculateTokenPrice = (
   }
   const tokenReservesNum = fromBig(tokenReserves, tokenDecimals);
   const lamportReservesNum = fromBig(lamportReserves, 9);
-  return (solPriceinUSD * lamportReservesNum) / tokenReservesNum;
+  return ((solPriceinUSD || 1) * lamportReservesNum) / tokenReservesNum;
 };
 
 export function calculateKotHProgress(

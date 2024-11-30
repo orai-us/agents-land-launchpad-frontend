@@ -9,19 +9,34 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { FC, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
-import { fromBig, reduceString } from "@/utils/util";
+import { fromBig, getSolPriceInUSD, reduceString } from "@/utils/util";
 import { twMerge } from "tailwind-merge";
 import { ACTION_TYPE } from "./MarqueeToken";
 import dayjs from "dayjs";
 import { BN } from "@coral-xyz/anchor";
 import { formatLargeNumber } from "@/utils/format";
+import UserContext from "@/context/UserContext";
 
 const Header: FC = () => {
+  const { solPrice, setSolPrice } = useContext(UserContext);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const price = await getSolPriceInUSD();
+        setSolPrice(price);
+      } catch (error) {
+        console.log("error sol price", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleToRouter = (id: string) => {
     router.push(id);

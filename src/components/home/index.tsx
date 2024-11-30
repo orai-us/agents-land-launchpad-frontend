@@ -55,19 +55,6 @@ const HomePage: FC = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const price = await getSolPriceInUSD();
-        setSolPrice(price);
-      } catch (error) {
-        console.log("error sol price", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
   const handleSortSelection = (option) => {
     let sortOption: string = "";
     let orderOption: string = "";

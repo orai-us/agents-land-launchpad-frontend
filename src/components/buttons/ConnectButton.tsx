@@ -36,8 +36,6 @@ export const ConnectButton: FC = () => {
 
   const tempUser = useMemo(() => user, [user]);
 
-  console.log("user", user);
-
   useEffect(() => {
     const handleClick = async () => {
       if (publicKey && !login) {
@@ -91,6 +89,7 @@ export const ConnectButton: FC = () => {
   const logOut = async () => {
     if (typeof disconnect === "function") {
       await disconnect();
+      router.push("/");
     }
     // Initialize `user` state to default value
     setUser({} as userInfo);
