@@ -147,3 +147,7 @@ table.scroll-table tbody tr {
   width: 100%;
   table-layout: fixed;
 }
+
+.infinite-scroll-component {
+  overflow: hidden;
+}

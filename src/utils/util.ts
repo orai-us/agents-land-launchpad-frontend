@@ -102,9 +102,18 @@ export const confirmWallet = async ({
   }
 };
 
-export const getCoinsInfo = async (): Promise<coinInfo[]> => {
-  const res = await axios.get(`${BACKEND_URL}/coin`, config);
-  return res.data;
+export const getCoinsInfo = async (
+  params
+): Promise<{ coins: coinInfo[]; total: number }> => {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/coin`, { ...config, params });
+    return res.data;
+  } catch (error) {
+    return {
+      coins: [],
+      total: 0,
+    };
+  }
 };
 
 export const getAgentsData = async (params): Promise<coinInfo[]> => {

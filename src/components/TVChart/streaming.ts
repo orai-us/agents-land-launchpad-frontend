@@ -64,7 +64,7 @@ if (socket) {
       tokenId,
     ]);
 
-    console.log("SOCKET :>> state-chart :>>", state?.data, priceUpdates);
+    console.log("SOCKET :>> state-chart :>>", state.data, priceUpdates);
 
     if (!state || !state.data || !priceUpdates) {
       return;

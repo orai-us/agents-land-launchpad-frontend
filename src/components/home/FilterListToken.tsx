@@ -4,6 +4,9 @@ import { FC, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { STATUS_TOKEN, TokenTab } from "./ListToken";
 import { BiSearchAlt } from "react-icons/bi";
+import { debounce } from "lodash";
+
+const SEARCH_TIME = 1000; // 3000
 
 const FilterListToken: FC<{ type; setType; setSearch }> = ({
   type,
@@ -28,6 +31,10 @@ const FilterListToken: FC<{ type; setType; setSearch }> = ({
   // const [token, setToken] = useState("");
 
   const searchToken = () => {};
+
+  const debounceSearch = debounce((e) => {
+    setSearch(e.target.value);
+  }, SEARCH_TIME);
 
   return (
     <div className="flex flex-wrap mt-14 justify-between items-center">
@@ -136,7 +143,7 @@ const FilterListToken: FC<{ type; setType; setSearch }> = ({
             type="text"
             // value={token}
             placeholder="Search Tokens"
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={debounceSearch}
             className=" bg-[#13141D] w-full py-1 outline-none bg-transparent text-[14px] placeholder:text-[#585A6B]"
           />
         </div>
