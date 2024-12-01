@@ -111,7 +111,7 @@ const Header: FC = () => {
                   // href={item.link}
                   onClick={item.onclick}
                   key={`${item.link}-${key}`}
-                  className="flex items-center px-4 h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
+                  className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
                 >
                   {item.text}
                 </button>
@@ -121,7 +121,8 @@ const Header: FC = () => {
               isOpen={showStepWork}
               closeModal={() => setShowStepWork(false)}
             />
-
+          </div>
+          <div className="flex justify-center items-center gap-2">
             {latestSwapInfo && (
               <div>
                 <Link
@@ -130,7 +131,7 @@ const Header: FC = () => {
                 >
                   <div
                     style={{ display: "flex", flexDirection: "row" }}
-                    className="animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center"
+                    className="text-[13px] animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center"
                   >
                     <span>
                       {reduceString(latestSwapInfo.creator, 4, 4)}&nbsp;
@@ -170,7 +171,7 @@ const Header: FC = () => {
             {latestCreatedToken && (
               <div>
                 <Link href={`/trading/${latestCreatedToken.token}`}>
-                  <div className="animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center">
+                  <div className="text-[13px] animate-bounce animate-infinite flex p-2 rounded bg-[#30344A] text-[#9192A0] text-nowrap items-center justify-center">
                     <span className="text-[#9192A0]">
                       {reduceString(
                         new PublicKey(

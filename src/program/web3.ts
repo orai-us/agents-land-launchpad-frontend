@@ -130,7 +130,11 @@ export class Web3SolanaProgramInteraction {
           "finalized"
         );
         console.log("Successfully initialized.\n Signature: ", signature);
-        return res;
+        return {
+          ...coinData,
+          token: mintKp.publicKey,
+          result: res,
+        };
       }
     } catch (error) {
       console.log("----", error);

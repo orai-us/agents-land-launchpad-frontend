@@ -105,7 +105,7 @@ export const ConnectButton: FC = () => {
 
   return (
     <div>
-      <button className="px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
+      <button className="ml-2 px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
         {login && publicKey ? (
           <>
             <div className="flex mr-3 items-center justify-center text-[16px] lg:text-md">

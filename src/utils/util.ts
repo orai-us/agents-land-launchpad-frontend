@@ -12,6 +12,9 @@ import {
 import { BN } from "@coral-xyz/anchor";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+export const DISTILL_BE_URL =
+  process.env.NEXT_PUBLIC_DISTILL_BACKEND_URL ||
+  "https://api-dev.distilled.ai/distill";
 
 const headers: Record<string, string> = {
   "ngrok-skip-browser-warning": "true",
@@ -103,6 +106,25 @@ export const getCoinsInfo = async (): Promise<coinInfo[]> => {
   const res = await axios.get(`${BACKEND_URL}/coin`, config);
   return res.data;
 };
+
+export const getAgentsData = async (params): Promise<coinInfo[]> => {
+  const res = await axios.get(`${DISTILL_BE_URL}/user/search`, {
+    ...config,
+    params: {
+      filter: JSON.stringify({
+        username: "",
+        status: 1,
+        role: 4,
+        publish: 1,
+        ...(params.filter || {}),
+      }),
+      limit: 50,
+      offset: 0,
+    },
+  });
+  return res.data;
+};
+
 export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
   const res = await axios.get<coinInfo[]>(
     `${BACKEND_URL}/coin/user/${id}`,
