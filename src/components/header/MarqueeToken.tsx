@@ -140,8 +140,8 @@ const MarqueeToken = () => {
       };
       console.log("new coin info: ", newCoinInfo);
       // setLatestCreatedToken(newCoinInfo);
-      setListNotifications((prevList) => [
-        {
+      setListNotifications((prevList) => {
+        const newItem = {
           address:
             newCoinInfo.creator["name"] ||
             reduceString(newCoinInfo.creator as string, 4, 4),
@@ -150,14 +150,18 @@ const MarqueeToken = () => {
             name: newCoinInfo.name,
             img: newCoinInfo.url,
           },
-        } as any,
-        ...prevList.slice(0, -1),
-      ]);
+        } as any;
+        if (prevList.length >= 4) {
+          return [newItem, ...prevList.slice(0, -1)];
+        }
+
+        return [newItem, ...prevList];
+      });
     });
     listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
       // setLatestSwapInfo(swapInfo);
-      setListNotifications((prevList) => [
-        {
+      setListNotifications((prevList) => {
+        const newItem = {
           address: reduceString(swapInfo.creator, 4, 4),
           type: swapInfo.direction,
           amount: (
@@ -168,9 +172,12 @@ const MarqueeToken = () => {
             name: swapInfo.mintSymbol,
             img: swapInfo.mintUri,
           },
-        } as any,
-        ...prevList.slice(0, -1),
-      ]);
+        } as any;
+        if (prevList.length >= 4) {
+          return [newItem, ...prevList.slice(0, -1)];
+        }
+        return [newItem, ...prevList];
+      });
     });
 
     const subId = listener.subscribeProgramLogs(
