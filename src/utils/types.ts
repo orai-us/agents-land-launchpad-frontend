@@ -70,6 +70,7 @@ export interface coinInfo {
   telegram?: string;
   date?: Date;
   decimals: number;
+  metadata?: metadataInfo;
 }
 export interface createCoinInfo {
   name: string;

@@ -9,6 +9,9 @@ import { numberWithCommas } from "@/utils/format";
 import solIcon from "@/assets/icons/sol_ic.svg";
 import LoadingImg from "@/assets/icons/loading-button.svg";
 import Image from "next/image";
+import { debounce } from "lodash";
+import BigNumber from "bignumber.js";
+import { SOL_DECIMAL } from "@/config";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -19,7 +22,9 @@ const web3Solana = new Web3SolanaProgramInteraction();
 export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [sol, setSol] = useState<string>("");
+  const [simulateReceive, setSimulateReceive] = useState<string>("");
   const [isBuy, setIsBuy] = useState<number>(0);
+  const [loadingEst, setLoadingEst] = useState<boolean>(false);
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
   const { user } = useContext(UserContext);
@@ -33,13 +38,46 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    console.log("value--->", value);
     if (!isNaN(parseFloat(value))) {
       setSol(value);
     } else if (value === "") {
+      setSimulateReceive("");
       setSol(""); // Allow empty string to clear the input
     }
   };
+
+  useEffect(() => {
+    if (sol) {
+      (async () => {
+        try {
+          setLoadingEst(true);
+          const amountWithDecimal = new BigNumber(sol)
+            .multipliedBy(
+              new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL)
+            )
+            .toFixed(0, 1);
+          const mint = new PublicKey(coin.token);
+          const receive = await web3Solana.simulateSwapTx(
+            mint,
+            wallet,
+            amountWithDecimal,
+            isBuy
+          );
+          setSimulateReceive(
+            new BigNumber(receive)
+              .div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL))
+              .toString()
+          );
+        } catch (error) {
+          console.log("simulate failed", error);
+        } finally {
+          setLoadingEst(false);
+        }
+      })();
+    } else {
+      setSimulateReceive("");
+    }
+  }, [sol]);
 
   const getBalance = async () => {
     if (!wallet.publicKey || !coin.token) {
@@ -91,7 +129,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               ? "bg-[#9FF4CF] text-[#080A14]"
               : "bg-[#1A1C28] hover:brightness-125"
           }`}
-          onClick={() => setIsBuy(0)}
+          onClick={() => {
+            setIsBuy(0);
+            setSol("");
+          }}
         >
           {" "}
           Buy
@@ -102,7 +143,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               ? "bg-[#E75787] text-[#080A14]"
               : "bg-[#1A1C28] hover:brightness-125"
           }`}
-          onClick={() => setIsBuy(1)}
+          onClick={() => {
+            setIsBuy(1);
+            setSol("");
+          }}
         >
           Sell
         </button>
@@ -247,10 +291,23 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             Trade
           </div>
         ) : ( */}
+
+        <div className="mt-2">
+          Receive: ≈{" "}
+          {simulateReceive
+            ? numberWithCommas(
+                new BigNumber(simulateReceive || 0).toNumber(),
+                undefined,
+                { maximumFractionDigits: 6 }
+              )
+            : "--"}{" "}
+          {!isBuy ? coin.ticker : "SOL"}
+        </div>
+
         <button
           disabled={progress === 100 || !sol || !wallet.publicKey}
           onClick={handlTrade}
-          className="mt-8 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+          className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
           <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
             {loading && <img src={LoadingImg.src} />}&nbsp;Trade

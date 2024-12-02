@@ -11,6 +11,7 @@ import { reduceString } from "@/utils/util";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "@/config";
 import { BN } from "bn.js";
+import { time } from "console";
 
 export enum ACTION_TYPE {
   Bought = "Bought",
@@ -57,7 +58,7 @@ const RecentTokenCreated: FC<
   Pick<RecentTokenAction, "address" | "type" | "time" | "token">
 > = ({ address, type, token, time }) => {
   return (
-    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
+    <div className="flex items-center px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
       <span className="text-[#9192A0]">{address}</span>&nbsp;
       <span className={twMerge("text-[#AEE67F]")}>{type}</span>
       &nbsp;
@@ -66,16 +67,17 @@ const RecentTokenCreated: FC<
         <img
           src={token.img}
           alt="tokenIMG"
-          className="w-5 h-5 rounded-full ml-2 mr-4"
+          className="w-5 h-5 rounded-full ml-2 mr-2"
         />
       ) : (
         <Image
           src={token.img}
           alt="tokenIMG"
-          className="w-5 h-5 rounded-full ml-2 mr-4"
+          className="w-5 h-5 rounded-full ml-2"
         />
-      )}{" "}
-      &nbsp;on <span className="mr-4">{dayjs(time).format("DD/MM/YYYY")}</span>
+      )}
+      &nbsp;on&nbsp;
+      <span className="mr-4">{dayjs(time).format("DD/MM/YYYY")}</span>
     </div>
   );
 };
@@ -144,10 +146,10 @@ const MarqueeToken = () => {
         const newItem = {
           address:
             newCoinInfo.creator["name"] ||
-            reduceString(newCoinInfo.creator as string, 4, 4),
+            reduceString(new PublicKey(newCoinInfo.creator).toString(), 4, 4),
           type: ACTION_TYPE.Created,
           token: {
-            name: newCoinInfo.name,
+            name: newCoinInfo.ticker,
             img: newCoinInfo.url,
           },
         } as any;
@@ -247,12 +249,13 @@ const MOCK_DATA = [
   },
   {
     address: "THZu...HKcR",
-    type: ACTION_TYPE.Sold,
+    type: ACTION_TYPE.Created,
     amount: "0.01",
     token: {
       name: "MAX",
       img: coinImg,
     },
+    time: Date.now(),
   },
   {
     address: "THZu...HKcR",

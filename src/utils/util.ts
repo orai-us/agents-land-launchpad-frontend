@@ -145,6 +145,7 @@ export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
     lamportReserves: new BN(info.lamportReserves),
   }));
 };
+
 export const getCoinInfo = async (data: string): Promise<coinInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/coin/${data}`, config);
@@ -155,7 +156,33 @@ export const getCoinInfo = async (data: string): Promise<coinInfo> => {
     };
   } catch (err) {
     console.log("err get coin info: ", err);
-    throw new Error(err);
+    // throw new Error(err);
+  }
+};
+
+export type RetryOptions = {
+  retry?: number;
+  timeout?: number;
+  callback?: (retry: number) => void;
+};
+
+export const fetchRetry = async (
+  url: RequestInfo | URL,
+  options: RequestInit & RetryOptions = {}
+) => {
+  let retry = options.retry ?? 3;
+  const { callback, timeout = 30000, ...init } = options;
+  init.signal = AbortSignal.timeout(timeout);
+  while (retry > 0) {
+    try {
+      return await fetch(url, init);
+    } catch (e) {
+      callback?.(retry);
+      retry--;
+      if (retry === 0) {
+        throw e;
+      }
+    }
   }
 };
 

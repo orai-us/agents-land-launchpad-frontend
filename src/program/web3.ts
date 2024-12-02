@@ -268,6 +268,7 @@ export class Web3SolanaProgramInteraction {
       pumpProgramInterface,
       provider
     ) as Program<Pumpfun>;
+
     try {
       const tx = await program.methods
         .simulateSwap(new BN(amount), type)
@@ -275,6 +276,7 @@ export class Web3SolanaProgramInteraction {
           tokenMint: mint,
         })
         .view();
+
       const actualAmountOut = new BN(tx).toString();
       return actualAmountOut;
     } catch (error) {

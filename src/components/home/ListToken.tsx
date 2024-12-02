@@ -120,14 +120,14 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
         return (
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)]"
-            key={`item-token-${ind}`}
+            key={`item-token-${ind}-${coinItem.token}`}
             onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
                 <div className="w-[112px] h-[112px]">
                   <img
-                    src={coinItem.url}
+                    src={coinItem.metadata?.image || coinItem.url}
                     alt="logoCoinImg"
                     width={112}
                     height={112}
@@ -238,14 +238,14 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
         return (
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)]"
-            key={`item-token-${ind}`}
+            key={`item-token-${ind}-${coinItem.token}-listed`}
             onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
                 <div className="w-[112px] h-[112px]">
                   <img
-                    src={coinItem.url}
+                    src={coinItem.metadata?.image || coinItem.url}
                     alt="logoCoinImg"
                     width={112}
                     height={112}

@@ -14,6 +14,7 @@ import { formatNumberKMB } from "@/utils/format";
 const Banner = () => {
   const [kothCoin, setKothCoin] = useState(null);
   const router = useRouter();
+
   const handleToRouter = (id: string) => {
     router.push(id);
   };
@@ -63,7 +64,10 @@ const Banner = () => {
           </div>
           {kothCoin && (
             // <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
-            <div className="relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px]">
+            <div
+              className="relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px] cursor-pointer"
+              onClick={() => handleToRouter(`/trading/${kothCoin.token}`)}
+            >
               <Image
                 src={badgeKothImg}
                 alt="badgeKothImg"
@@ -96,7 +100,7 @@ const Banner = () => {
                   <div className="text-[#84869A] uppercase text-[12px]">
                     create by&nbsp;
                     <span className="text-[#E4775D] underline ">
-                      {reduceString(kothCoin.creator.wallet, 4, 4)}
+                      {reduceString(kothCoin.creator?.wallet || "", 4, 4)}
                     </span>
                   </div>
                   <div className="text-[16px] font-medium leading-6 mt-2">

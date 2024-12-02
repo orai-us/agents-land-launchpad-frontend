@@ -8,11 +8,13 @@ import { debounce } from "lodash";
 
 const SEARCH_TIME = 1000; // 3000
 
-const FilterListToken: FC<{ type; setType; setSearch }> = ({
-  type,
-  setType,
-  setSearch,
-}) => {
+const FilterListToken: FC<{
+  type;
+  setType;
+  setSearch;
+  setFilterState;
+  filterState;
+}> = ({ type, setType, setSearch, filterState, setFilterState }) => {
   // const {
   //   filterState,
   //   setFilterState,
@@ -20,13 +22,13 @@ const FilterListToken: FC<{ type; setType; setSearch }> = ({
   //   setNsfwFilterState,
   // } = useContext(UserContext);
 
-  const [filterState, setFilterState] = useState<{
-    label: string;
-    value: string;
-  }>({
-    label: "Featured",
-    value: "featured",
-  });
+  // const [filterState, setFilterState] = useState<{
+  //   label: string;
+  //   value: string;
+  // }>({
+  //   label: "Featured",
+  //   value: "featured",
+  // });
 
   // const [token, setToken] = useState("");
 
@@ -91,24 +93,7 @@ const FilterListToken: FC<{ type; setType; setSearch }> = ({
                 className="p-2 text-sm text bg-[#1A1C28] border border-[rgba(88,90,107,0.24)] rounded-lg"
                 aria-labelledby="dropdownHoverButton"
               >
-                {[
-                  {
-                    label: "Featured",
-                    value: "featured",
-                  },
-                  {
-                    label: "Last trade",
-                    value: "last_trade",
-                  },
-                  {
-                    label: "Market cap",
-                    value: "market_cap",
-                  },
-                  {
-                    label: "Creation time",
-                    value: "creation_time",
-                  },
-                ].map((e, idx) => {
+                {SORT_LIST.map((e, idx) => {
                   return (
                     <li
                       key={`sorted_key_${idx}_${e.value}`}
@@ -153,3 +138,22 @@ const FilterListToken: FC<{ type; setType; setSearch }> = ({
 };
 
 export default FilterListToken;
+
+export const SORT_LIST = [
+  // {
+  //   label: "Featured",
+  //   value: "featured",
+  // },
+  // {
+  //   label: "Last trade",
+  //   value: "last_trade",
+  // },
+  {
+    label: "Creation time",
+    value: "date",
+  },
+  {
+    label: "Market cap",
+    value: "marketcap",
+  },
+];

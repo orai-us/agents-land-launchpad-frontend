@@ -9,8 +9,9 @@ import { CoinBlog } from "../cards/CoinBlog";
 import TopToken from "./TopToken";
 import FilterList from "./FilterList";
 import ListToken, { STATUS_TOKEN, TokenTab } from "./ListToken";
-import FilterListToken from "./FilterListToken";
+import FilterListToken, { SORT_LIST } from "./FilterListToken";
 import { LIMIT_PAGINATION } from "@/config";
+import BigNumber from "bignumber.js";
 
 const HomePage: FC = () => {
   const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } =
@@ -27,6 +28,11 @@ const HomePage: FC = () => {
   const dropdownRef1 = useRef(null);
   const router = useRouter();
   const [currentTab, setCurrentTab] = useState(STATUS_TOKEN.LUNCH);
+
+  const [filterState, setFilterState] = useState<{
+    label: string;
+    value: string;
+  }>(SORT_LIST[0]);
 
   const handleToRouter = (id: string) => {
     router.push(id);
@@ -50,6 +56,7 @@ const HomePage: FC = () => {
         page,
         keyword: (token || "").trim(),
         listed: currentTab === STATUS_TOKEN.LISTED,
+        // sortBy: filterState.value,
       });
       if (coins !== null) {
         setTotalData(total);
@@ -63,7 +70,7 @@ const HomePage: FC = () => {
       }
     };
     fetchData();
-  }, [page, token, currentTab]);
+  }, [page, token, currentTab, filterState]);
 
   const handleSortSelection = (option) => {
     let sortOption: string = "";
@@ -159,14 +166,41 @@ const HomePage: FC = () => {
           setPage(0);
           setToken("");
           setData([]);
+          setFilterState(SORT_LIST[0]);
         }}
-        setSearch={setToken}
+        setSearch={(e) => {
+          setToken(e);
+          setPage(0);
+        }}
+        filterState={filterState}
+        setFilterState={setFilterState}
       />
 
       <ListToken
         type={currentTab}
         data={
-          data.sort((a, b) => +a.tokenReserves - +b.tokenReserves)
+          data
+          // .sort((a, b) => {
+          //   if (currentTab === STATUS_TOKEN.LUNCH) {
+          //     switch (filterState.value) {
+          //       case "date":
+          //         return (
+          //           new Date(b.date).getTime() - new Date(a.date).getTime()
+          //         );
+          //       case "marketcap":
+          //         return new BigNumber(b.marketcap || 0)
+          //           .minus(a.marketcap || 0)
+          //           .toNumber();
+          //       default:
+          //         return (
+          //           new Date(b.date).getTime() - new Date(a.date).getTime()
+          //         );
+          //     }
+          //   } else {
+          //     return +b.tokenReserves - +a.tokenReserves;
+          //   }
+          // })
+          // .sort((a, b) => +a.tokenReserves - +b.tokenReserves)
           // .filter((elm) => {
           //   if (!token) return true;
 
