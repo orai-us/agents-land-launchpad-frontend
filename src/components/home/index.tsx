@@ -56,7 +56,7 @@ const HomePage: FC = () => {
         page,
         keyword: (token || "").trim(),
         listed: currentTab === STATUS_TOKEN.LISTED,
-        // sortBy: filterState.value,
+        sortBy: filterState.value,
       });
       if (coins !== null) {
         setTotalData(total);
