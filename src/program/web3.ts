@@ -12,7 +12,7 @@ import idl from "./pumpfun.json";
 import * as anchor from "@coral-xyz/anchor";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import { errorAlert } from "@/components/others/ToastGroup";
-import { Program } from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
 import { SEED_CONFIG } from "./seed";
 import { launchDataInfo } from "@/utils/types";
 import BigNumber from "bignumber.js";
@@ -238,6 +238,42 @@ export class Web3SolanaProgramInteraction {
         console.log("----confirm----", { transaction, result });
         return { transaction, result };
       }
+    }
+  };
+
+  // Swap transaction
+  simulateSwapTx = async (
+    mint: PublicKey,
+    wallet: WalletContextState,
+    amount: string,
+    type: number
+  ): Promise<string> => {
+    console.log("========Simulate swap==============");
+
+    // check the connection
+    if (!wallet.publicKey || !this.connection) {
+      console.log("Warning: Wallet not connected");
+      return;
+    }
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+    anchor.setProvider(provider);
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+    try {
+      const tx = await program.methods
+        .simulateSwap(new BN(amount), type)
+        .accounts({
+          tokenMint: mint,
+        })
+        .view();
+      const actualAmountOut = new BN(tx).toString();
+      return actualAmountOut;
+    } catch (error) {
+      console.log("Error in swap transaction", error, error.error);
     }
   };
 
