@@ -66,6 +66,9 @@ export default function TradingPage() {
     .multipliedBy(solPrice)
     .toFixed(6);
 
+  const isRaydiumListed = coin["raydiumPoolAddr"];
+  const isListed = coin["listed"];
+
   return (
     <div className="w-full flex flex-col px-3 mx-auto gap-5">
       <div className="text-center">
@@ -79,7 +82,29 @@ export default function TradingPage() {
           </div>
         </div>
       </div>
-      {/* <div className="animate-shake rounded px-3 py-2 bg-[]"></div> */}
+      {Number(progress) >= 100 && !isListed && (
+        <div className="animate-shake animate-infinite rounded px-3 py-3 mb-4 bg-[#9FF4CF] text-[#080A14] flex items-center justify-center">
+          Token is listing on Oraidex and Raydium. Please wait a minutes!
+        </div>
+      )}
+      {isListed &&
+        (isRaydiumListed ? (
+          <a
+            href={`https://raydium.io/liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}`}
+            target="_blank"
+            className="animate-shake animate-infinite rounded px-3 py-3 mb-4 bg-[linear-gradient(48deg,_#9945FF_0.56%,_#7962E7_20.34%,_#00D18C_99.44%)] text-[#080A14] flex items-center justify-center"
+          >
+            Token is listed on Raydium. Check it here!
+          </a>
+        ) : (
+          <a
+            href={`https://app.oraidex.io/pools/v2/${coin.oraidexPoolAddr}`}
+            target="_blank"
+            className="animate-shake animate-infinite rounded px-3 py-3 mb-4 bg-[#AEE67F] text-[#080A14] flex items-center justify-center"
+          >
+            Token is listed on Oraidex. Check it here!
+          </a>
+        ))}
       <div className="w-full flex flex-col xs:flex-row gap-4">
         {/* trading view chart  */}
         <div className="w-full px-2">

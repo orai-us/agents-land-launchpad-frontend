@@ -71,6 +71,9 @@ export interface coinInfo {
   date?: Date;
   decimals: number;
   metadata?: metadataInfo;
+  listed: boolean;
+  oraidexPoolAddr?: string;
+  raydiumPoolAddr?: string;
 }
 export interface createCoinInfo {
   name: string;
