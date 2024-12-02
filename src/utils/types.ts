@@ -2,13 +2,21 @@ import { BN } from "@coral-xyz/anchor";
 import { PublicKey } from "@solana/web3.js";
 
 export type ChartTable = {
-  table: {
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    time: number;
-  }[];
+  table: CandlePrice[];
+  raw: RawChart[];
+};
+
+export type RawChart = {
+  price: number;
+  ts: number;
+};
+
+export type CandlePrice = {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  time: number;
 };
 
 export type Chart = {

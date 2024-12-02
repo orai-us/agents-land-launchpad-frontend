@@ -1,24 +1,20 @@
 "use client";
-import { CoinBlog } from "@/components/cards/CoinBlog";
-import Modal from "@/components/modals/Modal";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
-import { coinInfo, userInfo } from "@/utils/types";
-import { getCoinsInfoBy, getUser, reduceString } from "@/utils/util";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, useContext } from "react";
-import { LuFileEdit } from "react-icons/lu";
-import { MdContentCopy } from "react-icons/md";
-import { ProfileMenuList } from "@/config/TextData";
 import nodataImg from "@/assets/icons/nodata.svg";
 import defaultUserImg from "@/assets/images/user-avatar.png";
-import { useWallet } from "@solana/wallet-adapter-react";
+import Modal from "@/components/modals/Modal";
+import { errorAlert, successAlert } from "@/components/others/ToastGroup";
+import { ProfileMenuList } from "@/config/TextData";
+import UserContext from "@/context/UserContext";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { twMerge } from "tailwind-merge";
-import ListToken, { STATUS_TOKEN } from "../home/ListToken";
-import Image from "next/image";
 import { formatNumberKMB, numberWithCommas } from "@/utils/format";
+import { coinInfo, userInfo } from "@/utils/types";
+import { getCoinsInfoBy, getUser, reduceString } from "@/utils/util";
+import { useWallet } from "@solana/wallet-adapter-react";
 import dayjs from "dayjs";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { useContext, useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 export default function ProfilePage() {
   const { user, setProfileEditModal, profileEditModal } =

@@ -114,7 +114,7 @@ const RecentTokenSwap: FC<
 };
 
 const MarqueeToken = () => {
-  const [notificationList, setListNotifications] = useState(MOCK_DATA);
+  const [notificationList, setListNotifications] = useState([]);
   // const [latestCreatedToken, setLatestCreatedToken] =
   //   useState<coinInfo>(undefined);
   // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
@@ -140,8 +140,8 @@ const MarqueeToken = () => {
       };
       console.log("new coin info: ", newCoinInfo);
       // setLatestCreatedToken(newCoinInfo);
-      setListNotifications((prevList) => [
-        {
+      setListNotifications((prevList) => {
+        const newItem = {
           address:
             newCoinInfo.creator["name"] ||
             reduceString(newCoinInfo.creator as string, 4, 4),
@@ -150,14 +150,18 @@ const MarqueeToken = () => {
             name: newCoinInfo.name,
             img: newCoinInfo.url,
           },
-        } as any,
-        ...prevList.slice(0, -1),
-      ]);
+        } as any;
+        if (prevList.length >= 4) {
+          return [newItem, ...prevList.slice(0, -1)];
+        }
+
+        return [newItem, ...prevList];
+      });
     });
     listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
       // setLatestSwapInfo(swapInfo);
-      setListNotifications((prevList) => [
-        {
+      setListNotifications((prevList) => {
+        const newItem = {
           address: reduceString(swapInfo.creator, 4, 4),
           type: swapInfo.direction,
           amount: (
@@ -168,9 +172,12 @@ const MarqueeToken = () => {
             name: swapInfo.mintSymbol,
             img: swapInfo.mintUri,
           },
-        } as any,
-        ...prevList.slice(0, -1),
-      ]);
+        } as any;
+        if (prevList.length >= 4) {
+          return [newItem, ...prevList.slice(0, -1)];
+        }
+        return [newItem, ...prevList];
+      });
     });
 
     const subId = listener.subscribeProgramLogs(
@@ -181,6 +188,8 @@ const MarqueeToken = () => {
       connection.removeOnLogsListener(subId);
     };
   }, []);
+
+  if (!notificationList?.length) return null;
 
   return (
     <div className="flex items-center justify-center w-full bg-[#1A1C28] p-4">
@@ -199,15 +208,14 @@ const MarqueeToken = () => {
             />
           </svg>
         </div>
-
-        {/* <Marquee
+        <Marquee
           pauseOnClick
           pauseOnHover
           gradient
           gradientColor="#1A1C28"
           gradientWidth={50}
-        > */}
-        <div className="w-full flex items-center overflow-x-auto no-scrollbar">
+        >
+          {/* <div className="w-full flex items-center overflow-x-auto no-scrollbar"> */}
           {notificationList.map((item, idx) => {
             return (
               <div
@@ -218,8 +226,8 @@ const MarqueeToken = () => {
               </div>
             );
           })}
-        </div>
-        {/* </Marquee> */}
+          {/* </div> */}
+        </Marquee>
       </div>
     </div>
   );

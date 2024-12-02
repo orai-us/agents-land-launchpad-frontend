@@ -36,8 +36,6 @@ export const ConnectButton: FC = () => {
 
   const tempUser = useMemo(() => user, [user]);
 
-  console.log("user", user);
-
   useEffect(() => {
     const handleClick = async () => {
       if (publicKey && !login) {
@@ -69,7 +67,7 @@ export const ConnectButton: FC = () => {
       }
 
       const msg = new TextEncoder().encode(
-        `Nonce to confirm: ${connection.nonce}`
+        `Sign in to Agent.land: ${connection.nonce}`
       );
 
       const sig = await signMessage?.(msg);
@@ -91,6 +89,7 @@ export const ConnectButton: FC = () => {
   const logOut = async () => {
     if (typeof disconnect === "function") {
       await disconnect();
+      router.push("/");
     }
     // Initialize `user` state to default value
     setUser({} as userInfo);
@@ -106,7 +105,7 @@ export const ConnectButton: FC = () => {
 
   return (
     <div>
-      <button className="px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
+      <button className="ml-2 px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
         {login && publicKey ? (
           <>
             <div className="flex mr-3 items-center justify-center text-[16px] lg:text-md">

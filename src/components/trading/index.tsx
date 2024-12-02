@@ -24,9 +24,11 @@ import { twMerge } from "tailwind-merge";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import Image from "next/image";
 import { BN } from "@coral-xyz/anchor";
-import { formatLargeNumber } from "@/utils/format";
+import { formatLargeNumber, numberWithCommas } from "@/utils/format";
+import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 
 export default function TradingPage() {
+  const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
   const pathname = usePathname();
   const [param, setParam] = useState<string>("");
@@ -51,11 +53,6 @@ export default function TradingPage() {
         .div(new BN(BONDING_CURVE_LIMIT))
         .toNumber();
 
-      console.log(
-        "bondingCurvePercent",
-        data.lamportReserves,
-        bondingCurvePercent
-      );
       // const solPrice = await getSolPriceInUSD();
       // const prog =
       //   (data.lamportReserves * 1000000 * solPrice) /
@@ -65,6 +62,11 @@ export default function TradingPage() {
     };
     fetchData();
   }, [pathname]);
+
+  const { curPrice } = useListenEventSwapChart({ coin });
+  const priceUsd = new BigNumber(isNaN(curPrice) ? 0 : curPrice)
+    .multipliedBy(solPrice)
+    .toFixed(6);
 
   return (
     <div className="w-full flex flex-col px-3 mx-auto gap-5">
@@ -100,7 +102,8 @@ export default function TradingPage() {
                 )}
                 <div>
                   <p className="text-[#E8E9EE] text-[24px] font-medium">
-                    {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker})
+                    {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
+                    {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                   </p>
                   <p className="text-[#84869A] text-[12px] mt-2 font-medium uppercase">
                     CONTRACT: {coin.token}
@@ -209,17 +212,27 @@ export default function TradingPage() {
             </div>
             <div>
               <p className="text-[#E8E9EE] text-[24px] font-medium">
-                {0.000026} SOL
+                {numberWithCommas(isNaN(curPrice) ? 0 : curPrice, undefined, {
+                  maximumFractionDigits: 9,
+                })}{" "}
+                SOL
                 {/* FIXME: update price simulate */}
               </p>
               <p
+                className={twMerge(
+                  "mt-1 font-medium text-[14px] text-[#84869A]"
+                )}
+              >
+                ≈ ${priceUsd}
+              </p>
+              {/* <p
                 className={twMerge(
                   "mt-1 font-medium text-[12px] text-[#9FF4CF]",
                   true && "text-[#E75787]"
                 )}
               >
                 {true ? "-" : "+"}1.25%
-              </p>
+              </p> */}
             </div>
           </div>
 

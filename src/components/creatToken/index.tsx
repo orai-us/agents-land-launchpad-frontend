@@ -1,19 +1,22 @@
 "use client";
 import MountainImg from "@/assets/images/mount_guide.png";
-import AgentImg from "@/assets/images/richoldman.png";
+import AgentImg from "@/assets/images/userAgentDefault.svg";
 import { Spinner } from "@/components/loadings/Spinner";
 import { errorAlert } from "@/components/others/ToastGroup";
 import { useSocket } from "@/contexts/SocketContext";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
 import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
-import { reduceString } from "@/utils/util";
+import { getAgentsData, reduceString } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import DropzoneFile from "../uploadFile/DropzoneFile";
+import nodataImg from "@/assets/icons/noagentdata.svg";
+import PreSaleModal from "./Presale";
+import CreateTokenSuccess from "./CreateTokenSuccess";
 
 export enum STEP_TOKEN {
   INFO,
@@ -23,15 +26,22 @@ export enum STEP_TOKEN {
 export default function CreateToken() {
   const [imageUrl, setIamgeUrl] = useState<string>("");
   const { isLoading, setIsLoading } = useSocket();
-  const [agentPersonality, setAgentPersonality] = useState<string>();
-  const [agentStyle, setAgentStyle] = useState<string>();
+  const [agentPersonality, setAgentPersonality] = useState<string>(
+    AGENT_PERSONALITY[0].value
+  );
+  const [agentStyle, setAgentStyle] = useState<string>(AGENT_STYLE[0].value);
   const [showOptional, setShowOptional] = useState<boolean>(false);
+  const [showModalPreSale, setShowModalPreSale] = useState<boolean>(false);
+  const [showModalSuccess, setShowModalSuccess] = useState<boolean>(false);
+  const [coinCreatedData, setCoinCreatedData] = useState(null);
   const [newCoin, setNewCoin] = useState<createCoinInfo>({} as createCoinInfo);
   const [selectedFileName, setSelectedFileName] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [getAmt, setGetAmt] = useState<number>(0);
   const [step, setStep] = useState<STEP_TOKEN>(STEP_TOKEN.INFO);
+  const [agentList, setAgentList] = useState([]);
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
@@ -52,6 +62,17 @@ export default function CreateToken() {
       image: !imageUrl,
     });
   }, [newCoin, imageUrl]);
+
+  useEffect(() => {
+    (async () => {
+      const res = await getAgentsData({});
+
+      if (res) {
+        setAgentList(res["items"]);
+        setSelectedAgent(res["items"][0]);
+      }
+    })();
+  }, []);
 
   const handleToRouter = (path: string) => {
     router.push(path);
@@ -182,26 +203,9 @@ export default function CreateToken() {
         setIsLoading(false);
         return;
       }
-
-      // const coin: coinInfo = {
-      //   ...newCoin,
-      //   creator: user._id.toString(),
-      //   url: uploadedImageUrl,
-      // };
-
-      // const created = await createNewCoin(coin);
-      // if (created) {
-      //   infoAlert("Token created successfully!");
-      //   setIsCreated(true);
-      //   setNewCoin({} as coinInfo);
-      //   setImageFile(null);
-      //   setImagePreview(null);
-      //   setSelectedFileName("");
-      //   setStep(STEP_TOKEN.INFO);
-      // } else {
-      //   errorAlert("Failed to create token.");
-      // }
-      router.push("/");
+      // router.push("/");
+      setShowModalSuccess(true);
+      setCoinCreatedData(res);
     } catch (error) {
       errorAlert("An unexpected error occurred.");
       console.error(error);
@@ -219,6 +223,18 @@ export default function CreateToken() {
 
   return (
     <div className="w-full m-auto px-3 my-24">
+      <PreSaleModal
+        isOpen={showModalPreSale}
+        closeModal={() => setShowModalPreSale(false)}
+        onConfirm={createCoin}
+        quantity={newCoin.presale}
+        setQuantity={handlePresaleChange}
+      />
+      <CreateTokenSuccess
+        isOpen={showModalSuccess}
+        coin={coinCreatedData}
+        closeModal={() => setShowModalSuccess(false)}
+      />
       <div onClick={() => handleToRouter("/")}>
         <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
@@ -279,15 +295,26 @@ export default function CreateToken() {
                 <div className="group relative cursor-pointer mt-3">
                   <div className="flex items-center justify-between w-full px-3 border border-[#585A6B] rounded h-12">
                     <div className="flex items-center">
-                      <Image
-                        src={AgentImg}
-                        alt="agentImg"
-                        width={32}
-                        height={32}
-                        className="border-[1.5px] border-[#ADADAD] rounded-full"
-                      />
+                      {selectedAgent?.avatar ? (
+                        <img
+                          src={selectedAgent?.avatar}
+                          alt="agentImg"
+                          width={32}
+                          height={32}
+                          className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                        />
+                      ) : (
+                        <Image
+                          src={AgentImg}
+                          alt="agentImg"
+                          width={32}
+                          height={32}
+                          className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                        />
+                      )}
+
                       <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
-                        Jordan’s Investor Coach
+                        {selectedAgent?.username || "--"}
                       </div>
                     </div>
                     <svg
@@ -307,75 +334,58 @@ export default function CreateToken() {
                   </div>
                   <div className="pt-2 invisible group-hover:visible absolute top-full w-full">
                     <div className="bg-[#1A1C28] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg flex flex-col gap-2 overflow-y-auto max-h-52 h-100%">
-                      {[
-                        {
-                          img: AgentImg,
-                          name: "Jordan’s Investor Coach",
-                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
-                        },
-                        {
-                          img: AgentImg,
-                          name: "Max",
-                          address:
-                            "2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt",
-                        },
-                        {
-                          img: AgentImg,
-                          name: "Max2",
-                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
-                        },
-                        {
-                          img: AgentImg,
-                          name: "Max2",
-                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
-                        },
-                        {
-                          img: AgentImg,
-                          name: "Max2",
-                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
-                        },
-                        {
-                          img: AgentImg,
-                          name: "Max2",
-                          address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
-                        },
-                      ].map((e, ind) => {
-                        return (
-                          <div
-                            className={twMerge(
-                              "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
-                              ind === 1 && "bg-[#13141D] cursor-not-allowed"
-                            )}
-                            key={`agent-item-${ind}`}
-                          >
-                            <div className="flex items-center">
-                              {typeof e.img === "string" ? (
-                                <img
-                                  src={e.img as any}
-                                  alt="agentImg"
-                                  width={32}
-                                  height={32}
-                                  className="border-[1.5px] border-[#ADADAD] rounded-full"
-                                />
-                              ) : (
-                                <Image
-                                  src={e.img as any}
-                                  alt="agentImg"
-                                  width={32}
-                                  height={32}
-                                  className="border-[1.5px] border-[#ADADAD] rounded-full"
-                                />
+                      {agentList.length <= 0 ? (
+                        <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-4 px-8 flex flex-col justify-center items-center">
+                          <Image src={nodataImg} alt="nodata" />
+                          <p className="mt-4 text-[#E8E9EE] text-[16px] uppercase">
+                            No Agent
+                          </p>
+                          <p className="mt-2 text-[#585A6B] text-[14px]">
+                            mesh.distilled.ai
+                          </p>
+                        </div>
+                      ) : (
+                        agentList.map((e, ind) => {
+                          return (
+                            <div
+                              className={twMerge(
+                                "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
+                                e.publicAddress ===
+                                  selectedAgent?.publicAddress &&
+                                  "bg-[#13141D] cursor-not-allowed"
                               )}
-                              <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
-                                {e.name}
+                              key={`agent-item-${ind}`}
+                              onClick={() => setSelectedAgent(e)}
+                            >
+                              <div className="flex items-center">
+                                {typeof e.img === "string" ? (
+                                  <img
+                                    src={e.avatar as any}
+                                    alt="agentImg"
+                                    width={32}
+                                    height={32}
+                                    className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                                  />
+                                ) : (
+                                  <Image
+                                    src={e.avatar as any}
+                                    alt="agentImg"
+                                    width={32}
+                                    height={32}
+                                    className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                                  />
+                                )}
+                                <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
+                                  {e.username}
+                                </div>
                               </div>
+                              <span className="text-[#585A6B] text-[14px] font-medium ">
+                                {reduceString(e.publicAddress, 4, 4)}
+                              </span>
                             </div>
-                            <span className="text-[#585A6B] text-[14px] font-medium ">
-                              {reduceString(e.address, 4, 4)}
-                            </span>
-                          </div>
-                        );
-                      })}
+                          );
+                        })
+                      )}
                     </div>
                   </div>
                 </div>
@@ -444,12 +454,12 @@ export default function CreateToken() {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <label
                   htmlFor="description"
                   className="text-[12px] font-medium text-[#84869A]"
                 >
-                  Presale (0 ~ 1.5 SOL)
+                  PRESALE (0 ~ 1.5 SOL)
                 </label>
                 <input
                   role="presentation"
@@ -460,7 +470,7 @@ export default function CreateToken() {
                   onChange={handlePresaleChange}
                   className="outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent"
                 />
-              </div>
+              </div> */}
 
               <div className="w-full flex flex-col justify-between gap-3">
                 <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
@@ -708,7 +718,8 @@ export default function CreateToken() {
           ) : (
             <button
               disabled={!formValid || isLoading}
-              onClick={createCoin}
+              // onClick={createCoin}
+              onClick={() => setShowModalPreSale(true)}
               className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
             >
               <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
@@ -833,5 +844,38 @@ export const AGENT_STYLE = [
   {
     label: "⭐️ Custom",
     value: "Custom",
+  },
+];
+
+const MOCK_AGENTS = [
+  {
+    img: AgentImg,
+    name: "Jordan’s Investor Coach",
+    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+  },
+  {
+    img: AgentImg,
+    name: "Max",
+    address: "2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt",
+  },
+  {
+    img: AgentImg,
+    name: "Max2",
+    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+  },
+  {
+    img: AgentImg,
+    name: "Max2",
+    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+  },
+  {
+    img: AgentImg,
+    name: "Max2",
+    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+  },
+  {
+    img: AgentImg,
+    name: "Max2",
+    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
   },
 ];

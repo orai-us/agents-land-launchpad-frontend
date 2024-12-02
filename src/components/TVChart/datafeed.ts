@@ -9,11 +9,16 @@ import type {
   PeriodParams,
 } from "@/libraries/charting_library";
 
-import { subscribeOnStream, unsubscribeFromStream } from "@/components/TVChart/streaming";
+import {
+  subscribeOnStream,
+  unsubscribeFromStream,
+} from "@/components/TVChart/streaming";
 import { getChartTable } from "@/utils/getChartTable";
 import { custom } from "viem";
 import { getBalance } from "viem/actions";
 import { Mark } from "@/libraries/charting_library/datafeed-api";
+import { queryClient } from "@/provider/providers";
+import { RawChart } from "@/utils/types";
 
 const lastBarsCache = new Map<string, Bar>();
 const minPrice: Number = 0;
@@ -30,19 +35,18 @@ const configurationData: DatafeedConfiguration = {
     "240",
     "1440",
   ] as ResolutionString[],
-
 };
 
 export function getDataFeed({
   pairIndex,
   customPeriodParams,
   name,
-  token
+  token,
 }: {
   name: string;
   pairIndex: number;
   customPeriodParams: PeriodParams;
-  token: string
+  token: string;
 }): IBasicDataFeed {
   let initialLoadComplete = false;
   return {
@@ -50,16 +54,14 @@ export function getDataFeed({
       setTimeout(() => callback(configurationData));
     },
 
-    searchSymbols: () => {
-    },
+    searchSymbols: () => {},
 
     resolveSymbol: async (
       symbolName,
       onSymbolResolvedCallback,
       _onResolveErrorCallback,
-      _extension,
+      _extension
     ) => {
-
       // Symbol information object
       const symbolInfo: LibrarySymbolInfo = {
         ticker: name,
@@ -72,7 +74,7 @@ export function getDataFeed({
         pricescale: 1000000000,
         exchange: "",
         has_intraday: true,
-        visible_plots_set: 'ohlc',
+        visible_plots_set: "ohlc",
         has_weekly_and_monthly: true,
         supported_resolutions: configurationData.supported_resolutions,
         volume_precision: 2,
@@ -92,7 +94,7 @@ export function getDataFeed({
       onErrorCallback
     ) => {
       // Use customPeriodParams if needed
-      const { from, to, firstDataRequest, countBack } = periodParams
+      const { from, to, firstDataRequest, countBack } = periodParams;
       try {
         const chartTable = await getChartTable({
           token,
@@ -100,7 +102,7 @@ export function getDataFeed({
           from,
           to,
           range: +resolution,
-          countBack
+          countBack,
         });
 
         if (!chartTable || !chartTable.table) {
@@ -108,7 +110,15 @@ export function getDataFeed({
           return;
         }
 
-        let bars = chartTable.table.map(bar => ({
+        queryClient.setQueryData(
+          ["chartTable", token],
+          (oldData: RawChart[]) => {
+            console.log("chartTable.raw", chartTable.raw);
+            return [...(oldData || []), ...chartTable.raw];
+          }
+        );
+
+        let bars = chartTable.table.map((bar) => ({
           ...bar,
           time: bar.time * 1000, // Convert from seconds to milliseconds
         }));
@@ -133,21 +143,21 @@ export function getDataFeed({
       resolution,
       onRealtimeCallback,
       subscriberUID,
-      onResetCacheNeededCallback,
+      onResetCacheNeededCallback
     ) => {
-      // subscribeOnStream(
-      //   symbolInfo,
-      //   resolution,
-      //   onRealtimeCallback,
-      //   subscriberUID,
-      //   onResetCacheNeededCallback,
-      //   lastBarsCache.get(symbolInfo.name)!,
-      //   pairIndex,
-      // );
+      subscribeOnStream(
+        symbolInfo,
+        resolution,
+        onRealtimeCallback,
+        subscriberUID,
+        onResetCacheNeededCallback,
+        lastBarsCache.get(symbolInfo.name)!,
+        token
+      );
     },
 
     unsubscribeBars: (subscriberUID) => {
-      // unsubscribeFromStream(subscriberUID);
+      unsubscribeFromStream(subscriberUID);
     },
   };
 }

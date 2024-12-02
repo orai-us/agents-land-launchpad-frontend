@@ -12,6 +12,9 @@ import {
 import { BN } from "@coral-xyz/anchor";
 
 export const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+export const DISTILL_BE_URL =
+  process.env.NEXT_PUBLIC_DISTILL_BACKEND_URL ||
+  "https://api-dev.distilled.ai/distill";
 
 const headers: Record<string, string> = {
   "ngrok-skip-browser-warning": "true",
@@ -99,10 +102,38 @@ export const confirmWallet = async ({
   }
 };
 
-export const getCoinsInfo = async (): Promise<coinInfo[]> => {
-  const res = await axios.get(`${BACKEND_URL}/coin`, config);
+export const getCoinsInfo = async (
+  params
+): Promise<{ coins: coinInfo[]; total: number }> => {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/coin`, { ...config, params });
+    return res.data;
+  } catch (error) {
+    return {
+      coins: [],
+      total: 0,
+    };
+  }
+};
+
+export const getAgentsData = async (params): Promise<coinInfo[]> => {
+  const res = await axios.get(`${DISTILL_BE_URL}/user/search`, {
+    ...config,
+    params: {
+      filter: JSON.stringify({
+        username: "",
+        status: 1,
+        role: 4,
+        publish: 1,
+        ...(params.filter || {}),
+      }),
+      limit: 50,
+      offset: 0,
+    },
+  });
   return res.data;
 };
+
 export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
   const res = await axios.get<coinInfo[]>(
     `${BACKEND_URL}/coin/user/${id}`,
@@ -148,7 +179,7 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
     return response.data;
   } catch (err) {
     console.log("err get message by coin: ", err);
-    throw new Error(err);
+    // throw new Error(err);
   }
 };
 
@@ -169,7 +200,20 @@ export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
     };
   } catch (err) {
     console.log("err get coin trade: ", err);
-    throw new Error(err);
+    // throw new Error(err);
+  }
+};
+
+export const getKoth = async (): Promise<coinInfo> => {
+  try {
+    const response = await axios.get(`${BACKEND_URL}/coin/king/koth`, config);
+    console.log("koth response::", response);
+    return {
+      ...response.data,
+    };
+  } catch (err) {
+    console.log("err get coin king: ", err);
+    // throw new Error(err);
   }
 };
 
@@ -189,12 +233,14 @@ export const findHolders = async (mint: string) => {
   // allOwners will store all the addresses that hold the token
   let allOwners: holderInfo[] = [];
 
+  // TODO: FIXME: helius rpc here: https://docs.helius.dev/compression-and-das-api/digital-asset-standard-das-api/get-token-accounts
+  const HELIUS_RPC =
+    "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd";
   while (true) {
     const response = await fetch(
-      process.env.NEXT_PUBLIC_SOLANA_RPC ||
-        "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd",
+      // process.env.NEXT_PUBLIC_SOLANA_RPC ||
+      HELIUS_RPC,
       {
-        //   const response = await fetch("https://white-aged-glitter.solana-mainnet.quiknode.pro/743d4e1e3949c3127beb7f7815cf2ca9743b43a6/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -236,7 +282,8 @@ export const getSolPriceInUSD = async () => {
   try {
     // Fetch the price data from CoinGecko
     const response = await axios.get(
-      "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+      // "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
+      "https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd"
     );
     const solPriceInUSD = response.data.solana.usd;
     return solPriceInUSD;
@@ -321,7 +368,7 @@ export const calculateTokenPrice = (
   tokenReserves: BN,
   lamportReserves: BN,
   tokenDecimals: number,
-  solPriceinUSD: number
+  solPriceinUSD?: number
 ): number => {
   if (!(tokenReserves instanceof BN)) {
     tokenReserves = new BN(tokenReserves);
@@ -331,7 +378,7 @@ export const calculateTokenPrice = (
   }
   const tokenReservesNum = fromBig(tokenReserves, tokenDecimals);
   const lamportReservesNum = fromBig(lamportReserves, 9);
-  return (solPriceinUSD * lamportReservesNum) / tokenReservesNum;
+  return ((solPriceinUSD || 1) * lamportReservesNum) / tokenReservesNum;
 };
 
 export function calculateKotHProgress(
