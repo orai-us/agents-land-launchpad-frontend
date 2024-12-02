@@ -7,7 +7,7 @@ import { BONDING_CURVE_LIMIT } from "@/config";
 import UserContext from "@/context/UserContext";
 import { formatLargeNumber, numberWithCommas } from "@/utils/format";
 import { coinInfo } from "@/utils/types";
-import { fromBig, getCoinInfo, reduceString } from "@/utils/util";
+import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
@@ -16,6 +16,8 @@ import { useContext, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TokenDistribution from "../others/TokenDistribution";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
+
+const SLEEP_TIMEOUT = 1500;
 
 export default function TradingPage() {
   const { solPrice } = useContext(UserContext);
@@ -37,21 +39,16 @@ export default function TradingPage() {
       setParam(parameter);
       setCoinId(parameter);
       let data = await getCoinInfo(parameter);
-      // if (data) {
 
-      // }
-      // const retry = 3
-      // while (retry > 0) {
-      //   try {
-      //     data = await getCoinInfo(parameter);
-      //   } catch (e) {
-      //     callback?.(retry);
-      //     retry--;
-      //     if (retry === 0) {
-      //       throw e;
-      //     }
-      //   }
-      // }
+      if (!data) {
+        let retry = 1;
+        while (retry < 3 && !data) {
+          console.log("Retry LoadToken", retry);
+          await sleep(SLEEP_TIMEOUT);
+          ++retry;
+          data = await getCoinInfo(parameter);
+        }
+      }
 
       const bondingCurvePercent = (data.lamportReserves || new BN(0))
         .mul(new BN(100))

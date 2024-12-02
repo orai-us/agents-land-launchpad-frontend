@@ -173,7 +173,10 @@ const HomePage: FC = () => {
           setPage(0);
         }}
         filterState={filterState}
-        setFilterState={setFilterState}
+        setFilterState={(e) => {
+          setPage(0);
+          setFilterState(e);
+        }}
       />
 
       <ListToken

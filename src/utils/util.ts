@@ -424,3 +424,5 @@ export function calculateKotHProgress(
   if (currentKotHProgress > 100) currentKotHProgress = 100;
   return currentKotHProgress;
 }
+
+export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
