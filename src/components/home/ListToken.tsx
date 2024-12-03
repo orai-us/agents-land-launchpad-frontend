@@ -291,7 +291,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
               <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
                 {coinItem.name} (${coinItem.ticker})
               </div>
-              <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+              <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6 h-20">
                 {coinItem.description || ""}
               </div>
               {isRaydiumListed ? (
