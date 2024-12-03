@@ -6,6 +6,7 @@ import {
   calculateTokenPrice,
   findHolders,
   fromBig,
+  getKoth,
   getSolPriceInUSD,
   getUserByWalletAddress,
 } from "@/utils/util";
@@ -17,6 +18,7 @@ import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventL
 import { ResultType } from "@/program/logListeners/types";
 import { endpoint, commitmentLevel } from "@/program/web3";
 import { Connection, PublicKey } from "@solana/web3.js";
+import { formatNumberKMB } from "@/utils/format";
 
 interface ModalProps {
   data: coinInfo;
@@ -25,6 +27,19 @@ interface ModalProps {
 const TokenDistribution: FC<ModalProps> = ({ data }) => {
   const [holders, setHolders] = useState<holderInfo[]>([]);
   const [kothProgress, setKotHProgress] = useState<number>(0);
+
+  const [kothCoin, setKothCoin] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const kingCoin = await getKoth();
+      console.log("kingCoin", kingCoin);
+      if (kingCoin) {
+        setKothCoin(kingCoin);
+      }
+    };
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -85,7 +100,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       </button> */}
       <div className="w-full flex flex-col gap-2 border border-[#1A1C28] rounded-lg p-6">
         <p className="text-[#E8E9EE] text-[16px] uppercase">
-          king of the hill progress ({kothProgress.toFixed(2)}%)
+          King of the hill progress ({kothProgress.toFixed(2)}%)
         </p>
         <div className="w-full my-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
           <div
@@ -95,7 +110,8 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
         </div>
 
         <span className="text-[#585A6B] text-[14px]">
-          dethrone the current king at $46,680 market cap
+          Dethrone the current king at{" "}
+          {formatNumberKMB(kothCoin?.marketcap || 0)} market cap
         </span>
       </div>
       <div className=" border border-[#1A1C28] rounded-lg p-6 mt-4 mb-14">

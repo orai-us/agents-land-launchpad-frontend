@@ -58,8 +58,8 @@ const RecentTokenCreated: FC<
   Pick<RecentTokenAction, "address" | "type" | "time" | "token">
 > = ({ address, type, token, time }) => {
   return (
-    <div className="flex items-center px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
-      <span className="text-[#9192A0]">{address}</span>&nbsp;
+    <div className="flex items-center px-6 border-r border-[rgba(252,_252,_252,_0.24)] text-[#FCFCFC] text-nowrap">
+      <span className="text-[#FCFCFC]">{address}</span>&nbsp;
       <span className={twMerge("text-[#AEE67F]")}>{type}</span>
       &nbsp;
       {token.name}
@@ -86,8 +86,8 @@ const RecentTokenSwap: FC<
   Pick<RecentTokenAction, "address" | "type" | "amount" | "token">
 > = ({ address, type, amount, token }) => {
   return (
-    <div className="flex px-6 border-r border-[#30344A] text-[#9192A0] text-nowrap">
-      <span className="text-[#9192A0]">{address}</span>&nbsp;
+    <div className="flex px-6 border-r border-[rgba(252,_252,_252,_0.24)] text-[#FCFCFC] text-nowrap">
+      <span className="text-[#FCFCFC]">{address}</span>&nbsp;
       <span
         className={twMerge(
           "text-[#9FF4CF]",
@@ -116,7 +116,7 @@ const RecentTokenSwap: FC<
 };
 
 const MarqueeToken = () => {
-  const [notificationList, setListNotifications] = useState([]);
+  const [notificationList, setListNotifications] = useState([]); // MOCK_DATA
   // const [latestCreatedToken, setLatestCreatedToken] =
   //   useState<coinInfo>(undefined);
   // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
@@ -195,7 +195,7 @@ const MarqueeToken = () => {
   if (!notificationList?.length) return null;
 
   return (
-    <div className="flex items-center justify-center w-full bg-[#1A1C28] p-4">
+    <div className="flex items-center justify-center w-full bg-[#3D2426] p-4">
       <div className="flex items-center justify-center max-w-[1216px]">
         <div className="mr-4">
           <svg
@@ -215,8 +215,9 @@ const MarqueeToken = () => {
           pauseOnClick
           pauseOnHover
           gradient
-          gradientColor="#1A1C28"
+          gradientColor="#3D2426"
           gradientWidth={50}
+          speed={150}
         >
           {/* <div className="w-full flex items-center overflow-x-auto no-scrollbar"> */}
           {notificationList.map((item, idx) => {

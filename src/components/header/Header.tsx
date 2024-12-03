@@ -14,7 +14,7 @@ import { ConnectButton } from "../buttons/ConnectButton";
 import Banner from "./Banner";
 import { fromBig, getSolPriceInUSD, reduceString } from "@/utils/util";
 import { twMerge } from "tailwind-merge";
-import { ACTION_TYPE } from "./MarqueeToken";
+import MarqueeToken, { ACTION_TYPE } from "./MarqueeToken";
 import dayjs from "dayjs";
 import { BN } from "@coral-xyz/anchor";
 import { formatLargeNumber } from "@/utils/format";
@@ -48,47 +48,48 @@ const Header: FC = () => {
     useState<coinInfo>(undefined);
   const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
 
-  useEffect(() => {
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
-    });
-    const listener = new AgentsLandListener(connection);
-    listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
-      const newCoinInfo: coinInfo = {
-        creator: basicTokenInfo.creator,
-        name: basicTokenInfo.metadata.name,
-        url: basicTokenInfo.metadata.json?.image ?? basicTokenInfo.metadata.uri,
-        ticker: basicTokenInfo.metadata.symbol,
-        tokenReserves: new BN(0),
-        lamportReserves: new BN(0),
-        token: basicTokenInfo.mintAddress,
-        commit: "",
-        decimals: 6,
-        bondingCurveLimit: new BN(0),
-        listed: false,
-      };
-      console.log("new coin info: ", newCoinInfo);
-      setLatestCreatedToken(newCoinInfo);
-    });
-    listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
-      setLatestSwapInfo(swapInfo);
-    });
+  // useEffect(() => {
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+  //   });
+  //   const listener = new AgentsLandListener(connection);
+  //   listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
+  //     const newCoinInfo: coinInfo = {
+  //       creator: basicTokenInfo.creator,
+  //       name: basicTokenInfo.metadata.name,
+  //       url: basicTokenInfo.metadata.json?.image ?? basicTokenInfo.metadata.uri,
+  //       ticker: basicTokenInfo.metadata.symbol,
+  //       tokenReserves: new BN(0),
+  //       lamportReserves: new BN(0),
+  //       token: basicTokenInfo.mintAddress,
+  //       commit: "",
+  //       decimals: 6,
+  //       bondingCurveLimit: new BN(0),
+  //       listed: false,
+  //     };
+  //     console.log("new coin info: ", newCoinInfo);
+  //     setLatestCreatedToken(newCoinInfo);
+  //   });
+  //   listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
+  //     setLatestSwapInfo(swapInfo);
+  //   });
 
-    const subId = listener.subscribeProgramLogs(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const subId = listener.subscribeProgramLogs(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      connection.removeOnLogsListener(subId);
-    };
-  }, []);
+  //   return () => {
+  //     connection.removeOnLogsListener(subId);
+  //   };
+  // }, []);
 
   console.log("latestCreatedToken", { latestCreatedToken });
   console.log("latestSwapInfo", { latestSwapInfo });
 
   return (
     <>
+      <MarqueeToken />
       <header className="relative z-10 w-full h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
         <div className="py-6 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
@@ -123,7 +124,7 @@ const Header: FC = () => {
               closeModal={() => setShowStepWork(false)}
             />
           </div>
-          <div className="flex justify-center items-center gap-2">
+          {/* <div className="flex justify-center items-center gap-2">
             {latestSwapInfo && (
               <div>
                 <Link
@@ -207,7 +208,7 @@ const Header: FC = () => {
                 </Link>
               </div>
             )}
-          </div>
+          </div> */}
           <ConnectButton />
         </div>
       </header>

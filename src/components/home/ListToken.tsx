@@ -43,7 +43,7 @@ dayjs.updateLocale("en", {
 });
 
 export enum STATUS_TOKEN {
-  LUNCH = "Live Lunch",
+  LUNCH = "Live Launch",
   LISTED = "Listed",
 }
 
@@ -119,7 +119,7 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
 
         return (
           <div
-            className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)]"
+            className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}`}
             onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
           >
@@ -147,45 +147,49 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
                 <Image src={cloudIslandImg} alt="cloudIslandImg" />
               </div>
             </div>
-            <div className="bg-[#13141d] rounded-lg p-6">
-              <div className="flex justify-between items-center">
-                <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                  create by{" "}
-                  <span
-                    className="text-[#E4775D] underline"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      handleToProfile(ind as any);
-                    }}
-                  >
-                    {coinItem.creator?.["wallet"]
-                      ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
-                      : coinItem.creator.toString()}
+            <div className="bg-[#13141d] rounded-lg p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <div className="uppercase text-[#84869A] text-[12px] font-medium">
+                    create by{" "}
+                    <span
+                      className="text-[#E4775D] underline"
+                      onClick={(event) => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        handleToProfile(ind as any);
+                      }}
+                    >
+                      {coinItem.creator?.["wallet"]
+                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                        : coinItem.creator.toString()}
+                    </span>
+                  </div>
+                  <span className="uppercase text-[12px] text-[#84869A] text-right">
+                    {dayjs(coinItem.date || Date.now()).fromNow()}
                   </span>
                 </div>
-                <span className="uppercase text-[12px] text-[#84869A] text-right">
-                  {dayjs(coinItem.date || Date.now()).fromNow()}
-                </span>
+                <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
+                  {coinItem.name} (${coinItem.ticker})
+                </div>
+                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+                  {coinItem.description || ""}
+                </div>
               </div>
-              <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
-                {coinItem.name} (${coinItem.ticker})
-              </div>
-              <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6 h-20">
-                {coinItem.description || ""}
-              </div>
-              <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
-                Marketcap{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatNumberKMB(Number(coinItem.marketcap || 0))}(
-                  {bondingCurvePercent}%)
-                </span>
-              </div>
-              <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
-                <div
-                  className="rounded-[999px] h-2 bg-barrie"
-                  style={{ width: `${bondingCurvePercent}%` }}
-                ></div>
+              <div>
+                <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
+                  Marketcap{" "}
+                  <span className="text-[#E8E9EE]">
+                    {formatNumberKMB(Number(coinItem.marketcap || 0))}(
+                    {bondingCurvePercent}%)
+                  </span>
+                </div>
+                <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
+                  <div
+                    className="rounded-[999px] h-2 bg-barrie"
+                    style={{ width: `${bondingCurvePercent}%` }}
+                  ></div>
+                </div>
               </div>
             </div>
           </div>
@@ -237,7 +241,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
           coinItem.oraidexPoolAddr && !coinItem.raydiumPoolAddr;
         return (
           <div
-            className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)]"
+            className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}-listed`}
             onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
           >
@@ -270,53 +274,57 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 />
               </div>
             </div>
-            <div className="bg-[#13141d] rounded-lg p-6">
-              <div className="flex justify-between items-center">
-                <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                  create by{" "}
-                  <span
-                    className="text-[#E4775D] underline"
-                    onClick={() => handleToProfile(ind as any)}
-                  >
-                    {coinItem.creator?.["wallet"]
-                      ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
-                      : coinItem.creator.toString()}
+            <div className="bg-[#13141d] rounded-lg p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <div className="uppercase text-[#84869A] text-[12px] font-medium">
+                    create by{" "}
+                    <span
+                      className="text-[#E4775D] underline"
+                      onClick={() => handleToProfile(ind as any)}
+                    >
+                      {coinItem.creator?.["wallet"]
+                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                        : coinItem.creator.toString()}
+                    </span>
+                  </div>
+
+                  <span className="uppercase text-[12px] text-[#84869A] text-right">
+                    {dayjs(coinItem.date || Date.now()).fromNow()}
                   </span>
                 </div>
-
-                <span className="uppercase text-[12px] text-[#84869A] text-right">
-                  {dayjs(coinItem.date || Date.now()).fromNow()}
-                </span>
-              </div>
-              <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
-                {coinItem.name} (${coinItem.ticker})
-              </div>
-              <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6 h-20">
-                {coinItem.description || ""}
-              </div>
-              {isRaydiumListed ? (
-                <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#9945FF_0.56%,_#7962E7_20.34%,_#00D18C_99.44%)] p-1">
-                  <Image
-                    src={raydiumIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN RAYDIUM</span>
+                <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
+                  {coinItem.name} (${coinItem.ticker})
                 </div>
-              ) : (
-                <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1">
-                  <Image
-                    src={oraidexIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN ORAIDEX</span>
+                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+                  {coinItem.description || ""}
                 </div>
-              )}
+              </div>
+              <div>
+                {isRaydiumListed ? (
+                  <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#9945FF_0.56%,_#7962E7_20.34%,_#00D18C_99.44%)] p-1">
+                    <Image
+                      src={raydiumIcon}
+                      alt="icon_dex"
+                      className="mr-1"
+                      width={16}
+                      height={16}
+                    />
+                    <span>LISTED oN RAYDIUM</span>
+                  </div>
+                ) : (
+                  <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1">
+                    <Image
+                      src={oraidexIcon}
+                      alt="icon_dex"
+                      className="mr-1"
+                      width={16}
+                      height={16}
+                    />
+                    <span>LISTED oN ORAIDEX</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         );
