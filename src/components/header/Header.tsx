@@ -66,6 +66,7 @@ const Header: FC = () => {
         commit: "",
         decimals: 6,
         bondingCurveLimit: new BN(0),
+        listed: false,
       };
       console.log("new coin info: ", newCoinInfo);
       setLatestCreatedToken(newCoinInfo);
