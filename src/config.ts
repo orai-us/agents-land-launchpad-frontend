@@ -5,8 +5,8 @@ export const PROGRAM_ID = process.env.NEXT_PUBLIC_PROGRAM_ID ?? "";
 export const SOL_DECIMAL = 9;
 export const MAX_RETRY_QUERY_TOKEN = 3;
 
-// export const BONDING_CURVE_LIMIT = 85 * LAMPORTS_PER_SOL;
-export const BONDING_CURVE_LIMIT = 10 * LAMPORTS_PER_SOL; // FIXME: fix limit
+export const BONDING_CURVE_LIMIT = 85 * LAMPORTS_PER_SOL;
+// export const BONDING_CURVE_LIMIT = 10 * LAMPORTS_PER_SOL; // FIXME: fix limit
 export const LIMIT_PAGINATION = 8;
 
 const endpoints = {
