@@ -1,4 +1,4 @@
-name: publish_package
+name: publish_staging
 
 # Controls when the action will run.
 on:
@@ -52,7 +52,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: devorai/agents-land-launchpad-be:${{ steps.extract_sha.outputs.short_sha }}
+          tags: devorai/agents-land-launchpad-fe:${{ steps.extract_sha.outputs.short_sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
