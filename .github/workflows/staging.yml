@@ -52,7 +52,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: devorai/owallet-landing-page:${{ steps.extract_sha.outputs.short_sha }}
+          tags: devorai/agents-land-launchpad-be:${{ steps.extract_sha.outputs.short_sha }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
 
