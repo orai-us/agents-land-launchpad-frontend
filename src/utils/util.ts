@@ -426,3 +426,12 @@ export function calculateKotHProgress(
 }
 
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export const retrieveEnvVariable = (variableName: string) => {
+  const variable = process.env[variableName] || "";
+  if (!variable) {
+    console.log(`${variableName} is not set`);
+    // process.exit(1);
+  }
+  return variable;
+};

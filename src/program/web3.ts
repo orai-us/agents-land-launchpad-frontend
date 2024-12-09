@@ -1,3 +1,9 @@
+import { errorAlert } from "@/components/others/ToastGroup";
+import { rayBuyTx, raySellTx } from "@/utils/raydiumSwap/raydiumSwap";
+import { launchDataInfo } from "@/utils/types";
+import * as anchor from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 import {
   ComputeBudgetProgram,
   Connection,
@@ -6,16 +12,12 @@ import {
   PublicKey,
   Transaction,
   TransactionExpiredTimeoutError,
+  VersionedTransaction,
 } from "@solana/web3.js";
+import BigNumber from "bignumber.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
-import * as anchor from "@coral-xyz/anchor";
-import { WalletContextState } from "@solana/wallet-adapter-react";
-import { errorAlert } from "@/components/others/ToastGroup";
-import { BN, Program } from "@coral-xyz/anchor";
 import { SEED_CONFIG } from "./seed";
-import { launchDataInfo } from "@/utils/types";
-import BigNumber from "bignumber.js";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -241,6 +243,163 @@ export class Web3SolanaProgramInteraction {
 
       if (result?.value?.confirmationStatus) {
         console.log("----confirm----", { transaction, result });
+        return { transaction, result };
+      }
+    }
+  };
+
+  //Raydium Swap transaction
+  raydiumSwapTx = async (
+    mint: PublicKey,
+    wallet: WalletContextState,
+    amount: string,
+    type: number,
+    poolKey: string
+  ) => {
+    // check the connection
+    if (!wallet.publicKey || !this.connection) {
+      console.log("Warning: Wallet not connected");
+      return;
+    }
+    // const poolKeys = await PoolKeys.fetchPoolKeyInfo(
+    //   this.connection,
+    //   mint,
+    //   NATIVE_MINT
+    // );
+    // const poolId = poolKeys.id;
+    const poolId = new PublicKey(poolKey);
+    try {
+      const coinDecimal = type === 0 ? 9 : 6;
+      const fmtAmount = new anchor.BN(
+        parseFloat(amount) * Math.pow(10, coinDecimal)
+      ).toString();
+      const transaction = new Transaction();
+
+      let swapTx;
+      if (type == 0) {
+        swapTx = await rayBuyTx(
+          this.connection,
+          mint,
+          parseFloat(amount),
+          // parseFloat(fmtAmount),
+          wallet,
+          poolId
+        );
+      } else {
+        swapTx = await raySellTx(
+          this.connection,
+          mint,
+          fmtAmount,
+          wallet,
+          poolId
+        );
+      }
+      if (swapTx == null) {
+        console.log(`Error getting buy transaction`);
+        return null;
+      }
+
+      // transaction.add(cpIx, cuIx);
+      transaction.add(...swapTx.instructions);
+
+      transaction.feePayer = wallet.publicKey;
+      transaction.recentBlockhash = (
+        await this.connection.getLatestBlockhash()
+      ).blockhash;
+
+      if (wallet.signTransaction) {
+        const signedTx = await wallet.signTransaction(transaction);
+        const sTx = signedTx.serialize();
+        console.log(
+          "----",
+          await this.connection.simulateTransaction(signedTx)
+        );
+        const signature = await this.connection.sendRawTransaction(sTx, {
+          preflightCommitment: "confirmed",
+          skipPreflight: false,
+        });
+        const blockhash = await this.connection.getLatestBlockhash();
+        const res = await this.connection.confirmTransaction(
+          {
+            signature,
+            blockhash: blockhash.blockhash,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+          },
+          "confirmed"
+        );
+        console.log("Successfully initialized.\n Signature: ", signature);
+        return res;
+      }
+    } catch (error) {
+      console.log("Error in swap transaction", error, error.error);
+      const { transaction = "", result } =
+        (await this.handleTransaction({
+          error,
+        })) || {};
+
+      if (result?.value?.confirmationStatus) {
+        console.log("----confirm----raydium", { transaction, result });
+        return { transaction, result };
+      }
+    }
+  };
+
+  //Raydium Swap transaction
+  simulateRaydiumSwapTx = async (
+    mint: PublicKey,
+    wallet: WalletContextState,
+    amount: string,
+    type: number,
+    poolKey: string
+  ) => {
+    // check the connection
+    if (!wallet.publicKey || !this.connection) {
+      console.log("Warning: Wallet not connected");
+      return;
+    }
+    const poolId = new PublicKey(poolKey);
+    try {
+      const coinDecimal = type === 0 ? 9 : 6;
+      const fmtAmount = new anchor.BN(
+        parseFloat(amount) * Math.pow(10, coinDecimal)
+      ).toString();
+      const transaction = new Transaction();
+
+      let swapTx: VersionedTransaction;
+      if (type == 0) {
+        swapTx = (await rayBuyTx(
+          this.connection,
+          mint,
+          parseFloat(amount),
+          wallet,
+          poolId
+        )) as VersionedTransaction;
+      } else {
+        swapTx = (await raySellTx(
+          this.connection,
+          mint,
+          fmtAmount,
+          wallet,
+          poolId
+        )) as VersionedTransaction;
+      }
+      if (swapTx == null) {
+        console.log(`Error getting buy transaction`);
+        return null;
+      }
+
+      const res = await this.connection.simulateTransaction(swapTx);
+
+      return res;
+    } catch (error) {
+      console.log("Error in swap transaction", error, error.error);
+      const { transaction = "", result } =
+        (await this.handleTransaction({
+          error,
+        })) || {};
+
+      if (result?.value?.confirmationStatus) {
+        console.log("----confirm----raydium", { transaction, result });
         return { transaction, result };
       }
     }

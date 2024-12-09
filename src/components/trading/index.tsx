@@ -24,6 +24,7 @@ import { twMerge } from "tailwind-merge";
 import TokenDistribution from "../others/TokenDistribution";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { CoinGeckoChart } from "../TVChart/CoingeckoChart";
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -290,9 +291,15 @@ export default function TradingPage() {
               </div>
             </div>
 
-            <div className="bg-[#111114] pr-6 pb-6 rounded-b">
-              <TradingChart param={coin}></TradingChart>
-            </div>
+            {Number(progress) < 100 ? (
+              <div className="bg-[#101827] pb-6 rounded-b">
+                <TradingChart param={coin}></TradingChart>
+              </div>
+            ) : (
+              <div className="bg-[#111114] rounded-b">
+                <CoinGeckoChart param={coin}></CoinGeckoChart>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col gap-4 mt-12">
@@ -301,6 +308,7 @@ export default function TradingPage() {
           <Chatting param={param} coin={coin}></Chatting>
         </div>
         <div className="w-full max-w-[384px]">
+          {coin.raydiumPoolAddr}
           <TradeForm coin={coin} progress={progress}></TradeForm>
           {/* <SocialList /> */}
           {/* <TokenData coinData={coin} /> */}

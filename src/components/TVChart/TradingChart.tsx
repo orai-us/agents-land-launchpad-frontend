@@ -49,9 +49,6 @@ export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
 
   return (
     <>
-      <Head>
-        <title>Sample Demo TradingView with NextJS</title>
-      </Head>
       {/* <Script
         src="/libraries/charting_library/charting_library.standalone.js"
         strategy="lazyOnload"

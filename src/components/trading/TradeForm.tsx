@@ -57,12 +57,27 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             )
             .toFixed(0, 1);
           const mint = new PublicKey(coin.token);
-          const receive = await web3Solana.simulateSwapTx(
-            mint,
-            wallet,
-            amountWithDecimal,
-            isBuy
-          );
+
+          let receive = "";
+          if (Number(progress) < 100) {
+            receive = await web3Solana.simulateSwapTx(
+              mint,
+              wallet,
+              amountWithDecimal,
+              isBuy
+            );
+          } else {
+            // receive = await web3Solana.simulateRaydiumSwapTx(
+            //   mint,
+            //   wallet,
+            //   amountWithDecimal,
+            //   isBuy,
+            //   coin.raydiumPoolAddr
+            // );
+
+            console.log("receive", receive);
+          }
+
           setSimulateReceive(
             new BigNumber(receive)
               .div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL))
@@ -106,7 +121,18 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     setLoading(true);
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
-    const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+    let res;
+    if (Number(progress) < 100) {
+      res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+    } else {
+      res = await web3Solana.raydiumSwapTx(
+        mint,
+        wallet,
+        sol,
+        isBuy,
+        coin.raydiumPoolAddr
+      );
+    }
 
     if (res) {
       console.log("res", res);
@@ -305,7 +331,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         </div>
 
         <button
-          disabled={progress === 100 || !sol || !wallet.publicKey}
+          disabled={!sol || !wallet.publicKey}
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >

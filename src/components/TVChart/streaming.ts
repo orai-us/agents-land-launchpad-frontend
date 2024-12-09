@@ -12,6 +12,7 @@ import type {
 
 import { queryClient } from "../../provider/providers";
 import { CandlePrice, Chart } from "@/utils/types";
+import { EVENT_CHART_SOCKET } from "./config";
 
 let socket: Socket | undefined = undefined;
 let initialTimeStamp: number = new Date().getTime();
@@ -54,7 +55,7 @@ if (socket) {
     }
   });
 
-  socket.on("updateChart", (tokenId: string, priceUpdates: RawChart) => {
+  socket.on(EVENT_CHART_SOCKET, (tokenId: string, priceUpdates: RawChart) => {
     try {
     } catch (error) {}
     const tradeTime = priceUpdates.ts * 1000;
