@@ -1,17 +1,13 @@
-import { PROGRAM_ID } from "@/config";
-import UserContext from "@/context/UserContext";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import { commitmentLevel, endpoint } from "@/program/web3";
-import { recordInfo } from "@/utils/types";
-import {
-  calculateTokenPrice,
-  getSolPriceInUSD,
-  getUserByWalletAddress,
-} from "@/utils/util";
-import { Connection, PublicKey } from "@solana/web3.js";
-import { isEmpty } from "lodash";
-import { useContext, useEffect, useState } from "react";
+import { PROGRAM_ID } from '@/config';
+import UserContext from '@/context/UserContext';
+import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
+import { ResultType } from '@/program/logListeners/types';
+import { commitmentLevel, endpoint } from '@/program/web3';
+import { recordInfo } from '@/utils/types';
+import { calculateTokenPrice, getSolPriceInUSD, getUserByWalletAddress } from '@/utils/util';
+import { Connection, PublicKey } from '@solana/web3.js';
+import { isEmpty } from 'lodash';
+import { useContext, useEffect, useState } from 'react';
 
 const useListenEventSwapChart = ({ coin }) => {
   const [newSwapDatas, setNewSwapDatas] = useState([]);
@@ -31,7 +27,7 @@ const useListenEventSwapChart = ({ coin }) => {
         // solPrice
       );
 
-      console.log("currentPrice", currentPrice);
+      console.log('currentPrice', currentPrice);
       setCurPrice(currentPrice);
     })();
   }, [coin]);
@@ -42,18 +38,18 @@ const useListenEventSwapChart = ({ coin }) => {
 
     const connection = new Connection(endpoint, {
       commitment: commitmentLevel,
-      wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+      wsEndpoint: import.meta.env.VITE_SOLANA_WS
     });
 
     const listener = new AgentsLandEventListener(connection);
     listener.setProgramEventCallback(
-      "swapEvent",
+      'swapEvent',
       async (result: ResultType) => {
         // const solPrice = await getSolPriceInUSD();
         const userInfo = await getUserByWalletAddress({ wallet: result.user });
         const tx = await connection.getTransaction(result.tx, {
-          commitment: "confirmed",
-          maxSupportedTransactionVersion: 0,
+          commitment: 'confirmed',
+          maxSupportedTransactionVersion: 0
         });
 
         const newPrice = calculateTokenPrice(
@@ -69,7 +65,7 @@ const useListenEventSwapChart = ({ coin }) => {
           time: new Date(tx.blockTime),
           tx: result.tx,
           price: newPrice,
-          swapDirection: result.swapDirection as any,
+          swapDirection: result.swapDirection as any
         };
 
         setCurPrice(newPrice);
@@ -81,20 +77,18 @@ const useListenEventSwapChart = ({ coin }) => {
       []
     );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+    const { program, listenerIds } = listener.listenProgramEvents(new PublicKey(PROGRAM_ID).toBase58());
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log('ready to remove listeners');
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [coin]);
 
   return {
     curPrice,
-    newSwapDatas,
+    newSwapDatas
   };
 };
 

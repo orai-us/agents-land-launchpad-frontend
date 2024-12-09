@@ -1,30 +1,28 @@
-"use client";
+'use client';
 
-import LogoFullIcon from "@/assets/icons/logo.svg";
-import { PROGRAM_ID } from "@/config";
-import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
-import { commitmentLevel, endpoint } from "@/program/web3";
-import { coinInfo, SwapInfo } from "@/utils/types";
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { FC, useContext, useEffect, useState } from "react";
-import { ConnectButton } from "../buttons/ConnectButton";
-import Banner from "./Banner";
-import { fromBig, getSolPriceInUSD, reduceString } from "@/utils/util";
-import { twMerge } from "tailwind-merge";
-import MarqueeToken, { ACTION_TYPE } from "./MarqueeToken";
-import dayjs from "dayjs";
-import { BN } from "@coral-xyz/anchor";
-import { formatLargeNumber } from "@/utils/format";
-import UserContext from "@/context/UserContext";
-import HowItWorkModal from "../modals/HowItWork";
+import LogoFullIcon from '@/assets/icons/logo.svg';
+import { PROGRAM_ID } from '@/config';
+import { AgentsLandListener } from '@/program/logListeners/AgentsLandListener';
+import { commitmentLevel, endpoint } from '@/program/web3';
+import { coinInfo, SwapInfo } from '@/utils/types';
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { FC, useContext, useEffect, useState } from 'react';
+import { ConnectButton } from '../buttons/ConnectButton';
+import Banner from './Banner';
+import { fromBig, getSolPriceInUSD, reduceString } from '@/utils/util';
+import { twMerge } from 'tailwind-merge';
+import MarqueeToken, { ACTION_TYPE } from './MarqueeToken';
+import dayjs from 'dayjs';
+import { BN } from '@coral-xyz/anchor';
+import { formatLargeNumber } from '@/utils/format';
+import UserContext from '@/context/UserContext';
+import HowItWorkModal from '../modals/HowItWork';
+import { Link, useLocation } from 'wouter';
 
 const Header: FC = () => {
   const { solPrice, setSolPrice } = useContext(UserContext);
-  const pathname = usePathname();
-  const router = useRouter();
+  // const [, setLocation] = useLocation();
+  const [pathname, setLocation] = useLocation();
   const [showStepWork, setShowStepWork] = useState(false);
 
   useEffect(() => {
@@ -33,7 +31,7 @@ const Header: FC = () => {
         const price = await getSolPriceInUSD();
         setSolPrice(price);
       } catch (error) {
-        console.log("error sol price", error);
+        console.log('error sol price', error);
       }
     };
 
@@ -41,17 +39,16 @@ const Header: FC = () => {
   }, []);
 
   const handleToRouter = (id: string) => {
-    router.push(id);
+    setLocation(id);
   };
 
-  const [latestCreatedToken, setLatestCreatedToken] =
-    useState<coinInfo>(undefined);
+  const [latestCreatedToken, setLatestCreatedToken] = useState<coinInfo>(undefined);
   const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
 
   // useEffect(() => {
   //   const connection = new Connection(endpoint, {
   //     commitment: commitmentLevel,
-  //     wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
   //   });
   //   const listener = new AgentsLandListener(connection);
   //   listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
@@ -84,8 +81,8 @@ const Header: FC = () => {
   //   };
   // }, []);
 
-  console.log("latestCreatedToken", { latestCreatedToken });
-  console.log("latestSwapInfo", { latestSwapInfo });
+  console.log('latestCreatedToken', { latestCreatedToken });
+  console.log('latestSwapInfo', { latestSwapInfo });
 
   return (
     <>
@@ -94,19 +91,19 @@ const Header: FC = () => {
         <div className="py-6 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
             <Link href="/">
-              <Image src={LogoFullIcon} alt="LogoFullIcon" />
+              <img src={LogoFullIcon} alt="LogoFullIcon" />
             </Link>
             {[
               {
-                link: "/create-coin",
-                text: "Launch",
-                onclick: () => handleToRouter("/create-coin"),
+                link: '/create-coin',
+                text: 'Launch',
+                onclick: () => handleToRouter('/create-coin')
               },
               {
-                link: "/how-it-work",
-                text: "How it works?",
-                onclick: () => setShowStepWork(true),
-              },
+                link: '/how-it-work',
+                text: 'How it works?',
+                onclick: () => setShowStepWork(true)
+              }
             ].map((item, key) => {
               return (
                 <button
@@ -119,10 +116,7 @@ const Header: FC = () => {
                 </button>
               );
             })}
-            <HowItWorkModal
-              isOpen={showStepWork}
-              closeModal={() => setShowStepWork(false)}
-            />
+            <HowItWorkModal isOpen={showStepWork} closeModal={() => setShowStepWork(false)} />
           </div>
           {/* <div className="flex justify-center items-center gap-2">
             {latestSwapInfo && (
@@ -160,7 +154,7 @@ const Header: FC = () => {
                         className="w-5 h-5 rounded-full ml-2"
                       />
                     ) : (
-                      <Image
+                      <img
                         src={latestSwapInfo.mintUri}
                         alt="tokenIMG"
                         className="w-5 h-5 rounded-full ml-2"
@@ -194,7 +188,7 @@ const Header: FC = () => {
                         className="w-5 h-5 rounded-full ml-2"
                       />
                     ) : (
-                      <Image
+                      <img
                         src={latestCreatedToken.url}
                         alt="tokenIMG"
                         className="w-5 h-5 rounded-full ml-2"
@@ -212,7 +206,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </header>
-      {pathname === "/" && <Banner />}
+      {pathname === '/' && <Banner />}
     </>
   );
 };

@@ -1,12 +1,12 @@
-import UserImg from "@/assets/images/user-avatar.png";
-import UserContext from "@/context/UserContext";
-import { userInfo } from "@/utils/types";
-import { reduceString, updateUser } from "@/utils/util";
-import React, { ChangeEvent, useContext, useRef, useState } from "react";
-import { errorAlert, successAlert } from "../others/ToastGroup";
-import { uploadImage } from "@/utils/fileUpload";
-import { useSocket } from "@/contexts/SocketContext";
-import { Spinner } from "../loadings/Spinner";
+import UserImg from '@/assets/images/user-avatar.png';
+import UserContext from '@/context/UserContext';
+import { userInfo } from '@/utils/types';
+import { reduceString, updateUser } from '@/utils/util';
+import React, { ChangeEvent, useContext, useRef, useState } from 'react';
+import { errorAlert, successAlert } from '../others/ToastGroup';
+import { uploadImage } from '@/utils/fileUpload';
+import { useSocket } from '@/contexts/SocketContext';
+import { Spinner } from '../loadings/Spinner';
 
 interface ModalProps {
   data: userInfo;
@@ -14,31 +14,26 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ data }) => {
   const { isLoading, setIsLoading } = useSocket();
-  const { setProfileEditModal, setImageUrl, setUser, user } =
-    useContext(UserContext);
+  const { setProfileEditModal, setImageUrl, setUser, user } = useContext(UserContext);
   const [index, setIndex] = useState<userInfo>(data);
-  const [imagePreview, setImagePreview] = useState<string | null>(
-    data.avatar || null
-  );
+  const [imagePreview, setImagePreview] = useState<string | null>(data.avatar || null);
   const [fileName, setFileName] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setIndex({ ...index, [e.target.id]: e.target.value });
   };
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file.");
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
         return;
       }
       const url = URL.createObjectURL(file);
-      setFileName(file.name || ""); // Ensure it's always a string
+      setFileName(file.name || ''); // Ensure it's always a string
       setImagePreview(url); // URL.createObjectURL always returns a string
     }
   };
@@ -46,20 +41,20 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
   const sendUpdate = async () => {
     try {
       setIsLoading(true);
-      let uploadedUrl: string = index.avatar || ""; // Ensure it starts as a string
+      let uploadedUrl: string = index.avatar || ''; // Ensure it starts as a string
 
       if (imagePreview && imagePreview !== index.avatar) {
         const uploadedImageUrl = await uploadImage(imagePreview);
 
         if (!uploadedImageUrl) {
           setIsLoading(false);
-          errorAlert("Image upload failed.");
+          errorAlert('Image upload failed.');
           return;
         }
-        uploadedUrl = uploadedImageUrl || ""; // If uploadImage returns false, fallback to an empty string
+        uploadedUrl = uploadedImageUrl || ''; // If uploadImage returns false, fallback to an empty string
       }
 
-      console.log("data: ", data)
+      console.log('data: ', data);
       const { name, wallet, isLedger, signature } = index;
 
       const updatedUser = {
@@ -67,31 +62,31 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
         name,
         wallet,
         isLedger,
-        signature,
+        signature
       };
 
       const result = await updateUser(index._id, updatedUser);
 
       if (result.error) {
-        errorAlert("Failed to save the data.");
+        errorAlert('Failed to save the data.');
       } else {
-        successAlert("Successfully updated.");
+        successAlert('Successfully updated.');
         setUser(updatedUser);
         setProfileEditModal(false);
       }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      errorAlert("An error occurred while updating your profile.");
+      errorAlert('An error occurred while updating your profile.');
     }
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      successAlert("Copied to clipboard!");
+      successAlert('Copied to clipboard!');
     } catch (err) {
-      errorAlert("Failed to copy!");
+      errorAlert('Failed to copy!');
     }
   };
 
@@ -99,23 +94,9 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
     <div className="fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md">
       {isLoading && Spinner()}
       <div className="flex w-full max-w-[300px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#13141D] text-[#E8E9EE] relative">
-        <button
-          onClick={() => setProfileEditModal(false)}
-          className="absolute top-6 right-6 text-gray-600"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
+        <button onClick={() => setProfileEditModal(false)} className="absolute top-6 right-6 text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
         <h2 className="text-[18px] font-medium mb-6">Edit Profile</h2>
@@ -133,26 +114,12 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
                 </div>
               ) : (
                 <div className="w-12 h-12 rounded-lg overflow-hidden">
-                  <img
-                    src={UserImg.src as any}
-                    alt="Default Avatar"
-                    className="flex object-cover w-full h-full mx-auto"
-                  />
+                  <img src={UserImg} alt="Default Avatar" className="flex object-cover w-full h-full mx-auto" />
                 </div>
               )}
               <div className="flex items-center ml-2">
-                <p className="mr-2 text-[14px] text-[#9192A0]">
-                  {reduceString(index?.wallet || "", 4, 4)}
-                </p>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  className="cursor-pointer hover:brightness-125"
-                  onClick={() => copyToClipboard(index?.wallet)}
-                >
+                <p className="mr-2 text-[14px] text-[#9192A0]">{reduceString(index?.wallet || '', 4, 4)}</p>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" className="cursor-pointer hover:brightness-125" onClick={() => copyToClipboard(index?.wallet)}>
                   <path
                     d="M14.1665 14.6676H5.99988C5.86727 14.6676 5.74009 14.615 5.64632 14.5212C5.55256 14.4274 5.49988 14.3003 5.49988 14.1676V6.00098C5.49988 5.86837 5.55256 5.74119 5.64632 5.64742C5.74009 5.55365 5.86727 5.50098 5.99988 5.50098H14.1665C14.2992 5.50098 14.4263 5.55365 14.5201 5.64742C14.6139 5.74119 14.6665 5.86837 14.6665 6.00098V14.1676C14.6665 14.3003 14.6139 14.4274 14.5201 14.5212C14.4263 14.615 14.2992 14.6676 14.1665 14.6676Z"
                     stroke="#585A6B"
@@ -171,37 +138,18 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
               </div>
             </div>
             <div className="flex items-center">
-              <label
-                htmlFor="fileUpload"
-                className="uppercase w-full p-2 rounded outline-none bg-[#1A1C28] text-center text-[12px] text-white cursor-pointer hover:brightness-125 flex items-center"
-              >
+              <label htmlFor="fileUpload" className="uppercase w-full p-2 rounded outline-none bg-[#1A1C28] text-center text-[12px] text-white cursor-pointer hover:brightness-125 flex items-center">
                 Upload
               </label>
-              <input
-                id="fileUpload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-              />
+              <input id="fileUpload" type="file" accept="image/*" className="hidden" onChange={handleFileChange} ref={fileInputRef} />
             </div>
           </div>
 
           <div className="w-full flex flex-col">
-            <label
-              className="block text-[12px] font-medium uppercase text-[#84869A] mb-3"
-              htmlFor="name"
-            >
+            <label className="block text-[12px] font-medium uppercase text-[#84869A] mb-3" htmlFor="name">
               Username:
             </label>
-            <input
-              className="w-full px-4 h-12 rounded-lg outline-none bg-transparent border-[1px] border-[#585A6B]"
-              type="text"
-              id="name"
-              value={index.name || ""}
-              onChange={handleChange}
-            />
+            <input className="w-full px-4 h-12 rounded-lg outline-none bg-transparent border-[1px] border-[#585A6B]" type="text" id="name" value={index.name || ''} onChange={handleChange} />
           </div>
         </div>
 

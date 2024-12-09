@@ -1,10 +1,10 @@
-"use client";
-import Link from "next/link";
-import { FC, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { STATUS_TOKEN, TokenTab } from "./ListToken";
-import { BiSearchAlt } from "react-icons/bi";
-import { debounce } from "lodash";
+'use client';
+import { FC, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { STATUS_TOKEN, TokenTab } from './ListToken';
+import { BiSearchAlt } from 'react-icons/bi';
+import { debounce } from 'lodash';
+import { Link } from 'wouter';
 
 const SEARCH_TIME = 1000; // 3000
 
@@ -47,9 +47,9 @@ const FilterListToken: FC<{
             key={e.label}
             onClick={() => setType(e.value)}
             className={twMerge(
-              "uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              'uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
 
-              type === e.value && "bg-[#585A6B] text-[#E8E9EE]"
+              type === e.value && 'bg-[#585A6B] text-[#E8E9EE]'
             )}
           >
             {e.label}
@@ -67,13 +67,7 @@ const FilterListToken: FC<{
               type="button"
             >
               <span className="text-nowrap">{filterState.label}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path
                   fillRule="evenodd"
                   clipRule="evenodd"
@@ -83,16 +77,8 @@ const FilterListToken: FC<{
               </svg>
             </button>
 
-            <div
-              id="dropdownHover"
-              className={twMerge(
-                "z-10 absolute right-0 top-full pt-2 invisible group-hover:visible w-[150px]"
-              )}
-            >
-              <ul
-                className="p-2 text-sm text bg-[#1A1C28] border border-[rgba(88,90,107,0.24)] rounded-lg"
-                aria-labelledby="dropdownHoverButton"
-              >
+            <div id="dropdownHover" className={twMerge('z-10 absolute right-0 top-full pt-2 invisible group-hover:visible w-[150px]')}>
+              <ul className="p-2 text-sm text bg-[#1A1C28] border border-[rgba(88,90,107,0.24)] rounded-lg" aria-labelledby="dropdownHoverButton">
                 {SORT_LIST.map((e, idx) => {
                   return (
                     <li
@@ -103,9 +89,8 @@ const FilterListToken: FC<{
                     >
                       <span
                         className={twMerge(
-                          "p-2 rounded-lg flex justify-start bg-[#1A1C28] gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] hover:bg-[#13141D] text-[#F3F4F6]",
-                          e.value === filterState.value &&
-                            "cursor-not-allowed pointer-events-none bg-[#13141D]"
+                          'p-2 rounded-lg flex justify-start bg-[#1A1C28] gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] hover:bg-[#13141D] text-[#F3F4F6]',
+                          e.value === filterState.value && 'cursor-not-allowed pointer-events-none bg-[#13141D]'
                         )}
                       >
                         {e.label}
@@ -119,11 +104,7 @@ const FilterListToken: FC<{
         )}
 
         <div className="w-screen max-w-[298px] flex flex-row items-center gap-1 pl-5 text-[#F3F4F6] bg-[#13141D] shadow shadow-[rgba(255,255,255,0.08)] hover:brightness-110 font-medium rounded-lg">
-          <BiSearchAlt
-            className="text-4xl text-[#585A6B]"
-            width={16}
-            height={16}
-          />
+          <BiSearchAlt className="text-4xl text-[#585A6B]" width={16} height={16} />
           <input
             type="text"
             // value={token}
@@ -141,19 +122,19 @@ export default FilterListToken;
 
 export const SORT_LIST = [
   {
-    label: "Featured",
-    value: "totalTrades",
+    label: 'Featured',
+    value: 'totalTrades'
   },
   {
-    label: "Last trade",
-    value: "lastTraded",
+    label: 'Last trade',
+    value: 'lastTraded'
   },
   {
-    label: "Creation time",
-    value: "date",
+    label: 'Creation time',
+    value: 'date'
   },
   {
-    label: "Market cap",
-    value: "marketcap",
-  },
+    label: 'Market cap',
+    value: 'marketcap'
+  }
 ];
