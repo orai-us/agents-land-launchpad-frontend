@@ -10,6 +10,7 @@ import { getKoth, reduceString } from "@/utils/util";
 import BigNumber from "bignumber.js";
 import { BONDING_CURVE_LIMIT } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
+import { twMerge } from "tailwind-merge";
 
 const Banner = () => {
   const [kothCoin, setKothCoin] = useState(null);
@@ -42,9 +43,9 @@ const Banner = () => {
 
   return (
     <>
-      <div className="w-full h-[450px] relative bg-banner flex items-center justify-center">
-        <div className="h-full flex justify-between items-center w-full max-w-[1216px]">
-          <div className="flex flex-col items-start">
+      <div className="w-full h-[263px] md:h-[450px] relative bg-banner flex items-center justify-center">
+        <div className="h-full flex justify-center md:justify-between items-end md:items-center w-full max-w-[1216px]">
+          <div className="hidden md:flex flex-col items-start">
             <div className="text-[56px] text-[#E8E9EE] leading-[64px] uppercase font-medium">
               Take your agent
               <br />
@@ -65,7 +66,7 @@ const Banner = () => {
           {kothCoin && (
             // <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
             <div
-              className="relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px] cursor-pointer"
+              className="translate-y-1/2 md:translate-y-0 relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px] cursor-pointer"
               onClick={() => handleToRouter(`/trading/${kothCoin.token}`)}
             >
               <Image
@@ -125,11 +126,29 @@ const Banner = () => {
             </div>
           )}
         </div>
-        {/* <Image
-        src={BannerImg}
-        alt="banner"
-        className="absolute left-1/2 -translate-x-1/2"
-      /> */}
+      </div>
+      <div
+        className={twMerge(
+          "md:hidden mt-6 flex flex-col items-start px-4",
+          kothCoin && "mt-[96px]"
+        )}
+      >
+        <div className="text-[30px] text-[#E8E9EE] leading-[48px] uppercase font-medium">
+          Take your agent
+          <br />
+          to the promise land
+        </div>
+        <div className="mt-6 mb-5 text-base font-medium text-[#E8E9EE]">
+          The First AI Agent Launch Platform
+        </div>
+        <div
+          onClick={() => handleToRouter("/create-coin")}
+          className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+        >
+          <div className="rounded bg-white px-6 py-2 text-[#080A14]">
+            Launch your AGENT
+          </div>
+        </div>
       </div>
     </>
   );

@@ -181,38 +181,7 @@ const HomePage: FC = () => {
 
       <ListToken
         type={currentTab}
-        data={
-          data
-          // .sort((a, b) => {
-          //   if (currentTab === STATUS_TOKEN.LUNCH) {
-          //     switch (filterState.value) {
-          //       case "date":
-          //         return (
-          //           new Date(b.date).getTime() - new Date(a.date).getTime()
-          //         );
-          //       case "marketcap":
-          //         return new BigNumber(b.marketcap || 0)
-          //           .minus(a.marketcap || 0)
-          //           .toNumber();
-          //       default:
-          //         return (
-          //           new Date(b.date).getTime() - new Date(a.date).getTime()
-          //         );
-          //     }
-          //   } else {
-          //     return +b.tokenReserves - +a.tokenReserves;
-          //   }
-          // })
-          // .sort((a, b) => +a.tokenReserves - +b.tokenReserves)
-          // .filter((elm) => {
-          //   if (!token) return true;
-
-          //   return (
-          //     elm.ticker.toLowerCase().includes(token.toLowerCase()) ||
-          //     elm.name.toLowerCase().includes(token.toLowerCase())
-          //   );
-          // })
-        }
+        data={data}
         handleLoadMore={() => setPage((page) => page + 1)}
         totalData={totalData}
       />

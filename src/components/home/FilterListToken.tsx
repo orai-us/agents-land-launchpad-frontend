@@ -15,31 +15,12 @@ const FilterListToken: FC<{
   setFilterState;
   filterState;
 }> = ({ type, setType, setSearch, filterState, setFilterState }) => {
-  // const {
-  //   filterState,
-  //   setFilterState,
-  //   nsfwFilterState,
-  //   setNsfwFilterState,
-  // } = useContext(UserContext);
-
-  // const [filterState, setFilterState] = useState<{
-  //   label: string;
-  //   value: string;
-  // }>({
-  //   label: "Featured",
-  //   value: "featured",
-  // });
-
-  // const [token, setToken] = useState("");
-
-  const searchToken = () => {};
-
   const debounceSearch = debounce((e) => {
     setSearch(e.target.value);
   }, SEARCH_TIME);
 
   return (
-    <div className="flex flex-wrap mt-14 justify-between items-center">
+    <div className="flex flex-wrap mt-10 md:mt-14 justify-between items-center">
       <div className="flex ">
         {Object.values(TokenTab).map((e, key) => (
           <Link
@@ -56,14 +37,14 @@ const FilterListToken: FC<{
           </Link>
         ))}
       </div>
-      <div className="flex ">
+      <div className="flex md:w-fit w-full mt-6">
         {type === STATUS_TOKEN.LUNCH && (
-          <div className="relative cursor-pointer group mr-4">
+          <div className="relative md:w-fit w-full cursor-pointer group mr-4">
             <button
               id="dropdownHoverButton"
               data-dropdown-toggle="dropdownHover"
               data-dropdown-trigger="hover"
-              className="w-screen max-w-[150px] h-10 text-[#F3F4F6] bg-[#13141D] shadow shadow-[rgba(255,255,255,0.08)] hover:brightness-110 font-medium rounded-lg text-sm px-2 py-[6px] flex items-center justify-between"
+              className="w-full mb:w-screen md:max-w-[150px] h-10 text-[#F3F4F6] bg-[#13141D] shadow shadow-[rgba(255,255,255,0.08)] hover:brightness-110 font-medium rounded-lg text-sm px-2 py-[6px] flex items-center justify-between"
               type="button"
             >
               <span className="text-nowrap">{filterState.label}</span>
@@ -118,7 +99,7 @@ const FilterListToken: FC<{
           </div>
         )}
 
-        <div className="w-screen max-w-[298px] flex flex-row items-center gap-1 pl-5 text-[#F3F4F6] bg-[#13141D] shadow shadow-[rgba(255,255,255,0.08)] hover:brightness-110 font-medium rounded-lg">
+        <div className="w-full md:w-screen max-w-[298px] flex flex-row items-center gap-1 pl-5 text-[#F3F4F6] bg-[#13141D] shadow shadow-[rgba(255,255,255,0.08)] hover:brightness-110 font-medium rounded-lg">
           <BiSearchAlt
             className="text-4xl text-[#585A6B]"
             width={16}

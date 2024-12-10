@@ -98,7 +98,7 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
   return (
     <div className="fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md">
       {isLoading && Spinner()}
-      <div className="flex w-full md:max-w-[300px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#13141D] text-[#E8E9EE] relative">
+      <div className="flex w-full md:max-w-[400px] sm:max-w-xl flex-col p-6 rounded-md gap-3 bg-[#13141D] text-[#E8E9EE] relative">
         <button
           onClick={() => setProfileEditModal(false)}
           className="absolute top-6 right-6 text-gray-600"

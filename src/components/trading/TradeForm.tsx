@@ -151,7 +151,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   };
 
   return (
-    <div className="p-6 rounded-lg bg-[#13141D] text-[#9192A0] w-full">
+    <div className="p-3 md:p-6 rounded-b-lg md:rounded-lg bg-[#13141D] text-[#9192A0] w-full">
       {isListedOnRay && (
         <div className="animate-pulse animate-infinite pb-4 text-[#E8E9EE] text-center">
           Trade via Raydium
@@ -190,7 +190,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         <div className="flex justify-between items-center mt-3 mb-3">
           <label
             htmlFor="name"
-            className="rounded bg-transparent text-ml font-medium text-[#9192A0] text-[12px] flex"
+            className="rounded bg-transparent text-ml font-medium text-[#9192A0] md:text-[12px] flex"
           >
             {/* Switch to {coin.ticker} &nbsp;
             <svg
@@ -278,7 +278,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               return (
                 <div
                   key={`list-sol-${index}`}
-                  className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+                  className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
                   onClick={() => setSol(item.id)}
                 >
                   {item.price}
@@ -289,31 +289,31 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         ) : (
           <div className="flex flex-row py-2 gap-3">
             <div
-              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol("")}
             >
               Reset
             </div>
             <div
-              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 10).toString())}
             >
               10%
             </div>
             <div
-              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 4).toString())}
             >
               25%
             </div>
             <div
-              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 2).toString())}
             >
               50%
             </div>
             <div
-              className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol(tokenBal.toString())}
             >
               100%
@@ -322,7 +322,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         )}
 
         {/* {progress === 100 ? (
-          <div className="border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
+          <div className="text-[10px] border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
             Trade
           </div>
         ) : ( */}

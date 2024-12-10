@@ -30,7 +30,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Providers>
           <Header></Header>
-          <div className="m-auto w-screen max-w-[1216px] px-2 sm:px-0">
+          <div className="m-auto w-screen max-w-[1216px] px-4 md:px-0">
             {children}
           </div>
           <Footer></Footer>

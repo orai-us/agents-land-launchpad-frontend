@@ -100,7 +100,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="w-full h-full flex items-start gap-8 px-2 mt-16 flex-col md:flex-row mb-10">
+    <div className="w-full h-full flex items-start gap-8 mt-8 md:mt-16 flex-col md:flex-row mb-10">
       <div className="w-full md:max-w-[350px] bg-[#13141D] p-6 rounded-lg">
         <div className="flex flex-col gap-6">
           <img
@@ -191,7 +191,7 @@ export default function ProfilePage() {
               key={item.id}
               onClick={() => setOption(item.id)}
               className={twMerge(
-                "cursor-pointer uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                "text-[12px] md:text-[14px] cursor-pointer uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
                 option === item.id && "bg-[#585A6B] text-[#E8E9EE]"
               )}
             >

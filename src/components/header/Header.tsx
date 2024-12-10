@@ -32,6 +32,12 @@ const Header: FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (pathname && isOpenMobileMenu) {
+      setOpenMobileMenu(false);
+    }
+  }, [pathname]);
+
   const handleToRouter = (id: string) => {
     router.push(id);
   };
@@ -56,7 +62,7 @@ const Header: FC = () => {
         closeModal={() => setShowStepWork(false)}
       />
       <MarqueeToken />
-      <header className="relative z-10 w-full h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
+      <header className="relative z-10 w-full h-[72px] md:h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
         <div className="py-6 px-2 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
             <Link href="/">
@@ -81,7 +87,7 @@ const Header: FC = () => {
             <ConnectButton />
           </div>
           <div
-            className="block md:hidden"
+            className="block md:hidden cursor-pointer"
             onClick={() => setOpenMobileMenu(true)}
           >
             <svg
@@ -110,16 +116,16 @@ const Header: FC = () => {
 
       <div
         className={
-          "fixed inset-0 z-10 flex flex-col bg-[#13141D] transition-all" +
+          "fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5" +
           ` ${isOpenMobileMenu ? "" : "translate-x-[-100%]"}`
         }
       >
-        <div className="flex h-[72px] items-center justify-between border-b border-[#1A1C28] px-[24px]">
+        <div className="flex h-[72px] items-center justify-between border-b border-[#1A1C28] px-2">
           <Link href="/">
             <Image src={LogoFullIcon} alt="LogoFullIcon" />
           </Link>
           <div
-            className="cursor-pointer p-2"
+            className="cursor-pointer"
             onClick={() => setOpenMobileMenu(false)}
           >
             <svg
@@ -136,17 +142,22 @@ const Header: FC = () => {
             </svg>
           </div>
         </div>
-        <div className="flex-grow px-[24px]">
+        <div className="flex-1 px-[24px]">
           {menu?.map((item, i) => (
             <button
               // href={item.link}
-              onClick={item.onclick}
+              onClick={() => {
+                item.onclick();
+                setOpenMobileMenu(false);
+              }}
               key={`${item.link}-${i}-mobile`}
-              className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
+              className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125"
             >
               {item.text}
             </button>
           ))}
+        </div>
+        <div className="w-full">
           <ConnectButton />
         </div>
       </div>

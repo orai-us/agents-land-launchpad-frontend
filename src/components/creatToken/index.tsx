@@ -222,7 +222,7 @@ export default function CreateToken() {
     newCoin.name && newCoin.ticker && newCoin.description && imageUrl;
 
   return (
-    <div className="w-full m-auto px-3 my-24 mt-4 md:mt-24">
+    <div className="w-full m-auto my-24 mt-4 md:mt-24">
       <PreSaleModal
         isOpen={showModalPreSale}
         closeModal={() => setShowModalPreSale(false)}

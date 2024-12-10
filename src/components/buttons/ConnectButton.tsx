@@ -1,27 +1,21 @@
 "use client";
-import { FC, useContext, useEffect, useMemo, useState } from "react";
+import { errorAlert, successAlert } from "@/components/others/ToastGroup";
+import UserContext from "@/context/UserContext";
+import { userInfo } from "@/utils/types";
+import { confirmWallet, walletConnect } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import {
-  successAlert,
-  errorAlert,
-  infoAlert,
-} from "@/components/others/ToastGroup";
 import base58 from "bs58";
-import UserContext from "@/context/UserContext";
-import { confirmWallet, walletConnect } from "@/utils/util";
-import { userInfo } from "@/utils/types";
 import { useRouter } from "next/navigation";
+import { FC, useContext, useEffect, useMemo } from "react";
 import { RiExchangeDollarLine } from "react-icons/ri";
 import { VscDebugDisconnect } from "react-icons/vsc";
-import { TbMoodEdit } from "react-icons/tb";
-import Link from "next/link";
-import Image from "next/image";
 
 export const ConnectButton: FC = () => {
   const router = useRouter();
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
     useContext(UserContext);
+
   const {
     publicKey,
     disconnect,
@@ -104,11 +98,11 @@ export const ConnectButton: FC = () => {
   };
 
   return (
-    <div>
-      <button className="ml-2 px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
+    <div className="px-5 md:px-0">
+      <button className="w-full md:w-fit mb-1 md:mb-0 md:ml-2 px-6 py-3 rounded bg-[#1A1C28] shadow-btn-inner text-[#E8E9EE] tracking-[0.32px] group relative cursor-pointer">
         {login && publicKey ? (
           <>
-            <div className="flex mr-3 items-center justify-center text-[16px] lg:text-md">
+            <div className="flex mr-0 md:mr-3 items-center justify-center text-[16px] lg:text-md">
               {/* {user.avatar !== undefined && (
                 <img
                   src={user.avatar}
@@ -132,17 +126,8 @@ export const ConnectButton: FC = () => {
                 {publicKey.toBase58().slice(-4)}
               </div>
             </div>
-            <div className="w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
+            <div className="hidden md:block w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
               <ul className="border border-[rgba(88,90,107,0.24)] rounded bg-[#1A1C28] p-2 ">
-                {/* <li>
-                  <div
-                    className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
-                    onClick={() => setVisible(true)}
-                  >
-                    <RiExchangeDollarLine />
-                    Change Wallet
-                  </div>
-                </li> */}
                 <li>
                   <div
                     className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
@@ -177,15 +162,28 @@ export const ConnectButton: FC = () => {
           </div>
         )}
       </button>
-      {/* <div>
-        {login && tempUser.wallet && (
-          <Link rel="stylesheet" href={`/profile/${tempUser._id}`}>
-            <div className="text-center py-1 text-md text-white cursor-pointer hover:bg-slate-800 hover:rounded-md active:bg-violet-700 focus:outline-none focus:ring focus:ring-violet-300">
-              [View Profile]
-            </div>
-          </Link>
-        )}
-      </div> */}
+      {login && tempUser.wallet && (
+        <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
+          <div
+            className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+            onClick={() =>
+              handleToProfile(
+                `/profile/${tempUser._id || "6746eb08d90318c6a4b2a386"}`
+              )
+            }
+          >
+            <RiExchangeDollarLine />
+            View Profile
+          </div>
+          <div
+            className="p-2 flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
+            onClick={logOut}
+          >
+            <VscDebugDisconnect />
+            Disconnect
+          </div>
+        </div>
+      )}
     </div>
   );
 };

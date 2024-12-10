@@ -129,10 +129,10 @@ export default function TradingPage() {
   const isListed = coin["listed"];
 
   return (
-    <div className="w-full flex flex-col mx-auto gap-5 px-2">
+    <div className="w-full flex flex-col mx-auto gap-5">
       <div className="text-center">
         <div
-          className="mt-12"
+          className="mt-0 md:mt-12"
           // onClick={() => router.push("/")}
         >
           <div className="cursor-pointer text-white text-2xl flex flex-row items-center gap-2 pb-2">
@@ -189,7 +189,7 @@ export default function TradingPage() {
           <div className="w-full">
             <div className="bg-[#1A1C28] rounded-t p-6">
               <div className="mb-4 flex justify-between items-start flex-wrap gap-4">
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-start md:items-center">
                   {typeof imgSrc === "string" ? (
                     <img
                       src={imgSrc}
@@ -208,7 +208,7 @@ export default function TradingPage() {
                       {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
                       {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                     </p>
-                    <p className="text-[#84869A] text-[12px] mt-2 font-medium uppercase break-all">
+                    <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium uppercase break-all">
                       CONTRACT: {coin.token}
                     </p>
                   </div>
