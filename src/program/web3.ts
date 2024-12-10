@@ -380,7 +380,6 @@ export class Web3SolanaProgramInteraction {
       console.log("Warning: Wallet not connected");
       return;
     }
-    console.log("amount---", amount);
     const poolId = new PublicKey(poolKey);
     try {
       const res = await simulateSwapOnRaydium(type, {

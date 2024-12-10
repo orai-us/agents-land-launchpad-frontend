@@ -113,7 +113,6 @@ export function getDataFeed({
         queryClient.setQueryData(
           ["chartTable", token],
           (oldData: RawChart[]) => {
-            console.log("chartTable.raw", chartTable.raw);
             return [...(oldData || []), ...chartTable.raw];
           }
         );

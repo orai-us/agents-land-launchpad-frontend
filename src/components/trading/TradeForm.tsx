@@ -152,6 +152,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
 
   return (
     <div className="p-6 rounded-lg bg-[#13141D] text-[#9192A0]">
+      {isListedOnRay && (
+        <div className="animate-pulse animate-infinite pb-4 text-[#E8E9EE] text-center">
+          Trade via Raydium
+        </div>
+      )}
       <div className="flex flex-row justify-center items-center w-full gap-2 text-[#E8E9EE] uppercase text-[14px]">
         <button
           className={`uppercase rounded py-2 h-12 w-full ${

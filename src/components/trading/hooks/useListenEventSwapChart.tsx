@@ -31,7 +31,6 @@ const useListenEventSwapChart = ({ coin }) => {
         // solPrice
       );
 
-      console.log("currentPrice", currentPrice);
       setCurPrice(currentPrice);
     })();
   }, [coin]);

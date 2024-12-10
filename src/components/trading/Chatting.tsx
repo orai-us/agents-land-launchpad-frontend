@@ -112,8 +112,6 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     }
   }, [tempNewMsg]);
 
-  console.log("trades", trades);
-
   return (
     <div className="pt-8">
       <div className="hidden sm2:flex flex-row items-center text-white font-semibold">

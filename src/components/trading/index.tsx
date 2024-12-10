@@ -28,6 +28,7 @@ import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { CoinGeckoChart } from "../TVChart/CoingeckoChart";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { DexToolsChart } from "../TVChart/DexToolsChart";
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -43,6 +44,7 @@ export default function TradingPage() {
   const [loadingEst, setLoadingEst] = useState<boolean>(true);
   const wallet = useWallet();
   const [simulatePrice, setSimulatePrice] = useState<string>("");
+  const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg.src;
   // FIXME: need to integrate agent
@@ -54,6 +56,7 @@ export default function TradingPage() {
       const parameter = segments[segments.length - 1];
       setParam(parameter);
       setCoinId(parameter);
+
       let data = await getCoinInfo(parameter);
 
       if (!data) {
@@ -71,6 +74,10 @@ export default function TradingPage() {
         .div(new BN(BONDING_CURVE_LIMIT))
         .toNumber();
 
+      const showCurrentChart =
+        bondingCurvePercent >= 100 && data.raydiumPoolAddr;
+
+      setIsAgentChart(!showCurrentChart);
       setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
       setCoin(data);
     };
@@ -86,8 +93,6 @@ export default function TradingPage() {
             .multipliedBy(new BigNumber(10).pow(coin.decimals))
             .toFixed(0, 1);
           const mint = new PublicKey(coin.token);
-
-          console.log("amountWithDecimal", amountWithDecimal);
 
           const { numerator, denominator } =
             await web3Solana.simulateRaydiumSwapTx(
@@ -148,7 +153,9 @@ export default function TradingPage() {
             {isListed &&
               (isRaydiumListed ? (
                 <a
-                  href={``}
+                  // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
+                  href={`https://raydium.io`}
+                  target="_blank"
                   className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
                 >
                   <Image
@@ -161,7 +168,11 @@ export default function TradingPage() {
                   <span>LISTED oN RAYDIUM</span>
                 </a>
               ) : (
-                <div className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1">
+                <a
+                  href={`https://app.oraidex.io`}
+                  target="_blank"
+                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1"
+                >
                   <Image
                     src={oraidexIcon}
                     alt="icon_dex"
@@ -170,7 +181,7 @@ export default function TradingPage() {
                     height={16}
                   />
                   <span>LISTED oN ORAIDEX</span>
-                </div>
+                </a>
               ))}
           </div>
 
@@ -347,13 +358,37 @@ export default function TradingPage() {
               </div>
             </div>
 
-            {!isListedOnRay ? (
+            {isListedOnRay && (
+              <div className="p-2 pt-0 bg-[#1a1c28] hidden sm2:flex flex-row items-center text-white font-semibold text-[12px]">
+                <div
+                  onClick={() => setIsAgentChart(true)}
+                  className={twMerge(
+                    "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                    isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                  )}
+                >
+                  Agent Land Chart
+                </div>
+                <div
+                  onClick={() => setIsAgentChart(false)}
+                  className={twMerge(
+                    "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                    !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                  )}
+                >
+                  Current Chart
+                </div>
+              </div>
+            )}
+
+            {isAgentChart ? (
               <div className="bg-[#101827] pb-6 rounded-b">
                 <TradingChart param={coin}></TradingChart>
               </div>
             ) : (
               <div className="bg-[#111114] rounded-b">
-                <CoinGeckoChart param={coin}></CoinGeckoChart>
+                {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
+                <DexToolsChart param={coin}></DexToolsChart>
               </div>
             )}
           </div>
@@ -364,7 +399,6 @@ export default function TradingPage() {
           <Chatting param={param} coin={coin}></Chatting>
         </div>
         <div className="w-full max-w-[384px]">
-          {coin.raydiumPoolAddr}
           <TradeForm coin={coin} progress={progress}></TradeForm>
           {/* <SocialList /> */}
           {/* <TokenData coinData={coin} /> */}

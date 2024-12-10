@@ -26,12 +26,6 @@ const TVChartContainer = dynamic(
 );
 
 export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
-  const state = queryClient.getQueryState<RawChart[]>([
-    "chartTable",
-    param.token,
-  ]);
-
-  console.log("state-chart :>>", state);
   const [isScriptReady, setIsScriptReady] = useState(false);
   const [period, setPeriod] = useState<PeriodParams>({} as PeriodParams);
   useEffect(() => {
