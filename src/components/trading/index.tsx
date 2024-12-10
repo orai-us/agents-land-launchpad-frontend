@@ -3,10 +3,11 @@
 import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
 import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import LoadingImg from "@/assets/icons/loading-button.svg";
 import { Chatting } from "@/components/trading/Chatting";
 import { TradeForm } from "@/components/trading/TradeForm";
 import { TradingChart } from "@/components/TVChart/TradingChart";
-import { BONDING_CURVE_LIMIT } from "@/config";
+import { BONDING_CURVE_LIMIT, SOL_DECIMAL } from "@/config";
 import UserContext from "@/context/UserContext";
 import {
   formatLargeNumber,
@@ -23,11 +24,14 @@ import { useContext, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TokenDistribution from "../others/TokenDistribution";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { CoinGeckoChart } from "../TVChart/CoingeckoChart";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 const SLEEP_TIMEOUT = 1500;
 
+const web3Solana = new Web3SolanaProgramInteraction();
 export default function TradingPage() {
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
@@ -36,6 +40,9 @@ export default function TradingPage() {
   const [progress, setProgress] = useState<Number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const router = useRouter();
+  const [loadingEst, setLoadingEst] = useState<boolean>(true);
+  const wallet = useWallet();
+  const [simulatePrice, setSimulatePrice] = useState<string>("");
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg.src;
   // FIXME: need to integrate agent
@@ -70,8 +77,46 @@ export default function TradingPage() {
     fetchData();
   }, [pathname]);
 
+  useEffect(() => {
+    if (coin) {
+      (async () => {
+        try {
+          setLoadingEst(true);
+          const amountWithDecimal = new BigNumber(1)
+            .multipliedBy(new BigNumber(10).pow(coin.decimals))
+            .toFixed(0, 1);
+          const mint = new PublicKey(coin.token);
+
+          console.log("amountWithDecimal", amountWithDecimal);
+
+          const { numerator, denominator } =
+            await web3Solana.simulateRaydiumSwapTx(
+              mint,
+              wallet,
+              amountWithDecimal,
+              1,
+              coin.raydiumPoolAddr
+            );
+
+          setSimulatePrice(
+            new BigNumber((numerator || 0).toString())
+              .div(new BigNumber(10).pow(SOL_DECIMAL))
+              .toString()
+          );
+        } catch (error) {
+          console.log("simulate failed", error);
+        } finally {
+          setLoadingEst(false);
+        }
+      })();
+    }
+  }, [coin]);
+
   const { curPrice } = useListenEventSwapChart({ coin });
-  const priceUsd = new BigNumber(isNaN(curPrice) ? 0 : curPrice)
+
+  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
+  const tokenPrice = isListedOnRay ? simulatePrice : curPrice;
+  const priceUsd = new BigNumber(isNaN(Number(tokenPrice)) ? 0 : tokenPrice)
     .multipliedBy(solPrice)
     .toFixed(6);
 
@@ -102,7 +147,10 @@ export default function TradingPage() {
           <div className="flex">
             {isListed &&
               (isRaydiumListed ? (
-                <div className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1">
+                <a
+                  href={``}
+                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
+                >
                   <Image
                     src={raydiumIcon}
                     alt="icon_dex"
@@ -111,7 +159,7 @@ export default function TradingPage() {
                     height={16}
                   />
                   <span>LISTED oN RAYDIUM</span>
-                </div>
+                </a>
               ) : (
                 <div className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1">
                   <Image
@@ -266,10 +314,18 @@ export default function TradingPage() {
                 </div>
               </div>
               <div>
-                <p className="text-[#E8E9EE] text-[24px] font-medium">
-                  {numberWithCommas(isNaN(curPrice) ? 0 : curPrice, undefined, {
-                    maximumFractionDigits: 9,
-                  })}{" "}
+                <p className="text-[#E8E9EE] text-[24px] font-medium flex items-center gap-1">
+                  {!loadingEst ? (
+                    numberWithCommas(
+                      isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
+                      undefined,
+                      {
+                        maximumFractionDigits: 9,
+                      }
+                    )
+                  ) : (
+                    <img src={LoadingImg.src} />
+                  )}{" "}
                   SOL
                   {/* FIXME: update price simulate */}
                 </p>
@@ -278,7 +334,7 @@ export default function TradingPage() {
                     "mt-1 font-medium text-[14px] text-[#84869A]"
                   )}
                 >
-                  ≈ ${priceUsd}
+                  ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
                 </p>
                 {/* <p
                 className={twMerge(
@@ -291,7 +347,7 @@ export default function TradingPage() {
               </div>
             </div>
 
-            {Number(progress) < 100 ? (
+            {!isListedOnRay ? (
               <div className="bg-[#101827] pb-6 rounded-b">
                 <TradingChart param={coin}></TradingChart>
               </div>

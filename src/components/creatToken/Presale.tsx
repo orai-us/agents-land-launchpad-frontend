@@ -60,7 +60,7 @@ const PreSaleModal: React.FC<ModalProps> = ({
               htmlFor="presale"
               className="uppercase text-[12px] font-medium text-[#9192A0]"
             >
-              quantity (Optional)
+              quantity (Optional: 0 ~ 1.5 SOL)
             </label>
             <div className="flex relative h-[56px] justify-between items-center border px-3 border-[#30344A] rounded mt-3">
               <input

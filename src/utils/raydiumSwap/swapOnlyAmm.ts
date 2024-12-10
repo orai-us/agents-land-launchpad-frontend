@@ -52,6 +52,30 @@ async function getWalletTokenAccount(
   }));
 }
 
+async function simulateSwapRay(connection: Connection, input: TestTxInputInfo) {
+  try {
+    const targetPoolInfo = await formatAmmKeysById(
+      connection,
+      input.targetPool
+    );
+    assert(targetPoolInfo, "cannot find the target pool");
+    const poolKeys = jsonInfo2PoolKeys(targetPoolInfo) as LiquidityPoolKeys;
+
+    const { amountOut, minAmountOut } = Liquidity.computeAmountOut({
+      poolKeys: poolKeys,
+      poolInfo: await Liquidity.fetchInfo({ connection, poolKeys }),
+      amountIn: input.inputTokenAmount,
+      currencyOut: input.outputToken,
+      slippage: input.slippage,
+    });
+
+    return minAmountOut;
+  } catch (error) {
+    console.log("error --- simulate swap on ray", error);
+    return;
+  }
+}
+
 async function swapOnlyAmm(connection: Connection, input: TestTxInputInfo) {
   // -------- pre-action: get pool info --------
   const targetPoolInfo = await formatAmmKeysById(connection, input.targetPool);
@@ -158,10 +182,7 @@ export async function getBuyTx(
   const baseToken = new Token(TOKEN_PROGRAM_ID, baseMint, baseDecimal);
   const quoteToken = new Token(TOKEN_PROGRAM_ID, quoteMint, 9);
 
-  const quoteTokenAmount = new TokenAmount(
-    quoteToken,
-    Math.floor(amount * 10 ** 9)
-  );
+  const quoteTokenAmount = new TokenAmount(quoteToken, Math.floor(amount));
   const slippage = new Percent(100, 100);
   const walletTokenAccounts = await getWalletTokenAccount(
     solanaConnection,
@@ -189,12 +210,49 @@ export async function getBuyTx(
   return willSendTx;
 }
 
+export async function simulateBuyTx(
+  solanaConnection: Connection,
+  wallet: WalletContextState,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  amount: number,
+  targetPool: string
+) {
+  const baseInfo = await getMint(solanaConnection, baseMint);
+  if (baseInfo == null) {
+    return null;
+  }
+
+  const baseDecimal = baseInfo.decimals;
+
+  const baseToken = new Token(TOKEN_PROGRAM_ID, baseMint, baseDecimal);
+  const quoteToken = new Token(TOKEN_PROGRAM_ID, quoteMint, 9);
+
+  const quoteTokenAmount = new TokenAmount(quoteToken, Math.floor(amount));
+  const slippage = new Percent(100, 100);
+  const walletTokenAccounts = await getWalletTokenAccount(
+    solanaConnection,
+    wallet.publicKey
+  );
+
+  const minAmountOut = await simulateSwapRay(solanaConnection, {
+    outputToken: baseToken,
+    targetPool,
+    inputTokenAmount: quoteTokenAmount,
+    slippage,
+    walletTokenAccounts,
+    wallet: wallet,
+  });
+
+  return minAmountOut;
+}
+
 export async function getSellTx(
   solanaConnection: Connection,
   wallet: WalletContextState,
   baseMint: PublicKey,
   quoteMint: PublicKey,
-  amount: string,
+  amount: number,
   targetPool: string
 ) {
   try {
@@ -206,21 +264,19 @@ export async function getSellTx(
     if (!tokenBal || tokenBal.value.uiAmount == 0) return null;
     const balance = tokenBal.value.amount;
     tokenBal.value.decimals;
-    console.log("rtkenBal", tokenBal);
     const baseToken = new Token(
       TOKEN_PROGRAM_ID,
       baseMint,
       tokenBal.value.decimals
     );
     const quoteToken = new Token(TOKEN_PROGRAM_ID, quoteMint, 9);
-    const baseTokenAmount = new TokenAmount(baseToken, amount);
+    const baseTokenAmount = new TokenAmount(baseToken, Math.floor(amount));
     const slippage = new Percent(99, 100);
     const walletTokenAccounts = await getWalletTokenAccount(
       solanaConnection,
       wallet.publicKey
     );
 
-    console.log("baseTokenAmount", baseTokenAmount);
     const instructions = await swapOnlyAmm(solanaConnection, {
       outputToken: quoteToken,
       targetPool,
@@ -245,3 +301,84 @@ export async function getSellTx(
     return null;
   }
 }
+
+export async function simulateSellTx(
+  solanaConnection: Connection,
+  wallet: WalletContextState,
+  baseMint: PublicKey,
+  quoteMint: PublicKey,
+  amount: number,
+  targetPool: string
+) {
+  try {
+    const tokenAta = await getAssociatedTokenAddress(
+      baseMint,
+      wallet.publicKey
+    );
+    const tokenBal = await solanaConnection.getTokenAccountBalance(tokenAta);
+    if (!tokenBal || tokenBal.value.uiAmount == 0) return null;
+    const balance = tokenBal.value.amount;
+    tokenBal.value.decimals;
+    const baseToken = new Token(
+      TOKEN_PROGRAM_ID,
+      baseMint,
+      tokenBal.value.decimals
+    );
+    const quoteToken = new Token(TOKEN_PROGRAM_ID, quoteMint, 9);
+    const baseTokenAmount = new TokenAmount(baseToken, Math.floor(amount));
+    const slippage = new Percent(99, 100);
+    const walletTokenAccounts = await getWalletTokenAccount(
+      solanaConnection,
+      wallet.publicKey
+    );
+
+    const minAmountOut = await simulateSwapRay(solanaConnection, {
+      outputToken: quoteToken,
+      targetPool,
+      inputTokenAmount: baseTokenAmount,
+      slippage,
+      walletTokenAccounts,
+      wallet: wallet,
+    });
+
+    return minAmountOut;
+  } catch (error) {
+    console.log("Error in simulate selling token");
+    return null;
+  }
+}
+
+export const simulateTxOnRay = async (
+  type: number,
+  dataSwap: {
+    solanaConnection: Connection;
+    wallet: WalletContextState;
+    baseMint: PublicKey;
+    quoteMint: PublicKey;
+    amount: number;
+    targetPool: string;
+  }
+) => {
+  const { solanaConnection, wallet, baseMint, quoteMint, amount, targetPool } =
+    dataSwap;
+
+  if (type === 0) {
+    return await simulateBuyTx(
+      solanaConnection,
+      wallet,
+      baseMint,
+      quoteMint,
+      amount,
+      targetPool
+    );
+  }
+
+  return await simulateSellTx(
+    solanaConnection,
+    wallet,
+    baseMint,
+    quoteMint,
+    amount,
+    targetPool
+  );
+};

@@ -35,6 +35,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     { id: "0.5", price: "0.5 SOL" },
     { id: "1", price: "1 SOL" },
   ];
+  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -59,7 +60,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           const mint = new PublicKey(coin.token);
 
           let receive = "";
-          if (Number(progress) < 100) {
+          if (!isListedOnRay) {
             receive = await web3Solana.simulateSwapTx(
               mint,
               wallet,
@@ -67,13 +68,16 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               isBuy
             );
           } else {
-            // receive = await web3Solana.simulateRaydiumSwapTx(
-            //   mint,
-            //   wallet,
-            //   amountWithDecimal,
-            //   isBuy,
-            //   coin.raydiumPoolAddr
-            // );
+            const { numerator, denominator } =
+              await web3Solana.simulateRaydiumSwapTx(
+                mint,
+                wallet,
+                amountWithDecimal,
+                isBuy,
+                coin.raydiumPoolAddr
+              );
+
+            receive = (numerator || 0).toString();
 
             console.log("receive", receive);
           }
@@ -122,7 +126,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
     let res;
-    if (Number(progress) < 100) {
+    if (isListedOnRay) {
       res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
     } else {
       res = await web3Solana.raydiumSwapTx(
@@ -318,20 +322,26 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           </div>
         ) : ( */}
 
-        <div className="mt-2">
+        <div className="mt-2 flex items-center gap-1">
           Receive: ≈{" "}
-          {simulateReceive
-            ? numberWithCommas(
+          {!loadingEst ? (
+            simulateReceive ? (
+              numberWithCommas(
                 new BigNumber(simulateReceive || 0).toNumber(),
                 undefined,
                 { maximumFractionDigits: 6 }
               )
-            : "--"}{" "}
+            ) : (
+              "--"
+            )
+          ) : (
+            <img src={LoadingImg.src} />
+          )}{" "}
           {!isBuy ? coin.ticker : "SOL"}
         </div>
 
         <button
-          disabled={!sol || !wallet.publicKey}
+          disabled={!sol || !wallet.publicKey || loading}
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >

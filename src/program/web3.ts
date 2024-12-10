@@ -1,5 +1,9 @@
 import { errorAlert } from "@/components/others/ToastGroup";
-import { rayBuyTx, raySellTx } from "@/utils/raydiumSwap/raydiumSwap";
+import {
+  rayBuyTx,
+  raySellTx,
+  simulateSwapOnRaydium,
+} from "@/utils/raydiumSwap/raydiumSwap";
 import { launchDataInfo } from "@/utils/types";
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
@@ -17,7 +21,7 @@ import {
 import BigNumber from "bignumber.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
-import { SEED_CONFIG } from "./seed";
+import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -172,6 +176,21 @@ export class Web3SolanaProgramInteraction {
     );
 
     const configAccount = await program.account.config.fetch(configPda);
+
+    const curveLimit = configAccount.curveLimit.toNumber();
+    // check launch phase is 'Presale'
+    const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
+      program.programId
+    );
+    const curveAccount = await program.account.bondingCurve.fetch(
+      bondingCurvePda
+    );
+    const solReserve = curveAccount.reserveLamport.toNumber();
+
+    const maxSolSwap = curveLimit - solReserve;
+    console.log(maxSolSwap, amount);
+
     try {
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -180,12 +199,17 @@ export class Web3SolanaProgramInteraction {
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
       const coinDecimal = type === 0 ? 9 : 6;
+      const fmtAmount = new anchor.BN(
+        parseFloat(amount) * Math.pow(10, coinDecimal)
+      );
+
+      if (new BigNumber(fmtAmount.toNumber()).isGreaterThan(maxSolSwap)) {
+        console.log("Exceeded bonding curve limit");
+        throw Error("Exceeded bonding curve limit");
+      }
+
       const swapIx = await program.methods
-        .swap(
-          new anchor.BN(parseFloat(amount) * Math.pow(10, coinDecimal)),
-          type,
-          new anchor.BN(0)
-        )
+        .swap(fmtAmount, type, new anchor.BN(0))
         .accounts({
           teamWallet: configAccount.teamWallet,
           user: wallet.publicKey,
@@ -272,7 +296,7 @@ export class Web3SolanaProgramInteraction {
       const coinDecimal = type === 0 ? 9 : 6;
       const fmtAmount = new anchor.BN(
         parseFloat(amount) * Math.pow(10, coinDecimal)
-      ).toString();
+      ).toNumber();
       const transaction = new Transaction();
 
       let swapTx;
@@ -280,8 +304,7 @@ export class Web3SolanaProgramInteraction {
         swapTx = await rayBuyTx(
           this.connection,
           mint,
-          parseFloat(amount),
-          // parseFloat(fmtAmount),
+          fmtAmount,
           wallet,
           poolId
         );
@@ -357,51 +380,31 @@ export class Web3SolanaProgramInteraction {
       console.log("Warning: Wallet not connected");
       return;
     }
+    console.log("amount---", amount);
     const poolId = new PublicKey(poolKey);
     try {
-      const coinDecimal = type === 0 ? 9 : 6;
-      const fmtAmount = new anchor.BN(
-        parseFloat(amount) * Math.pow(10, coinDecimal)
-      ).toString();
-      const transaction = new Transaction();
+      const res = await simulateSwapOnRaydium(type, {
+        solanaConnection: this.connection,
+        baseMint: mint,
+        amount: Number(amount),
+        wallet,
+        poolId,
+      });
 
-      let swapTx: VersionedTransaction;
-      if (type == 0) {
-        swapTx = (await rayBuyTx(
-          this.connection,
-          mint,
-          parseFloat(amount),
-          wallet,
-          poolId
-        )) as VersionedTransaction;
-      } else {
-        swapTx = (await raySellTx(
-          this.connection,
-          mint,
-          fmtAmount,
-          wallet,
-          poolId
-        )) as VersionedTransaction;
-      }
-      if (swapTx == null) {
-        console.log(`Error getting buy transaction`);
-        return null;
+      if (res) {
+        const { numerator, denominator } = res;
+
+        // return new anchor.BN(denominator).eqn(0)
+        //   ? 0
+        //   : new anchor.BN(numerator).div(denominator).toNumber();
+
+        // return numerator.toString();
+        return res;
       }
 
-      const res = await this.connection.simulateTransaction(swapTx);
-
-      return res;
+      // return "0";
     } catch (error) {
-      console.log("Error in swap transaction", error, error.error);
-      const { transaction = "", result } =
-        (await this.handleTransaction({
-          error,
-        })) || {};
-
-      if (result?.value?.confirmationStatus) {
-        console.log("----confirm----raydium", { transaction, result });
-        return { transaction, result };
-      }
+      console.log("Error in simulate swap transaction", error);
     }
   };
 
