@@ -139,6 +139,7 @@ table.scroll-table tbody {
   display: block;
   max-height: 350px;
   overflow-y: scroll;
+  overflow-x: scroll;
 }
 
 table.scroll-table thead,

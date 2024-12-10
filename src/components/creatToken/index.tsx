@@ -222,7 +222,7 @@ export default function CreateToken() {
     newCoin.name && newCoin.ticker && newCoin.description && imageUrl;
 
   return (
-    <div className="w-full m-auto px-3 my-24">
+    <div className="w-full m-auto px-3 my-24 mt-4 md:mt-24">
       <PreSaleModal
         isOpen={showModalPreSale}
         closeModal={() => setShowModalPreSale(false)}
@@ -253,12 +253,12 @@ export default function CreateToken() {
         </div>
       </div>
       {isLoading && Spinner()}
-      <div className="w-full text-[14px] text-[#9192A0] mb-[72px] mt-4">
+      <div className="w-full text-[14px] text-[#9192A0] mb-4 md:mb-[72px] mt-4">
         Input the details as you go about your project and after 2 steps, your
         Agent is set to go live.
       </div>
-      <div className="flex justify-between items-start">
-        <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-8">
+      <div className="flex justify-between items-start flex-col-reverse md:flex-row">
+        <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-4 md:p-8">
           <div className="text-[#E8E9EE] text-[18px] font-medium">
             {step === STEP_TOKEN.INFO ? "Project info" : "Agent Behaviors"}
           </div>
@@ -391,8 +391,8 @@ export default function CreateToken() {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center w-full gap-4">
-                <div className="flex-1">
+              <div className="flex justify-between items-center w-full gap-4 flex-col md:flex-row">
+                <div className="flex-1 w-full">
                   <label
                     htmlFor="name"
                     className="text-[12px] font-medium text-[#84869A]"
@@ -413,7 +413,7 @@ export default function CreateToken() {
                   />
                 </div>
 
-                <div className="flex-1">
+                <div className="flex-1 w-full">
                   <label
                     htmlFor="ticker"
                     className="text-[12px] font-medium text-[#84869A]"
@@ -516,8 +516,8 @@ export default function CreateToken() {
 
               {showOptional && (
                 <div>
-                  <div className="flex justify-between items-center w-full gap-4">
-                    <div className="flex-1">
+                  <div className="flex justify-between items-center w-full gap-4 flex-col md:flex-row">
+                    <div className="flex-1 w-full">
                       <label
                         htmlFor="name"
                         className="text-[12px] font-medium text-[#84869A]"
@@ -538,7 +538,7 @@ export default function CreateToken() {
                       />
                     </div>
 
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                       <label
                         htmlFor="ticker"
                         className="text-[12px] font-medium text-[#84869A]"
@@ -560,8 +560,8 @@ export default function CreateToken() {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center w-full mt-4 gap-4">
-                    <div className="flex-1">
+                  <div className="flex justify-between items-center w-full mt-4 gap-4 flex-col md:flex-row">
+                    <div className="flex-1 w-full">
                       <label
                         htmlFor="name"
                         className="text-[12px] font-medium text-[#84869A]"
@@ -582,7 +582,7 @@ export default function CreateToken() {
                       />
                     </div>
 
-                    <div className="flex-1">
+                    <div className="flex-1 w-full">
                       <label
                         htmlFor="ticker"
                         className="text-[12px] font-medium text-[#84869A]"
@@ -625,7 +625,7 @@ export default function CreateToken() {
                         }}
                         key={`${idx}-personality`}
                         className={twMerge(
-                          "text-[#E8E9EE] flex items-center rounded-lg p-4 bg-[#080A14] border border-[#30344A] cursor-pointer",
+                          "text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer",
                           e.value === agentPersonality &&
                             "border-2 border-[#E4775D]"
                         )}
@@ -672,7 +672,7 @@ export default function CreateToken() {
                         }}
                         key={`${idx}-styles-agent`}
                         className={twMerge(
-                          "text-[#E8E9EE] flex items-center rounded-lg text-[16px] p-4 bg-[#080A14] border border-[#30344A] cursor-pointer",
+                          "text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer",
                           e.value === agentStyle && "border-2 border-[#E4775D]"
                         )}
                       >
@@ -728,8 +728,8 @@ export default function CreateToken() {
             </button>
           )}
         </div>
-        <div className="w-full max-w-[490px] flex justify-end">
-          <div className="">
+        <div className="w-full md:max-w-[490px] flex justify-end">
+          <div className="hidden md:block">
             <div className="flex">
               <div className="relative translate-y-[0%]">
                 <div
@@ -753,6 +753,7 @@ export default function CreateToken() {
               <div className="relative translate-y-[0%] flex flex-col justify-end">
                 <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
                 <div
+                  onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
                   className={twMerge(
                     "relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]",
                     step === STEP_TOKEN.BEHAVIOR &&
@@ -771,8 +772,49 @@ export default function CreateToken() {
                 </span>
               </div>
             </div>
-            <div className="mt-[72px]">
+            <div className="mt-[72px] hidden md:block">
               <Image src={MountainImg} alt="MountainImg" />
+            </div>
+          </div>
+          <div className="block md:hidden w-full mb-6">
+            <div className="flex w-full items-center justify-between">
+              <div
+                onClick={() => setStep(STEP_TOKEN.INFO)}
+                className="cursor-pointer relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]"
+              >
+                1
+              </div>
+              <div className="border-b border-dashed border-[#585A6B] flex-1"></div>
+              <div
+                onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
+                className={twMerge(
+                  "relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]",
+                  step === STEP_TOKEN.BEHAVIOR && " bg-[#E4775D] text-[#080A14]"
+                )}
+              >
+                2
+              </div>
+            </div>
+            <div>
+              {step === STEP_TOKEN.INFO ? (
+                <div className="mt-2">
+                  <div className="text-[#E8E9EE] font-medium text-[18px]">
+                    Agent info
+                  </div>
+                  <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
+                    Information to help the community identify you.
+                  </span>
+                </div>
+              ) : (
+                <div className="text-right mt-2">
+                  <div className="text-[#E8E9EE] font-medium text-[18px]">
+                    Agent Behaviors
+                  </div>
+                  <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
+                    Set unique behaviors your agent
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -114,7 +114,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
   return (
     <div className="pt-8">
-      <div className="hidden sm2:flex flex-row items-center text-white font-semibold">
+      <div className="flex flex-row items-center text-white font-semibold">
         <div
           onClick={() => setIsTrades(true)}
           className={twMerge(
@@ -171,29 +171,29 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
             <table className="w-full h-full scroll-table">
               <thead className="w-full text-white">
                 <tr className="text-lg">
-                  <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
+                  <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase text-left">
                     Account
                   </th>
-                  <th className="py-2 text-[#585A6B] text-[12px] uppercase">
+                  <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
                     Type
                   </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[12px] uppercase">
+                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
                     SOL AMOUNT
                     {/* <BiSort style={{ color: "#30344A" }} /> */}
                   </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[12px] uppercase">
+                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
                     TOKEN AMOUNT
                     {/* <BiSort style={{ color: "#30344A" }} /> */}
                   </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[12px] uppercase">
+                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
                     Date
                   </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[12px] uppercase">
+                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
                     Transaction
                   </th>
                 </tr>
               </thead>
-              <tbody className="">
+              <tbody className="min-w-[320px]">
                 {trades.record &&
                   trades.record
                     .filter(

@@ -20,7 +20,7 @@ const CreateTokenSuccess: React.FC<ModalProps> = ({ isOpen, coin }) => {
   return (
     <div
       className={twMerge(
-        "fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md",
+        "fixed w-screen inset-0 flex items-center justify-center z-50 backdrop-blur-md",
         !isOpen && "hidden"
       )}
     >

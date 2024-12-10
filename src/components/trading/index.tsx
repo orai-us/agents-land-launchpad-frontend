@@ -129,7 +129,7 @@ export default function TradingPage() {
   const isListed = coin["listed"];
 
   return (
-    <div className="w-full flex flex-col mx-auto gap-5">
+    <div className="w-full flex flex-col mx-auto gap-5 px-2">
       <div className="text-center">
         <div
           className="mt-12"
@@ -147,7 +147,7 @@ export default function TradingPage() {
         </div>
       )}
 
-      <div className="w-full flex flex-col xs:flex-row gap-10">
+      <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
           <div className="flex">
             {isListed &&
@@ -188,7 +188,7 @@ export default function TradingPage() {
           {/* trading view chart  */}
           <div className="w-full">
             <div className="bg-[#1A1C28] rounded-t p-6">
-              <div className="mb-4 flex justify-between items-start">
+              <div className="mb-4 flex justify-between items-start flex-wrap gap-4">
                 <div className="flex gap-2 items-center">
                   {typeof imgSrc === "string" ? (
                     <img
@@ -208,12 +208,38 @@ export default function TradingPage() {
                       {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
                       {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                     </p>
-                    <p className="text-[#84869A] text-[12px] mt-2 font-medium uppercase">
+                    <p className="text-[#84869A] text-[12px] mt-2 font-medium uppercase break-all">
                       CONTRACT: {coin.token}
                     </p>
                   </div>
                 </div>
-                <div className="flex flex-col justify-between items-end h-full">
+                {/* <div className="flex gap-2 flex-wrap justify-between items-center w-full md:w-fit">
+                  <div className="block md:hidden">
+                    <p className="text-[#E8E9EE] text-[14px] md:text-[24px] font-medium flex items-center gap-1">
+                      {!loadingEst ? (
+                        numberWithCommas(
+                          isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
+                          undefined,
+                          {
+                            maximumFractionDigits: 9,
+                          }
+                        )
+                      ) : (
+                        <img src={LoadingImg.src} />
+                      )}{" "}
+                      SOL
+                    </p>
+                    <p
+                      className={twMerge(
+                        "mt-1 font-medium text-[14px] text-[#84869A]"
+                      )}
+                    >
+                      ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
+                    </p>
+                  </div>
+                </div> */}
+
+                <div className="flex flex-col justify-between md:items-end items-start h-full">
                   <div className="text-[12px] text-[#84869A] font-medium uppercase">
                     CREATED BY{" "}
                     <span className="text-[12px] text-[#E4775D] underline cursor-pointer">
@@ -324,8 +350,8 @@ export default function TradingPage() {
                   </div>
                 </div>
               </div>
-              <div>
-                <p className="text-[#E8E9EE] text-[24px] font-medium flex items-center gap-1">
+              <div className="">
+                <p className="text-[#E8E9EE] text-[14px] md:text-[24px] font-medium flex items-center gap-1">
                   {!loadingEst ? (
                     numberWithCommas(
                       isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
@@ -347,61 +373,61 @@ export default function TradingPage() {
                 >
                   ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
                 </p>
-                {/* <p
-                className={twMerge(
-                  "mt-1 font-medium text-[12px] text-[#9FF4CF]",
-                  true && "text-[#E75787]"
-                )}
-              >
-                {true ? "-" : "+"}1.25%
-              </p> */}
               </div>
             </div>
 
-            {isListedOnRay && (
-              <div className="p-2 pt-0 bg-[#1a1c28] hidden sm2:flex flex-row items-center text-white font-semibold text-[12px]">
-                <div
-                  onClick={() => setIsAgentChart(true)}
-                  className={twMerge(
-                    "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                    isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                  )}
-                >
-                  Agent Land Chart
-                </div>
-                <div
-                  onClick={() => setIsAgentChart(false)}
-                  className={twMerge(
-                    "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                    !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                  )}
-                >
-                  Current Chart
-                </div>
-              </div>
-            )}
+            <div className="flex md:hidden w-full">
+              <TradeForm coin={coin} progress={progress}></TradeForm>
+            </div>
 
-            {isAgentChart ? (
-              <div className="bg-[#101827] pb-6 rounded-b">
-                <TradingChart param={coin}></TradingChart>
-              </div>
-            ) : (
-              <div className="bg-[#111114] rounded-b">
-                {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
-                <DexToolsChart param={coin}></DexToolsChart>
-              </div>
-            )}
+            <div className="hidden md:flex ">
+              {isListedOnRay && (
+                <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px]">
+                  <div
+                    onClick={() => setIsAgentChart(true)}
+                    className={twMerge(
+                      "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                      isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                    )}
+                  >
+                    Agent Land Chart
+                  </div>
+                  <div
+                    onClick={() => setIsAgentChart(false)}
+                    className={twMerge(
+                      "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                      !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                    )}
+                  >
+                    Current Chart
+                  </div>
+                </div>
+              )}
+
+              {isAgentChart ? (
+                <div className="bg-[#101827] pb-6 rounded-b">
+                  <TradingChart param={coin}></TradingChart>
+                </div>
+              ) : (
+                <div className="bg-[#111114] rounded-b">
+                  {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
+                  <DexToolsChart param={coin}></DexToolsChart>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4 mt-12">
-            <p className="text-[14px] text-[#9192A0]">{coin?.description}</p>
+          <div className="hidden md:block">
+            <div className="flex flex-col gap-4 mt-12 ">
+              <p className="text-[14px] text-[#9192A0]">{coin?.description}</p>
+            </div>
+            <Chatting param={param} coin={coin}></Chatting>
           </div>
-          <Chatting param={param} coin={coin}></Chatting>
         </div>
-        <div className="w-full max-w-[384px]">
-          <TradeForm coin={coin} progress={progress}></TradeForm>
-          {/* <SocialList /> */}
-          {/* <TokenData coinData={coin} /> */}
+        <div className="w-full md:max-w-[384px]">
+          <div className="hidden md:flex">
+            <TradeForm coin={coin} progress={progress}></TradeForm>
+          </div>
           <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
             <div className="w-full flex flex-col gap-2">
               <p className="text-[#E8E9EE] text-[16px] uppercase">
@@ -441,6 +467,13 @@ export default function TradingPage() {
             </p>
           </div>
           <TokenDistribution data={coin} />
+        </div>
+
+        <div className="block md:hidden">
+          <div className="flex flex-col gap-4 mt-12 ">
+            <p className="text-[14px] text-[#9192A0]">{coin?.description}</p>
+          </div>
+          <Chatting param={param} coin={coin}></Chatting>
         </div>
       </div>
     </div>

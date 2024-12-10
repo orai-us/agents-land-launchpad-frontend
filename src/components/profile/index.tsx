@@ -100,8 +100,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="w-full h-full flex items-start gap-8 px-2 mt-16">
-      <div className="w-full max-w-[350px] bg-[#13141D] p-6 rounded-lg">
+    <div className="w-full h-full flex items-start gap-8 px-2 mt-16 flex-col md:flex-row mb-10">
+      <div className="w-full md:max-w-[350px] bg-[#13141D] p-6 rounded-lg">
         <div className="flex flex-col gap-6">
           <img
             src={userData.avatar || defaultUserImg.src}

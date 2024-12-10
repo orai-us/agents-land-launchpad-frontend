@@ -19,7 +19,7 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
 
   return (
     <tr className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]">
-      <td className="flex flex-row gap-2 items-center py-4">
+      <td className="text-[10px] break-keep md:text-[12px] flex flex-row gap-2 items-center py-4">
         {/* <img
           src={trade.holder?.avatar || ""}
           alt="Token IMG"
@@ -27,35 +27,29 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
           width={40}
           height={40}
         /> */}
-        <div className="text-lg">
-          {reduceString(trade.holder?.wallet || "", 4, 4)}
-        </div>
+        <div className="">{reduceString(trade.holder?.wallet || "", 4, 4)}</div>
       </td>
       <td
         className={twMerge(
-          "text-center py-2 text-[#E75787]",
+          "text-[10px] break-keep md:text-[12px] text-center py-2 text-[#E75787]",
           trade.swapDirection == 0 && "text-[#9FF4CF]"
         )}
       >
         {trade.swapDirection == 0 ? "BUY" : "SELL"}
       </td>
-      <td className="py-2 text-right">
-        {
-            formatLargeNumber(fromBig(trade.lamportAmount || new BN(0), 9))
-        }
+      <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
+        {formatLargeNumber(fromBig(trade.lamportAmount || new BN(0), 9))}
       </td>
-      <td className="py-2 text-right">
-        {
-          formatLargeNumber(fromBig(trade.tokenAmount || new BN(0), 6))
-        }
+      <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
+        {formatLargeNumber(fromBig(trade.tokenAmount || new BN(0), 6))}
       </td>
-      <td className="py-2 text-right">
+      <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
         {dayjs(trade.time || Date.now()).format("YYYY-MM-DD HH:mm:ss")}
       </td>
-      <td className="py-2 text-right">
+      <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
         <p
           onClick={() => handleToRouter(`https://solscan.io/tx/${trade.tx}`)}
-          className="text-lg leading-10 hover:cursor-pointer hover:text-white underline"
+          className="leading-10 hover:cursor-pointer hover:text-white underline"
         >
           {trade.tx?.slice(0, 4)}...{trade.tx?.slice(-3)}
         </p>
