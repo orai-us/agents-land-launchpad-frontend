@@ -1,5 +1,3 @@
-'use client';
-
 import LogoFullIcon from '@/assets/icons/logo.svg';
 import { PROGRAM_ID } from '@/config';
 import { AgentsLandListener } from '@/program/logListeners/AgentsLandListener';

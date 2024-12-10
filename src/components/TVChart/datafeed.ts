@@ -1,5 +1,3 @@
-'use client';
-
 import type { Bar, LibrarySymbolInfo, IBasicDataFeed, DatafeedConfiguration, ResolutionString, PeriodParams } from '@/libraries/charting_library';
 
 import { subscribeOnStream, unsubscribeFromStream } from '@/components/TVChart/streaming';

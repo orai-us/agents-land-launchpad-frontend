@@ -1,4 +1,3 @@
-'use client';
 import { coinInfo } from '@/utils/types';
 
 import { FC, useContext, useState } from 'react';

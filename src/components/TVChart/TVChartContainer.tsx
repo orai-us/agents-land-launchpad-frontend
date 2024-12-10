@@ -1,4 +1,3 @@
-'use client';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { ChartingLibraryWidgetOptions, HistoryCallback, IChartingLibraryWidget, IDatafeedChartApi, LanguageCode, ResolutionString, SearchSymbolResultItem, widget } from '@/libraries/charting_library';
 import { Bar, PeriodParamsInfo, recordInfo } from '@/utils/types';

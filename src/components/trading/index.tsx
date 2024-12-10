@@ -1,5 +1,3 @@
-'use client';
-
 import oraidexIcon from '@/assets/icons/oraidex_ic.svg';
 import raydiumIcon from '@/assets/icons/raydium_ic.svg';
 import defaultUserImg from '@/assets/images/userAgentDefault.svg';

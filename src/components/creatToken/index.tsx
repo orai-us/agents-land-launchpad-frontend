@@ -1,4 +1,3 @@
-'use client';
 import MountainImg from '@/assets/images/mount_guide.png';
 import AgentImg from '@/assets/images/userAgentDefault.svg';
 import { Spinner } from '@/components/loadings/Spinner';

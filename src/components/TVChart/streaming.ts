@@ -1,5 +1,3 @@
-'use client';
-
 import { RawChart } from './../../utils/types';
 
 import { io, Socket } from 'socket.io-client';

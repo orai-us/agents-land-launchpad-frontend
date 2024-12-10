@@ -1,4 +1,3 @@
-'use client';
 import { coinInfo, holderInfo, recordInfo } from '@/utils/types';
 import { FC, useContext, useEffect, useState } from 'react';
 import { calculateKotHProgress, calculateTokenPrice, findHolders, fromBig, getKoth, getSolPriceInUSD, getUserByWalletAddress } from '@/utils/util';
