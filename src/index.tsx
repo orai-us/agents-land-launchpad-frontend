@@ -7,7 +7,7 @@ import 'dotenv/config';
 import Header from './components/header/Header';
 import Footer from './components/footer/Footer';
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.body).render(
   <React.StrictMode>
     <Providers>
       <Header></Header>
