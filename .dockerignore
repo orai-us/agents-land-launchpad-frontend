@@ -1,0 +1,41 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Next.js build and cache files
+.next
+out
+.cache
+
+# Logs
+logs
+*.log
+*.log.*
+
+# Environment variables
+.env.example
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Editor and OS-specific files
+.vscode
+.idea
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Docker files
+Dockerfile*
+.dockerignore
+
+# Temporary files
+tmp
+temp
