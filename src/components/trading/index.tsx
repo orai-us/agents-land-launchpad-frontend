@@ -380,9 +380,9 @@ export default function TradingPage() {
               <TradeForm coin={coin} progress={progress}></TradeForm>
             </div>
 
-            <div className="hidden md:flex ">
+            <div className="hidden md:block">
               {isListedOnRay && (
-                <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px]">
+                <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
                   <div
                     onClick={() => setIsAgentChart(true)}
                     className={twMerge(
