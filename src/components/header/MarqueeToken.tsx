@@ -68,6 +68,7 @@ const MarqueeToken = () => {
       commitment: commitmentLevel,
       wsEndpoint: import.meta.env.VITE_SOLANA_WS
     });
+
     const listener = new AgentsLandListener(connection);
     listener.setProgramLogsCallback('Launch', (basicTokenInfo: any) => {
       const newCoinInfo: coinInfo = {

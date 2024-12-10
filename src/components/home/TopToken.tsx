@@ -2,7 +2,7 @@ import { FC, useContext } from 'react';
 
 import { useLocation } from 'wouter';
 import UserContext from '@/context/UserContext';
-import TestTokenImg from '@/../public/assets/images/test-token-bg.png';
+import TestTokenImg from '@/assets/images/test-token-bg.png';
 
 const TopToken: FC = () => {
   const { setIsLoading, setSolPrice } = useContext(UserContext);

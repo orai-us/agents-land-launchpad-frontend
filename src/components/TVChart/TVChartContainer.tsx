@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { ChartingLibraryWidgetOptions, HistoryCallback, IChartingLibraryWidget, IDatafeedChartApi, LanguageCode, ResolutionString, SearchSymbolResultItem, widget } from '@/libraries/charting_library';
+import { ChartingLibraryWidgetOptions, HistoryCallback, IChartingLibraryWidget, IDatafeedChartApi, LanguageCode, ResolutionString, SearchSymbolResultItem, widget } from '@/charting_library';
 import { Bar, PeriodParamsInfo, recordInfo } from '@/utils/types';
 import { getCoinTrade } from '@/utils/util';
 import { chartOverrides, disabledFeatures, enabledFeatures } from '@/utils/constants';
@@ -56,7 +56,7 @@ export const TVChartContainer = ({ name, pairIndex, token, customPeriodParams }:
         interval: '1D' as ResolutionString
       };
 
-      tvWidgetRef.current = new widget(widgetOptions);
+      tvWidgetRef.current = new window.TradingView.widget(widgetOptions);
       tvWidgetRef.current.onChartReady(function () {
         setIsLoading(false);
         // const priceScale = tvWidgetRef.current?.activeChart().getPanes()[0].getMainSourcePriceScale();

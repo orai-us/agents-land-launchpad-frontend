@@ -1,10 +1,10 @@
-import type { Bar, LibrarySymbolInfo, IBasicDataFeed, DatafeedConfiguration, ResolutionString, PeriodParams } from '@/libraries/charting_library';
+import type { Bar, LibrarySymbolInfo, IBasicDataFeed, DatafeedConfiguration, ResolutionString, PeriodParams } from '@/charting_library';
 
 import { subscribeOnStream, unsubscribeFromStream } from '@/components/TVChart/streaming';
 import { getChartTable } from '@/utils/getChartTable';
-import { custom } from 'viem';
-import { getBalance } from 'viem/actions';
-import { Mark } from '@/libraries/charting_library/datafeed-api';
+// import { custom } from 'viem';
+// import { getBalance } from 'viem/actions';
+// import { Mark } from '@/datafeed-api';
 import { queryClient } from '@/provider/providers';
 import { RawChart } from '@/utils/types';
 
