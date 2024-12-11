@@ -1,14 +1,19 @@
 "use client";
 
+import LoadingImg from "@/assets/icons/loading-button.svg";
 import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
 import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
-import LoadingImg from "@/assets/icons/loading-button.svg";
 import { Chatting } from "@/components/trading/Chatting";
 import { TradeForm } from "@/components/trading/TradeForm";
 import { TradingChart } from "@/components/TVChart/TradingChart";
-import { BONDING_CURVE_LIMIT, SOL_DECIMAL } from "@/config";
+import {
+  BONDING_CURVE_LIMIT,
+  INIT_SOL_BONDING_CURVE,
+  SOL_DECIMAL,
+} from "@/config";
 import UserContext from "@/context/UserContext";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
 import {
   formatLargeNumber,
   formatNumberKMB,
@@ -17,18 +22,16 @@ import {
 import { coinInfo } from "@/utils/types";
 import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TokenDistribution from "../others/TokenDistribution";
-import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { CoinGeckoChart } from "../TVChart/CoingeckoChart";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { DexToolsChart } from "../TVChart/DexToolsChart";
+import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -46,7 +49,15 @@ export default function TradingPage() {
   const [simulatePrice, setSimulatePrice] = useState<string>("");
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
 
-  const imgSrc = coin.metadata?.image || coin.url || defaultUserImg.src;
+  const bondingCurveValue = new BigNumber(
+    (coin.lamportReserves || 0).toString()
+  )
+    .minus(INIT_SOL_BONDING_CURVE)
+    .div(10 ** 9)
+    .toNumber();
+  const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
+
+  const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
   // FIXME: need to integrate agent
 
   useEffect(() => {
@@ -69,9 +80,15 @@ export default function TradingPage() {
         }
       }
 
-      const bondingCurvePercent = (data.lamportReserves || new BN(0))
-        .mul(new BN(100))
-        .div(new BN(BONDING_CURVE_LIMIT))
+      const bondingCurveValue = new BigNumber(
+        (data.lamportReserves || new BN(0)).toString()
+      )
+        .minus(INIT_SOL_BONDING_CURVE)
+        .toNumber();
+
+      const bondingCurvePercent = new BigNumber(bondingCurveValue)
+        .multipliedBy(new BigNumber(100))
+        .div(new BigNumber(BONDING_CURVE_LIMIT))
         .toNumber();
 
       const showCurrentChart =
@@ -447,9 +464,9 @@ export default function TradingPage() {
               </span>{" "}
               tokens still available for sale in the bonding curve and there is{" "}
               <span className="text-[#E8E9EE]">
-                {formatLargeNumber(fromBig(coin.lamportReserves, 9))}
+                {formatLargeNumber(shownBondingCurve)} SOL
               </span>{" "}
-              SOL in the bonding curve.
+              in the bonding curve.
             </p>
             <p className="text-[14px] text-[#585A6B]">
               When the market cap reaches{" "}

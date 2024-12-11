@@ -7,6 +7,7 @@ export const MAX_RETRY_QUERY_TOKEN = 3;
 
 // export const BONDING_CURVE_LIMIT = 85 * LAMPORTS_PER_SOL;
 export const BONDING_CURVE_LIMIT = 10 * LAMPORTS_PER_SOL; // FIXME: fix limit
+export const INIT_SOL_BONDING_CURVE = 3 * LAMPORTS_PER_SOL; // FIXME: fix limit
 export const LIMIT_PAGINATION = 8;
 
 export const TX_FEE = 0.25;

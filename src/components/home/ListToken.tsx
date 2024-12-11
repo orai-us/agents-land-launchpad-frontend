@@ -1,24 +1,22 @@
-import InfiniteScroll from "react-infinite-scroll-component";
+import nodataImg from "@/assets/icons/nodata.svg";
 import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
 import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import cloudIslandImg from "@/assets/images/islandCloud.png";
 import oraidexIsland from "@/assets/images/oraidex_island.png";
 import raydiumIsland from "@/assets/images/raydium_island.png";
-import logoCoinImg from "@/assets/images/richoldman.png";
-import loadingImg from "@/assets/icons/loading-button.svg";
-import nodataImg from "@/assets/icons/nodata.svg";
 import { coinInfo } from "@/utils/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC } from "react";
-import { twMerge } from "tailwind-merge";
-import { reduceString } from "@/utils/util";
+import InfiniteScroll from "react-infinite-scroll-component";
+//
+import { BONDING_CURVE_LIMIT, INIT_SOL_BONDING_CURVE } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
+import { reduceString } from "@/utils/util";
 import BigNumber from "bignumber.js";
-import { BONDING_CURVE_LIMIT } from "@/config";
+import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
-import dayjs from "dayjs";
+import { FC } from "react";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -106,16 +104,23 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
       }
     >
       {data.map((coinItem: coinInfo, ind) => {
-        const bondingCurvePercentOrg = new BigNumber(
-          (coinItem.lamportReserves || 0).toString() || 0
+        const bondingCurveValue = new BigNumber(
+          (coinItem.lamportReserves || 0).toString()
         )
-          .multipliedBy(100)
-          .div(BONDING_CURVE_LIMIT);
+          .minus(INIT_SOL_BONDING_CURVE)
+          .toNumber();
 
-        const bondingCurvePercent =
-          bondingCurvePercentOrg.isGreaterThanOrEqualTo(100)
+        const bondingCurvePercent = new BigNumber(bondingCurveValue)
+          .multipliedBy(new BigNumber(100))
+          .div(new BigNumber(BONDING_CURVE_LIMIT))
+          .toNumber();
+
+        const shownPercent =
+          bondingCurvePercent < 0
+            ? 0
+            : bondingCurvePercent > 100
             ? 100
-            : bondingCurvePercentOrg.toFixed(2, 1);
+            : bondingCurvePercent;
 
         return (
           <div
@@ -181,13 +186,13 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
                   Marketcap{" "}
                   <span className="text-[#E8E9EE]">
                     {formatNumberKMB(Number(coinItem.marketcap || 0))}(
-                    {bondingCurvePercent}%)
+                    {shownPercent.toFixed(2)}%)
                   </span>
                 </div>
                 <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
                   <div
                     className="rounded-[999px] h-2 bg-barrie"
-                    style={{ width: `${bondingCurvePercent}%` }}
+                    style={{ width: `${shownPercent}%` }}
                   ></div>
                 </div>
               </div>

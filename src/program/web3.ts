@@ -26,7 +26,6 @@ import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
 export const LAMPORT_RESERVES = 1_000_000_000;
-export const INIT_BONDING_CURVE = 95;
 
 export const endpoint = process.env.NEXT_PUBLIC_SOLANA_RPC;
 export const pumpProgramId = new PublicKey(idl.address);
