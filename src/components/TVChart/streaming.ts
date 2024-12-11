@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { RawChart } from './../../utils/types';
+import { RawChart } from "./../../utils/types";
 
-import { io, Socket } from 'socket.io-client';
-import type { Bar, LibrarySymbolInfo, ResolutionString, SubscribeBarsCallback } from '@/libraries/charting_library';
+import { io, Socket } from "socket.io-client";
+import type {
+  Bar,
+  LibrarySymbolInfo,
+  ResolutionString,
+  SubscribeBarsCallback,
+} from "@/libraries/charting_library";
 
-import { queryClient } from '../../provider/providers';
-import { CandlePrice, Chart } from '@/utils/types';
+import { queryClient } from "../../provider/providers";
+import { CandlePrice, Chart } from "@/utils/types";
+import { EVENT_CHART_SOCKET } from "./config";
 
 let socket: Socket | undefined = undefined;
 let initialTimeStamp: number = new Date().getTime();
 let lastUpdated = 0;
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   socket = io(import.meta.env.VITE_BACKEND_URL!);
 }
 
@@ -30,38 +36,41 @@ type SubscriptionItem = {
 const channelToSubscription = new Map<string, SubscriptionItem>();
 
 if (socket) {
-  socket.on('connect', () => {
-    console.log('[socket] Connected', socket!.id);
+  socket.on("connect", () => {
+    console.log("[socket] Connected", socket!.id);
     initialTimeStamp = new Date().getTime();
   });
 
-  socket.on('disconnect', (reason) => {
-    console.log('[socket] Disconnected:', reason);
+  socket.on("disconnect", (reason) => {
+    console.log("[socket] Disconnected:", reason);
   });
 
-  socket.on('connect_error', (error) => {
+  socket.on("connect_error", (error) => {
     if (socket!.active) {
       // temporary failure, the socket will automatically try to reconnect
     } else {
       // the connection was denied by the server
       // in that case, `socket.connect()` must be manually called in order to reconnect
-      console.log('[socket] Error:', error.message);
+      console.log("[socket] Error:", error.message);
     }
   });
 
-  socket.on('updateChart', (tokenId: string, priceUpdates: RawChart) => {
+  socket.on(EVENT_CHART_SOCKET, (tokenId: string, priceUpdates: RawChart) => {
     try {
     } catch (error) {}
     const tradeTime = priceUpdates.ts * 1000;
 
-    const state = queryClient.getQueryState<RawChart[]>(['chartTable', tokenId]);
+    const state = queryClient.getQueryState<RawChart[]>([
+      "chartTable",
+      tokenId,
+    ]);
 
-    console.log('SOCKET :>> state-chart :>>', state.data, priceUpdates);
+    console.log("SOCKET :>> state-chart :>>", state.data, priceUpdates);
 
     if (!state || !state.data || !priceUpdates) {
       return;
     }
-    console.log('SOCKET :>> tokenId, priceUpdates', tokenId, priceUpdates);
+    console.log("SOCKET :>> tokenId, priceUpdates", tokenId, priceUpdates);
 
     const priceHistory = [...state.data, priceUpdates];
     const subscriptionItem = channelToSubscription.get(tokenId);
@@ -71,17 +80,20 @@ if (socket) {
     // const nextBarTime = getNextBarTime(lastBar.time, +resolution);
     const dataChartTable = genOhlcData({
       priceHistory,
-      range: Number(subscriptionItem?.resolution)
+      range: Number(subscriptionItem?.resolution),
     });
 
     const bars = dataChartTable.map((bar) => ({
       ...bar,
-      time: bar.time * 1000 // Convert from seconds to milliseconds
+      time: bar.time * 1000, // Convert from seconds to milliseconds
     }));
 
     const lastBar = bars[bars.length - 1];
-    let bar: Bar = lastBar.close === lastBar.open && lastBar.high === lastBar.low ? bars[bars.length - 2] : lastBar;
-    console.log('bar', bar, lastBar);
+    let bar: Bar =
+      lastBar.close === lastBar.open && lastBar.high === lastBar.low
+        ? bars[bars.length - 2]
+        : lastBar;
+    console.log("bar", bar, lastBar);
 
     if (!bar) return;
     // if (tradeTime >= nextBarTime) {
@@ -103,7 +115,7 @@ if (socket) {
     // Send data to every subscriber of that symbol
     subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
 
-    queryClient.setQueryData(['chartTable', tokenId], (oldData: RawChart[]) => {
+    queryClient.setQueryData(["chartTable", tokenId], (oldData: RawChart[]) => {
       return [...(oldData || []), priceUpdates];
     });
   });
@@ -198,10 +210,18 @@ function getNextBarTime(barTime: number, resolution: number) {
   return (previousSegment + 1) * 1000 * 60 * resolution;
 }
 
-export function subscribeOnStream(symbolInfo: LibrarySymbolInfo, resolution: ResolutionString, onRealtimeCallback: SubscribeBarsCallback, subscriberUID: string, onResetCacheNeededCallback: () => void, lastBar: Bar, pairIndex: string) {
+export function subscribeOnStream(
+  symbolInfo: LibrarySymbolInfo,
+  resolution: ResolutionString,
+  onRealtimeCallback: SubscribeBarsCallback,
+  subscriberUID: string,
+  onResetCacheNeededCallback: () => void,
+  lastBar: Bar,
+  pairIndex: string
+) {
   const handler = {
     id: subscriberUID,
-    callback: onRealtimeCallback
+    callback: onRealtimeCallback,
   };
   //   let subscriptionItem = channelToSubscription.get(pairIndex);
   let subscriptionItem = channelToSubscription.get(pairIndex);
@@ -216,11 +236,15 @@ export function subscribeOnStream(symbolInfo: LibrarySymbolInfo, resolution: Res
     resolution,
     lastBar,
     handlers: [handler],
-    pairIndex
+    pairIndex,
   } as SubscriptionItem;
   channelToSubscription.set(pairIndex, subscriptionItem);
 
-  console.log('[subscribeBars]: Subscribe to streaming. Channel:', pairIndex, subscriptionItem);
+  console.log(
+    "[subscribeBars]: Subscribe to streaming. Channel:",
+    pairIndex,
+    subscriptionItem
+  );
 }
 
 export function unsubscribeFromStream(subscriberUID: string) {
@@ -232,7 +256,9 @@ export function unsubscribeFromStream(subscriberUID: string) {
       continue;
     }
 
-    const handlerIndex = subscriptionItem.handlers.findIndex((handler) => handler.id === subscriberUID);
+    const handlerIndex = subscriptionItem.handlers.findIndex(
+      (handler) => handler.id === subscriberUID
+    );
 
     if (handlerIndex !== -1) {
       // Remove from handlers
@@ -240,7 +266,10 @@ export function unsubscribeFromStream(subscriberUID: string) {
 
       if (subscriptionItem.handlers.length === 0) {
         // Unsubscribe from the channel if it was the last handler
-        console.log('[unsubscribeBars]: Unsubscribe from streaming. Channel:', pairIndex);
+        console.log(
+          "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
+          pairIndex
+        );
         // socket.emit("SubRemove", { subs: [channelString] });
         channelToSubscription.delete(pairIndex);
         break;
@@ -252,7 +281,7 @@ export function unsubscribeFromStream(subscriberUID: string) {
 export const genOhlcData = ({
   priceHistory,
   range,
-  countBack = 300
+  countBack = 300,
 }: {
   priceHistory: {
     price: number;
@@ -282,13 +311,19 @@ export const genOhlcData = ({
 
   // convert price feed to candle price data
   let cdStart = Math.floor(priceHistory[0].ts / candlePeriod) * candlePeriod;
-  let cdEnd = Math.floor(priceHistory[priceHistory.length - 1].ts / candlePeriod) * candlePeriod;
+  let cdEnd =
+    Math.floor(priceHistory[priceHistory.length - 1].ts / candlePeriod) *
+    candlePeriod;
   // let cdStart = start;
   // let cdEnd = end;
 
   let cdFeeds: CandlePrice[] = [];
   let pIndex = 0;
-  for (let curCdStart = cdStart; curCdStart <= cdEnd; curCdStart += candlePeriod) {
+  for (
+    let curCdStart = cdStart;
+    curCdStart <= cdEnd;
+    curCdStart += candlePeriod
+  ) {
     let st = priceHistory[pIndex].price;
     let hi = priceHistory[pIndex].price;
     let lo = priceHistory[pIndex].price;
@@ -310,20 +345,30 @@ export const genOhlcData = ({
         high: hi,
         low: lo,
         close: en,
-        time: curCdStart
+        time: curCdStart,
       });
   }
   const extraCandlesNeeded = countBack - cdFeeds.length;
   if (extraCandlesNeeded > 0) {
-    console.log(`[getCandleData]: Generating ${extraCandlesNeeded} extra candle(s)`);
+    console.log(
+      `[getCandleData]: Generating ${extraCandlesNeeded} extra candle(s)`
+    );
     const lastCandle = cdFeeds[0];
-    const extraCandles = generateExtraCandles(lastCandle, extraCandlesNeeded, candlePeriod);
+    const extraCandles = generateExtraCandles(
+      lastCandle,
+      extraCandlesNeeded,
+      candlePeriod
+    );
     cdFeeds = [...extraCandles, ...cdFeeds];
   }
   return cdFeeds;
 };
 
-const generateExtraCandles = (lastCandle: CandlePrice, numberOfCandles: number, candlePeriod: number) => {
+const generateExtraCandles = (
+  lastCandle: CandlePrice,
+  numberOfCandles: number,
+  candlePeriod: number
+) => {
   const extraCandles = [];
   for (let i = 1; i <= numberOfCandles; i++) {
     const newTime = lastCandle.time - i * candlePeriod;
@@ -333,7 +378,7 @@ const generateExtraCandles = (lastCandle: CandlePrice, numberOfCandles: number, 
       low: lastCandle.low,
       close: lastCandle.low,
       isExtra: true,
-      time: newTime
+      time: newTime,
     });
   }
   return extraCandles;

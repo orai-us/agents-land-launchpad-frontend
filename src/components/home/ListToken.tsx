@@ -76,7 +76,7 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
   ) : (
     <InfiniteScroll
       next={handleLoadMore}
-      className="mt-8 mb-14 pb-2 grid grid-cols-4 gap-x-4 gap-y-8 w-full overflow-hidden"
+      className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
       hasMore={data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"
@@ -182,7 +182,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
   ) : (
     <InfiniteScroll
       next={handleLoadMore}
-      className="mt-8 mb-14 pb-2 grid grid-cols-4 gap-x-4 gap-y-8 w-full overflow-hidden"
+      className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
       hasMore={data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"

@@ -132,7 +132,7 @@ const MarqueeToken = () => {
 
   return (
     <div className="flex items-center justify-center w-full bg-[#3D2426] p-4">
-      <div className="flex items-center justify-center max-w-[1216px]">
+      <div className="flex items-center justify-center max-w-[1216px] w-full">
         <div className="mr-4">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
             <path

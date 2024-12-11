@@ -1,17 +1,17 @@
-import UserContext from '@/context/UserContext';
-import { coinInfo } from '@/utils/types';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { PublicKey } from '@solana/web3.js';
-import { ChangeEvent, useContext, useEffect, useState } from 'react';
-import { errorAlert, successAlert } from '../others/ToastGroup';
-import { Web3SolanaProgramInteraction } from '@/program/web3';
-import { numberWithCommas } from '@/utils/format';
-import solIcon from '@/assets/icons/sol_ic.svg';
-import LoadingImg from '@/assets/icons/loading-button.svg';
+import UserContext from "@/context/UserContext";
+import { coinInfo } from "@/utils/types";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey } from "@solana/web3.js";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { errorAlert, successAlert } from "../others/ToastGroup";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { numberWithCommas } from "@/utils/format";
+import solIcon from "@/assets/icons/sol_ic.svg";
+import LoadingImg from "@/assets/icons/loading-button.svg";
 
-import { debounce } from 'lodash';
-import BigNumber from 'bignumber.js';
-import { SOL_DECIMAL } from '@/config';
+import { debounce } from "lodash";
+import BigNumber from "bignumber.js";
+import { SOL_DECIMAL } from "@/config";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -21,8 +21,8 @@ const web3Solana = new Web3SolanaProgramInteraction();
 
 export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [sol, setSol] = useState<string>('');
-  const [simulateReceive, setSimulateReceive] = useState<string>('');
+  const [sol, setSol] = useState<string>("");
+  const [simulateReceive, setSimulateReceive] = useState<string>("");
   const [isBuy, setIsBuy] = useState<number>(0);
   const [loadingEst, setLoadingEst] = useState<boolean>(false);
   const [tokenBal, setTokenBal] = useState<number>(0);
@@ -30,19 +30,20 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
-    { id: '', price: 'Reset' },
-    { id: '0.1', price: '0.1 SOL' },
-    { id: '0.5', price: '0.5 SOL' },
-    { id: '1', price: '1 SOL' }
+    { id: "", price: "Reset" },
+    { id: "0.1", price: "0.1 SOL" },
+    { id: "0.5", price: "0.5 SOL" },
+    { id: "1", price: "1 SOL" },
   ];
+  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!isNaN(parseFloat(value))) {
       setSol(value);
-    } else if (value === '') {
-      setSimulateReceive('');
-      setSol(''); // Allow empty string to clear the input
+    } else if (value === "") {
+      setSimulateReceive("");
+      setSol(""); // Allow empty string to clear the input
     }
   };
 
@@ -51,18 +52,49 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
       (async () => {
         try {
           setLoadingEst(true);
-          const amountWithDecimal = new BigNumber(sol).multipliedBy(new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL)).toFixed(0, 1);
+          const amountWithDecimal = new BigNumber(sol)
+            .multipliedBy(
+              new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL)
+            )
+            .toFixed(0, 1);
           const mint = new PublicKey(coin.token);
-          const receive = await web3Solana.simulateSwapTx(mint, wallet, amountWithDecimal, isBuy);
-          setSimulateReceive(new BigNumber(receive).div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL)).toString());
+
+          let receive = "";
+          if (!isListedOnRay) {
+            receive = await web3Solana.simulateSwapTx(
+              mint,
+              wallet,
+              amountWithDecimal,
+              isBuy
+            );
+          } else {
+            const { numerator, denominator } =
+              await web3Solana.simulateRaydiumSwapTx(
+                mint,
+                wallet,
+                amountWithDecimal,
+                isBuy,
+                coin.raydiumPoolAddr
+              );
+
+            receive = (numerator || 0).toString();
+
+            console.log("receive", receive);
+          }
+
+          setSimulateReceive(
+            new BigNumber(receive)
+              .div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL))
+              .toString()
+          );
         } catch (error) {
-          console.log('simulate failed', error);
+          console.log("simulate failed", error);
         } finally {
           setLoadingEst(false);
         }
       })();
     } else {
-      setSimulateReceive('');
+      setSimulateReceive("");
     }
   }, [sol]);
 
@@ -72,11 +104,14 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     }
 
     try {
-      const [tokenBal, solBal] = await Promise.all([web3Solana.getTokenBalance(wallet.publicKey.toString(), coin.token), web3Solana.getSolanaBalance(wallet.publicKey)]);
+      const [tokenBal, solBal] = await Promise.all([
+        web3Solana.getTokenBalance(wallet.publicKey.toString(), coin.token),
+        web3Solana.getSolanaBalance(wallet.publicKey),
+      ]);
       setTokenBal(tokenBal ? tokenBal : 0);
       setSolBalance(solBal ? solBal : 0);
     } catch (error) {
-      console.log('error', error);
+      console.log("error", error);
       // setTokenBal(0);
       // setSolBalance(0);
     }
@@ -90,14 +125,25 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     setLoading(true);
     const mint = new PublicKey(coin.token);
     // const userWallet = new PublicKey(user.wallet);
-    const res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+    let res;
+    if (isListedOnRay) {
+      res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+    } else {
+      res = await web3Solana.raydiumSwapTx(
+        mint,
+        wallet,
+        sol,
+        isBuy,
+        coin.raydiumPoolAddr
+      );
+    }
 
     if (res) {
-      console.log('res', res);
-      successAlert('Transaction successfully!');
+      console.log("res", res);
+      successAlert("Transaction successfully!");
       getBalance();
     } else {
-      errorAlert('Transaction Failed!');
+      errorAlert("Transaction Failed!");
     }
 
     setLoading(false);
@@ -105,23 +151,36 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   };
 
   return (
-    <div className="p-6 rounded-lg bg-[#13141D] text-[#9192A0]">
+    <div className="p-3 md:p-6 rounded-b-lg md:rounded-lg bg-[#13141D] text-[#9192A0] w-full">
+      {isListedOnRay && (
+        <div className="animate-pulse animate-infinite pb-4 text-[#E8E9EE] text-center">
+          Trade via Raydium
+        </div>
+      )}
       <div className="flex flex-row justify-center items-center w-full gap-2 text-[#E8E9EE] uppercase text-[14px]">
         <button
-          className={`uppercase rounded py-2 h-12 w-full ${isBuy === 0 ? 'bg-[#9FF4CF] text-[#080A14]' : 'bg-[#1A1C28] hover:brightness-125'}`}
+          className={`uppercase rounded py-2 h-12 w-full ${
+            isBuy === 0
+              ? "bg-[#9FF4CF] text-[#080A14]"
+              : "bg-[#1A1C28] hover:brightness-125"
+          }`}
           onClick={() => {
             setIsBuy(0);
-            setSol('');
+            setSol("");
           }}
         >
-          {' '}
+          {" "}
           Buy
         </button>
         <button
-          className={`uppercase rounded py-2 h-12 w-full ${isBuy === 1 ? 'bg-[#E75787] text-[#080A14]' : 'bg-[#1A1C28] hover:brightness-125'}`}
+          className={`uppercase rounded py-2 h-12 w-full ${
+            isBuy === 1
+              ? "bg-[#E75787] text-[#080A14]"
+              : "bg-[#1A1C28] hover:brightness-125"
+          }`}
           onClick={() => {
             setIsBuy(1);
-            setSol('');
+            setSol("");
           }}
         >
           Sell
@@ -129,7 +188,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
       </div>
       <div className="flex flex-col relative">
         <div className="flex justify-between items-center mt-3 mb-3">
-          <label htmlFor="name" className="rounded bg-transparent text-ml font-medium text-[#9192A0] text-[12px] flex">
+          <label
+            htmlFor="name"
+            className="rounded bg-transparent text-ml font-medium text-[#9192A0] md:text-[12px] flex"
+          >
             {/* Switch to {coin.ticker} &nbsp;
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -176,19 +238,37 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             />
 
             <span className="text-[10px] text-[#E8E9EE] font-medium">
-              Balance: {isBuy !== 0 ? numberWithCommas(tokenBal) : numberWithCommas(solBalance)} {isBuy === 0 ? 'SOL' : coin.ticker}
+              Balance:{" "}
+              {isBuy !== 0
+                ? numberWithCommas(tokenBal)
+                : numberWithCommas(solBalance)}{" "}
+              {isBuy === 0 ? "SOL" : coin.ticker}
             </span>
           </div>
 
           {isBuy === 0 ? (
             <div className="flex w-fit text-[#E8E9EE] text-[14px] rounded-[32px] bg-[#080A14] py-1 px-4 justify-center items-center h-8">
               SOL
-              <img src={solIcon} alt="solIcon" width={20} height={20} className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover" />
+              <img
+                src={solIcon}
+                alt="solIcon"
+                width={20}
+                height={20}
+                className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover"
+              />
             </div>
           ) : (
             <div className="flex w-fit text-[#E8E9EE] text-[14px] rounded-[32px] bg-[#080A14] py-1 px-4 justify-center items-center h-8">
               {coin.ticker}
-              {coin.url && <img src={coin.url} alt="coinIcon" width={20} height={20} className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover" />}
+              {coin.url && (
+                <img
+                  src={coin.url}
+                  alt="coinIcon"
+                  width={20}
+                  height={20}
+                  className="ml-1 w-5 h-5 rounded-full border border-[#30344A] object-cover"
+                />
+              )}
             </div>
           )}
         </div>
@@ -196,7 +276,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           <div className="flex flex-row py-2 gap-3">
             {SolList.map((item: any, index: any) => {
               return (
-                <div key={`list-sol-${index}`} className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol(item.id)}>
+                <div
+                  key={`list-sol-${index}`}
+                  className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+                  onClick={() => setSol(item.id)}
+                >
                   {item.price}
                 </div>
               );
@@ -204,40 +288,71 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
           </div>
         ) : (
           <div className="flex flex-row py-2 gap-3">
-            <div className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol('')}>
+            <div
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              onClick={() => setSol("")}
+            >
               Reset
             </div>
-            <div className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol((tokenBal / 10).toString())}>
+            <div
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              onClick={() => setSol((tokenBal / 10).toString())}
+            >
               10%
             </div>
-            <div className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol((tokenBal / 4).toString())}>
+            <div
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              onClick={() => setSol((tokenBal / 4).toString())}
+            >
               25%
             </div>
-            <div className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol((tokenBal / 2).toString())}>
+            <div
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              onClick={() => setSol((tokenBal / 2).toString())}
+            >
               50%
             </div>
-            <div className="border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer" onClick={() => setSol(tokenBal.toString())}>
+            <div
+              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              onClick={() => setSol(tokenBal.toString())}
+            >
               100%
             </div>
           </div>
         )}
 
         {/* {progress === 100 ? (
-          <div className="border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
+          <div className="text-[10px] border-[1px] border-[#143F72] cursor-not-allowed w-full text-center rounded-lg hover:bg-slate-500 py-2">
             Trade
           </div>
         ) : ( */}
 
-        <div className="mt-2">
-          Receive: ≈ {simulateReceive ? numberWithCommas(new BigNumber(simulateReceive || 0).toNumber(), undefined, { maximumFractionDigits: 6 }) : '--'} {!isBuy ? coin.ticker : 'SOL'}
+        <div className="mt-2 flex items-center gap-1">
+          Receive: ≈{" "}
+          {!loadingEst ? (
+            simulateReceive ? (
+              numberWithCommas(
+                new BigNumber(simulateReceive || 0).toNumber(),
+                undefined,
+                { maximumFractionDigits: 6 }
+              )
+            ) : (
+              "--"
+            )
+          ) : (
+            <img src={LoadingImg.src} />
+          )}{" "}
+          {!isBuy ? coin.ticker : "SOL"}
         </div>
 
         <button
-          disabled={progress === 100 || !sol || !wallet.publicKey}
+          disabled={!sol || !wallet.publicKey || loading}
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
-          <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">{loading && <img src={LoadingImg} />}&nbsp;Trade</div>
+          <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
+            {loading && <img src={LoadingImg} />}&nbsp;Trade
+          </div>
         </button>
         {/* )} */}
       </div>

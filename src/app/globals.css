@@ -58,6 +58,7 @@
 body {
   color: #e8e9ee;
   background-color: #080a14;
+  overflow-x: hidden;
 }
 
 @layer utilities {
@@ -105,6 +106,12 @@ input[type="number"] {
   background-position: center center;
 }
 
+@media only screen and (max-width: 600px) {
+  .bg-banner {
+    background-position: 25% 100%;
+  }
+}
+
 .bg-hill {
   background-image: url(../assets/images/hill_progress.png);
   background-repeat: no-repeat;
@@ -139,6 +146,7 @@ table.scroll-table tbody {
   display: block;
   max-height: 350px;
   overflow-y: scroll;
+  overflow-x: scroll;
 }
 
 table.scroll-table thead,

@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
-import { ChartingLibraryWidgetOptions, PeriodParams, ResolutionString } from '@/libraries/charting_library/charting_library';
-import { Chart, coinInfo, RawChart } from '@/utils/types';
-import { queryClient } from '@/provider/providers';
-import { TVChartContainer } from './TVChartContainer';
+import { PeriodParams } from "@/libraries/charting_library/charting_library";
+import { coinInfo } from "@/utils/types";
+import { TVChartContainer } from "./TVChartContainer";
 
 interface TradingChartProps {
   param: coinInfo;
@@ -12,9 +11,6 @@ interface TradingChartProps {
 // const TVChartContainer = () => import('@/components/TVChart/TVChartContainer').then((mod) => mod.TVChartContainer);
 
 export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
-  const state = queryClient.getQueryState<RawChart[]>(['chartTable', param.token]);
-
-  console.log('state-chart :>>', state);
   const [isScriptReady, setIsScriptReady] = useState(false);
   const [period, setPeriod] = useState<PeriodParams>({} as PeriodParams);
   useEffect(() => {
@@ -24,7 +20,7 @@ export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
         to: Math.floor(new Date().getTime() / 1000),
         // to: new Date().getTime(),
         firstDataRequest: true,
-        countBack: 2
+        countBack: 2,
       };
       setPeriod(newPeriod);
     }
@@ -32,13 +28,6 @@ export const TradingChart: React.FC<TradingChartProps> = ({ param }) => {
 
   return (
     <>
-      {/* <head>
-        <title>Sample Demo TradingView with NextJS</title>
-      </head> */}
-      {/* <Script
-        src="/libraries/charting_library/charting_library.standalone.js"
-        strategy="lazyOnload"
-      /> */}
       {isScriptReady && param && (
         <TVChartContainer
           name={param.ticker || param.name}
