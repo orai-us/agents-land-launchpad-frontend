@@ -155,7 +155,7 @@ export class Web3SolanaProgramInteraction {
     amount: string,
     type: number
   ): Promise<any> => {
-    console.log("========trade swap==============");
+    console.log("==============trade swap==============");
 
     // check the connection
     if (!wallet.publicKey || !this.connection) {
@@ -203,7 +203,10 @@ export class Web3SolanaProgramInteraction {
         parseFloat(amount) * Math.pow(10, coinDecimal)
       );
 
-      if (new BigNumber(fmtAmount.toNumber()).isGreaterThan(maxSolSwap)) {
+      if (
+        type === 0 &&
+        new BigNumber(fmtAmount.toNumber()).isGreaterThan(maxSolSwap)
+      ) {
         console.log("Exceeded bonding curve limit");
         throw Error("Exceeded bonding curve limit");
       }

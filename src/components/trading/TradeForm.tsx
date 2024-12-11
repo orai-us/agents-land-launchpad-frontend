@@ -122,32 +122,37 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   }, [coin]);
 
   const handlTrade = async () => {
-    setLoading(true);
-    const mint = new PublicKey(coin.token);
-    // const userWallet = new PublicKey(user.wallet);
-    let res;
-    if (isListedOnRay) {
-      res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
-    } else {
-      res = await web3Solana.raydiumSwapTx(
-        mint,
-        wallet,
-        sol,
-        isBuy,
-        coin.raydiumPoolAddr
-      );
-    }
+    try {
+      setLoading(true);
+      const mint = new PublicKey(coin.token);
+      let res;
+      if (!isListedOnRay) {
+        res = await web3Solana.swapTx(mint, wallet, sol, isBuy);
+      } else {
+        res = await web3Solana.raydiumSwapTx(
+          mint,
+          wallet,
+          sol,
+          isBuy,
+          coin.raydiumPoolAddr
+        );
+      }
 
-    if (res) {
-      console.log("res", res);
-      successAlert("Transaction successfully!");
-      getBalance();
-    } else {
+      if (res) {
+        console.log("res", res);
+        successAlert("Transaction successfully!");
+        getBalance();
+      } else {
+        errorAlert("Transaction Failed!");
+      }
+
+      return res;
+    } catch (error) {
+      console.log("error trade", error);
       errorAlert("Transaction Failed!");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    return res;
   };
 
   return (
