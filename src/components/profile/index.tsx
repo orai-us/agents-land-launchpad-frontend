@@ -29,8 +29,6 @@ export default function ProfilePage() {
   const [pathname, setLocation] = useLocation();
   const { publicKey } = useWallet();
 
-  console.log("location", location);
-
   useEffect(() => {
     if (!publicKey) {
       return;
@@ -59,6 +57,7 @@ export default function ProfilePage() {
       setUserData(response);
     } catch (error) {
       console.error("Error fetching user:", error);
+      handleToRouter("/");
     }
   };
 
@@ -201,12 +200,15 @@ export default function ProfilePage() {
         <div className="w-full">
           {option === 2 && (
             <div className="flex flex-wrap">
-              {!coins.length ? (
+              {!coins.sort(
+                (a, b) =>
+                  new Date(b.date).getTime() - new Date(a.date).getTime()
+              ).length ? (
                 <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-12 px-8 flex flex-col justify-center items-center">
                   <img src={nodataImg} alt="nodata" />
                   <p className="mt-4 text-[#E8E9EE] text-[16px]">No Token</p>
                   <p className="mt-2 text-[#585A6B] text-[14px]">
-                    No Token Held
+                    No Token Created
                   </p>
                 </div>
               ) : (
@@ -268,15 +270,6 @@ export default function ProfilePage() {
                     </tbody>
                   </table>
                 </div>
-                // coins.map((coin) => (
-                //   <div
-                //     key={coin.token}
-                //     onClick={() => handleToRouter(`/trading/${coin.token}`)}
-                //     className="cursor-pointer"
-                //   >
-                //     <CoinBlog coin={coin} componentKey="coin" />
-                //   </div>
-                // ))
               )}
             </div>
           )}

@@ -182,9 +182,11 @@ export class Web3SolanaProgramInteraction {
       [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
       program.programId
     );
+
     const curveAccount = await program.account.bondingCurve.fetch(
       bondingCurvePda
     );
+
     const solReserve = curveAccount.reserveLamport.toNumber();
 
     const maxSolSwap = curveLimit - solReserve;

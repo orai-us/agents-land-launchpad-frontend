@@ -157,11 +157,11 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
                     create by{" "}
                     <span
                       className="text-[#E4775D] underline"
-                      onClick={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        handleToProfile(ind as any);
-                      }}
+                      // onClick={(event) => {
+                      //   event.preventDefault();
+                      //   event.stopPropagation();
+                      //   handleToProfile(ind as any);
+                      // }}
                     >
                       {coinItem.creator?.["wallet"]
                         ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
@@ -284,7 +284,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                     create by{" "}
                     <span
                       className="text-[#E4775D] underline"
-                      onClick={() => handleToProfile(ind as any)}
+                      // onClick={() => handleToProfile(ind as any)}
                     >
                       {coinItem.creator?.["wallet"]
                         ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)

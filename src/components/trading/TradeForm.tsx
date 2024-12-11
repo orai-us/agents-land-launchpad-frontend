@@ -36,6 +36,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
     { id: "1", price: "1 SOL" },
   ];
   const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
+  const isDisableSwapOnAgent =
+    Number(progress) >= 100 &&
+    !coin.raydiumPoolAddr &&
+    !coin.oraidexPoolAddr &&
+    !coin.listed;
 
   const isInsufficientFund =
     isBuy === 0
@@ -356,7 +361,13 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         </div>
 
         <button
-          disabled={!sol || !wallet.publicKey || loading || isInsufficientFund}
+          disabled={
+            !sol ||
+            !wallet.publicKey ||
+            loading ||
+            isInsufficientFund ||
+            isDisableSwapOnAgent
+          }
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
