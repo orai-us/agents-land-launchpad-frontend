@@ -37,6 +37,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   ];
   const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
 
+  const isInsufficientFund =
+    isBuy === 0
+      ? new BigNumber(sol).isGreaterThan(solBalance)
+      : new BigNumber(sol).isGreaterThan(tokenBal);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!isNaN(parseFloat(value))) {
@@ -351,7 +356,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         </div>
 
         <button
-          disabled={!sol || !wallet.publicKey || loading}
+          disabled={!sol || !wallet.publicKey || loading || isInsufficientFund}
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
