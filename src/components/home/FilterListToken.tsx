@@ -1,10 +1,9 @@
-"use client";
-import { FC, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { STATUS_TOKEN, TokenTab } from "./ListToken";
-import { BiSearchAlt } from "react-icons/bi";
 import { debounce } from "lodash";
+import { FC } from "react";
+import { BiSearchAlt } from "react-icons/bi";
+import { twMerge } from "tailwind-merge";
 import { Link } from "wouter";
+import { STATUS_TOKEN, TokenTab } from "./ListToken";
 
 const SEARCH_TIME = 1000; // 3000
 

@@ -1,4 +1,4 @@
-import { ChartingLibraryFeatureset } from "@/libraries/charting_library";
+import { ChartingLibraryFeatureset } from "@/charting_library";
 
 const RED = "#FF6767";
 const GREEN = "#47D0A5";
@@ -21,21 +21,6 @@ const chartStyleOverrides = [
 }, {});
 
 export const chartOverrides = {
-  // "paneProperties.background": "#111114",
-  // "paneProperties.backgroundGradientStartColor": "#111114",
-  // "paneProperties.backgroundGradientEndColor": "#111114",
-  // "paneProperties.backgroundType": "solid",
-  // "paneProperties.vertGridProperties.color": "rgba(35, 38, 59, 1)",
-  // "paneProperties.vertGridProperties.style": 2,
-  // "paneProperties.horzGridProperties.color": "rgba(35, 38, 59, 1)",
-  // "paneProperties.horzGridProperties.style": 2,
-  // "mainSeriesProperties.priceLineColor": "#3a3e5e",
-  // "scalesProperties.textColor": "#9494A8",
-  // "scalesProperties.lineColor": "#111114",
-  // "scalesProperties.fontSize": 14,
-  // priceScaleSelectionStrategyName: "right",
-  // "scalesProperties.showSymbolLabels": true,
-
   "paneProperties.background": "#161a25",
   "paneProperties.backgroundGradientStartColor": "#161a25",
   "paneProperties.backgroundGradientEndColor": "#161a25",

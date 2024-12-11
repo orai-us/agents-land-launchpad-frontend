@@ -1,5 +1,3 @@
-"use client";
-
 import type {
   Bar,
   DatafeedConfiguration,
@@ -7,7 +5,7 @@ import type {
   LibrarySymbolInfo,
   PeriodParams,
   ResolutionString,
-} from "@/libraries/charting_library";
+} from "@/charting_library";
 
 import {
   subscribeOnStream,

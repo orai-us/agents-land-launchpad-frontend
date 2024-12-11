@@ -340,7 +340,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               "--"
             )
           ) : (
-            <img src={LoadingImg.src} />
+            <img src={LoadingImg} />
           )}{" "}
           {!isBuy ? coin.ticker : "SOL"}
         </div>

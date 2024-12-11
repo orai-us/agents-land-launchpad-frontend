@@ -1,4 +1,3 @@
-'use client';
 import { FC, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { PiLightning } from 'react-icons/pi';
 import UserContext from '@/context/UserContext';

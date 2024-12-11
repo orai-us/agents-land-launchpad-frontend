@@ -1,5 +1,3 @@
-"use client";
-
 import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
 import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
@@ -225,7 +223,7 @@ export default function TradingPage() {
                           }
                         )
                       ) : (
-                        <img src={LoadingImg.src} />
+                        <img src={LoadingImg} />
                       )}{" "}
                       SOL
                     </p>
@@ -361,7 +359,7 @@ export default function TradingPage() {
                       }
                     )
                   ) : (
-                    <img src={LoadingImg.src} />
+                    <img src={LoadingImg} />
                   )}{" "}
                   SOL
                   {/* FIXME: update price simulate */}

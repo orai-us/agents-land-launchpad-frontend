@@ -24,9 +24,6 @@
       "@/*": [
         "./src/*"
       ],
-      "@/libraries/*": [
-        "./public/libraries/*"
-      ],
     }
   },
   "include": [

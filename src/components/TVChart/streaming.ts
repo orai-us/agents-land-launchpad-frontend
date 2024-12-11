@@ -1,17 +1,13 @@
-"use client";
-
-import { RawChart } from "./../../utils/types";
-
-import { io, Socket } from "socket.io-client";
 import type {
   Bar,
   LibrarySymbolInfo,
   ResolutionString,
   SubscribeBarsCallback,
-} from "@/libraries/charting_library";
-
+} from "@/charting_library";
+import { CandlePrice } from "@/utils/types";
+import { io, Socket } from "socket.io-client";
 import { queryClient } from "../../provider/providers";
-import { CandlePrice, Chart } from "@/utils/types";
+import { RawChart } from "./../../utils/types";
 import { EVENT_CHART_SOCKET } from "./config";
 
 let socket: Socket | undefined = undefined;

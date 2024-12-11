@@ -1,10 +1,9 @@
-'use client';
 import { FC, useContext, useState } from 'react';
 import UserContext from '@/context/UserContext';
 import TimeTranding from '../buttons/TimeTranding';
 import { CiFilter } from 'react-icons/ci';
-import switchOn from '@/../public/assets/images/switch-on.png';
-import switchOff from '@/../public/assets/images/switch-off.png';
+import switchOn from '@/assets/images/switch-on.png';
+import switchOff from '@/assets/images/switch-off.png';
 import { BiSearchAlt } from 'react-icons/bi';
 import { coinInfo } from '@/utils/types';
 import FilterListButton from '../others/FilterListButton';

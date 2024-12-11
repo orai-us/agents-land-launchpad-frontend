@@ -10,7 +10,6 @@ import { reduceString } from '@/utils/util';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { PROGRAM_ID } from '@/config';
 import { BN } from 'bn.js';
-import { time } from 'console';
 
 export enum ACTION_TYPE {
   Bought = 'Bought',
@@ -69,6 +68,7 @@ const MarqueeToken = () => {
       commitment: commitmentLevel,
       wsEndpoint: import.meta.env.VITE_SOLANA_WS
     });
+
     const listener = new AgentsLandListener(connection);
     listener.setProgramLogsCallback('Launch', (basicTokenInfo: any) => {
       const newCoinInfo: coinInfo = {

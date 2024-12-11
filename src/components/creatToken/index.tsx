@@ -1,4 +1,5 @@
 "use client";
+import nodataImg from "@/assets/icons/noagentdata.svg";
 import MountainImg from "@/assets/images/mount_guide.png";
 import AgentImg from "@/assets/images/userAgentDefault.svg";
 import { Spinner } from "@/components/loadings/Spinner";
@@ -9,14 +10,12 @@ import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
 import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
 import { getAgentsData, reduceString } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
-
-import { useLocation } from "wouter";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
+import { useLocation } from "wouter";
 import DropzoneFile from "../uploadFile/DropzoneFile";
-import nodataImg from "@/assets/icons/noagentdata.svg";
-import PreSaleModal from "./Presale";
 import CreateTokenSuccess from "./CreateTokenSuccess";
+import PreSaleModal from "./Presale";
 
 export enum STEP_TOKEN {
   INFO,

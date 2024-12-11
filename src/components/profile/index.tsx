@@ -1,4 +1,3 @@
-"use client";
 import nodataImg from "@/assets/icons/nodata.svg";
 import defaultUserImg from "@/assets/images/user-avatar.png";
 import Modal from "@/components/modals/Modal";

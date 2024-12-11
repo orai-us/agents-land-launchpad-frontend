@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
     <!-- Global site tag (gtag.js) - Google Analytics -->
 
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
@@ -28,13 +28,17 @@
 
     <meta property="twitter:url" content="%PUBLIC_URL%" />
     <meta property="twitter:domain" content="%PUBLIC_URL%" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&subset=latin,vietnamese&display=swap" rel="stylesheet" />
     <script>
       var exports = {};
     </script>
   </head>
   <body>
     <div id="root"></div>
-    <script src="/src/libraries/datafeeds/udf/dist/bundle.js"></script>
+    <script src="/libraries/charting_library/charting_library.standalone.js"></script>
+    <script src="/libraries/datafeeds/udf/dist/bundle.js"></script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

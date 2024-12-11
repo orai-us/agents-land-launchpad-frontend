@@ -63,7 +63,7 @@ export const DexToolsChart: React.FC<TradingChartProps> = ({ param }) => {
     <div className="relative">
       {loading && (
         <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black rounded-b">
-          <img src={LoadingImg.src} width={40} height={40} />
+          <img src={LoadingImg} width={40} height={40} />
         </div>
       )}
       <iframe

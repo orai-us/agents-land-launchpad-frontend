@@ -3,7 +3,6 @@ import { coinInfo, replyInfo, tradeInfo, userInfo } from '@/utils/types';
 import { postReply } from '@/utils/util';
 import React, { ChangeEvent, useContext, useMemo, useRef, useState } from 'react';
 import { errorAlert, successAlert } from '../others/ToastGroup';
-import ImgIcon from '@/../public/assets/images/imce-logo.jpg';
 
 import { uploadImage } from '@/utils/fileUpload';
 

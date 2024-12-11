@@ -1,5 +1,3 @@
-"use client";
-
 import LogoFullIcon from "@/assets/icons/logo.svg";
 import UserContext from "@/context/UserContext";
 import { getSolPriceInUSD } from "@/utils/util";

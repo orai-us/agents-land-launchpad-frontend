@@ -1,11 +1,9 @@
-"use client";
-import UserContext from "@/context/UserContext";
 import {
   ChartingLibraryWidgetOptions,
   IChartingLibraryWidget,
   ResolutionString,
-  widget,
-} from "@/libraries/charting_library";
+} from "@/charting_library";
+import UserContext from "@/context/UserContext";
 import {
   chartOverrides,
   disabledFeatures,
@@ -70,7 +68,7 @@ export const TVChartContainer = ({
         interval: "1D" as ResolutionString,
       };
 
-      tvWidgetRef.current = new widget(widgetOptions);
+      tvWidgetRef.current = new window.TradingView.widget(widgetOptions);
       tvWidgetRef.current.onChartReady(function () {
         setIsLoading(false);
         // const priceScale = tvWidgetRef.current
