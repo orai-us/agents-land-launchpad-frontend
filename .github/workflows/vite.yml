@@ -1,0 +1,77 @@
+name: Trigger action deploy to Firebase
+
+# add ref name?
+run-name: Deploy to Firebase from ${{ github.event.client_payload.repo }}:${{ github.event.client_payload.ref_name || '' }}
+
+on:
+  push:
+    branches:
+      - "feat/vitejs"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ github.event.client_payload.node_version }}
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    # Check if Yarn is installed, if not install it
+    - name: Check and Install Yarn
+      run: |
+        if ! yarn --version > /dev/null 2>&1; then
+          echo "Yarn is not installed. Installing Yarn."
+          npm i -g yarn
+        else
+          echo "Yarn is already installed."
+        fi
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Create env file
+      run: |
+        #!/bin/bash
+        if [ ! -f .env ] && [ -f .env.example ]; then
+            cp .env.example .env
+        fi
+
+    - name: Create env file
+      run: echo "$ENV_CONTENT" > .env
+      shell: bash
+      env:
+        ENV_CONTENT: ${{secrets.ENV_VITE}}
+
+    - name: Build source
+      run: |
+        export NODE_OPTIONS="--max-old-space-size=4096"
+        yarn build
+      env:
+          CI: false
+
+    - name: Select secret
+      if: github.event.client_payload.project
+      id: select-secret
+      run: echo "secret_name=$(echo ${{ github.event.client_payload.project }} | tr '[:lower:]' '[:upper:]' | tr '-' '_')_FIREBASE_DEPLOYER_CREDENTIALS" >> $GITHUB_OUTPUT
+    - name: Import Firebase service account credentials
+      id: import-credentials
+      run : |
+        echo ${{ github.event.client_payload.project && secrets[steps.select-secret.outputs.secret_name] || secrets.FIREBASE_DEPLOYER_CREDENTIALS }} | base64 -d > $(pwd)/serviceaccount.json
+        echo "file_path=$(pwd)/serviceaccount.json" >> $GITHUB_OUTPUT
+
+    - name: Deploy to Firebase
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.import-credentials.outputs.file_path }}
+      run: yarn firebase -P ${{ github.event.client_payload.project_alias || 'default' }} deploy --only hosting:${{ github.event.client_payload.target }}
+
+    - name: Remove credentials file
+      if: success() || failure()
+      run: rm ${{ steps.import-credentials.outputs.file_path }}
