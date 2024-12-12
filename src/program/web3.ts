@@ -22,7 +22,7 @@ import BigNumber from "bignumber.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
-import { SEED_GLOBAL, TEST_COMMUNITY_POOL_WALLET } from "@/config";
+import { SEED_GLOBAL, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -91,8 +91,10 @@ export class Web3SolanaProgramInteraction {
           creator: wallet.publicKey,
           token: mintKp.publicKey,
           // teamWallet: configAccount.teamWallet,
-          communityPoolWallet: new PublicKey(TEST_COMMUNITY_POOL_WALLET), // distill community pool
-          aiAgentWallet: new PublicKey(TEST_COMMUNITY_POOL_WALLET), // user // agent address
+          communityPoolWallet: new PublicKey(DISTILL_COMMUNITY_POOL_WALLET), // distill community pool
+          aiAgentWallet: new PublicKey(
+            "GPKkdZ27NatWw1ciYroHRPtmxQouvZm26wxFvSVV6fvo"
+          ), // user // agent address from data coin // FIXME:
         })
         .instruction();
 

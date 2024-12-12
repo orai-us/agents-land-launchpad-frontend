@@ -12,7 +12,7 @@ import {
 import defaultUserImg from "@/assets/images/user-avatar.png";
 
 import { BN } from "@coral-xyz/anchor";
-import { PROGRAM_ID } from "@/config";
+import { PROGRAM_ID, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import {
@@ -153,6 +153,12 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const isBondingAddr =
                   String(item.owner).toLowerCase() ===
                   String(configBondingAddress).toLowerCase();
+                const isAgent =
+                  String(item.owner).toLowerCase() ===
+                  String(data["agent"]).toLowerCase();
+                const isCommunityPool =
+                  String(item.owner).toLowerCase() ===
+                  String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();
 
                 return (
                   <div
@@ -170,6 +176,16 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         {isBondingAddr && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
                             (Bonding Curve)
+                          </span>
+                        )}
+                        {isCommunityPool && (
+                          <span className="ml-1 text-[#585A6B] text-[12px]">
+                            (Distilled AI Community)
+                          </span>
+                        )}
+                        {isAgent && (
+                          <span className="ml-1 text-[#585A6B] text-[12px]">
+                            (Agent)
                           </span>
                         )}
                       </div>

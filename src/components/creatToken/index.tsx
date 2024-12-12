@@ -204,7 +204,7 @@ export default function CreateToken() {
       }
       // setLocation("/");
       setShowModalSuccess(true);
-      setCoinCreatedData(res);
+      setCoinCreatedData({ ...res, jsonData });
     } catch (error) {
       errorAlert("An unexpected error occurred.");
       console.error(error);
@@ -717,8 +717,8 @@ export default function CreateToken() {
           ) : (
             <button
               disabled={!formValid || isLoading}
-              // onClick={createCoin}
-              onClick={() => setShowModalPreSale(true)}
+              onClick={createCoin}
+              // onClick={() => setShowModalPreSale(true)}
               className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
             >
               <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">

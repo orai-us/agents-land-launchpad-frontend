@@ -9,8 +9,8 @@ export const MAX_RETRY_QUERY_TOKEN = 3;
 export const BONDING_CURVE_LIMIT = 10 * LAMPORTS_PER_SOL; // FIXME: fix limit
 export const INIT_SOL_BONDING_CURVE = 3 * LAMPORTS_PER_SOL; // FIXME: fix limit
 export const LIMIT_PAGINATION = 8;
-export const TEST_COMMUNITY_POOL_WALLET =
-  "GPKkdZ27NatWw1ciYroHRPtmxQouvZm26wxFvSVV6fvo";
+export const DISTILL_COMMUNITY_POOL_WALLET =
+  "CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN"; // FIXME: update later for community pool
 export const SEED_GLOBAL = "global";
 export const TX_FEE = 0.25;
 
