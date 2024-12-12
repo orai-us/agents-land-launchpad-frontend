@@ -1,12 +1,10 @@
 name: Deploy vite Firebase 
 
-# add ref name?
-run-name: Deploy to Firebase from ${{ github.event.client_payload.repo }}:${{ github.event.client_payload.ref_name || '' }}
-
 on:
   push:
     branches:
       - "feat/vitejs"
+      - "master"
 
 jobs:
   deploy:
@@ -62,5 +60,12 @@ jobs:
       run: yarn firebase -P default deploy --only hosting:agents-land-staging
 
     - name: Remove credentials file
-      if: success() || failure()
       run: rm ${{ steps.import-credentials.outputs.file_path }}
+
+    - name: Send discord message
+      uses: appleboy/discord-action@master
+      with:
+        webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+        webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        username: 'GitBot [agents-land]'
+        message: 'Repo agents-land-launchpad-frontend has just published by ${{ github.event.head_commit.author.name }}'
