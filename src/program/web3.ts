@@ -22,6 +22,11 @@ import BigNumber from "bignumber.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
+import { SEED_GLOBAL, TEST_COMMUNITY_POOL_WALLET } from "@/config";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -85,7 +90,9 @@ export class Web3SolanaProgramInteraction {
         .accounts({
           creator: wallet.publicKey,
           token: mintKp.publicKey,
-          teamWallet: configAccount.teamWallet,
+          // teamWallet: configAccount.teamWallet,
+          communityPoolWallet: new PublicKey(TEST_COMMUNITY_POOL_WALLET), // distill community pool
+          aiAgentWallet: new PublicKey(TEST_COMMUNITY_POOL_WALLET), // user // agent address
         })
         .instruction();
 
@@ -379,6 +386,11 @@ export class Web3SolanaProgramInteraction {
     type: number,
     poolKey: string
   ) => {
+    if (!poolKey) {
+      console.log("Coin not listed");
+      return;
+    }
+
     // check the connection
     if (!wallet.publicKey || !this.connection) {
       console.log("Warning: Wallet not connected");
@@ -559,6 +571,77 @@ export class Web3SolanaProgramInteraction {
     } catch (e) {
       console.log(e);
       return null;
+    }
+  };
+  getAssociatedTokenAccount = (
+    ownerPubkey: PublicKey,
+    mintPk: PublicKey
+  ): PublicKey => {
+    let associatedTokenAccountPubkey = PublicKey.findProgramAddressSync(
+      [
+        ownerPubkey.toBytes(),
+        TOKEN_PROGRAM_ID.toBytes(),
+        mintPk.toBytes(), // mint address
+      ],
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    )[0];
+
+    return associatedTokenAccountPubkey;
+  };
+
+  getConfigGlobal = async (wallet, token) => {
+    if (!wallet.publicKey || !this.connection) {
+      console.log("Warning: Wallet not connected");
+      return;
+    }
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+    anchor.setProvider(provider);
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+
+    const [global_vault] = PublicKey.findProgramAddressSync(
+      [Buffer.from(SEED_GLOBAL)],
+      program.programId
+    );
+    const globalVaultTokenAccount = this.getAssociatedTokenAccount(
+      global_vault,
+      token
+    );
+    const globalVaultBalance = await this.connection.getTokenAccountBalance(
+      globalVaultTokenAccount
+    );
+
+    return globalVaultBalance;
+  };
+
+  getBondingAddressToken = async (wallet) => {
+    try {
+      if (!wallet.publicKey || !this.connection) {
+        console.log("Warning: Wallet not connected");
+        return;
+      }
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: "confirmed",
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const [global_vault] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_GLOBAL)],
+        program.programId
+      );
+
+      return global_vault.toBase58();
+    } catch (error) {
+      console.log("error", error);
+      return "";
     }
   };
 }

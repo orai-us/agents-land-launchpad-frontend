@@ -99,7 +99,7 @@ export default function TradingPage() {
   }, [pathname]);
 
   useEffect(() => {
-    if (coin) {
+    if (coin.token && coin.raydiumPoolAddr) {
       (async () => {
         try {
           setLoadingEst(true);

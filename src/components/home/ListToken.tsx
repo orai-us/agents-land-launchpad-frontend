@@ -43,6 +43,11 @@ export enum STATUS_TOKEN {
   LISTED = "Listed",
 }
 
+export const KeyByStatus = {
+  [STATUS_TOKEN.LUNCH]: "live",
+  [STATUS_TOKEN.LISTED]: "listed",
+};
+
 const ListToken: FC<{
   type: STATUS_TOKEN;
   data: coinInfo[];
@@ -339,14 +344,14 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
 export const TokenTab = {
   [STATUS_TOKEN.LUNCH]: {
     label: STATUS_TOKEN.LUNCH,
-    value: STATUS_TOKEN.LUNCH,
-    link: "/?tab=live",
+    value: KeyByStatus[STATUS_TOKEN.LUNCH],
+    link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
     content: ListLaunchToken,
   },
   [STATUS_TOKEN.LISTED]: {
     label: STATUS_TOKEN.LISTED,
-    value: STATUS_TOKEN.LISTED,
-    link: "/?tab=listed",
+    value: KeyByStatus[STATUS_TOKEN.LISTED],
+    link: `/?tab=${KeyByStatus[STATUS_TOKEN.LISTED]}`,
     content: ListListedToken,
   },
 };
