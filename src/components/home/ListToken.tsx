@@ -15,6 +15,11 @@ import updateLocale from "dayjs/plugin/updateLocale";
 import { FC } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useLocation } from "wouter";
+import {
+  formatCountdownTime,
+  TIMER,
+  useCountdown,
+} from "../trading/hooks/useCountdown";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -40,38 +45,59 @@ dayjs.updateLocale("en", {
 
 export enum STATUS_TOKEN {
   LUNCH = "Live Launch",
+  UPCOMING = "UPCOMING",
   LISTED = "Listed",
 }
 
 export const KeyByStatus = {
   [STATUS_TOKEN.LUNCH]: "live",
+  [STATUS_TOKEN.UPCOMING]: "upcoming",
   [STATUS_TOKEN.LISTED]: "listed",
 };
 
 const ListToken: FC<{
-  type: STATUS_TOKEN;
+  type: string;
   data: coinInfo[];
   handleLoadMore;
   totalData;
 }> = ({ type, data, handleLoadMore, totalData }) => {
-  return type === STATUS_TOKEN.LISTED ? (
-    <ListListedToken
-      data={data}
-      handleLoadMore={handleLoadMore}
-      totalData={totalData}
-    />
-  ) : (
-    <ListLaunchToken
-      data={data}
-      handleLoadMore={handleLoadMore}
-      totalData={totalData}
-    />
+  return (
+    <>
+      {type === KeyByStatus[STATUS_TOKEN.LISTED] && (
+        <ListListedToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+        />
+      )}
+      {type === KeyByStatus[STATUS_TOKEN.UPCOMING] && (
+        <ListLaunchToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+          isUpcoming={true}
+        />
+      )}
+      {type === KeyByStatus[STATUS_TOKEN.LUNCH] && (
+        <ListLaunchToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+          isUpcoming={false}
+        />
+      )}
+    </>
   );
 };
 
 export default ListToken;
 
-export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
+export const ListLaunchToken = ({
+  data,
+  handleLoadMore,
+  totalData,
+  isUpcoming,
+}) => {
   const [, setLocation] = useLocation();
   const handleToProfile = (id: string) => {
     setLocation(`/profile/${id}`);
@@ -124,6 +150,11 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
             : bondingCurvePercent > 100
             ? 100
             : bondingCurvePercent;
+
+        const isNotForSale =
+          new Date(coinItem.date).getTime() +
+            TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+          Date.now();
 
         return (
           <div
@@ -184,26 +215,78 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData }) => {
                   {coinItem.description || ""}
                 </div>
               </div>
-              <div>
-                <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
-                  Marketcap{" "}
-                  <span className="text-[#E8E9EE]">
-                    {formatNumberKMB(Number(coinItem.marketcap || 0))}(
-                    {shownPercent.toFixed(2)}%)
-                  </span>
+              {isUpcoming ? (
+                <CountdownItem coin={coinItem} />
+              ) : (
+                <div>
+                  <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
+                    Marketcap{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatNumberKMB(Number(coinItem.marketcap || 0))}(
+                      {shownPercent.toFixed(2)}%)
+                    </span>
+                  </div>
+                  <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
+                    <div
+                      className="rounded-[999px] h-2 bg-barrie"
+                      style={{ width: `${shownPercent}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
-                  <div
-                    className="rounded-[999px] h-2 bg-barrie"
-                    style={{ width: `${shownPercent}%` }}
-                  ></div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         );
       })}
     </InfiniteScroll>
+  );
+};
+
+const CountdownItem = ({ coin }) => {
+  const startTime = Math.ceil(
+    new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND
+  );
+  const endTime = startTime + TIMER.DAY_TO_SECONDS;
+
+  const { timeRemaining } = useCountdown({
+    startTime,
+    endTime,
+    onStart: () => {},
+    onEnd: () => {},
+  });
+
+  const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
+
+  return (
+    <div className="rounded-lg">
+      <div className="flex items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M11 6C11 8.76142 8.76142 11 6 11C3.23858 11 1 8.76142 1 6C1 3.23858 3.23858 1 6 1C8.76142 1 11 3.23858 11 6ZM6 3C6.27614 3 6.5 3.22386 6.5 3.5V5.79289L7.35355 6.64645C7.54882 6.84171 7.54882 7.15829 7.35355 7.35355C7.15829 7.54882 6.84171 7.54882 6.64645 7.35355L5.64645 6.35355C5.55268 6.25979 5.5 6.13261 5.5 6V3.5C5.5 3.22386 5.72386 3 6 3Z"
+            fill="#9192A0"
+          />
+        </svg>
+        <span className="text-[#9192A0] text-[12px] ml-1">Phase start at</span>
+      </div>
+
+      <div className="flex mt-1">
+        <div className="text-[20px] text-[#6392E9] font-semibold">{hours}h</div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {minutes}m
+        </div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {seconds}s
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -346,6 +429,12 @@ export const TokenTab = {
     label: STATUS_TOKEN.LUNCH,
     value: KeyByStatus[STATUS_TOKEN.LUNCH],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
+    content: ListLaunchToken,
+  },
+  [STATUS_TOKEN.UPCOMING]: {
+    label: STATUS_TOKEN.UPCOMING,
+    value: KeyByStatus[STATUS_TOKEN.UPCOMING],
+    link: `/?tab=${KeyByStatus[STATUS_TOKEN.UPCOMING]}`,
     content: ListLaunchToken,
   },
   [STATUS_TOKEN.LISTED]: {

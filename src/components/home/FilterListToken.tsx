@@ -3,7 +3,7 @@ import { FC } from "react";
 import { BiSearchAlt } from "react-icons/bi";
 import { twMerge } from "tailwind-merge";
 import { Link } from "wouter";
-import { STATUS_TOKEN, TokenTab } from "./ListToken";
+import { KeyByStatus, STATUS_TOKEN, TokenTab } from "./ListToken";
 
 const SEARCH_TIME = 1000; // 3000
 
@@ -37,7 +37,7 @@ const FilterListToken: FC<{
         ))}
       </div>
       <div className="flex md:w-fit w-full mt-6">
-        {type === STATUS_TOKEN.LUNCH && (
+        {type === KeyByStatus[STATUS_TOKEN.LUNCH] && (
           <div className="relative md:w-fit w-full cursor-pointer group mr-4">
             <button
               id="dropdownHoverButton"
