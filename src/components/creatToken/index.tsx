@@ -16,6 +16,8 @@ import { useLocation } from "wouter";
 import DropzoneFile from "../uploadFile/DropzoneFile";
 import CreateTokenSuccess from "./CreateTokenSuccess";
 import PreSaleModal from "./Presale";
+import { Circles } from "react-loader-spinner";
+import ZappingText from "../zapping";
 
 export enum STEP_TOKEN {
   INFO,
@@ -41,6 +43,7 @@ export default function CreateToken() {
   const [step, setStep] = useState<STEP_TOKEN>(STEP_TOKEN.INFO);
   const [agentList, setAgentList] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [selectGroup, setSelectedGroup] = useState(false);
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
@@ -255,7 +258,45 @@ export default function CreateToken() {
           tokenize agent
         </div>
       </div>
-      {isLoading && Spinner()}
+
+      {isLoading && (
+        <div className="w-full h-full fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 backdrop-blur-lg z-50">
+          <div className="w-[350px] h-[220px] flex flex-col justify-center items-center relative p-6  bg-[#13141D] rounded-lg shadow-lg">
+            <button
+              onClick={() => setIsLoading(!isLoading)}
+              className="absolute top-6 right-6  hover:brightness-125 text-gray-600"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="w-[350px] h-[200px] flex flex-col gap-4 justify-center items-center">
+              <Circles
+                height="80"
+                width="80"
+                color="#E4775D"
+                ariaLabel="circles-loading"
+                visible={true}
+              />
+
+              <div className="right-6 text-1xl p-2">
+                <ZappingText text={"Transaction processing"} dot={5} />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="w-full text-[14px] text-[#9192A0] mb-4 mt-4">
         {/* Input the details as you go about your project and after 2 steps, your
         Agent is set to go live. */}
@@ -296,7 +337,12 @@ export default function CreateToken() {
                   </div>
                 </label>
 
-                <div className="group relative cursor-pointer mt-3">
+                <div
+                  className="relative cursor-pointer mt-3"
+                  onClick={() => {
+                    setSelectedGroup(!selectGroup);
+                  }}
+                >
                   <div className="flex items-center justify-between w-full px-3 border border-[#585A6B] rounded h-12">
                     <div className="flex items-center">
                       {selectedAgent?.avatar ? (
@@ -336,62 +382,64 @@ export default function CreateToken() {
                       />
                     </svg>
                   </div>
-                  <div className="pt-2 invisible group-hover:visible absolute top-full w-full">
-                    <div className="bg-[#1A1C28] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg flex flex-col gap-2 overflow-y-auto max-h-52 h-100%">
-                      {agentList.length <= 0 ? (
-                        <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-4 px-8 flex flex-col justify-center items-center">
-                          <img src={nodataImg} alt="nodata" />
-                          <p className="mt-4 text-[#E8E9EE] text-[16px] uppercase">
-                            No Agent
-                          </p>
-                          <p className="mt-2 text-[#585A6B] text-[14px]">
-                            mesh.distilled.ai
-                          </p>
-                        </div>
-                      ) : (
-                        agentList.map((e, ind) => {
-                          return (
-                            <div
-                              className={twMerge(
-                                "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
-                                e?.botWallet?.solAddr ===
-                                  selectedAgent?.botWallet?.solAddr &&
-                                  "bg-[#13141D] cursor-not-allowed"
-                              )}
-                              key={`agent-item-${ind}`}
-                              onClick={() => setSelectedAgent(e)}
-                            >
-                              <div className="flex items-center">
-                                {typeof e.img === "string" ? (
-                                  <img
-                                    src={e.avatar as any}
-                                    alt="agentImg"
-                                    width={32}
-                                    height={32}
-                                    className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
-                                  />
-                                ) : (
-                                  <img
-                                    src={e.avatar as any}
-                                    alt="agentImg"
-                                    width={32}
-                                    height={32}
-                                    className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
-                                  />
+                  {selectGroup && (
+                    <div className="pt-2 absolute top-full w-full">
+                      <div className="bg-[#1A1C28] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg flex flex-col gap-2 overflow-y-auto max-h-52 h-100%">
+                        {agentList.length <= 0 ? (
+                          <div className="w-full mt-4 rounded-lg bg-[#13141D] border border-dashed border-[#30344A] py-4 px-8 flex flex-col justify-center items-center">
+                            <img src={nodataImg} alt="nodata" />
+                            <p className="mt-4 text-[#E8E9EE] text-[16px] uppercase">
+                              No Agent
+                            </p>
+                            <p className="mt-2 text-[#585A6B] text-[14px]">
+                              mesh.distilled.ai
+                            </p>
+                          </div>
+                        ) : (
+                          agentList.map((e, ind) => {
+                            return (
+                              <div
+                                className={twMerge(
+                                  "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
+                                  e?.botWallet?.solAddr ===
+                                    selectedAgent?.botWallet?.solAddr &&
+                                    "bg-[#13141D] cursor-not-allowed"
                                 )}
-                                <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
-                                  {e.username}
+                                key={`agent-item-${ind}`}
+                                onClick={() => setSelectedAgent(e)}
+                              >
+                                <div className="flex items-center">
+                                  {typeof e.img === "string" ? (
+                                    <img
+                                      src={e.avatar as any}
+                                      alt="agentImg"
+                                      width={32}
+                                      height={32}
+                                      className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={e.avatar as any}
+                                      alt="agentImg"
+                                      width={32}
+                                      height={32}
+                                      className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
+                                    />
+                                  )}
+                                  <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
+                                    {e.username}
+                                  </div>
                                 </div>
+                                <span className="text-[#585A6B] text-[14px] font-medium ">
+                                  {reduceString(e?.botWallet?.solAddr, 4, 4)}
+                                </span>
                               </div>
-                              <span className="text-[#585A6B] text-[14px] font-medium ">
-                                {reduceString(e?.botWallet?.solAddr, 4, 4)}
-                              </span>
-                            </div>
-                          );
-                        })
-                      )}
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
