@@ -115,7 +115,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       </button> */}
       <div className="w-full flex flex-col gap-2 border border-[#1A1C28] rounded-lg p-6">
         <p className="text-[#E8E9EE] text-[16px] uppercase">
-          King of the hill progress ({kothProgress.toFixed(2)}%)
+          Peak of evolution progress ({kothProgress.toFixed(2)}%)
         </p>
         <div className="w-full my-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
           <div
@@ -155,7 +155,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                   String(configBondingAddress).toLowerCase();
                 const isAgent =
                   String(item.owner).toLowerCase() ===
-                  String(data.metadata.agentAddress).toLowerCase();
+                  String(data.metadata?.agentAddress).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
                   String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();

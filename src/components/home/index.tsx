@@ -27,7 +27,7 @@ const HomePage: FC = () => {
   const dropdownRef = useRef(null);
   const dropdownRef1 = useRef(null);
   const [location, setLocation] = useLocation();
-  const [currentTab, setCurrentTab] = useState(STATUS_TOKEN.LUNCH);
+  const [currentTab, setCurrentTab] = useState(KeyByStatus[STATUS_TOKEN.LUNCH]);
 
   // useEffect(() => {
   // const queryString = window.location.search;
@@ -88,7 +88,7 @@ const HomePage: FC = () => {
         limit: LIMIT_PAGINATION,
         page,
         keyword: (token || "").trim(),
-        listed: currentTab === STATUS_TOKEN.LISTED,
+        listed: currentTab,
         sortBy: filterState.value,
       });
       if (coins !== null) {

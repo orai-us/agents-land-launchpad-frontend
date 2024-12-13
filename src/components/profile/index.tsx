@@ -189,7 +189,7 @@ export default function ProfilePage() {
               key={item.id}
               onClick={() => setOption(item.id)}
               className={twMerge(
-                "text-[12px] md:text-[14px] cursor-pointer uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                "uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
                 option === item.id && "bg-[#585A6B] text-[#E8E9EE]"
               )}
             >
