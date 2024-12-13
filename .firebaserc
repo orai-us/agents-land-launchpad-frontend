@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "oraichain-dapp"
+  },
+  "targets": {
+    "oraichain-dapp": {
+      "hosting": {
+        "agents-land-staging": [
+          "agents-land-staging"
+        ]
+      }
+    }
+  }
+}

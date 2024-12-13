@@ -1,0 +1,71 @@
+name: Deploy vite Firebase 
+
+on:
+  push:
+    branches:
+      - "feat/vitejs"
+      - "master"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ github.event.client_payload.node_version }}
+    - name: Cache node_modules
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+    # Check if Yarn is installed, if not install it
+    - name: Check and Install Yarn
+      run: |
+        if ! yarn --version > /dev/null 2>&1; then
+          echo "Yarn is not installed. Installing Yarn."
+          npm i -g yarn
+        else
+          echo "Yarn is already installed."
+        fi
+    - name: Install dependencies
+      run: yarn install
+
+    - name: Create env file
+      run: echo "$ENV_CONTENT" > .env
+      shell: bash
+      env:
+        ENV_CONTENT: ${{ secrets.ENV_VITE }}
+
+    - name: Build source
+      run: |
+        export NODE_OPTIONS="--max-old-space-size=4096"
+        yarn build
+      env:
+          CI: false
+
+    - name: Import Firebase service account credentials
+      id: import-credentials
+      run : |
+        echo ${{ secrets.FIREBASE_DEPLOYER_CREDENTIALS }} | base64 -d > $(pwd)/serviceaccount.json
+        echo "file_path=$(pwd)/serviceaccount.json" >> $GITHUB_OUTPUT
+
+    - name: Deploy to Firebase
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.import-credentials.outputs.file_path }}
+      run: yarn firebase -P default deploy --only hosting:agents-land-staging
+
+    - name: Remove credentials file
+      run: rm ${{ steps.import-credentials.outputs.file_path }}
+
+    - name: Send discord message
+      uses: appleboy/discord-action@master
+      with:
+        webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
+        webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
+        username: 'GitBot [agents-land]'
+        message: 'Repo agents-land-launchpad-frontend has just published by ${{ github.event.head_commit.author.name }}'
