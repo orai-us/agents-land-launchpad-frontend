@@ -134,6 +134,20 @@ export const getAgentsData = async (params): Promise<coinInfo[]> => {
   return res.data;
 };
 
+export const getAgentsDataByUser = async (params): Promise<any[]> => {
+  const res = await axios.get(`${DISTILL_BE_URL}/bot/public/list`, {
+    ...config,
+    params: {
+      filter: JSON.stringify({
+        ownerAddress: params.user,
+      }),
+      limit: 100,
+      offset: 0,
+    },
+  });
+  return res.data;
+};
+
 export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
   const res = await axios.get<coinInfo[]>(
     `${BACKEND_URL}/coin/user/${id}`,

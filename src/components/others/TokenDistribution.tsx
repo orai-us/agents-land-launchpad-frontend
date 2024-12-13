@@ -9,7 +9,7 @@ import {
   getSolPriceInUSD,
   getUserByWalletAddress,
 } from "@/utils/util";
-import defaultUserImg from "@/assets/images/user-avatar.png";
+import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 
 import { BN } from "@coral-xyz/anchor";
 import { PROGRAM_ID, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
@@ -155,7 +155,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                   String(configBondingAddress).toLowerCase();
                 const isAgent =
                   String(item.owner).toLowerCase() ===
-                  String(data["agent"]).toLowerCase();
+                  String(data.metadata.agentAddress).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
                   String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();

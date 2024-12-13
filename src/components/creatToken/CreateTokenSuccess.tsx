@@ -63,9 +63,9 @@ const CreateTokenSuccess: React.FC<ModalProps> = ({
           <img
             src={jsonData.image || ""}
             alt="coinImg"
-            className="w-10 h-10 rounded-full"
+            className="w-14 h-14 rounded-full"
           />
-          <span className="uppercase text-[#9192A0] text-[16px] font-semibold">
+          <span className="uppercase text-[#9192A0] text-[18px] font-semibold">
             ${symbol || "--"}
           </span>
         </div>

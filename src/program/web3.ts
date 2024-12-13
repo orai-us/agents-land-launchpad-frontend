@@ -22,7 +22,7 @@ import BigNumber from "bignumber.js";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
-import { SEED_GLOBAL, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
+import { SEED_GLOBAL } from "@/config";
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -31,6 +31,7 @@ import {
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
 export const LAMPORT_RESERVES = 1_000_000_000;
+export const FAKE_AGENT = "oCQLttxhiCGMbTYQjiYNRcpu5M3LXX8RxURBP6xB9Zk";
 
 export const endpoint = import.meta.env.VITE_SOLANA_RPC;
 export const pumpProgramId = new PublicKey(idl.address);
@@ -77,6 +78,19 @@ export class Web3SolanaProgramInteraction {
       const configAccount = await program.account.config.fetch(configPda);
 
       const mintKp = Keypair.generate();
+      console.log(mintKp.publicKey.toBase58());
+
+      const aiAgentTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(FAKE_AGENT),
+        mintKp.publicKey
+      );
+      const creatorTokenAccount = this.getAssociatedTokenAccount(
+        wallet.publicKey,
+        mintKp.publicKey
+      );
+
+      // console.log("aiAgentTokenAccount", aiAgentTokenAccount);
+      // console.log("creatorTokenAccount", creatorTokenAccount);
 
       const transaction = new Transaction();
       const updateCpIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -90,13 +104,25 @@ export class Web3SolanaProgramInteraction {
         .accounts({
           creator: wallet.publicKey,
           token: mintKp.publicKey,
-          // teamWallet: configAccount.teamWallet,
-          communityPoolWallet: new PublicKey(DISTILL_COMMUNITY_POOL_WALLET), // distill community pool
-          aiAgentWallet: new PublicKey(
-            "GPKkdZ27NatWw1ciYroHRPtmxQouvZm26wxFvSVV6fvo"
-          ), // user // agent address from data coin // FIXME:
+          communityPoolWallet: configAccount.communityPoolWallet,
+          aiAgentWallet: new PublicKey(FAKE_AGENT), // user // agent address from data coin // FIXME:
+          teamWallet: configAccount.teamWallet,
         })
+        .remainingAccounts([
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: aiAgentTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: creatorTokenAccount,
+          },
+        ])
         .instruction();
+
+      console.log("createIx", createIx);
 
       transaction.add(updateCpIx, updateCuIx, createIx);
 

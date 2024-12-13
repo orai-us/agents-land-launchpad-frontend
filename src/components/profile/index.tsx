@@ -1,5 +1,5 @@
 import nodataImg from "@/assets/icons/nodata.svg";
-import defaultUserImg from "@/assets/images/user-avatar.png";
+import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import Modal from "@/components/modals/Modal";
 import { errorAlert, successAlert } from "@/components/others/ToastGroup";
 import { ProfileMenuList } from "@/config/TextData";
@@ -74,11 +74,11 @@ export default function ProfilePage() {
   useEffect(() => {
     const segments = pathname.split("/");
     const id = segments[segments.length - 1];
-    if (id && id !== param) {
+    if (id) {
       setParam(id);
       fetchUserData(id);
     }
-  }, [pathname]);
+  }, [pathname, profileEditModal]);
 
   useEffect(() => {
     if (option === 2 && param) {
@@ -240,15 +240,21 @@ export default function ProfilePage() {
                           className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
                         >
                           <td className="flex flex-row gap-2 items-center py-4">
-                            <div className="text-lg flex items-center">
+                            <a
+                              href={`/trading/${coin.token}`}
+                              target="_blank"
+                              className="text-lg flex items-center"
+                            >
                               <img
                                 src={coin.url}
                                 alt="coinUrl"
                                 className="rounded-full w-6 h-6 border border-[#E8E9EE]"
                               />
                               &nbsp;
-                              {coin.ticker}
-                            </div>
+                              <span className="hover:underline">
+                                {coin.ticker}
+                              </span>
+                            </a>
                           </td>
                           {/* <td className="py-2 text-right">
                             {numberWithCommas(coin.balance || 0)}
@@ -289,7 +295,7 @@ export default function ProfilePage() {
                     <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
                       <tr className="text-lg">
                         <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
-                          Token Address
+                          Token
                         </th>
                         <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
                           Balance

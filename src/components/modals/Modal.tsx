@@ -1,4 +1,4 @@
-import UserImg from "@/assets/images/user-avatar.png";
+import UserImg from "@/assets/images/userAgentDefault.svg";
 import UserContext from "@/context/UserContext";
 import { userInfo } from "@/utils/types";
 import { reduceString, updateUser } from "@/utils/util";

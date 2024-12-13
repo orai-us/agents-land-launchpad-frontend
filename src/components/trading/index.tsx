@@ -29,6 +29,8 @@ import { useLocation } from "wouter";
 import TokenDistribution from "../others/TokenDistribution";
 import { DexToolsChart } from "../TVChart/DexToolsChart";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
+import { TIMER } from "./hooks/useCountdown";
+import NotForSale from "./NotForSale";
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -45,6 +47,7 @@ export default function TradingPage() {
   const wallet = useWallet();
   const [simulatePrice, setSimulatePrice] = useState<string>("");
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
+  const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
 
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
@@ -56,6 +59,10 @@ export default function TradingPage() {
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
   // FIXME: need to integrate agent
+
+  const isNotForSale =
+    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+    Date.now();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -128,6 +135,8 @@ export default function TradingPage() {
           setLoadingEst(false);
         }
       })();
+    } else {
+      setLoadingEst(false);
     }
   }, [coin]);
 
@@ -201,8 +210,18 @@ export default function TradingPage() {
 
           {/* trading view chart  */}
           <div className="w-full">
-            <div className="bg-[#1A1C28] rounded-t p-6">
-              <div className="mb-4 flex justify-between items-start flex-wrap gap-4">
+            <div
+              className={twMerge(
+                "bg-[#1A1C28] rounded-t p-6",
+                isNotForSale && "rounded"
+              )}
+            >
+              <div
+                className={twMerge(
+                  "mb-4 flex justify-between items-start flex-wrap gap-4",
+                  isNotForSale && "mb-0"
+                )}
+              >
                 <div className="flex gap-2 items-start md:items-center">
                   {typeof imgSrc === "string" ? (
                     <img
@@ -262,8 +281,11 @@ export default function TradingPage() {
                   </div>
                   <div className="flex gap-3 mt-4">
                     {/* AGENT info url */}
-                    {coin.metadata?.website && (
-                      <a href={coin.metadata?.website} target="_blank">
+                    {coin.metadata?.agentId && (
+                      <a
+                        href={`https://mesh.distilled.ai/invite/${coin.metadata?.agentId}`}
+                        target="_blank"
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="20"
@@ -364,124 +386,136 @@ export default function TradingPage() {
                   </div>
                 </div>
               </div>
-              <div className="">
-                <p className="text-[#E8E9EE] text-[14px] md:text-[24px] font-medium flex items-center gap-1">
-                  {!loadingEst ? (
-                    numberWithCommas(
-                      isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
-                      undefined,
-                      {
-                        maximumFractionDigits: 9,
-                      }
-                    )
-                  ) : (
-                    <img src={LoadingImg} />
-                  )}{" "}
-                  SOL
-                  {/* FIXME: update price simulate */}
-                </p>
-                <p
-                  className={twMerge(
-                    "mt-1 font-medium text-[14px] text-[#84869A]"
-                  )}
-                >
-                  ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
-                </p>
+              {!isNotForSale && (
+                <div className="">
+                  <p className="text-[#E8E9EE] text-[14px] md:text-[24px] font-medium flex items-center gap-1">
+                    {!loadingEst ? (
+                      numberWithCommas(
+                        isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
+                        undefined,
+                        {
+                          maximumFractionDigits: 9,
+                        }
+                      )
+                    ) : (
+                      <img src={LoadingImg} />
+                    )}{" "}
+                    SOL
+                  </p>
+                  <p
+                    className={twMerge(
+                      "mt-1 font-medium text-[14px] text-[#84869A]"
+                    )}
+                  >
+                    ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {!isNotForSale && (
+              <div className="flex md:hidden w-full">
+                <TradeForm coin={coin} progress={progress}></TradeForm>
               </div>
-            </div>
+            )}
 
-            <div className="flex md:hidden w-full">
-              <TradeForm coin={coin} progress={progress}></TradeForm>
-            </div>
-
-            <div className="hidden md:block">
-              {isListedOnRay && (
-                <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
-                  <div
-                    onClick={() => setIsAgentChart(true)}
-                    className={twMerge(
-                      "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                      isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                    )}
-                  >
-                    Agent Land Chart
+            {!isNotForSale && (
+              <div className="hidden md:block">
+                {isListedOnRay && (
+                  <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
+                    <div
+                      onClick={() => setIsAgentChart(true)}
+                      className={twMerge(
+                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                        isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                      )}
+                    >
+                      Agent Land Chart
+                    </div>
+                    <div
+                      onClick={() => setIsAgentChart(false)}
+                      className={twMerge(
+                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                        !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                      )}
+                    >
+                      Current Chart
+                    </div>
                   </div>
-                  <div
-                    onClick={() => setIsAgentChart(false)}
-                    className={twMerge(
-                      "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                      !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                    )}
-                  >
-                    Current Chart
-                  </div>
-                </div>
-              )}
+                )}
 
-              {isAgentChart ? (
-                <div className="bg-[#101827] pb-6 rounded-b">
-                  <TradingChart param={coin}></TradingChart>
-                </div>
-              ) : (
-                <div className="bg-[#111114] rounded-b">
-                  {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
-                  <DexToolsChart param={coin}></DexToolsChart>
-                </div>
-              )}
-            </div>
+                {isAgentChart ? (
+                  <div className="bg-[#101827] pb-6 rounded-b">
+                    <TradingChart param={coin}></TradingChart>
+                  </div>
+                ) : (
+                  <div className="bg-[#111114] rounded-b">
+                    {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
+                    <DexToolsChart param={coin}></DexToolsChart>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="hidden md:block">
-            <div className="flex flex-col gap-4 mt-12 ">
+            <div className="flex flex-col gap-4 mt-6">
               <p className="text-[14px] text-[#9192A0]">{coin?.description}</p>
             </div>
             <Chatting param={param} coin={coin}></Chatting>
           </div>
         </div>
-        <div className="w-full md:max-w-[384px]">
-          <div className="hidden md:flex">
-            <TradeForm coin={coin} progress={progress}></TradeForm>
-          </div>
-          <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
-            <div className="w-full flex flex-col gap-2">
-              <p className="text-[#E8E9EE] text-[16px] uppercase">
-                Bonding curve ({progress.toFixed(2)}%)
-              </p>
-              <div className="w-full mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
-                <div
-                  className="rounded-[999px] h-2 bg-barrie"
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
+        {isNotForSale && !isOnSaleCountdown ? (
+          <NotForSale coin={coin} onEnd={() => setIsOnSaleCountdown(true)} />
+        ) : (
+          <div className="w-full md:max-w-[384px]">
+            <div className="hidden md:flex">
+              <TradeForm coin={coin} progress={progress}></TradeForm>
             </div>
-            <p className="text-[14px] text-[#585A6B]">
-              There are{" "}
-              <span className="text-[#E8E9EE]">
-                {formatLargeNumber(fromBig(coin.tokenReserves, coin.decimals))}
-              </span>{" "}
-              tokens still available for sale in the bonding curve and there is{" "}
-              <span className="text-[#E8E9EE]">
-                {formatLargeNumber(shownBondingCurve)} SOL
-              </span>{" "}
-              in the bonding curve.
-            </p>
-            <p className="text-[14px] text-[#585A6B]">
-              When the market cap reaches{" "}
-              <span className="text-[#E8E9EE]">
-                {formatNumberKMB(
-                  new BigNumber(BONDING_CURVE_LIMIT)
-                    .multipliedBy(solPrice)
-                    .div(LAMPORTS_PER_SOL)
-                    .toNumber()
-                )}
-              </span>
-              &nbsp; all the liquidity from the bonding curve will be deposited
-              into Raydium and burned. progression increases as the price goes
-              up.
-            </p>
+            <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
+              <div className="w-full flex flex-col gap-2">
+                <p className="text-[#E8E9EE] text-[16px] uppercase">
+                  Bonding curve ({progress.toFixed(2)}%)
+                </p>
+                <div className="w-full mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
+                  <div
+                    className="rounded-[999px] h-2 bg-barrie"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+              </div>
+              <p className="text-[14px] text-[#585A6B]">
+                There are{" "}
+                <span className="text-[#E8E9EE]">
+                  {formatLargeNumber(
+                    fromBig(coin.tokenReserves, coin.decimals)
+                  )}
+                </span>{" "}
+                tokens still available for sale in the bonding curve and there
+                is{" "}
+                <span className="text-[#E8E9EE]">
+                  {formatLargeNumber(shownBondingCurve)} SOL
+                </span>{" "}
+                in the bonding curve.
+              </p>
+              <p className="text-[14px] text-[#585A6B]">
+                When the market cap reaches{" "}
+                <span className="text-[#E8E9EE]">
+                  {formatNumberKMB(
+                    new BigNumber(BONDING_CURVE_LIMIT)
+                      .multipliedBy(solPrice)
+                      .div(LAMPORTS_PER_SOL)
+                      .toNumber()
+                  )}
+                </span>
+                &nbsp; all the liquidity from the bonding curve will be
+                deposited into Raydium and burned. progression increases as the
+                price goes up.
+              </p>
+            </div>
+            <TokenDistribution data={coin} />
           </div>
-          <TokenDistribution data={coin} />
-        </div>
+        )}
 
         <div className="block md:hidden">
           <div className="flex flex-col gap-4 mt-12 ">

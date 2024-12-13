@@ -130,9 +130,10 @@ const MarqueeToken = () => {
     listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
       const newCoinInfo: coinInfo = {
         creator: basicTokenInfo.creator,
-        name: basicTokenInfo.metadata.name,
-        url: basicTokenInfo.metadata.json.image ?? basicTokenInfo.metadata.uri,
-        ticker: basicTokenInfo.metadata.symbol,
+        name: basicTokenInfo.metadata?.name,
+        url:
+          basicTokenInfo.metadata?.json?.image ?? basicTokenInfo.metadata?.uri,
+        ticker: basicTokenInfo.metadata?.symbol,
         tokenReserves: new BN(0),
         lamportReserves: new BN(0),
         token: basicTokenInfo.mintAddress,

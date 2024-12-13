@@ -8,7 +8,7 @@ import { useSocket } from "@/contexts/SocketContext";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
 import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
-import { getAgentsData, reduceString } from "@/utils/util";
+import { getAgentsData, getAgentsDataByUser, reduceString } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -63,15 +63,17 @@ export default function CreateToken() {
   }, [newCoin, imageUrl]);
 
   useEffect(() => {
-    (async () => {
-      const res = await getAgentsData({});
+    if (wallet.publicKey) {
+      (async () => {
+        const res = await getAgentsDataByUser({ user: wallet.publicKey });
 
-      if (res) {
-        setAgentList(res["items"]);
-        setSelectedAgent(res["items"][0]);
-      }
-    })();
-  }, []);
+        if (res) {
+          setAgentList(res["items"]);
+          setSelectedAgent(res["items"][0]);
+        }
+      })();
+    }
+  }, [wallet.publicKey]);
 
   const handleToRouter = (path: string) => {
     setLocation(path);
@@ -175,6 +177,8 @@ export default function CreateToken() {
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
         discord: newCoin.telegram || undefined, // Only assign if it exists
+        agentId: selectedAgent?.id,
+        agentAddress: selectedAgent?.botWallet?.solAddr,
       };
       // Process metadata upload
       const uploadMetadataUrl = await uploadMetadata(jsonData);
@@ -221,7 +225,7 @@ export default function CreateToken() {
     newCoin.name && newCoin.ticker && newCoin.description && imageUrl;
 
   return (
-    <div className="w-full m-auto my-24 mt-4 md:mt-24">
+    <div className="w-full m-auto my-24 mt-4 md:mt-10">
       <PreSaleModal
         isOpen={showModalPreSale}
         closeModal={() => setShowModalPreSale(false)}
@@ -252,11 +256,11 @@ export default function CreateToken() {
         </div>
       </div>
       {isLoading && Spinner()}
-      <div className="w-full text-[14px] text-[#9192A0] mb-4 md:mb-[72px] mt-4">
-        Input the details as you go about your project and after 2 steps, your
-        Agent is set to go live.
+      <div className="w-full text-[14px] text-[#9192A0] mb-4 mt-4">
+        {/* Input the details as you go about your project and after 2 steps, your
+        Agent is set to go live. */}
       </div>
-      <div className="flex justify-between items-start flex-col-reverse md:flex-row">
+      <div className="flex justify-between items-start flex-col md:flex-row">
         <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-4 md:p-8">
           <div className="text-[#E8E9EE] text-[18px] font-medium">
             {step === STEP_TOKEN.INFO ? "Project info" : "Agent Behaviors"}
@@ -264,12 +268,12 @@ export default function CreateToken() {
           {step === STEP_TOKEN.INFO && (
             <div className="flex flex-col gap-6">
               <div>
-                <div className="group relative cursor-pointer">
-                  <label
-                    htmlFor="name"
-                    className="text-[12px] font-medium text-[#84869A] flex items-center cursor-pointer"
-                  >
-                    AGENT (OPTIONAL)
+                <label
+                  htmlFor="name"
+                  className="text-[12px] font-medium text-[#84869A] flex items-center cursor-pointer"
+                >
+                  AGENT&nbsp;<span className="text-red-700">*</span>
+                  <div className="group relative cursor-pointer">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       width="12"
@@ -283,13 +287,14 @@ export default function CreateToken() {
                         fill="#585A6B"
                       />
                     </svg>
-                  </label>
-                  <div className="pb-2 invisible group-hover:visible absolute bottom-full">
-                    <div className="bg-[#30344A] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg">
-                      Private intellegent created from mesh.distilled.ai
+
+                    <div className="pb-2 invisible group-hover:visible absolute bottom-full w-screen max-w-[210px]">
+                      <div className="bg-[#30344A] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg">
+                        Private intellegent created from mesh.distilled.ai
+                      </div>
                     </div>
                   </div>
-                </div>
+                </label>
 
                 <div className="group relative cursor-pointer mt-3">
                   <div className="flex items-center justify-between w-full px-3 border border-[#585A6B] rounded h-12">
@@ -349,8 +354,8 @@ export default function CreateToken() {
                             <div
                               className={twMerge(
                                 "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
-                                e.publicAddress ===
-                                  selectedAgent?.publicAddress &&
+                                e?.botWallet?.solAddr ===
+                                  selectedAgent?.botWallet?.solAddr &&
                                   "bg-[#13141D] cursor-not-allowed"
                               )}
                               key={`agent-item-${ind}`}
@@ -379,7 +384,7 @@ export default function CreateToken() {
                                 </div>
                               </div>
                               <span className="text-[#585A6B] text-[14px] font-medium ">
-                                {reduceString(e.publicAddress, 4, 4)}
+                                {reduceString(e?.botWallet?.solAddr, 4, 4)}
                               </span>
                             </div>
                           );
@@ -704,7 +709,7 @@ export default function CreateToken() {
             </div>
           )}
 
-          {step === STEP_TOKEN.INFO ? (
+          {/* {step === STEP_TOKEN.INFO ? (
             <button
               onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
               // disabled={!formValid || isLoading}
@@ -714,20 +719,20 @@ export default function CreateToken() {
                 Next
               </div>
             </button>
-          ) : (
-            <button
-              disabled={!formValid || isLoading}
-              onClick={createCoin}
-              // onClick={() => setShowModalPreSale(true)}
-              className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
-            >
-              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
-                Launch
-              </div>
-            </button>
-          )}
+          ) : ( */}
+          <button
+            disabled={!formValid || isLoading}
+            onClick={createCoin}
+            // onClick={() => setShowModalPreSale(true)}
+            className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+          >
+            <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
+              Launch
+            </div>
+          </button>
+          {/* )} */}
         </div>
-        <div className="w-full md:max-w-[490px] flex justify-end">
+        {/* <div className="w-full md:max-w-[490px] flex justify-end">
           <div className="hidden md:block">
             <div className="flex">
               <div className="relative translate-y-[0%]">
@@ -816,11 +821,59 @@ export default function CreateToken() {
               )}
             </div>
           </div>
+        </div> */}
+        <div className="flex justify-end w-full md:max-w-[490px] border border-[#1A1C28] rounded p-3 md:p-6 mt-4 md:mt-0 md:ml-8 lg:ml-16 xl:ml-28">
+          <div className="w-full">
+            <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
+              Tokenomics
+            </div>
+            <div>
+              {TOKENOMICS_LIST.map((e, idx) => {
+                return (
+                  <div
+                    key={`key-${idx}-tokenomic-${e.text}-${e.color}`}
+                    className="flex items-center mb-4"
+                  >
+                    <div
+                      className={twMerge(
+                        `w-3 h-3 rounded-[2px] mr-2 bg-[${e.color}]`
+                      )}
+                      style={{
+                        backgroundColor: e.color,
+                      }}
+                    ></div>
+                    <div className="text-[14px] text-[#E8E9EE] font-medium">
+                      {e.text}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+export const TOKENOMICS_LIST = [
+  {
+    text: "1% for creator",
+    color: `#f9b48f`,
+  },
+  {
+    text: "1% for Distilled AI community ",
+    color: `#f9dd8f`,
+  },
+  {
+    text: "1% for AI Agent wallet",
+    color: `#C2F98F`,
+  },
+  {
+    text: "97% for fairlaunch (bonding curve)",
+    color: `#9EEEDB`,
+  },
+];
 
 export const AGENT_PERSONALITY = [
   {

@@ -21,10 +21,18 @@ import { ResultType } from "@/program/logListeners/types";
 import { endpoint, commitmentLevel } from "@/program/web3";
 import { Connection, PublicKey } from "@solana/web3.js";
 import _ from "lodash";
+import { TIMER } from "./hooks/useCountdown";
+import { TOKENOMICS_LIST } from "../creatToken";
 
 interface ChattingProps {
   param: string | null;
   coin: coinInfo;
+}
+
+enum CHAT_TAB {
+  CHAT,
+  TRADE,
+  TOKENOMICS,
 }
 
 export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
@@ -38,8 +46,12 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     solPrice,
   } = useContext(UserContext);
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
-  const [isTrades, setIsTrades] = useState<Boolean>(true);
+  const [isTrades, setIsTrades] = useState<CHAT_TAB>(CHAT_TAB.CHAT);
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
+
+  const isNotForSale =
+    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+    Date.now();
 
   // subscribe to real-time swap txs on trade
   useEffect(() => {
@@ -93,10 +105,10 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   useEffect(() => {
     const fetchData = async () => {
       if (param) {
-        if (isTrades) {
+        if (isTrades === CHAT_TAB.CHAT) {
           const data = await getMessageByCoin(param);
           setMessages(data);
-        } else {
+        } else if (coin?.token && isTrades === CHAT_TAB.TRADE) {
           const coinAddress = coin.token;
           const data = await getCoinTrade(coinAddress);
           setTrades(data);
@@ -104,7 +116,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
       }
     };
     fetchData();
-  }, [isTrades, param]);
+  }, [isTrades, param, coin]);
 
   useEffect(() => {
     if (coinId == coin._id) {
@@ -113,60 +125,59 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   }, [tempNewMsg]);
 
   return (
-    <div className="pt-8">
-      <div className="flex flex-row items-center text-white font-semibold">
-        <div
-          onClick={() => setIsTrades(true)}
-          className={twMerge(
-            "cursor-pointer hover:brightness-125 uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-            isTrades && "bg-[#585A6B] text-[#E8E9EE]"
-          )}
-        >
-          Thread
+    <div className={twMerge("pt-8")}>
+      {!isNotForSale && (
+        <div className="flex flex-row items-center text-white font-semibold">
+          <div
+            onClick={() => setIsTrades(CHAT_TAB.CHAT)}
+            className={twMerge(
+              "cursor-pointer hover:brightness-125 uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              isTrades === CHAT_TAB.CHAT && "bg-[#585A6B] text-[#E8E9EE]"
+            )}
+          >
+            Thread
+          </div>
+          <div
+            onClick={() => setIsTrades(CHAT_TAB.TRADE)}
+            className={twMerge(
+              "cursor-pointer hover:brightness-125 uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              isTrades === CHAT_TAB.TRADE && "bg-[#585A6B] text-[#E8E9EE]"
+            )}
+          >
+            Trades
+          </div>
+          <div
+            onClick={() => setIsTrades(CHAT_TAB.TOKENOMICS)}
+            className={twMerge(
+              "cursor-pointer hover:brightness-125 uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              isTrades === CHAT_TAB.TOKENOMICS && "bg-[#585A6B] text-[#E8E9EE]"
+            )}
+          >
+            Tokenomics
+          </div>
         </div>
-        <div
-          onClick={() => setIsTrades(false)}
-          className={twMerge(
-            "cursor-pointer hover:brightness-125 uppercase mr-4 px-4 py-[6px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-            !isTrades && "bg-[#585A6B] text-[#E8E9EE]"
-          )}
-        >
-          Trades
-        </div>
-      </div>
+      )}
 
       <div>
-        {isTrades ? (
-          coin && (
-            // <div>
-            // {messages &&
-            //   messages.map((message, index) => (
-            //     <MessageForm key={index} msg={message}></MessageForm>
-            //   ))}
-            //   <div
-            //     onClick={() => setPostReplyModal(true)}
-            //     className="w-[200px] flex flex-col justify-center text-center font-semibold bg-custom-gradient rounded-full px-8 py-2 text-xl cursor-pointer text-white mx-auto"
-            //   >
-            //     Post Reply
-            //   </div>
-            // </div>
-            <div>
-              <ThreadSection data={coin}></ThreadSection>
+        {isTrades === CHAT_TAB.CHAT && coin && (
+          <div>
+            <ThreadSection data={coin}></ThreadSection>
 
-              <div className="mt-4 mb-12 h-screen max-h-[450px] overflow-y-auto">
-                {messages &&
-                  messages
-                    .sort(
-                      (a, b) =>
-                        new Date(b.time).getTime() - new Date(a.time).getTime()
-                    )
-                    .map((message, index) => (
-                      <MessageForm key={index} msg={message}></MessageForm>
-                    ))}
-              </div>
+            <div className="mt-4 mb-12 h-screen max-h-[450px] overflow-y-auto">
+              {messages &&
+                messages
+                  .sort(
+                    (a, b) =>
+                      new Date(b.time).getTime() - new Date(a.time).getTime()
+                  )
+                  .map((message, index) => (
+                    <MessageForm key={index} msg={message}></MessageForm>
+                  ))}
             </div>
-          )
-        ) : (
+          </div>
+        )}
+
+        {isTrades === CHAT_TAB.TRADE && (
           <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4 mb-12">
             <table className="w-full h-full scroll-table">
               <thead className="w-full text-white">
@@ -206,6 +217,31 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                     ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {isTrades === CHAT_TAB.TOKENOMICS && (
+          <div className="w-full border border-[#1A1C28] rounded p-3 md:p-6 mt-4 mb-12">
+            {TOKENOMICS_LIST.map((e, idx) => {
+              return (
+                <div
+                  key={`key-${idx}-tokenomic-${e.text}-${e.color}`}
+                  className="flex items-center mb-4"
+                >
+                  <div
+                    className={twMerge(
+                      `w-3 h-3 rounded-[2px] mr-2 bg-[${e.color}]`
+                    )}
+                    style={{
+                      backgroundColor: e.color,
+                    }}
+                  ></div>
+                  <div className="text-[14px] text-[#E8E9EE] font-medium">
+                    {e.text}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
         {postReplyModal && <ReplyModal data={coin} />}

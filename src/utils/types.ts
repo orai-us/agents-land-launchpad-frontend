@@ -48,6 +48,8 @@ export interface metadataInfo {
   website?: string;
   telegram?: string;
   discord?: string;
+  agentId: number;
+  agentAddress: string;
 }
 
 export interface coinInfo {
