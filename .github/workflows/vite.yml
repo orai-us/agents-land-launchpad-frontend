@@ -36,7 +36,7 @@ jobs:
       run: yarn install
 
     - name: Create env file
-      run: echo "$ENV_CONTENT" > .env
+      run: echo $ENV_CONTENT > .env
       shell: bash
       env:
         ENV_CONTENT: ${{ secrets.ENV_VITE }}
