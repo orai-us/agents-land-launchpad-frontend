@@ -60,9 +60,10 @@ export default function TradingPage() {
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
   // FIXME: need to integrate agent
 
-  const isNotForSale =
+  const isUnlock =
     new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
     Date.now();
+  const isNotForSale = isUnlock && !isOnSaleCountdown;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -465,7 +466,7 @@ export default function TradingPage() {
             <Chatting param={param} coin={coin}></Chatting>
           </div>
         </div>
-        {isNotForSale && !isOnSaleCountdown ? (
+        {isNotForSale ? (
           <NotForSale coin={coin} onEnd={() => setIsOnSaleCountdown(true)} />
         ) : (
           <div className="w-full md:max-w-[384px]">

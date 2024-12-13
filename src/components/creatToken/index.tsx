@@ -18,6 +18,7 @@ import CreateTokenSuccess from "./CreateTokenSuccess";
 import PreSaleModal from "./Presale";
 import { Circles } from "react-loader-spinner";
 import ZappingText from "../zapping";
+import useOnClickOutside from "@/hooks/useOnClickOutside";
 
 export enum STEP_TOKEN {
   INFO,
@@ -44,11 +45,16 @@ export default function CreateToken() {
   const [agentList, setAgentList] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [selectGroup, setSelectedGroup] = useState(false);
+  const refAgent = useRef();
   const [errors, setErrors] = useState({
     name: false,
     ticker: false,
     description: false,
     image: false,
+  });
+
+  useOnClickOutside(refAgent, () => {
+    setSelectedGroup(false);
   });
 
   const wallet = useWallet();
@@ -338,6 +344,7 @@ export default function CreateToken() {
                 </label>
 
                 <div
+                  ref={refAgent}
                   className="relative cursor-pointer mt-3"
                   onClick={() => {
                     setSelectedGroup(!selectGroup);

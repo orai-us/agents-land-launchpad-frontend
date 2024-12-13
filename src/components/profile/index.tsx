@@ -97,15 +97,25 @@ export default function ProfilePage() {
     }
   };
 
+  console.log("userData", userData);
+
   return (
     <div className="w-full h-full flex items-start gap-8 mt-8 md:mt-16 flex-col md:flex-row mb-10">
       <div className="w-full md:max-w-[350px] bg-[#13141D] p-6 rounded-lg">
         <div className="flex flex-col gap-6">
-          <img
-            src={userData.avatar || defaultUserImg}
-            alt="Avatar"
-            className="object-cover w-16 h-16 rounded-lg"
-          />
+          {userData.avatar ? (
+            <img
+              src={userData.avatar}
+              alt="Avatar"
+              className="object-cover w-16 h-16 rounded-lg"
+            />
+          ) : (
+            <img
+              src={defaultUserImg}
+              alt="Avatar"
+              className="object-cover w-16 h-16 rounded-lg"
+            />
+          )}
           <div className="w-full flex flex-col text-white font-medium gap-2">
             <div className="text-[24px] text-[#E8E9EE]">
               @{userData.name}
