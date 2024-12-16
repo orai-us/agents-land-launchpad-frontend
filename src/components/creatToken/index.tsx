@@ -231,7 +231,11 @@ export default function CreateToken() {
   // newCoin.tokenSupply &&
 
   const formValid =
-    newCoin.name && newCoin.ticker && newCoin.description && imageUrl;
+    newCoin.name &&
+    newCoin.ticker &&
+    newCoin.description &&
+    imageUrl &&
+    selectedAgent;
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
@@ -398,9 +402,13 @@ export default function CreateToken() {
                             <p className="mt-4 text-[#E8E9EE] text-[16px] uppercase">
                               No Agent
                             </p>
-                            <p className="mt-2 text-[#585A6B] text-[14px]">
+                            <a
+                              href="https://mesh.distilled.ai"
+                              target="_blank"
+                              className="mt-2 text-[#585A6B] text-[14px] hover:underline"
+                            >
                               mesh.distilled.ai
-                            </p>
+                            </a>
                           </div>
                         ) : (
                           agentList.map((e, ind) => {

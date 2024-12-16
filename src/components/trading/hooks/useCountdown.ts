@@ -13,7 +13,8 @@ export const TIMER = {
   SECOND: 60,
   MINUTE: 60,
   HOUR: 24,
-  DAY_TO_SECONDS: 24 * 60 * 60,
+  // DAY_TO_SECONDS: 24 * 60 * 60,
+  DAY_TO_SECONDS: 5 * 60, // FIXME: updateTime later current is 5mins
 };
 
 export const calcDiffTime = (

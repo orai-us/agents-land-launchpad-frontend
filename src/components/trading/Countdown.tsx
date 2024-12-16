@@ -5,7 +5,6 @@ const Countdown = ({ onEnd, coin }) => {
     new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND
   );
   const endTime = startTime + TIMER.DAY_TO_SECONDS;
-  // const endTime = startTime + 24 * 60 * 60 - 56 * 60;
 
   const { timeRemaining } = useCountdown({
     startTime,
