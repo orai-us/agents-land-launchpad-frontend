@@ -81,7 +81,7 @@ export class Web3SolanaProgramInteraction {
       console.log(mintKp.publicKey.toBase58());
 
       const aiAgentTokenAccount = this.getAssociatedTokenAccount(
-        new PublicKey(FAKE_AGENT),
+        new PublicKey(coinData.metadata.agentAddress),
         mintKp.publicKey
       );
       const creatorTokenAccount = this.getAssociatedTokenAccount(
@@ -105,7 +105,7 @@ export class Web3SolanaProgramInteraction {
           creator: wallet.publicKey,
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
-          aiAgentWallet: new PublicKey(FAKE_AGENT), // user // agent address from data coin // FIXME:
+          aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
           teamWallet: configAccount.teamWallet,
         })
         .remainingAccounts([

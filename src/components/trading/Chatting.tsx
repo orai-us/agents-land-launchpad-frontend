@@ -131,7 +131,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           <div
             onClick={() => setIsTrades(CHAT_TAB.CHAT)}
             className={twMerge(
-              "uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              "uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
               isTrades === CHAT_TAB.CHAT && "bg-[#585A6B] text-[#E8E9EE]"
             )}
           >
@@ -140,7 +140,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           <div
             onClick={() => setIsTrades(CHAT_TAB.TRADE)}
             className={twMerge(
-              "uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              "uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
               isTrades === CHAT_TAB.TRADE && "bg-[#585A6B] text-[#E8E9EE]"
             )}
           >
@@ -149,7 +149,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           <div
             onClick={() => setIsTrades(CHAT_TAB.TOKENOMICS)}
             className={twMerge(
-              "uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+              "uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
               isTrades === CHAT_TAB.TOKENOMICS && "bg-[#585A6B] text-[#E8E9EE]"
             )}
           >

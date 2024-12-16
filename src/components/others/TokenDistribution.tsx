@@ -107,6 +107,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [data]);
+  console.log("first", holders);
 
   return (
     <div className="flex flex-col justify-between pt-4">
@@ -166,7 +167,10 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                     className="w-full flex flex-row justify-between text-[14px] text-[#E8E9EE] pr-2 pb-4 border border-b border-[#1A1C28] border-t-0 border-x-0 hover:brightness-75"
                   >
                     <div className="flex flex-row gap-1 items-center">
-                      <div className="">
+                      <a
+                        href={`https://solscan.io/account/${item.owner}`}
+                        target="_blank"
+                      >
                         {item.slice}
                         {isCreator && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
@@ -188,7 +192,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                             (Agent)
                           </span>
                         )}
-                      </div>
+                      </a>
                     </div>
                     <div className="flex flex-col">
                       {Math.floor(item.amount / 10_000_000_000) / 1000}%
