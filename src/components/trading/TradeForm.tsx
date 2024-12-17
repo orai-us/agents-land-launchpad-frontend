@@ -15,11 +15,16 @@ import { SOL_DECIMAL } from "@/config";
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
+  curveLimit: number;
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
 
-export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
+export const TradeForm: React.FC<TradingFormProps> = ({
+  coin,
+  progress,
+  curveLimit,
+}) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [sol, setSol] = useState<string>("");
   const [simulateReceive, setSimulateReceive] = useState<string>("");
@@ -48,6 +53,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
       : new BigNumber(sol).isGreaterThan(tokenBal);
 
   const isNegativeAmount = new BigNumber(sol).isLessThan(0);
+  const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(
+    new BigNumber(curveLimit).div(10 ** 9).toFixed(3)
+  );
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -60,7 +68,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
   };
 
   useEffect(() => {
-    if (sol && !isNegativeAmount) {
+    if (sol && !isNegativeAmount && !isExceedCurveLimit) {
       (async () => {
         try {
           setLoadingEst(true);
@@ -241,6 +249,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             </svg> */}
           </div>
         </div>
+
         <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
           <div className="py-2">
             <input
@@ -295,7 +304,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
               return (
                 <div
                   key={`list-sol-${index}`}
-                  className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+                  className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
                   onClick={() => setSol(item.id)}
                 >
                   {item.price}
@@ -306,31 +315,31 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
         ) : (
           <div className="flex flex-row py-2 gap-3">
             <div
-              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol("")}
             >
               Reset
             </div>
             <div
-              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 10).toString())}
             >
               10%
             </div>
             <div
-              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 4).toString())}
             >
               25%
             </div>
             <div
-              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol((tokenBal / 2).toString())}
             >
               50%
             </div>
             <div
-              className="text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+              className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
               onClick={() => setSol(tokenBal.toString())}
             >
               100%
@@ -343,6 +352,22 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             Trade
           </div>
         ) : ( */}
+
+        {isBuy === 0 && (
+          <button
+            disabled={!curveLimit}
+            onClick={() =>
+              setSol(new BigNumber(curveLimit).div(10 ** 9).toFixed(3))
+            }
+            className="text-center disabled:cursor-not-allowed text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
+          >
+            Max bonding curve limit:{" "}
+            {numberWithCommas(
+              new BigNumber(curveLimit).div(10 ** 9).toNumber()
+            )}{" "}
+            SOL
+          </button>
+        )}
 
         <div className="mt-2 flex items-center gap-1">
           Receive: ≈{" "}
@@ -369,7 +394,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({ coin, progress }) => {
             loading ||
             isInsufficientFund ||
             isDisableSwapOnAgent ||
-            isNegativeAmount
+            isNegativeAmount ||
+            isExceedCurveLimit
           }
           onClick={handlTrade}
           className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"

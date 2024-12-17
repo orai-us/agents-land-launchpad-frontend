@@ -8,10 +8,15 @@ import { TradingChart } from "@/components/TVChart/TradingChart";
 import {
   BONDING_CURVE_LIMIT,
   INIT_SOL_BONDING_CURVE,
+  PROGRAM_ID,
   SOL_DECIMAL,
 } from "@/config";
 import UserContext from "@/context/UserContext";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
+import {
+  commitmentLevel,
+  endpoint,
+  Web3SolanaProgramInteraction,
+} from "@/program/web3";
 import {
   formatLargeNumber,
   formatNumberKMB,
@@ -21,7 +26,7 @@ import { coinInfo } from "@/utils/types";
 import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
 import { useContext, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -31,6 +36,8 @@ import { DexToolsChart } from "../TVChart/DexToolsChart";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 import { TIMER } from "./hooks/useCountdown";
 import NotForSale from "./NotForSale";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -38,9 +45,9 @@ const web3Solana = new Web3SolanaProgramInteraction();
 export default function TradingPage() {
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
-
   const [param, setParam] = useState<string>("");
   const [progress, setProgress] = useState<Number>(0);
+  const [curveLimit, setCurveLimit] = useState<number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const [pathname, setLocation] = useLocation();
   const [loadingEst, setLoadingEst] = useState<boolean>(true);
@@ -66,6 +73,43 @@ export default function TradingPage() {
     Date.now();
   const isNotForSale = isUnlock && !isOnSaleCountdown;
 
+  const fetchDataCoin = async (parameter) => {
+    let data = await getCoinInfo(parameter);
+
+    if (!data) {
+      let retry = 1;
+      while (retry < 3 && !data) {
+        console.log("Retry LoadToken", retry);
+        await sleep(SLEEP_TIMEOUT);
+        ++retry;
+        data = await getCoinInfo(parameter);
+      }
+    }
+
+    const maxCurve = await web3Solana.getMaxBondingCurveLimit(
+      new PublicKey(data.token),
+      wallet
+    );
+    setCurveLimit(maxCurve || 0);
+
+    const bondingCurveValue = new BigNumber(
+      (data.lamportReserves || new BN(0)).toString()
+    )
+      .minus(INIT_SOL_BONDING_CURVE)
+      .toNumber();
+
+    const bondingCurvePercent = new BigNumber(bondingCurveValue)
+      .multipliedBy(new BigNumber(100))
+      .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+      .toNumber();
+
+    const showCurrentChart = bondingCurvePercent >= 100 && data.raydiumPoolAddr;
+
+    setIsAgentChart(!showCurrentChart);
+    setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
+    setCoin(data);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       // Split the pathname and extract the last segment
@@ -74,38 +118,42 @@ export default function TradingPage() {
       setParam(parameter);
       setCoinId(parameter);
 
-      let data = await getCoinInfo(parameter);
-
-      if (!data) {
-        let retry = 1;
-        while (retry < 3 && !data) {
-          console.log("Retry LoadToken", retry);
-          await sleep(SLEEP_TIMEOUT);
-          ++retry;
-          data = await getCoinInfo(parameter);
-        }
-      }
-
-      const bondingCurveValue = new BigNumber(
-        (data.lamportReserves || new BN(0)).toString()
-      )
-        .minus(INIT_SOL_BONDING_CURVE)
-        .toNumber();
-
-      const bondingCurvePercent = new BigNumber(bondingCurveValue)
-        .multipliedBy(new BigNumber(100))
-        .div(new BigNumber(BONDING_CURVE_LIMIT))
-        .toNumber();
-
-      const showCurrentChart =
-        bondingCurvePercent >= 100 && data.raydiumPoolAddr;
-
-      setIsAgentChart(!showCurrentChart);
-      setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
-      setCoin(data);
+      await fetchDataCoin(parameter);
     };
     fetchData();
   }, [pathname]);
+
+  // realtime bonding curve
+  useEffect(() => {
+    if (!coinId) return;
+    const connection = new Connection(endpoint, {
+      commitment: commitmentLevel,
+      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+    });
+    const listener = new AgentsLandEventListener(connection);
+    listener.setProgramEventCallback(
+      "swapEvent",
+      async (result: ResultType) => {
+        console.log("==== UPDATE BONDING CURVE ====");
+        // Split the pathname and extract the last segment
+        const segments = pathname.split("/");
+        const parameter = segments[segments.length - 1];
+
+        await fetchDataCoin(parameter);
+      },
+      []
+    );
+
+    const { program, listenerIds } = listener.listenProgramEvents(
+      new PublicKey(PROGRAM_ID).toBase58()
+    );
+
+    return () => {
+      if (!program) return;
+      console.log("ready to remove listeners");
+      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+    };
+  }, [coinId]);
 
   useEffect(() => {
     if (coin.token && coin.raydiumPoolAddr) {
@@ -239,10 +287,18 @@ export default function TradingPage() {
                     />
                   )}
                   <div>
-                    <p className="text-[#E8E9EE] text-[24px] font-medium">
-                      {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
-                      {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
-                    </p>
+                    <div className="flex items-center">
+                      <div className="text-[#E8E9EE] text-[24px] font-medium">
+                        {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
+                        {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
+                      </div>
+                      <div className="text-[#84869A] text-[12px] font-medium uppercase ml-2">
+                        - Marketcap{" "}
+                        <span className="text-[#E8E9EE]">
+                          {formatNumberKMB(Number(coin.marketcap || 0))}
+                        </span>
+                      </div>
+                    </div>
                     <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium uppercase break-all">
                       CONTRACT: {coin.token}
                     </p>
@@ -417,7 +473,11 @@ export default function TradingPage() {
 
             {!isNotForSale && (
               <div className="flex md:hidden w-full">
-                <TradeForm coin={coin} progress={progress}></TradeForm>
+                <TradeForm
+                  coin={coin}
+                  progress={progress}
+                  curveLimit={curveLimit}
+                ></TradeForm>
               </div>
             )}
 
@@ -472,7 +532,11 @@ export default function TradingPage() {
         ) : (
           <div className="w-full md:max-w-[384px]">
             <div className="hidden md:flex">
-              <TradeForm coin={coin} progress={progress}></TradeForm>
+              <TradeForm
+                coin={coin}
+                progress={progress}
+                curveLimit={curveLimit}
+              ></TradeForm>
             </div>
             <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
               <div className="w-full flex flex-col gap-2">

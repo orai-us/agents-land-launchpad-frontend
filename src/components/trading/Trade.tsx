@@ -47,12 +47,13 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
         {dayjs(trade.time || Date.now()).format("YYYY-MM-DD HH:mm:ss")}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
-        <p
-          onClick={() => handleToRouter(`https://solscan.io/tx/${trade.tx}`)}
+        <a
+          target="_blank"
+          href={`https://solscan.io/tx/${trade.tx}`}
           className="leading-10 hover:cursor-pointer hover:text-white underline"
         >
           {trade.tx?.slice(0, 4)}...{trade.tx?.slice(-3)}
-        </p>
+        </a>
       </td>
     </tr>
   );

@@ -179,44 +179,46 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
         {isTrades === CHAT_TAB.TRADE && (
           <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4 mb-12">
-            <table className="w-full h-full scroll-table">
-              <thead className="w-full text-white">
-                <tr className="text-lg">
-                  <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase text-left">
-                    Account
-                  </th>
-                  <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
-                    Type
-                  </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
-                    SOL AMOUNT
-                    {/* <BiSort style={{ color: "#30344A" }} /> */}
-                  </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
-                    TOKEN AMOUNT
-                    {/* <BiSort style={{ color: "#30344A" }} /> */}
-                  </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
-                    Date
-                  </th>
-                  <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
-                    Transaction
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="min-w-[320px]">
-                {trades.record &&
-                  trades.record
-                    .filter(
-                      (trans) =>
-                        trans.tokenAmount?.toNumber() &&
-                        trans.lamportAmount?.toNumber()
-                    )
-                    .map((trade, index) => (
-                      <Trade key={index} trade={trade}></Trade>
-                    ))}
-              </tbody>
-            </table>
+            <div className="scrollable-table-container">
+              <table className="w-full h-full scroll-table">
+                <thead className="w-full text-white">
+                  <tr className="text-lg">
+                    <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase text-left">
+                      Account
+                    </th>
+                    <th className="py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
+                      Type
+                    </th>
+                    <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
+                      SOL AMOUNT
+                      {/* <BiSort style={{ color: "#30344A" }} /> */}
+                    </th>
+                    <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
+                      TOKEN AMOUNT
+                      {/* <BiSort style={{ color: "#30344A" }} /> */}
+                    </th>
+                    <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
+                      Date
+                    </th>
+                    <th className="text-right py-2 text-[#585A6B] text-[10px] md:text-[12px] uppercase">
+                      Transaction
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="min-w-[320px]">
+                  {trades.record &&
+                    trades.record
+                      .filter(
+                        (trans) =>
+                          trans.tokenAmount?.toNumber() &&
+                          trans.lamportAmount?.toNumber()
+                      )
+                      .map((trade, index) => (
+                        <Trade key={index} trade={trade}></Trade>
+                      ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 

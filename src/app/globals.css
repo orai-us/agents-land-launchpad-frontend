@@ -15,6 +15,11 @@
   /* background: #140b56; */
 }
 
+::-webkit-scrollbar-corner {
+  /* background: rgba(0, 0, 0, 0); */
+  background: transparent;
+}
+
 /* Track */
 ::-webkit-scrollbar-track {
   /* background: #140b56; */
@@ -60,6 +65,7 @@ body {
   background-color: #080a14;
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
+  overflow-x: hidden;
 }
 
 @layer utilities {
@@ -142,12 +148,11 @@ input[type="number"] {
   }
 }
 
+/* 
 table.scroll-table tbody {
-  /* padding-right: 2px; */
   display: block;
   max-height: 350px;
   overflow-y: scroll;
-  overflow-x: scroll;
 }
 
 table.scroll-table thead,
@@ -155,6 +160,35 @@ table.scroll-table tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
+} */
+
+.scrollable-table-container {
+  width: 100%; /* Adjust container width */
+  height: 300px; /* Adjust container height */
+  overflow: auto; /* Enable both vertical and horizontal scrolling */
+}
+
+table {
+  /* Ensure table width exceeds container for horizontal scroll */
+  /* min-width: 768px;  */
+  border-collapse: collapse; /* Clean borders */
+}
+
+th,
+td {
+  padding: 10px; /* Cell padding */
+  text-align: left; /* Align text */
+}
+
+th {
+  background-color: #080a14; /* Header background */
+  position: sticky; /* Fix header to the top of the scrollable container */
+  top: 0; /* Required for sticky header */
+  z-index: 2; /* Ensures the header stays above content */
+}
+
+td {
+  white-space: nowrap; /* Prevent wrapping for long content */
 }
 
 .infinite-scroll-component {

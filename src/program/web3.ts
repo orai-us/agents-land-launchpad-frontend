@@ -182,6 +182,49 @@ export class Web3SolanaProgramInteraction {
     }
   };
 
+  getMaxBondingCurveLimit = async (
+    mint: PublicKey,
+    wallet: WalletContextState
+  ): Promise<any> => {
+    // check the connection
+    if (!wallet.publicKey || !this.connection) {
+      console.log("Warning: Wallet not connected");
+      return;
+    }
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+    anchor.setProvider(provider);
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+
+    try {
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+      const configAccount = await program.account.config.fetch(configPda);
+
+      const curveLimit = configAccount.curveLimit.toNumber();
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
+        program.programId
+      );
+      const curveAccount = await program.account.bondingCurve.fetch(
+        bondingCurvePda
+      );
+      const solReserve = curveAccount.reserveLamport.toNumber();
+      const maxSolSwap = curveLimit - solReserve;
+
+      return maxSolSwap;
+    } catch (error) {
+      console.log("Error in get config curve limit", error);
+      return 0;
+    }
+  };
+
   // Swap transaction
   swapTx = async (
     mint: PublicKey,
