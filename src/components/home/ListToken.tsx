@@ -1,55 +1,59 @@
-import nodataImg from '@/assets/icons/nodata.svg';
-import oraidexIcon from '@/assets/icons/oraidex_ic.svg';
-import raydiumIcon from '@/assets/icons/raydium_ic.svg';
-import cloudIslandImg from '@/assets/images/islandCloud.png';
-import oraidexIsland from '@/assets/images/oraidex_island.png';
-import raydiumIsland from '@/assets/images/raydium_island.png';
-import { BONDING_CURVE_LIMIT, INIT_SOL_BONDING_CURVE } from '@/config';
-import { formatNumberKMB } from '@/utils/format';
-import { coinInfo } from '@/utils/types';
-import { reduceString } from '@/utils/util';
-import BigNumber from 'bignumber.js';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import updateLocale from 'dayjs/plugin/updateLocale';
-import { FC } from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
-import { useLocation } from 'wouter';
-import { formatCountdownTime, TIMER, useCountdown } from '../trading/hooks/useCountdown';
-import ReactLoading from 'react-loading';
+import nodataImg from "@/assets/icons/nodata.svg";
+import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
+import raydiumIcon from "@/assets/icons/raydium_ic.svg";
+import cloudIslandImg from "@/assets/images/islandCloud.png";
+import oraidexIsland from "@/assets/images/oraidex_island.png";
+import raydiumIsland from "@/assets/images/raydium_island.png";
+import { BONDING_CURVE_LIMIT, INIT_SOL_BONDING_CURVE } from "@/config";
+import { formatNumberKMB } from "@/utils/format";
+import { coinInfo } from "@/utils/types";
+import { reduceString } from "@/utils/util";
+import BigNumber from "bignumber.js";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+import { FC } from "react";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { useLocation } from "wouter";
+import {
+  formatCountdownTime,
+  TIMER,
+  useCountdown,
+} from "../trading/hooks/useCountdown";
+import ReactLoading from "react-loading";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
 
 // Custom locale configuration
-dayjs.updateLocale('en', {
+dayjs.updateLocale("en", {
   relativeTime: {
-    future: 'in %s',
-    past: '%s ago',
-    s: 'a few seconds',
-    m: '1m', // 1 minute
-    mm: '%dm', // 2-59 minutes
-    h: '1h', // 1 hour
-    hh: '%dh', // 2-23 hours
-    d: '1d', // 1 day
-    dd: '%dd', // 2-30 days
-    M: '1mo', // 1 month
-    MM: '%dmo', // 2-12 months
-    y: '1y', // 1 year
-    yy: '%dy' // 2+ years
-  }
+    future: "in %s",
+    past: "%s ago",
+    s: "a few seconds",
+    m: "1m", // 1 minute
+    mm: "%dm", // 2-59 minutes
+    h: "1h", // 1 hour
+    hh: "%dh", // 2-23 hours
+    d: "1d", // 1 day
+    dd: "%dd", // 2-30 days
+    M: "1mo", // 1 month
+    MM: "%dmo", // 2-12 months
+    y: "1y", // 1 year
+    yy: "%dy", // 2+ years
+  },
 });
 
 export enum STATUS_TOKEN {
-  LUNCH = 'Live Launch',
-  UPCOMING = 'UPCOMING',
-  LISTED = 'Listed'
+  LUNCH = "Live Launch",
+  UPCOMING = "UPCOMING",
+  LISTED = "Listed",
 }
 
 export const KeyByStatus = {
-  [STATUS_TOKEN.LUNCH]: 'live',
-  [STATUS_TOKEN.UPCOMING]: 'upcoming',
-  [STATUS_TOKEN.LISTED]: 'listed'
+  [STATUS_TOKEN.LUNCH]: "live",
+  [STATUS_TOKEN.UPCOMING]: "upcoming",
+  [STATUS_TOKEN.LISTED]: "listed",
 };
 
 const NoToken = () => (
@@ -62,7 +66,7 @@ const NoToken = () => (
 
 const Loading = () => (
   <div className="flex h-screen items-start justify-center bg-tizz-background">
-    <ReactLoading height={20} width={50} type={'bars'} color={'#36d7b7'} />
+    <ReactLoading height={20} width={50} type={"bars"} color={"#36d7b7"} />
   </div>
 );
 
@@ -74,16 +78,41 @@ const ListToken: FC<{
 }> = ({ type, data, handleLoadMore, totalData }) => {
   return (
     <>
-      {type === KeyByStatus[STATUS_TOKEN.LISTED] && <ListListedToken data={data} handleLoadMore={handleLoadMore} totalData={totalData} />}
-      {type === KeyByStatus[STATUS_TOKEN.UPCOMING] && <ListLaunchToken data={data} handleLoadMore={handleLoadMore} totalData={totalData} isUpcoming={true} />}
-      {type === KeyByStatus[STATUS_TOKEN.LUNCH] && <ListLaunchToken data={data} handleLoadMore={handleLoadMore} totalData={totalData} isUpcoming={false} />}
+      {type === KeyByStatus[STATUS_TOKEN.LISTED] && (
+        <ListListedToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+        />
+      )}
+      {type === KeyByStatus[STATUS_TOKEN.UPCOMING] && (
+        <ListLaunchToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+          isUpcoming={true}
+        />
+      )}
+      {type === KeyByStatus[STATUS_TOKEN.LUNCH] && (
+        <ListLaunchToken
+          data={data}
+          handleLoadMore={handleLoadMore}
+          totalData={totalData}
+          isUpcoming={false}
+        />
+      )}
     </>
   );
 };
 
 export default ListToken;
 
-export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming }) => {
+export const ListLaunchToken = ({
+  data,
+  handleLoadMore,
+  totalData,
+  isUpcoming,
+}) => {
   const [, setLocation] = useLocation();
   const handleToProfile = (id: string) => {
     setLocation(`/profile/${id}`);
@@ -118,13 +147,28 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming })
       }
     >
       {data.map((coinItem: coinInfo, ind) => {
-        const bondingCurveValue = new BigNumber((coinItem.lamportReserves || 0).toString()).minus(INIT_SOL_BONDING_CURVE).toNumber();
+        const bondingCurveValue = new BigNumber(
+          (coinItem.lamportReserves || 0).toString()
+        )
+          .minus(INIT_SOL_BONDING_CURVE)
+          .toNumber();
 
-        const bondingCurvePercent = new BigNumber(bondingCurveValue).multipliedBy(new BigNumber(100)).div(new BigNumber(BONDING_CURVE_LIMIT)).toNumber();
+        const bondingCurvePercent = new BigNumber(bondingCurveValue)
+          .multipliedBy(new BigNumber(100))
+          .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+          .toNumber();
 
-        const shownPercent = bondingCurvePercent < 0 ? 0 : bondingCurvePercent > 100 ? 100 : bondingCurvePercent;
+        const shownPercent =
+          bondingCurvePercent < 0
+            ? 0
+            : bondingCurvePercent > 100
+            ? 100
+            : bondingCurvePercent;
 
-        const isNotForSale = new Date(coinItem.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND > Date.now();
+        const isNotForSale =
+          new Date(coinItem.date).getTime() +
+            TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+          Date.now();
 
         return (
           <div
@@ -135,7 +179,13 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming })
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
                 <div className="w-[112px] h-[112px]">
-                  <img src={coinItem.metadata?.image || coinItem.url} alt="logoCoinImg" width={112} height={112} className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover" />
+                  <img
+                    src={coinItem.metadata?.image || coinItem.url}
+                    alt="logoCoinImg"
+                    width={112}
+                    height={112}
+                    className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
+                  />
                 </div>
                 {/* <div
                   className={twMerge(
@@ -154,7 +204,7 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming })
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{' '}
+                    create by{" "}
                     <span
                       className="text-[#E4775D] underline"
                       // onClick={(event) => {
@@ -163,28 +213,38 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming })
                       //   handleToProfile(ind as any);
                       // }}
                     >
-                      {coinItem.creator?.['wallet'] ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4) : coinItem.creator.toString()}
+                      {coinItem.creator?.["wallet"]
+                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                        : coinItem.creator.toString()}
                     </span>
                   </div>
-                  <span className="uppercase text-[12px] text-[#84869A] text-right">{dayjs(coinItem.date || Date.now()).fromNow()}</span>
+                  <span className="uppercase text-[12px] text-[#84869A] text-right">
+                    {dayjs(coinItem.date || Date.now()).fromNow()}
+                  </span>
                 </div>
                 <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
                   {coinItem.name} (${coinItem.ticker})
                 </div>
-                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">{coinItem.description || ''}</div>
+                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+                  {coinItem.description || ""}
+                </div>
               </div>
               {isUpcoming ? (
                 <CountdownItem coin={coinItem} />
               ) : (
                 <div>
                   <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
-                    Marketcap{' '}
+                    Marketcap{" "}
                     <span className="text-[#E8E9EE]">
-                      {formatNumberKMB(Number(coinItem.marketcap || 0))}({shownPercent.toFixed(2)}%)
+                      {formatNumberKMB(Number(coinItem.marketcap || 0))}(
+                      {shownPercent.toFixed(2)}%)
                     </span>
                   </div>
                   <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
-                    <div className="rounded-[999px] h-2 bg-barrie" style={{ width: `${shownPercent}%` }}></div>
+                    <div
+                      className="rounded-[999px] h-2 bg-barrie"
+                      style={{ width: `${shownPercent}%` }}
+                    ></div>
                   </div>
                 </div>
               )}
@@ -197,14 +257,16 @@ export const ListLaunchToken = ({ data, handleLoadMore, totalData, isUpcoming })
 };
 
 const CountdownItem = ({ coin }) => {
-  const startTime = Math.ceil(new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND);
+  const startTime = Math.ceil(
+    new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND
+  );
   const endTime = startTime + TIMER.DAY_TO_SECONDS;
 
   const { timeRemaining } = useCountdown({
     startTime,
     endTime,
     onStart: () => {},
-    onEnd: () => {}
+    onEnd: () => {},
   });
 
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
@@ -212,7 +274,13 @@ const CountdownItem = ({ coin }) => {
   return (
     <div className="rounded-lg">
       <div className="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -225,8 +293,12 @@ const CountdownItem = ({ coin }) => {
 
       <div className="flex mt-1">
         <div className="text-[20px] text-[#6392E9] font-semibold">{hours}h</div>
-        <div className="text-[20px] text-[#6392E9] font-semibold">{minutes}m</div>
-        <div className="text-[20px] text-[#6392E9] font-semibold">{seconds}s</div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {minutes}m
+        </div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {seconds}s
+        </div>
       </div>
     </div>
   );
@@ -269,7 +341,8 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
       {data.map((coinItem, ind) => {
         // [...new Array(10)]
         const isRaydiumListed = coinItem.raydiumPoolAddr;
-        const isOraidexListed = coinItem.oraidexPoolAddr && !coinItem.raydiumPoolAddr;
+        const isOraidexListed =
+          coinItem.oraidexPoolAddr && !coinItem.raydiumPoolAddr;
         return (
           <div
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
@@ -279,7 +352,13 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
                 <div className="w-[112px] h-[112px]">
-                  <img src={coinItem.metadata?.image || coinItem.url} alt="logoCoinImg" width={112} height={112} className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover" />
+                  <img
+                    src={coinItem.metadata?.image || coinItem.url}
+                    alt="logoCoinImg"
+                    width={112}
+                    height={112}
+                    className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
+                  />
                 </div>
                 {/* <div
                   className={twMerge(
@@ -291,38 +370,61 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 </div> */}
               </div>
               <div className="absolute bottom-0">
-                <img src={isRaydiumListed ? raydiumIsland : oraidexIsland} alt={isRaydiumListed ? 'raydiumIslandImg' : 'oraidexIslandImg'} />
+                <img
+                  src={isRaydiumListed ? raydiumIsland : oraidexIsland}
+                  alt={
+                    isRaydiumListed ? "raydiumIslandImg" : "oraidexIslandImg"
+                  }
+                />
               </div>
             </div>
             <div className="bg-[#13141d] rounded-lg p-6 flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{' '}
+                    create by{" "}
                     <span
                       className="text-[#E4775D] underline"
                       // onClick={() => handleToProfile(ind as any)}
                     >
-                      {coinItem.creator?.['wallet'] ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4) : coinItem.creator.toString()}
+                      {coinItem.creator?.["wallet"]
+                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                        : coinItem.creator.toString()}
                     </span>
                   </div>
 
-                  <span className="uppercase text-[12px] text-[#84869A] text-right">{dayjs(coinItem.date || Date.now()).fromNow()}</span>
+                  <span className="uppercase text-[12px] text-[#84869A] text-right">
+                    {dayjs(coinItem.date || Date.now()).fromNow()}
+                  </span>
                 </div>
                 <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
                   {coinItem.name} (${coinItem.ticker})
                 </div>
-                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">{coinItem.description || ''}</div>
+                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+                  {coinItem.description || ""}
+                </div>
               </div>
               <div>
                 {isRaydiumListed ? (
                   <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#9945FF_0.56%,_#7962E7_20.34%,_#00D18C_99.44%)] p-1">
-                    <img src={raydiumIcon} alt="icon_dex" className="mr-1" width={16} height={16} />
+                    <img
+                      src={raydiumIcon}
+                      alt="icon_dex"
+                      className="mr-1"
+                      width={16}
+                      height={16}
+                    />
                     <span>LISTED oN RAYDIUM</span>
                   </div>
                 ) : (
                   <div className="text-[#080A14] rounded-full flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1">
-                    <img src={oraidexIcon} alt="icon_dex" className="mr-1" width={16} height={16} />
+                    <img
+                      src={oraidexIcon}
+                      alt="icon_dex"
+                      className="mr-1"
+                      width={16}
+                      height={16}
+                    />
                     <span>LISTED oN ORAIDEX</span>
                   </div>
                 )}
@@ -340,18 +442,18 @@ export const TokenTab = {
     label: STATUS_TOKEN.LUNCH,
     value: KeyByStatus[STATUS_TOKEN.LUNCH],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
-    content: ListLaunchToken
+    content: ListLaunchToken,
   },
   [STATUS_TOKEN.UPCOMING]: {
     label: STATUS_TOKEN.UPCOMING,
     value: KeyByStatus[STATUS_TOKEN.UPCOMING],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.UPCOMING]}`,
-    content: ListLaunchToken
+    content: ListLaunchToken,
   },
   [STATUS_TOKEN.LISTED]: {
     label: STATUS_TOKEN.LISTED,
     value: KeyByStatus[STATUS_TOKEN.LISTED],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.LISTED]}`,
-    content: ListListedToken
-  }
+    content: ListListedToken,
+  },
 };
