@@ -181,11 +181,11 @@ export default function CreateToken() {
         description: newCoin.description,
         agentPersonality: agentPersonality || undefined,
         agentStyle: agentStyle || undefined,
-        createdOn: "https://test.com",
+        createdOn: "https://agent.land",
         twitter: newCoin.twitter || undefined, // Only assign if it exists
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
-        discord: newCoin.telegram || undefined, // Only assign if it exists
+        discord: newCoin.discord || undefined, // Only assign if it exists
         agentId: selectedAgent?.id,
         agentAddress: selectedAgent?.botWallet?.solAddr,
       };

@@ -60,6 +60,7 @@ export default function TradingPage() {
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
   // FIXME: need to integrate agent
 
+  console.log("coin", coin);
   const isUnlock =
     new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
     Date.now();

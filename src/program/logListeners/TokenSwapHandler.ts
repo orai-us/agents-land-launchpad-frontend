@@ -10,7 +10,7 @@ import {
   SystemProgram,
 } from "@solana/web3.js";
 import { ProcessProgramLogs } from "./types";
-import { findInstructionByProgramId } from "./utils";
+import { fetchJSONDataFromUrl, findInstructionByProgramId } from "./utils";
 import { Metaplex } from "@metaplex-foundation/js";
 import { GLOBAL_VAULT } from "./constants";
 import { SwapInfo } from "@/utils/types";
@@ -87,13 +87,20 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
       mintUri: token.json?.image || token.uri,
     };
 
+    if (!token.json?.image && token.uri) {
+      const { image = "" } = (await fetchJSONDataFromUrl(token.uri)) || {};
+      swapInfo.mintUri = image;
+    }
+
     const soldInstruction = this.findSellSolInstruction(
       txData.meta?.innerInstructions,
       globalVaultPda
     );
 
     if (soldInstruction) {
-      swapInfo.solAmountInLamports = new BN(soldInstruction.parsed.info.lamports);
+      swapInfo.solAmountInLamports = new BN(
+        soldInstruction.parsed.info.lamports
+      );
       return swapInfo;
     }
     const boughtInstruction = this.findBuySolInstruction(
@@ -101,7 +108,9 @@ export class TokenSwapProgramHandler implements ProcessProgramLogs {
       globalVaultPda
     );
     if (boughtInstruction) {
-      swapInfo.solAmountInLamports = new BN(boughtInstruction.parsed.info.lamports);
+      swapInfo.solAmountInLamports = new BN(
+        boughtInstruction.parsed.info.lamports
+      );
       swapInfo.direction = "Bought";
       return swapInfo;
     }

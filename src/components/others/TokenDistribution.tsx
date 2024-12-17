@@ -107,7 +107,6 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [data]);
-  console.log("first", holders);
 
   return (
     <div className="flex flex-col justify-between pt-4">

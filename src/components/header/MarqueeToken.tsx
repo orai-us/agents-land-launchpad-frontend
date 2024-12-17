@@ -10,6 +10,8 @@ import { reduceString } from "@/utils/util";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { PROGRAM_ID } from "@/config";
 import { BN } from "bn.js";
+import { numberWithCommas } from "@/utils/format";
+import BigNumber from "bignumber.js";
 
 export enum ACTION_TYPE {
   Bought = "Bought",
@@ -96,7 +98,7 @@ const RecentTokenSwap: FC<
         {type}
       </span>{" "}
       &nbsp;
-      {amount} SOL of {token.name}
+      {numberWithCommas(new BigNumber(amount).toNumber())} SOL of {token.name}
       {typeof token.img === "string" ? (
         <img
           src={token.img}
@@ -128,11 +130,14 @@ const MarqueeToken = () => {
 
     const listener = new AgentsLandListener(connection);
     listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
+      console.log("basicTokenInfo", basicTokenInfo);
       const newCoinInfo: coinInfo = {
         creator: basicTokenInfo.creator,
         name: basicTokenInfo.metadata?.name,
         url:
-          basicTokenInfo.metadata?.json?.image ?? basicTokenInfo.metadata?.uri,
+          basicTokenInfo.metadata?.image ||
+          basicTokenInfo.metadata?.json?.image ||
+          basicTokenInfo.metadata?.uri,
         ticker: basicTokenInfo.metadata?.symbol,
         tokenReserves: new BN(0),
         lamportReserves: new BN(0),
@@ -164,7 +169,6 @@ const MarqueeToken = () => {
       });
     });
     listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
-      // setLatestSwapInfo(swapInfo);
       setListNotifications((prevList) => {
         const newItem = {
           tokenAddress: swapInfo.mintAddress,

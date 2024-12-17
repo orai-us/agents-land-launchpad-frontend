@@ -6,7 +6,7 @@ import {
   PublicKey,
 } from "@solana/web3.js";
 import { ProcessProgramLogs } from "./types";
-import { findInstructionByProgramId } from "./utils";
+import { fetchJSONDataFromUrl, findInstructionByProgramId } from "./utils";
 import { Metaplex } from "@metaplex-foundation/js";
 
 export class CreatedTokenProgramLogsHandler implements ProcessProgramLogs {
@@ -65,10 +65,17 @@ export class CreatedTokenProgramLogsHandler implements ProcessProgramLogs {
     const token = await this.metaplex
       .nfts()
       .findByMint({ mintAddress: mintAddress }, { commitment: "confirmed" });
+
+    let image = token.uri;
+    if (token.uri) {
+      const jsonData = await fetchJSONDataFromUrl(token.uri);
+      image = jsonData?.image || "";
+    }
+
     return {
       creator,
       mintAddress,
-      metadata: token,
+      metadata: { ...token, image },
       bondingCurve,
     };
   }
