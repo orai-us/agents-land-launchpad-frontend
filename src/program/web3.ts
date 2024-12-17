@@ -282,13 +282,14 @@ export class Web3SolanaProgramInteraction {
         parseFloat(amount) * Math.pow(10, coinDecimal)
       );
 
-      if (
-        type === 0 &&
-        new BigNumber(fmtAmount.toNumber()).isGreaterThan(maxSolSwap)
-      ) {
-        console.log("Exceeded bonding curve limit");
-        throw Error("Exceeded bonding curve limit");
-      }
+      // FIXME: uncomment to check limit curve
+      // if (
+      //   type === 0 &&
+      //   new BigNumber(fmtAmount.toNumber()).isGreaterThan(maxSolSwap)
+      // ) {
+      //   console.log("Exceeded bonding curve limit");
+      //   throw Error("Exceeded bonding curve limit");
+      // }
 
       const swapIx = await program.methods
         .swap(fmtAmount, type, new anchor.BN(0))
