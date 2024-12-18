@@ -44,7 +44,9 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
         {formatLargeNumber(fromBig(trade.tokenAmount || new BN(0), 6))}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
-        {dayjs(trade.time || Date.now()).format("YYYY-MM-DD HH:mm:ss")}
+        {dayjs(trade.time || Date.now()).format("YYYY-MM-DD")}
+        <br />
+        {dayjs(trade.time || Date.now()).format("HH:mm:ss")}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2 text-right">
         <a

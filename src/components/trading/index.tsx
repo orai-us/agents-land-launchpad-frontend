@@ -22,7 +22,7 @@ import {
   formatNumberKMB,
   numberWithCommas,
 } from "@/utils/format";
-import { coinInfo } from "@/utils/types";
+import { coinInfo, SwapInfo } from "@/utils/types";
 import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -38,6 +38,31 @@ import { TIMER } from "./hooks/useCountdown";
 import NotForSale from "./NotForSale";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+// Extend dayjs with the relativeTime plugin
+dayjs.extend(relativeTime);
+dayjs.extend(updateLocale);
+
+// Custom locale configuration
+dayjs.updateLocale("en", {
+  relativeTime: {
+    future: "in %s",
+    past: "%s ago",
+    s: "a few seconds",
+    m: "1m", // 1 minute
+    mm: "%dm", // 2-59 minutes
+    h: "1h", // 1 hour
+    hh: "%dh", // 2-23 hours
+    d: "1d", // 1 day
+    dd: "%dd", // 2-30 days
+    M: "1mo", // 1 month
+    MM: "%dmo", // 2-12 months
+    y: "1y", // 1 year
+    yy: "%dy", // 2+ years
+  },
+});
 
 const SLEEP_TIMEOUT = 1500;
 
@@ -65,9 +90,7 @@ export default function TradingPage() {
   const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
-  // FIXME: need to integrate agent
 
-  console.log("coin", coin);
   const isUnlock =
     new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
     Date.now();
@@ -121,11 +144,11 @@ export default function TradingPage() {
       await fetchDataCoin(parameter);
     };
     fetchData();
-  }, [pathname]);
+  }, [pathname, wallet.publicKey]);
 
   // realtime bonding curve
   useEffect(() => {
-    if (!coinId) return;
+    if (!coinId || !wallet.publicKey) return;
     const connection = new Connection(endpoint, {
       commitment: commitmentLevel,
       wsEndpoint: import.meta.env.VITE_SOLANA_WS,
@@ -134,12 +157,13 @@ export default function TradingPage() {
     listener.setProgramEventCallback(
       "swapEvent",
       async (result: ResultType) => {
-        console.log("==== UPDATE BONDING CURVE ====");
-        // Split the pathname and extract the last segment
         const segments = pathname.split("/");
         const parameter = segments[segments.length - 1];
 
-        await fetchDataCoin(parameter);
+        if (result.mint === parameter) {
+          console.log("==== UPDATE BONDING CURVE ====");
+          await fetchDataCoin(parameter);
+        }
       },
       []
     );
@@ -153,7 +177,7 @@ export default function TradingPage() {
       console.log("ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
-  }, [coinId]);
+  }, [coinId, wallet.publicKey]);
 
   useEffect(() => {
     if (coin.token && coin.raydiumPoolAddr) {
@@ -292,7 +316,10 @@ export default function TradingPage() {
                         {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
                         {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                       </div>
-                      <div className="text-[#84869A] text-[12px] font-medium uppercase ml-2">
+                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
+                        - {dayjs(coin.date || Date.now()).fromNow()}
+                      </div>
+                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
                         - Marketcap{" "}
                         <span className="text-[#E8E9EE]">
                           {formatNumberKMB(Number(coin.marketcap || 0))}

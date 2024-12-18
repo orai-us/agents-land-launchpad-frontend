@@ -52,10 +52,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       ? new BigNumber(sol).isGreaterThan(solBalance)
       : new BigNumber(sol).isGreaterThan(tokenBal);
 
-  const isNegativeAmount = new BigNumber(sol).isLessThan(0);
+  const isNegativeAmount = new BigNumber(sol || 0).isLessThanOrEqualTo(0);
   const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(
     new BigNumber(curveLimit).div(10 ** 9).toFixed(3)
   );
+  const canSimulate = (isBuy === 0 && !isExceedCurveLimit) || isBuy !== 0;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -68,7 +69,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   };
 
   useEffect(() => {
-    if (sol && !isNegativeAmount && !isExceedCurveLimit) {
+    if (sol && !isNegativeAmount && canSimulate) {
       (async () => {
         try {
           setLoadingEst(true);
@@ -102,7 +103,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             console.log("receive", receive);
           }
 
-          setSimulateReceive(
+          setSimulateReceive(() =>
             new BigNumber(receive)
               .div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL))
               .toString()
@@ -114,9 +115,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         }
       })();
     } else {
-      setSimulateReceive("");
+      setSimulateReceive(() => "");
     }
-  }, [sol]);
+  }, [sol, curveLimit]);
 
   const getBalance = async () => {
     if (!wallet.publicKey || !coin.token) {
@@ -371,18 +372,22 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
         <div className="mt-2 flex items-center gap-1">
           Receive: ≈{" "}
-          {!loadingEst ? (
-            simulateReceive ? (
-              numberWithCommas(
-                new BigNumber(simulateReceive || 0).toNumber(),
-                undefined,
-                { maximumFractionDigits: 6 }
+          {canSimulate ? (
+            !loadingEst ? (
+              simulateReceive ? (
+                numberWithCommas(
+                  new BigNumber(simulateReceive || 0).toNumber(),
+                  undefined,
+                  { maximumFractionDigits: 6 }
+                )
+              ) : (
+                "--"
               )
             ) : (
-              "--"
+              <img src={LoadingImg} />
             )
           ) : (
-            <img src={LoadingImg} />
+            "--"
           )}{" "}
           {!isBuy ? coin.ticker : "SOL"}
         </div>
@@ -395,10 +400,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             isInsufficientFund ||
             isDisableSwapOnAgent ||
             isNegativeAmount ||
-            isExceedCurveLimit
+            !canSimulate
           }
           onClick={handlTrade}
-          className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed disabled:pointer-events-none uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
+          className="disabled:cursor-not-allowed mt-4 disabled:opacity-75 uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
         >
           <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
             {loading && <img src={LoadingImg} />}&nbsp;Trade

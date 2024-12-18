@@ -10,6 +10,7 @@ import {
   userInfo,
 } from "./types";
 import { BN } from "@coral-xyz/anchor";
+import { INIT_SOL_BONDING_CURVE } from "@/config";
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const DISTILL_BE_URL =
@@ -434,8 +435,17 @@ export function calculateKotHProgress(
     bondingCurveLimit = new BN(bondingCurveLimit);
   }
   if (bondingCurveLimit.toNumber() === 0) return 0;
+  const calcLamportReserves = lamportReserves.sub(
+    new BN(INIT_SOL_BONDING_CURVE)
+  );
+  const calcBondingCurveLimit = bondingCurveLimit.sub(
+    new BN(INIT_SOL_BONDING_CURVE)
+  );
   let currentKotHProgress =
-    (fromBig(lamportReserves, 9) / (fromBig(bondingCurveLimit, 9) / 2)) * 100;
+    (fromBig(calcLamportReserves, 9) /
+      (fromBig(calcBondingCurveLimit, 9) / 2)) *
+    100;
+
   if (currentKotHProgress > 100) currentKotHProgress = 100;
   return currentKotHProgress;
 }
