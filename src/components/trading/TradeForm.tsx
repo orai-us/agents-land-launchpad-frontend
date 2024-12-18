@@ -47,15 +47,19 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     !coin.oraidexPoolAddr &&
     !coin.listed;
 
+  const fmtCurve = new BigNumber(
+    new BigNumber(curveLimit).div(10 ** 9).toFixed(3, 1)
+  )
+    .plus(0.001)
+    .toString();
+
   const isInsufficientFund =
     isBuy === 0
       ? new BigNumber(sol).isGreaterThan(solBalance)
       : new BigNumber(sol).isGreaterThan(tokenBal);
 
   const isNegativeAmount = new BigNumber(sol || 0).isLessThanOrEqualTo(0);
-  const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(
-    new BigNumber(curveLimit).div(10 ** 9).toFixed(3)
-  );
+  const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(fmtCurve);
   const canSimulate = (isBuy === 0 && !isExceedCurveLimit) || isBuy !== 0;
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -175,6 +179,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       setLoading(false);
     }
   };
+
+  // console.log("curveLimit", curveLimit);
 
   return (
     <div className="p-3 md:p-6 rounded-b-lg md:rounded-lg bg-[#13141D] text-[#9192A0] w-full">
@@ -354,19 +360,14 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           </div>
         ) : ( */}
 
-        {isBuy === 0 && (
+        {isBuy === 0 && !!curveLimit && (
           <button
             disabled={!curveLimit}
-            onClick={() =>
-              setSol(new BigNumber(curveLimit).div(10 ** 9).toFixed(3))
-            }
+            onClick={() => setSol(fmtCurve)}
             className="text-center disabled:cursor-not-allowed text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
           >
             Max bonding curve limit:{" "}
-            {numberWithCommas(
-              new BigNumber(curveLimit).div(10 ** 9).toNumber()
-            )}{" "}
-            SOL
+            {numberWithCommas(new BigNumber(fmtCurve).toNumber())} SOL
           </button>
         )}
 
