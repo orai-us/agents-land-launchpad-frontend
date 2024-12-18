@@ -48,6 +48,11 @@ const Header: FC = () => {
       text: "How it works?",
       onclick: () => setShowStepWork(true),
     },
+    {
+      link: "/staking",
+      text: "Staking",
+      onclick: () => handleToRouter("/staking"),
+    },
   ];
 
   return (

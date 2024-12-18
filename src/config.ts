@@ -13,6 +13,7 @@ export const DISTILL_COMMUNITY_POOL_WALLET =
   "CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN"; // FIXME: update later for community pool
 export const SEED_GLOBAL = "global";
 export const TX_FEE = 0.25;
+export const MAX_TOKEN_ADDRESS = "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h";
 
 const endpoints = {
   tradingVariables: "",
