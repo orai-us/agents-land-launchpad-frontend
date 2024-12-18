@@ -217,11 +217,9 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
       `${BACKEND_URL}/feedback/coin/${data}`,
       config
     );
-    console.log("messages:", response.data);
     return response.data;
   } catch (err) {
     console.log("err get message by coin: ", err);
-    // throw new Error(err);
   }
 };
 

@@ -207,6 +207,7 @@ export class Web3SolanaProgramInteraction {
       );
       const configAccount = await program.account.config.fetch(configPda);
 
+      const platformBuyFee = configAccount.platformBuyFee || 0;
       const curveLimit = configAccount.curveLimit.toNumber();
       const [bondingCurvePda] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
@@ -218,7 +219,46 @@ export class Web3SolanaProgramInteraction {
       const solReserve = curveAccount.reserveLamport.toNumber();
       const maxSolSwap = curveLimit - solReserve;
 
-      return maxSolSwap;
+      const maxSolSwapIncludeFee = new BigNumber(maxSolSwap)
+        .multipliedBy(new BigNumber(platformBuyFee).plus(100))
+        .div(100)
+        .toNumber();
+
+      console.log("=== maxSolSwapIncludeFee ===", {
+        origin: maxSolSwap,
+        includeFee: maxSolSwapIncludeFee,
+      });
+      return maxSolSwapIncludeFee;
+    } catch (error) {
+      console.log("Error in get config curve limit", error);
+      return 0;
+    }
+  };
+
+  getConfigData = async (wallet: WalletContextState): Promise<any> => {
+    // check the connection
+    if (!this.connection) {
+      console.log("Warning: connection not connected");
+      return;
+    }
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      preflightCommitment: "confirmed",
+    });
+    anchor.setProvider(provider);
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+
+    try {
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+      const configAccount = await program.account.config.fetch(configPda);
+
+      const platformBuyFee = configAccount.platformBuyFee;
+      return platformBuyFee;
     } catch (error) {
       console.log("Error in get config curve limit", error);
       return 0;

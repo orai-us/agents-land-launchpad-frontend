@@ -366,7 +366,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             onClick={() => setSol(fmtCurve)}
             className="text-center disabled:cursor-not-allowed text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
           >
-            Max bonding curve limit:{" "}
+            Max Bonding Curve Limit:{" "}
             {numberWithCommas(new BigNumber(fmtCurve).toNumber())} SOL
           </button>
         )}
