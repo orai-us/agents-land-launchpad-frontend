@@ -187,8 +187,8 @@ export class Web3SolanaProgramInteraction {
     wallet: WalletContextState
   ): Promise<any> => {
     // check the connection
-    if (!wallet.publicKey || !this.connection) {
-      console.log("Warning: Wallet not connected");
+    if (!this.connection) {
+      console.log("Warning: connection not connected");
       return;
     }
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
@@ -662,8 +662,8 @@ export class Web3SolanaProgramInteraction {
   };
 
   getConfigGlobal = async (wallet, token) => {
-    if (!wallet.publicKey || !this.connection) {
-      console.log("Warning: Wallet not connected");
+    if (!this.connection) {
+      console.log("Warning: Connection not connected");
       return;
     }
     const provider = new anchor.AnchorProvider(this.connection, wallet, {
@@ -692,8 +692,8 @@ export class Web3SolanaProgramInteraction {
 
   getBondingAddressToken = async (wallet) => {
     try {
-      if (!wallet.publicKey || !this.connection) {
-        console.log("Warning: Wallet not connected");
+      if (!this.connection) {
+        console.log("Warning: Connection not connected");
         return;
       }
       const provider = new anchor.AnchorProvider(this.connection, wallet, {

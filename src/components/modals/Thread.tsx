@@ -1,10 +1,17 @@
-import UserContext from '@/context/UserContext';
-import { coinInfo, replyInfo, tradeInfo, userInfo } from '@/utils/types';
-import { postReply } from '@/utils/util';
-import React, { ChangeEvent, useContext, useMemo, useRef, useState } from 'react';
-import { errorAlert, successAlert } from '../others/ToastGroup';
+import UserContext from "@/context/UserContext";
+import { coinInfo, replyInfo, tradeInfo, userInfo } from "@/utils/types";
+import { postReply } from "@/utils/util";
+import React, {
+  ChangeEvent,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { errorAlert, successAlert } from "../others/ToastGroup";
 
-import { uploadImage } from '@/utils/fileUpload';
+import { uploadImage } from "@/utils/fileUpload";
+import { useWallet } from "@solana/wallet-adapter-react";
 
 interface ThreadProps {
   data: coinInfo;
@@ -13,8 +20,9 @@ interface ThreadProps {
 const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
   const { postReplyModal, setPostReplyModal, user } = useContext(UserContext);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [imageUrl, setImageUrl] = useState<string>('');
-  const [msg, setMsg] = useState<string>('');
+  const [imageUrl, setImageUrl] = useState<string>("");
+  const [msg, setMsg] = useState<string>("");
+  const wallet = useWallet();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -23,14 +31,14 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
     if (imageUrl) {
       const url = await uploadImage(imageUrl);
       if (url && user._id) {
-        console.log('user._id: ', user._id);
-        console.log('url: ', url);
+        console.log("user._id: ", user._id);
+        console.log("url: ", url);
 
         reply = {
           coinId: data._id,
           sender: user._id,
           msg: msg,
-          img: url
+          img: url,
         };
       }
     } else {
@@ -38,15 +46,15 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
         reply = {
           coinId: data._id,
           sender: user._id,
-          msg: msg
+          msg: msg,
         };
       }
     }
-    console.log('first', user, reply);
+    console.log("first", user, reply);
     // handleModalToggle();
     const res = await postReply(reply);
     if (res) {
-      setMsg('');
+      setMsg("");
     }
   };
 
@@ -57,12 +65,12 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith('image/')) {
-        successAlert('Please select a valid image file.');
+      if (!file.type.startsWith("image/")) {
+        successAlert("Please select a valid image file.");
         return;
       }
       const url = URL.createObjectURL(file);
-      setFileName(file.name || ''); // Ensure it's always a string
+      setFileName(file.name || ""); // Ensure it's always a string
       setImageUrl(url); // URL.createObjectURL always returns a string
     }
   };
@@ -124,7 +132,11 @@ const ThreadSection: React.FC<ThreadProps> = ({ data }) => {
         )}
       </div> */}
       <div className="flex justify-around p-3 absolute right-0 bottom-0">
-        <button disabled={!msg} onClick={replyPost} className="disabled:brightness-[60%] disabled:pointer-events-none mt-2 px-4 py-2 bg-[#1A1C28] text-[#E8E9EE] text-[14px] rounded uppercase hover:brightness-125 cursor-pointer">
+        <button
+          disabled={!msg || !wallet.publicKey}
+          onClick={replyPost}
+          className="disabled:brightness-[60%] disabled:cursor-not-allowed mt-2 px-4 py-2 bg-[#1A1C28] text-[#E8E9EE] text-[14px] rounded uppercase hover:brightness-125 cursor-pointer"
+        >
           POST
         </button>
       </div>
