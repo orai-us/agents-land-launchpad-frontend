@@ -251,7 +251,7 @@ export default function CreateToken() {
         coin={coinCreatedData}
         closeModal={() => setShowModalSuccess(false)}
       />
-      <div onClick={() => handleToRouter("/")}>
+      <div onClick={() => handleToRouter("/")} className="w-fit">
         <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"

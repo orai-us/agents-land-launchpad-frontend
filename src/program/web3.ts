@@ -27,6 +27,7 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import { handleTransaction } from "./utils";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -177,7 +178,7 @@ export class Web3SolanaProgramInteraction {
         };
       }
     } catch (error) {
-      console.log("----", error);
+      console.log("--error--", error);
       return false;
     }
   };
@@ -349,10 +350,10 @@ export class Web3SolanaProgramInteraction {
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        console.log(
-          "----",
-          await this.connection.simulateTransaction(signedTx)
-        );
+        // console.log(
+        //   "----",
+        //   await this.connection.simulateTransaction(signedTx)
+        // );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: "confirmed",
           skipPreflight: false,
@@ -370,22 +371,13 @@ export class Web3SolanaProgramInteraction {
 
         console.log("Successfully initialized.\n Signature: ", signature);
         return res;
-
-        // const { result } = await this.handleTransaction({
-        //   error: { signature } as any,
-        // });
-
-        // console.log("result", result);
-        // if (result?.value?.confirmationStatus) {
-        //   console.log("Successfully initialized.\n Signature: ", signature);
-        //   return { signature, result };
-        // }
       }
     } catch (error) {
       console.log("Error in swap transaction", error, error.error);
       const { transaction = "", result } =
-        (await this.handleTransaction({
+        (await handleTransaction({
           error,
+          connection: this.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -456,10 +448,10 @@ export class Web3SolanaProgramInteraction {
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        console.log(
-          "----",
-          await this.connection.simulateTransaction(signedTx)
-        );
+        // console.log(
+        //   "----",
+        //   await this.connection.simulateTransaction(signedTx)
+        // );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: "confirmed",
           skipPreflight: false,
@@ -479,8 +471,9 @@ export class Web3SolanaProgramInteraction {
     } catch (error) {
       console.log("Error in swap transaction", error, error.error);
       const { transaction = "", result } =
-        (await this.handleTransaction({
+        (await handleTransaction({
           error,
+          connection: this.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -592,10 +585,6 @@ export class Web3SolanaProgramInteraction {
       response.value[0].pubkey
     );
 
-    // Convert the balance from integer to decimal format
-
-    console.log(`Token Balance: ${tokenAccountInfo.value.uiAmount}`);
-
     return tokenAccountInfo.value.uiAmount;
   };
 
@@ -651,38 +640,6 @@ export class Web3SolanaProgramInteraction {
         uniqueTokenCount: 0,
         tokenDetails: [],
       };
-    }
-  };
-
-  isTransactionExpiredTimeoutError(error: any) {
-    return error instanceof TransactionExpiredTimeoutError;
-  }
-
-  handleTransaction = async ({
-    error,
-  }: {
-    error: TransactionExpiredTimeoutError;
-  }) => {
-    try {
-      if (this.isTransactionExpiredTimeoutError(error) || error["signature"]) {
-        const result = await this.connection.getSignatureStatus(
-          error.signature,
-          {
-            searchTransactionHistory: true,
-          }
-        );
-
-        if (result?.value?.confirmationStatus) {
-          console.log(result);
-
-          return { transaction: error.signature, result };
-        }
-      }
-
-      return null;
-    } catch (e) {
-      console.log(e);
-      return null;
     }
   };
   getAssociatedTokenAccount = (

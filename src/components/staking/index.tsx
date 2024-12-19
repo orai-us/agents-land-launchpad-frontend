@@ -1,16 +1,26 @@
+import LoadingImg from "@/assets/icons/loading-button.svg";
+import nodataImg from "@/assets/icons/nodata.svg";
 import MaxImg from "@/assets/images/richoldman.png";
-import { useSocket } from "@/contexts/SocketContext";
-import useOnClickOutside from "@/hooks/useOnClickOutside";
+import { SPL_DECIMAL, STAKE_CURRENCY_MINT, TIMER } from "@/config";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import { formatNumberKMB, numberWithCommas } from "@/utils/format";
+import { toBN } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { Circles } from "react-loader-spinner";
-import { useLocation } from "wouter";
-import ZappingText from "../zapping";
-import { MAX_TOKEN_ADDRESS } from "@/config";
-import { twMerge } from "tailwind-merge";
 import dayjs from "dayjs";
+import tz from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import { ChangeEvent, useEffect, useState } from "react";
+import ReactLoading from "react-loading";
+import { twMerge } from "tailwind-merge";
+import { useLocation } from "wouter";
+import { successAlert } from "../others/ToastGroup";
+import { LOCK_TIME_OPTIONS } from "./constants";
+import useGetListLockedByUser from "./hooks/useGetListLockedByUser";
+import LockingItem from "./LockingItem";
+
+dayjs.extend(utc);
+dayjs.extend(tz);
 
 export enum STEP_TOKEN {
   INFO,
@@ -19,21 +29,23 @@ export enum STEP_TOKEN {
 
 const web3Solana = new Web3SolanaProgramInteraction();
 
+const web3Locking = new Web3SolanaLockingToken();
+
 export default function Staking() {
-  const { isLoading, setIsLoading } = useSocket();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshList, setIsRefreshList] = useState(false);
   const [selectedLockTime, setSelectedLockTime] = useState(
     LOCK_TIME_OPTIONS[0]
   );
-  const [selectGroup, setSelectedGroup] = useState(false);
-  const refAgent = useRef();
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
   const [stakeAmount, setStakeAmount] = useState<string>("");
+  const {
+    loading: loadingList,
+    lockingList,
+    totalLocked,
+  } = useGetListLockedByUser(isRefreshList);
   const AMOUNT_LIST = [
-    {
-      label: "10%",
-      value: tokenBal / 10,
-    },
     {
       label: "25%",
       value: tokenBal / 4,
@@ -52,10 +64,6 @@ export default function Staking() {
     },
   ];
 
-  useOnClickOutside(refAgent, () => {
-    setSelectedGroup(false);
-  });
-
   const getBalance = async () => {
     if (!wallet.publicKey) {
       return;
@@ -65,7 +73,7 @@ export default function Staking() {
       const [tokenBal, solBal] = await Promise.all([
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
-          MAX_TOKEN_ADDRESS
+          STAKE_CURRENCY_MINT
         ),
         web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
@@ -96,10 +104,16 @@ export default function Staking() {
     }
   };
 
+  const Loading = () => (
+    <div className="flex h-screen items-start justify-center bg-tizz-background">
+      <ReactLoading height={20} width={50} type={"bars"} color={"#36d7b7"} />
+    </div>
+  );
+
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
-      <div onClick={() => handleToRouter("/")}>
-        <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2 pb-2">
+      <div onClick={() => handleToRouter("/")} className="w-fit">
+        <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
@@ -112,70 +126,91 @@ export default function Staking() {
               fill="#585A6B"
             />
           </svg>
-          max staking
+          Strongbox Vaults
         </div>
       </div>
-
-      {isLoading && (
-        <div className="w-full h-full fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 backdrop-blur-lg z-50">
-          <div className="w-[350px] h-[220px] flex flex-col justify-center items-center relative p-6  bg-[#13141D] rounded-lg shadow-lg">
-            <button
-              onClick={() => setIsLoading(!isLoading)}
-              className="absolute top-6 right-6  hover:brightness-125 text-gray-600"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                stroke="currentColor"
-                className="w-6 h-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            <div className="w-[350px] h-[200px] flex flex-col gap-4 justify-center items-center">
-              <Circles
-                height="80"
-                width="80"
-                color="#E4775D"
-                ariaLabel="circles-loading"
-                visible={true}
-              />
-
-              <div className="right-6 text-1xl p-2">
-                <ZappingText text={"Transaction processing"} dot={5} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      <div className="w-full text-[14px] text-[#9192A0] mb-4 mt-4">
-        Stake your $MAX today to gain advantages of coming tokens and so much
+      <div className="w-full text-[14px] text-[#9192A0] mb-3 md:mb-12 mt-4">
+        Lock your $MAX today to gain advantages of coming projects and so much
         more!
       </div>
-      <div className="flex justify-between items-start flex-col md:flex-row">
-        <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-4 md:p-8">
-          <div className="text-[#E8E9EE] text-[18px] font-medium">
+      <div className="flex justify-between items-start flex-col-reverse md:flex-row">
+        <div className="w-full flex flex-col">
+          <div className="text-[#E8E9EE] text-[18px] font-medium mb-4 md:mb-6">
             Your locking
           </div>
-
-          <div className="flex flex-col gap-6">
-            <div></div>
-          </div>
+          {loadingList ? (
+            <Loading />
+          ) : lockingList.length <= 0 ? (
+            <div className="flex h-screen max-h-[212px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-[#30344A] bg-[#13141D] p-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded border border-[#1A1C28] bg-[#080A14]">
+                <img src={nodataImg} alt="nodata" />
+              </div>
+              <p className="mt-4 text-[16px] font-medium uppercase text-[#E8E9EE]">
+                No locking
+              </p>
+              <p className="mt-2 text-[14px] font-medium text-[#585A6B]">
+                Your locking history will appear here
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-6">
+              <div className="scrollable-table-container border border-[#1A1C28] rounded-lg !max-h-[440px]">
+                <table className="w-full h-full scroll-table">
+                  <thead className="w-full text-white">
+                    <tr className="text-lg">
+                      <th className="pl-4 py-2 md:pl-6 md:py-4 bg-[#13141d] text-[#9192A0] text-[10px] md:text-[12px] uppercase text-left">
+                        MAX locked
+                      </th>
+                      <th className="px-1 py-2 md:px-2 md:py-4 bg-[#13141d] text-[#9192A0] text-[10px] md:text-[12px] uppercase">
+                        STATE
+                      </th>
+                      <th className="px-1 py-2 md:px-2 md:py-4 bg-[#13141d] text-[#9192A0] text-[10px] md:text-[12px] uppercase">
+                        duration
+                      </th>
+                      <th className="px-1 py-2 md:px-2 md:py-4 bg-[#13141d] text-[#9192A0] text-[10px] md:text-[12px] uppercase">
+                        Unlock date
+                      </th>
+                      <th className="pr-4 py-2 md:pr-6 md:py-4 bg-[#13141d] text-[#9192A0] text-[10px] md:text-[12px] uppercase">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="min-w-[320px]">
+                    {lockingList
+                      .sort((a, b) =>
+                        toBN(b.unstakedAtTime || 0)
+                          .minus(a.unstakedAtTime || 0)
+                          .toNumber()
+                      )
+                      .filter((lockItem) =>
+                        toBN(lockItem.stakeAmount).isGreaterThan(0)
+                      )
+                      .map((item, index) => {
+                        return (
+                          <LockingItem
+                            keyId={index}
+                            item={item}
+                            onSuccess={() => {
+                              setIsRefreshList(!isRefreshList);
+                              getBalance();
+                            }}
+                          ></LockingItem>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col w-full md:max-w-[490px]">
+        <div className="flex flex-col w-full md:max-w-[490px] mb-6">
           <div className="w-full flex flex-col border border-[#1A1C28] bg-[#13141D] rounded-lg p-3 md:p-8 mt-4 md:mt-0 md:ml-4">
             <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
-              Let's stake now
+              Let's lock now
             </div>
             <div>
               <div className="uppercase text-[#84869A] text-[12px] font-medium mb-3">
-                Stake amount
+                Lock amount
               </div>
               <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
                 <div className="py-2">
@@ -209,7 +244,7 @@ export default function Staking() {
                   return (
                     <div
                       key={`amount-list-percent-${idx}---`}
-                      className="flex-1 cursor-pointer rounded border-[1px] border-[#30344A] bg-[#080A14] px-2 py-1 text-center text-[12px] font-medium text-[#9192A0] hover:brightness-125"
+                      className="cursor-pointer rounded border-[1px] border-[#30344A] bg-[#080A14] px-2 py-1 text-center text-[12px] font-medium text-[#9192A0] hover:brightness-125"
                       onClick={() => setStakeAmount(amount.value.toString())}
                     >
                       {amount.label}
@@ -225,91 +260,83 @@ export default function Staking() {
               >
                 locking duration
               </label>
-
-              <div
-                ref={refAgent}
-                className="relative cursor-pointer mt-3"
-                onClick={() => {
-                  setSelectedGroup(!selectGroup);
-                }}
-              >
-                <div className="flex items-center justify-between w-full px-3 border border-[#585A6B] rounded h-12">
-                  <div className="flex items-center text-[#E8E9EE] text-[14px] font-medium">
-                    {selectedLockTime.label}
-                  </div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
-                      fill="#9192A0"
-                    />
-                  </svg>
-                </div>
-                {selectGroup && (
-                  <div className="pt-2 absolute top-full w-full">
-                    <div className="bg-[#1A1C28] shadow shadow-[rgba(0,_0,_0,_0.10)] p-3 text-[12px] text-[#F7F7F7] rounded-lg flex flex-col gap-2 overflow-y-auto max-h-52 h-100%">
-                      {LOCK_TIME_OPTIONS.map((e, ind) => {
-                        return (
-                          <div
-                            className={twMerge(
-                              "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
-                              e.value === selectedLockTime.value &&
-                                "bg-[#13141D] cursor-not-allowed"
-                            )}
-                            key={`agent-item-${ind}`}
-                            onClick={() => setSelectedLockTime(e)}
-                          >
-                            <div className="flex items-center text-[#E8E9EE] text-[14px] font-medium">
-                              {e.label}
-                            </div>
-                          </div>
-                        );
-                      })}
+              <div className="flex justify-between gap-3 mt-3">
+                {LOCK_TIME_OPTIONS.map((item, idx) => {
+                  return (
+                    <div
+                      className={twMerge(
+                        "cursor-pointer flex flex-1 items-center justify-center h-10 bg-[#080A14] border border-[#30344A] rounded hover:brightness-125 text-[#9192A0] text-[12px] md:text-[14px] font-medium",
+                        selectedLockTime.label === item.label &&
+                          "border-[#E8E9EE] text-[#E8E9EE] rounded-lg "
+                      )}
+                      key={`key-lock-time-${idx}---`}
+                      onClick={() => setSelectedLockTime(item)}
+                    >
+                      {item.label}
                     </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
             </div>
             <div className="my-4 md:my-6 flex justify-between items-center">
               <div className="text-[#84869A]">Unlock on</div>
               <div>
-                {dayjs(Date.now())
-                  .add(selectedLockTime.value, "day")
-                  .format("MMM DD YYYY HH:MM")}
+                {dayjs()
+                  .add(selectedLockTime.value, selectedLockTime.type)
+                  .format("MMM DD YYYY HH:mm")}
               </div>
             </div>
 
             <button
-              disabled={isLoading}
-              onClick={() => {
+              disabled={isLoading || !stakeAmount || !Number(stakeAmount)}
+              onClick={async () => {
                 console.log("Stake!!");
+                try {
+                  setIsLoading(true);
+                  const duration =
+                    selectedLockTime.value * TIMER.MONTH_TO_SECONDS;
+                  const amount = toBN(
+                    toBN(stakeAmount || 0)
+                      .multipliedBy(10 ** SPL_DECIMAL)
+                      .toFixed(0, 1)
+                  ).toNumber();
+                  const res = await web3Locking.stake(duration, amount, wallet);
+                  if (res) {
+                    successAlert("Lock token successfully!");
+                    getBalance();
+                    setIsRefreshList(!isRefreshList);
+                  }
+                } catch (error) {
+                  console.log("error lock", error);
+                } finally {
+                  setIsLoading(false);
+                }
               }}
               className="mt-4 disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
             >
-              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
-                Stake
+              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
+                {isLoading && <img src={LoadingImg} />}&nbsp;Lock
               </div>
             </button>
           </div>
           <div className="w-full flex justify-between gap-2 border border-[#1A1C28] bg-[#13141D] rounded-lg p-3 md:p-8 mt-4 md:ml-4">
             <div>
-              <div className="text-[#585A6B]">Total MAX staked</div>
+              <div className="text-[#585A6B]">Total MAX locked</div>
               <div className="text-[#FCFCFC] font-medium text-[20px] mt-2">
-                {formatNumberKMB(12345678, false)} MAX
+                {formatNumberKMB(
+                  toBN(totalLocked)
+                    .div(10 ** SPL_DECIMAL)
+                    .toNumber(),
+                  false
+                )}{" "}
+                MAX
               </div>
             </div>
             <div>
-              <div className="text-[#585A6B]">Unique stakers</div>
+              {/* <div className="text-[#585A6B] text-right">Unique lockers</div>
               <div className="text-[#FCFCFC] font-medium text-[20px] mt-2 text-right">
                 {numberWithCommas(120)}
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -318,17 +345,33 @@ export default function Staking() {
   );
 }
 
-export const LOCK_TIME_OPTIONS = [
+export const LIST_LOCKING_ITEMS = [
   {
-    label: "3 months",
-    value: 3,
+    id: 1,
+    status: 0,
   },
   {
-    label: "2 months",
-    value: 2,
+    id: 1,
+    status: 1,
   },
   {
-    label: "1 months",
-    value: 1,
+    id: 1,
+    status: 0,
+  },
+  {
+    id: 1,
+    status: 0,
+  },
+  {
+    id: 1,
+    status: 0,
+  },
+  {
+    id: 1,
+    status: 0,
+  },
+  {
+    id: 1,
+    status: 0,
   },
 ];

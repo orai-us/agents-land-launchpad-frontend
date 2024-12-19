@@ -11,6 +11,8 @@ import {
 } from "./types";
 import { BN } from "@coral-xyz/anchor";
 import { INIT_SOL_BONDING_CURVE } from "@/config";
+import BigNumber from "bignumber.js";
+import { PublicKey, PublicKeyInitData } from "@solana/web3.js";
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const DISTILL_BE_URL =
@@ -457,4 +459,12 @@ export const retrieveEnvVariable = (variableName: string) => {
     // process.exit(1);
   }
   return variable;
+};
+
+export const toBN = (val: BigNumber.Value) => {
+  return new BigNumber(val);
+};
+
+export const toPublicKey = (val: PublicKeyInitData) => {
+  return new PublicKey(val);
 };
