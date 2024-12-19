@@ -164,7 +164,8 @@ table.scroll-table tbody tr {
 
 .scrollable-table-container {
   width: 100%; /* Adjust container width */
-  height: 300px; /* Adjust container height */
+  height: 100%;
+  max-height: 300px;
   overflow: auto; /* Enable both vertical and horizontal scrolling */
 }
 
