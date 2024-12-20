@@ -89,7 +89,7 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
               />
             </svg>
           )}
-          <span className="ml-1">{!claimable ? "Locking" : "Complete"}</span>
+          <span className="ml-1">{!claimable ? "Locked" : "Complete"}</span>
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
