@@ -147,6 +147,9 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const isAgent =
                   String(item.owner).toLowerCase() ===
                   String(data.metadata?.agentAddress).toLowerCase();
+                const isVaults =
+                  String(item.owner).toLowerCase() ===
+                  String(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
                   String(
@@ -182,6 +185,11 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         {isAgent && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
                             (Agent)
+                          </span>
+                        )}
+                        {isVaults && (
+                          <span className="ml-1 text-[#585A6B] text-[12px]">
+                            (Strongbox Vaults)
                           </span>
                         )}
                       </a>
