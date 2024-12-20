@@ -323,12 +323,13 @@ export default function Staking() {
                   ).toNumber();
                   const res = await web3Locking.stake(duration, amount, wallet);
                   if (res) {
-                    successAlert("Lock token successfully!");
+                    successAlert("Lock successfully!");
                     getBalance();
                     setIsRefreshList(!isRefreshList);
                   }
                 } catch (error) {
                   console.log("error lock", error);
+                  successAlert("Lock failed!");
                 } finally {
                   setIsLoading(false);
                 }
