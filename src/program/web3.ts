@@ -94,6 +94,11 @@ export class Web3SolanaProgramInteraction {
         mintKp.publicKey
       );
 
+      const communityPoolTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET),
+        mintKp.publicKey
+      );
+
       // console.log("aiAgentTokenAccount", aiAgentTokenAccount);
       // console.log("creatorTokenAccount", creatorTokenAccount);
 
@@ -128,6 +133,11 @@ export class Web3SolanaProgramInteraction {
             isWritable: true,
             isSigner: false,
             pubkey: stakingTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: communityPoolTokenAccount,
           },
         ])
         .instruction();
