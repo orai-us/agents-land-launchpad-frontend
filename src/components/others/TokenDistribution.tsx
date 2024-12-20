@@ -1,28 +1,19 @@
-import { coinInfo, holderInfo, recordInfo } from "@/utils/types";
-import { FC, useContext, useEffect, useState } from "react";
-import {
-  calculateKotHProgress,
-  calculateTokenPrice,
-  findHolders,
-  fromBig,
-  getKoth,
-  getSolPriceInUSD,
-  getUserByWalletAddress,
-} from "@/utils/util";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import { coinInfo, holderInfo } from "@/utils/types";
+import { calculateKotHProgress, findHolders, getKoth } from "@/utils/util";
+import { FC, useEffect, useState } from "react";
 
-import { BN } from "@coral-xyz/anchor";
-import { PROGRAM_ID, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID } from "@/config";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import {
-  endpoint,
   commitmentLevel,
+  endpoint,
   Web3SolanaProgramInteraction,
 } from "@/program/web3";
-import { Connection, PublicKey } from "@solana/web3.js";
 import { formatNumberKMB } from "@/utils/format";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 interface ModalProps {
   data: coinInfo;
@@ -158,7 +149,9 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                   String(data.metadata?.agentAddress).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
-                  String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();
+                  String(
+                    ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET
+                  ).toLowerCase();
 
                 return (
                   <div

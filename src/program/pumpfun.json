@@ -1,5 +1,5 @@
 {
-  "address": "3uHJMHzeiqdqQ3LNc5bNVxuCp224HGtStPkv1JUEcabr",
+  "address": "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
   "metadata": {
     "name": "pumpfun",
     "version": "0.1.0",
@@ -282,20 +282,17 @@
         },
         {
           "name": "ai_agent_wallet",
+          "docs": ["CHECK"],
           "writable": true
         },
         {
-          "name": "team_wallet",
-          "writable": true
-        },
-        {
-          "name": "team_wallet_ata",
+          "name": "staking_wallet_ata",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "team_wallet"
+                "path": "staking_wallet"
               },
               {
                 "kind": "const",
@@ -319,6 +316,10 @@
               ]
             }
           }
+        },
+        {
+          "name": "staking_wallet",
+          "writable": true
         },
         {
           "name": "system_program",
@@ -644,7 +645,7 @@
           }
         },
         {
-          "name": "admin",
+          "name": "migrator",
           "writable": true,
           "signer": true
         },
@@ -702,13 +703,13 @@
           }
         },
         {
-          "name": "admin_ata",
+          "name": "migrator_ata",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "admin"
+                "path": "migrator"
               },
               {
                 "kind": "const",
@@ -872,6 +873,10 @@
             "type": "u64"
           },
           {
+            "name": "init_token",
+            "type": "u64"
+          },
+          {
             "name": "reserve_lamport",
             "type": "u64"
           },
@@ -928,7 +933,15 @@
             "type": "pubkey"
           },
           {
+            "name": "migrator",
+            "type": "pubkey"
+          },
+          {
             "name": "community_pool_wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "staking_pool_wallet",
             "type": "pubkey"
           },
           {
@@ -973,6 +986,10 @@
           },
           {
             "name": "ai_agent_fee",
+            "type": "f64"
+          },
+          {
+            "name": "staking_fee",
             "type": "f64"
           }
         ]

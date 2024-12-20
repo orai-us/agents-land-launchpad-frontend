@@ -5,13 +5,10 @@ import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import { Chatting } from "@/components/trading/Chatting";
 import { TradeForm } from "@/components/trading/TradeForm";
 import { TradingChart } from "@/components/TVChart/TradingChart";
-import {
-  BONDING_CURVE_LIMIT,
-  INIT_SOL_BONDING_CURVE,
-  PROGRAM_ID,
-  SOL_DECIMAL,
-} from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from "@/config";
 import UserContext from "@/context/UserContext";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
 import {
   commitmentLevel,
   endpoint,
@@ -22,25 +19,22 @@ import {
   formatNumberKMB,
   numberWithCommas,
 } from "@/utils/format";
-import { coinInfo, SwapInfo } from "@/utils/types";
+import { coinInfo } from "@/utils/types";
 import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
 import { useContext, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { useLocation } from "wouter";
 import TokenDistribution from "../others/TokenDistribution";
 import { DexToolsChart } from "../TVChart/DexToolsChart";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
-import { TIMER } from "./hooks/useCountdown";
 import NotForSale from "./NotForSale";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import updateLocale from "dayjs/plugin/updateLocale";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -84,7 +78,7 @@ export default function TradingPage() {
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
   )
-    .minus(INIT_SOL_BONDING_CURVE)
+    .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
     .div(10 ** 9)
     .toNumber();
   const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
@@ -92,7 +86,8 @@ export default function TradingPage() {
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
   const isUnlock =
-    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+    new Date(coin.date).getTime() +
+      ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
     Date.now();
   const isNotForSale = isUnlock && !isOnSaleCountdown;
 
@@ -118,12 +113,16 @@ export default function TradingPage() {
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString()
     )
-      .minus(INIT_SOL_BONDING_CURVE)
+      .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
       .toNumber();
 
     const bondingCurvePercent = new BigNumber(bondingCurveValue)
       .multipliedBy(new BigNumber(100))
-      .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+      .div(
+        new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+          ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+        )
+      )
       .toNumber();
 
     const showCurrentChart = bondingCurvePercent >= 100 && data.raydiumPoolAddr;
@@ -595,7 +594,7 @@ export default function TradingPage() {
                 When the market cap reaches{" "}
                 <span className="text-[#E8E9EE]">
                   {formatNumberKMB(
-                    new BigNumber(BONDING_CURVE_LIMIT)
+                    new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)
                       .multipliedBy(solPrice)
                       .div(LAMPORTS_PER_SOL)
                       .toNumber()

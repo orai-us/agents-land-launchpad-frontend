@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pumpfun.json`.
  */
 export type Pumpfun = {
-  address: "3uHJMHzeiqdqQ3LNc5bNVxuCp224HGtStPkv1JUEcabr";
+  address: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM";
   metadata: {
     name: "pumpfun";
     version: "0.1.0";
@@ -532,20 +532,17 @@ export type Pumpfun = {
         },
         {
           name: "aiAgentWallet";
+          docs: ["CHECK"];
           writable: true;
         },
         {
-          name: "teamWallet";
-          writable: true;
-        },
-        {
-          name: "teamWalletAta";
+          name: "stakingWalletAta";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "account";
-                path: "teamWallet";
+                path: "stakingWallet";
               },
               {
                 kind: "const";
@@ -627,6 +624,10 @@ export type Pumpfun = {
               ];
             };
           };
+        },
+        {
+          name: "stakingWallet";
+          writable: true;
         },
         {
           name: "systemProgram";
@@ -1150,7 +1151,7 @@ export type Pumpfun = {
           };
         },
         {
-          name: "admin";
+          name: "migrator";
           writable: true;
           signer: true;
         },
@@ -1278,13 +1279,13 @@ export type Pumpfun = {
           };
         },
         {
-          name: "adminAta";
+          name: "migratorAta";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "account";
-                path: "admin";
+                path: "migrator";
               },
               {
                 kind: "const";
@@ -1506,6 +1507,10 @@ export type Pumpfun = {
             type: "u64";
           },
           {
+            name: "initToken";
+            type: "u64";
+          },
+          {
             name: "reserveLamport";
             type: "u64";
           },
@@ -1562,7 +1567,15 @@ export type Pumpfun = {
             type: "pubkey";
           },
           {
+            name: "migrator";
+            type: "pubkey";
+          },
+          {
             name: "communityPoolWallet";
+            type: "pubkey";
+          },
+          {
+            name: "stakingPoolWallet";
             type: "pubkey";
           },
           {
@@ -1607,6 +1620,10 @@ export type Pumpfun = {
           },
           {
             name: "aiAgentFee";
+            type: "f64";
+          },
+          {
+            name: "stakingFee";
             type: "f64";
           }
         ];

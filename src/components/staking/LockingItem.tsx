@@ -1,15 +1,15 @@
 import LoadingImg from "@/assets/icons/loading-button.svg";
 import MAXImg from "@/assets/images/richoldman.png";
-import { SPL_DECIMAL, TIMER } from "@/config";
+import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
+import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import { numberWithCommas } from "@/utils/format";
 import { toBN } from "@/utils/util";
+import { useWallet } from "@solana/wallet-adapter-react";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { LOCK_TIME_OPTIONS } from "./constants";
-import { Web3SolanaLockingToken } from "@/program/web3Locking";
-import { useWallet } from "@solana/wallet-adapter-react";
 import { successAlert } from "../others/ToastGroup";
+import { LOCK_TIME_OPTIONS } from "./constants";
 const web3Locking = new Web3SolanaLockingToken();
 
 const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
@@ -21,10 +21,10 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
   const { id, stakeAmount, unstakedAtTime, lockPeriod } = item || {};
   const wallet = useWallet();
   const claimable = !toBN(unstakedAtTime).isGreaterThan(
-    Math.floor(Date.now() / TIMER.MILLISECONDS)
+    Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS)
   );
   const period = LOCK_TIME_OPTIONS.find(
-    (e) => e.value * TIMER.MONTH_TO_SECONDS === lockPeriod
+    (e) => e.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS === lockPeriod
   );
 
   return (
@@ -95,8 +95,9 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(
-          toBN(unstakedAtTime).multipliedBy(TIMER.MILLISECONDS).toNumber() ||
-            Date.now()
+          toBN(unstakedAtTime)
+            .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+            .toNumber() || Date.now()
         ).format("MMM DD YYYY HH:mm")}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">

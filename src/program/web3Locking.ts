@@ -1,6 +1,6 @@
 import {
+  ALL_CONFIGS,
   STAKE_CONFIG_SEED,
-  STAKE_CURRENCY_MINT,
   STAKE_DETAIL_SEED,
   STAKER_INFO_SEED,
   VAULT_SEED,
@@ -26,7 +26,7 @@ export const endpoint = import.meta.env.VITE_SOLANA_RPC;
 export const vaultProgramId = new PublicKey(idl.address);
 export const vaultInterface = JSON.parse(JSON.stringify(idl));
 
-const stakeCurrencyMint = STAKE_CURRENCY_MINT;
+const stakeCurrencyMint = ALL_CONFIGS.STAKE_CURRENCY_MINT;
 
 export class Web3SolanaLockingToken {
   constructor(
