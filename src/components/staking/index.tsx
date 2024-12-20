@@ -154,7 +154,7 @@ export default function Staking() {
       <div className="flex justify-between items-start flex-col-reverse md:flex-row">
         <div className="w-full flex flex-col">
           <div className="text-[#E8E9EE] text-[18px] font-medium mb-4 md:mb-6">
-            Your locking
+            Your locked
           </div>
           {loadingList ? (
             <Loading />
@@ -164,10 +164,10 @@ export default function Staking() {
                 <img src={nodataImg} alt="nodata" />
               </div>
               <p className="mt-4 text-[16px] font-medium uppercase text-[#E8E9EE]">
-                No locking
+                No locked
               </p>
               <p className="mt-2 text-[14px] font-medium text-[#585A6B]">
-                Your locking history will appear here
+                Your locked history will appear here
               </p>
             </div>
           ) : (
@@ -280,7 +280,7 @@ export default function Staking() {
                 htmlFor="name"
                 className="text-[12px] uppercase font-medium text-[#84869A] flex items-center cursor-pointer"
               >
-                locking duration
+                locked duration
               </label>
               <div className="flex justify-between gap-3 mt-3">
                 {LOCK_TIME_OPTIONS.map((item, idx) => {

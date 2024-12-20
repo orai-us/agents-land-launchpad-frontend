@@ -6,7 +6,7 @@ export enum TypeLock {
 
 export const LOCK_TIME_OPTIONS = [
   {
-    label: "1 months",
+    label: "1 month",
     value: 1,
     type: TypeLock.MONTH,
   },
