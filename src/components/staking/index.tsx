@@ -66,6 +66,7 @@ export default function Staking() {
   ];
 
   const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
+  const isNegative = toBN(stakeAmount || 0).isLessThanOrEqualTo(0);
 
   const genMsgTextBtn = () => {
     if (!stakeAmount || !Number(stakeAmount)) {
@@ -308,7 +309,8 @@ export default function Staking() {
                 isLoading ||
                 !stakeAmount ||
                 !Number(stakeAmount) ||
-                isInsufficient
+                isInsufficient ||
+                isNegative
               }
               onClick={async () => {
                 console.log("Stake!!");
