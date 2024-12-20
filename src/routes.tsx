@@ -16,7 +16,7 @@ export function Routes() {
         <Route path="/profile/:address" component={ProfilePage} />
         <Route path="/trading/:address" component={TradingPage} />
         <Route path="/" component={Home} /> */}
-        <Route path="/vaults" component={Staking} />
+        <Route path="/" component={Staking} />
       </Switch>
     </Router>
   );

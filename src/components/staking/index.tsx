@@ -112,7 +112,8 @@ export default function Staking() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!isNaN(parseFloat(value))) {
-      setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
+      // setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
+      setStakeAmount(value);
     } else if (value === "") {
       setStakeAmount(""); // Allow empty string to clear the input
     }
