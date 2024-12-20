@@ -30,5 +30,3 @@ export const STAKE_INFO_SEED = "stake_info";
 export const STAKE_DETAIL_SEED = "stake_detail";
 export const STAKE_CURRENCY_MINT =
   "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h";
-// export const STAKE_CURRENCY_MINT =
-//   "3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4";
