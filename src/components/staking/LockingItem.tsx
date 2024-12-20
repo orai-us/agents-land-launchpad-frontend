@@ -45,7 +45,9 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
             {numberWithCommas(
               toBN(stakeAmount || 0)
                 .div(10 ** SPL_DECIMAL)
-                .toNumber()
+                .toNumber(),
+              undefined,
+              { maximumFractionDigits: SPL_DECIMAL }
             )}
           </span>
         </div>
