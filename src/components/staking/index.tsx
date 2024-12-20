@@ -112,7 +112,7 @@ export default function Staking() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!isNaN(parseFloat(value))) {
-      setStakeAmount(value);
+      setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
     } else if (value === "") {
       setStakeAmount(""); // Allow empty string to clear the input
     }
@@ -243,7 +243,11 @@ export default function Staking() {
                   />
 
                   <span className="text-[10px] text-[#E8E9EE] font-medium">
-                    Balance: {numberWithCommas(Number(tokenBal))} MAX
+                    Balance:{" "}
+                    {numberWithCommas(Number(tokenBal), undefined, {
+                      maximumFractionDigits: SPL_DECIMAL,
+                    })}{" "}
+                    MAX
                   </span>
                 </div>
 
