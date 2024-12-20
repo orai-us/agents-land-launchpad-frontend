@@ -112,9 +112,12 @@ export default function Staking() {
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
-      <div onClick={() => handleToRouter("/")} className="w-fit">
+      <div
+        // onClick={() => handleToRouter("/")}
+        className="w-fit"
+      >
         <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2">
-          <svg
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="24"
@@ -125,7 +128,7 @@ export default function Staking() {
               d="M10.5171 11.9999L18.3546 3.83901C18.5515 3.63745 18.5468 3.30464 18.3452 3.09839L16.9437 1.66401C16.7421 1.45776 16.414 1.45307 16.2171 1.65464L6.64521 11.6203C6.54209 11.7234 6.49521 11.864 6.50459 11.9999C6.4999 12.1406 6.54678 12.2765 6.64521 12.3796L16.2171 22.3499C16.414 22.5515 16.7421 22.5468 16.9437 22.3406L18.3452 20.9062C18.5468 20.6999 18.5515 20.3671 18.3546 20.1656L10.5171 11.9999Z"
               fill="#585A6B"
             />
-          </svg>
+          </svg> */}
           Strongbox Vaults
         </div>
       </div>

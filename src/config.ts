@@ -16,11 +16,11 @@ export const TX_FEE = 0.25;
 
 /**
  * LOCKING
- *
  */
 export const SPL_DECIMAL = 6;
 export const TIMER = {
   MILLISECONDS: 1000,
+  // MONTH_TO_SECONDS: 30 * 24 * 60 * 60, // FIXME: update time
   MONTH_TO_SECONDS: 60, // FIXME: update time
 };
 export const VAULT_SEED = "staking_vault";
@@ -28,6 +28,7 @@ export const STAKE_CONFIG_SEED = "staking_config";
 export const STAKER_INFO_SEED = "staker_info";
 export const STAKE_INFO_SEED = "stake_info";
 export const STAKE_DETAIL_SEED = "stake_detail";
-// export const STAKE_CURRENCY_MINT = "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h";
 export const STAKE_CURRENCY_MINT =
-  "3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4";
+  "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h";
+// export const STAKE_CURRENCY_MINT =
+//   "3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4";
