@@ -22,8 +22,8 @@ export const TX_FEE = 0.25;
 export const SPL_DECIMAL = 6;
 export const TIMER = {
   MILLISECONDS: 1000,
-  // MONTH_TO_SECONDS: 30 * 24 * 60 * 60, // FIXME: update time
-  MONTH_TO_SECONDS: 60, // FIXME: update time
+  MONTH_TO_SECONDS: 30 * 24 * 60 * 60, // FIXME: update time
+  // MONTH_TO_SECONDS: 60, // FIXME: update time
 };
 export const VAULT_SEED = "staking_vault";
 export const STAKE_CONFIG_SEED = "staking_config";

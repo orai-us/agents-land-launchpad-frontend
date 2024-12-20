@@ -302,9 +302,12 @@ export default function Staking() {
             <div className="my-4 md:my-6 flex justify-between items-center">
               <div className="text-[#84869A]">Unlock on</div>
               <div>
-                {dayjs()
+                {dayjs(
+                  Date.now() + selectedLockTime.value * 30 * 24 * 60 * 60 * 1000
+                ).format("MMM DD YYYY HH:mm")}
+                {/* {dayjs()
                   .add(selectedLockTime.value, selectedLockTime.type)
-                  .format("MMM DD YYYY HH:mm")}
+                  .format("MMM DD YYYY HH:mm")} */}
               </div>
             </div>
 
