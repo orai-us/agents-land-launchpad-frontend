@@ -37,24 +37,28 @@ const Header: FC = () => {
     setLocation(id);
   };
 
-  // const menu = [
-  //   {
-  //     link: "/create-coin",
-  //     text: "Launch",
-  //     onclick: () => handleToRouter("/create-coin"),
-  //   },
-  //   {
-  //     link: "/how-it-work",
-  //     text: "How it works?",
-  //     onclick: () => setShowStepWork(true),
-  //   },
-  //   {
-  //     link: "/vaults",
-  //     text: "Strongbox Vaults",
-  //     onclick: () => handleToRouter("/vaults"),
-  //   },
-  // ];
-  const menu = [];
+  const menu = [
+    // {
+    //   link: "/create-coin",
+    //   text: "Launch",
+    //   onclick: () => handleToRouter("/create-coin"),
+    // },
+    // {
+    //   link: "/how-it-work",
+    //   text: "How it works?",
+    //   onclick: () => setShowStepWork(true),
+    // },
+    // {
+    //   link: "/vaults",
+    //   text: "Strongbox Vaults",
+    //   onclick: () => handleToRouter("/vaults"),
+    // },
+    {
+      link: "https://docs.agents.land/",
+      text: "Docs",
+      onclick: null,
+    },
+  ];
 
   return (
     <>
@@ -72,14 +76,15 @@ const Header: FC = () => {
             <div className="hidden md:flex">
               {menu.map((item, key) => {
                 return (
-                  <button
-                    // href={item.link}
-                    onClick={item.onclick}
+                  <a
+                    target="_blank"
+                    href={item.link ? item.link : ""}
+                    onClick={item.onclick ? item.onclick : () => {}}
                     key={`${item.link}-${key}`}
                     className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
                   >
                     {item.text}
-                  </button>
+                  </a>
                 );
               })}
             </div>
