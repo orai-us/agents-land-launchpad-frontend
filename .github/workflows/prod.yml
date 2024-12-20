@@ -56,7 +56,7 @@ jobs:
     - name: Deploy to Firebase
       env:
         GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.import-credentials.outputs.file_path }}
-      run: yarn firebase -P default deploy --only hosting:agents-land-staging
+      run: yarn firebase -P default deploy --only hosting:agents-land-prod
 
     - name: Remove credentials file
       run: rm ${{ steps.import-credentials.outputs.file_path }}
