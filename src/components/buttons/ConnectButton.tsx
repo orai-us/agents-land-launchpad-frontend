@@ -84,7 +84,7 @@ export const ConnectButton: FC = () => {
   const logOut = async () => {
     if (typeof disconnect === "function") {
       await disconnect();
-      setLocation("/");
+      // setLocation("/");
     }
     // Initialize `user` state to default value
     setUser({} as userInfo);
