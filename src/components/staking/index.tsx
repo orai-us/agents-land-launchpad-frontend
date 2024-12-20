@@ -280,7 +280,7 @@ export default function Staking() {
                 htmlFor="name"
                 className="text-[12px] uppercase font-medium text-[#84869A] flex items-center cursor-pointer"
               >
-                locked duration
+                locking duration
               </label>
               <div className="flex justify-between gap-3 mt-3">
                 {LOCK_TIME_OPTIONS.map((item, idx) => {
