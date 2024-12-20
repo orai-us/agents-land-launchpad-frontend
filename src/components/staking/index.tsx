@@ -81,7 +81,7 @@ export default function Staking() {
 
   const getBalance = async () => {
     if (!wallet.publicKey) {
-      return;
+      return setTokenBal(0);
     }
 
     try {
