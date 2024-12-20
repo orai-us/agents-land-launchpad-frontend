@@ -40,6 +40,7 @@ export default function Staking() {
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
   const [stakeAmount, setStakeAmount] = useState<string>("");
+  const wallet = useWallet();
   const {
     loading: loadingList,
     lockingList,
@@ -64,21 +65,34 @@ export default function Staking() {
     },
   ];
 
+  const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
+
+  const genMsgTextBtn = () => {
+    if (!stakeAmount || !Number(stakeAmount)) {
+      return "Lock amount required";
+    }
+    if (isInsufficient) {
+      return "Insufficient amount";
+    }
+
+    return "Lock";
+  };
+
   const getBalance = async () => {
     if (!wallet.publicKey) {
       return;
     }
 
     try {
-      const [tokenBal, solBal] = await Promise.all([
+      const [tokenBal] = await Promise.all([
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
           STAKE_CURRENCY_MINT
         ),
-        web3Solana.getSolanaBalance(wallet.publicKey),
+        // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
       setTokenBal(tokenBal ? tokenBal : 0);
-      setSolBalance(solBal ? solBal : 0);
+      // setSolBalance(solBal ? solBal : 0);
     } catch (error) {
       console.log("error", error);
     }
@@ -86,9 +100,8 @@ export default function Staking() {
 
   useEffect(() => {
     getBalance();
-  }, []);
+  }, [wallet.publicKey]);
 
-  const wallet = useWallet();
   const [, setLocation] = useLocation();
 
   const handleToRouter = (path: string) => {
@@ -288,7 +301,12 @@ export default function Staking() {
             </div>
 
             <button
-              disabled={isLoading || !stakeAmount || !Number(stakeAmount)}
+              disabled={
+                isLoading ||
+                !stakeAmount ||
+                !Number(stakeAmount) ||
+                isInsufficient
+              }
               onClick={async () => {
                 console.log("Stake!!");
                 try {
@@ -316,6 +334,7 @@ export default function Staking() {
             >
               <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14] flex items-center justify-center">
                 {isLoading && <img src={LoadingImg} />}&nbsp;Lock
+                {/* {genMsgTextBtn()} */}
               </div>
             </button>
           </div>

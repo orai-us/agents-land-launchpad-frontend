@@ -12,7 +12,7 @@ export function Routes() {
       <Switch>
         <Route path="/dashboard" component={DashBoard} />
         <Route path="/create-coin" component={CreateToken} />
-        <Route path="/staking" component={Staking} />
+        <Route path="/vaults" component={Staking} />
         <Route path="/profile/:address" component={ProfilePage} />
         <Route path="/trading/:address" component={TradingPage} />
         <Route path="/" component={Home} />

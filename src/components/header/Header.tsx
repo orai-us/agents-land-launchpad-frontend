@@ -49,9 +49,9 @@ const Header: FC = () => {
       onclick: () => setShowStepWork(true),
     },
     {
-      link: "/staking",
-      text: "Staking",
-      onclick: () => handleToRouter("/staking"),
+      link: "/vaults",
+      text: "Strongbox Vaults",
+      onclick: () => handleToRouter("/vaults"),
     },
   ];
 
