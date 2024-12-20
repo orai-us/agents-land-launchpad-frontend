@@ -1,9 +1,9 @@
-name: Deploy vite Firebase 
+name: Deploy Prod 
 
 on:
   push:
     branches:
-      - "feat/vitejs"
+      - "master"
 
 jobs:
   deploy:
@@ -38,7 +38,7 @@ jobs:
       run: echo "$ENV_CONTENT" >> .env
       shell: bash
       env:
-        ENV_CONTENT: ${{ secrets.ENV_VITE }}
+        ENV_CONTENT: ${{ secrets.ENV_PROD }}
 
     - name: Build source
       run: |
@@ -67,4 +67,4 @@ jobs:
         webhook_id: ${{ secrets.DISCORD_WEBHOOK_ID }}
         webhook_token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
         username: 'GitBot [agents-land]'
-        message: '[staging] Repo agents-land-launchpad-frontend has just published by ${{ github.event.head_commit.author.name }}'
+        message: '[Production] Repo agents-land-launchpad-frontend has just published by ${{ github.event.head_commit.author.name }}'

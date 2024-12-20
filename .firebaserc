@@ -5,6 +5,9 @@
   "targets": {
     "oraichain-dapp": {
       "hosting": {
+        "agents-land-prod": [
+          "agents-land-prod"
+        ],
         "agents-land-staging": [
           "agents-land-staging"
         ]
