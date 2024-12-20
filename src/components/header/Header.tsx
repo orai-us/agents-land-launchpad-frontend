@@ -37,35 +37,37 @@ const Header: FC = () => {
     setLocation(id);
   };
 
-  const menu = [
-    {
-      link: "/create-coin",
-      text: "Launch",
-      onclick: () => handleToRouter("/create-coin"),
-    },
-    {
-      link: "/how-it-work",
-      text: "How it works?",
-      onclick: () => setShowStepWork(true),
-    },
-    {
-      link: "/vaults",
-      text: "Strongbox Vaults",
-      onclick: () => handleToRouter("/vaults"),
-    },
-  ];
+  // const menu = [
+  //   {
+  //     link: "/create-coin",
+  //     text: "Launch",
+  //     onclick: () => handleToRouter("/create-coin"),
+  //   },
+  //   {
+  //     link: "/how-it-work",
+  //     text: "How it works?",
+  //     onclick: () => setShowStepWork(true),
+  //   },
+  //   {
+  //     link: "/vaults",
+  //     text: "Strongbox Vaults",
+  //     onclick: () => handleToRouter("/vaults"),
+  //   },
+  // ];
+  const menu = [];
 
   return (
     <>
-      <HowItWorkModal
+      {/* <HowItWorkModal
         isOpen={showStepWork}
         closeModal={() => setShowStepWork(false)}
       />
-      <MarqueeToken />
+      <MarqueeToken /> */}
       <header className="relative z-10 w-full h-[72px] md:h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
         <div className="py-6 px-2 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
-            <Link href="/">
+            {/* <Link href="/"> */}
+            <Link href="/vaults">
               <img src={LogoFullIcon} alt="LogoFullIcon" />
             </Link>
             <div className="hidden md:flex">
@@ -161,7 +163,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </div>
-      {pathname === "/" && <Banner />}
+      {/* {pathname === "/" && <Banner />} */}
     </>
   );
 };

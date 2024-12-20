@@ -18,7 +18,6 @@ export const TX_FEE = 0.25;
 
 /**
  * LOCKING
- *
  */
 export const SPL_DECIMAL = 6;
 export const TIMER = {
