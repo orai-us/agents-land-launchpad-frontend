@@ -199,7 +199,7 @@ export default function ProfilePage() {
               key={item.id}
               onClick={() => setOption(item.id)}
               className={twMerge(
-                "uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                "cursor-pointer uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
                 option === item.id && "bg-[#585A6B] text-[#E8E9EE]"
               )}
             >
@@ -223,68 +223,70 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
-                  <table className="w-full h-full scroll-table">
-                    <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
-                      <tr className="text-lg">
-                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
-                          Token
-                        </th>
-                        {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                  <div className="scrollable-table-container">
+                    <table className="w-full h-full scroll-table">
+                      <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
+                        <tr className="text-lg">
+                          <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
+                            Token
+                          </th>
+                          {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
                         Price
                       </th> */}
-                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
-                          Marketcap
-                        </th>
-                        {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                          <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
+                            Marketcap
+                          </th>
+                          {/* <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right">
                       CHANGE
                       </th> */}
-                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
-                          Date Created
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="">
-                      {coins.map((coin, index) => (
-                        <tr
-                          key={`${index}-tk-details`}
-                          className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
-                        >
-                          <td className="flex flex-row gap-2 items-center py-4">
-                            <a
-                              href={`/trading/${coin.token}`}
-                              target="_blank"
-                              className="text-lg flex items-center"
-                            >
-                              <img
-                                src={coin.url}
-                                alt="coinUrl"
-                                className="rounded-full w-6 h-6 border border-[#E8E9EE]"
-                              />
-                              &nbsp;
-                              <span className="hover:underline">
-                                {coin.ticker}
-                              </span>
-                            </a>
-                          </td>
-                          {/* <td className="py-2 text-right">
-                            {numberWithCommas(coin.balance || 0)}
-                          </td> */}
-                          <td className="py-2 text-right">
-                            {" "}
-                            {formatNumberKMB(Number(coin.marketcap || 0))}
-                          </td>
-                          {/* <td className="py-2 text-right">
-                            {numberWithCommas(coin.balance || 0)}
-                          </td> */}
-                          <td className="py-2 text-right">
-                            {dayjs(coin.date || Date.now()).format(
-                              "DD/MM/YYYY"
-                            )}
-                          </td>
+                          <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
+                            Date Created
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="">
+                        {coins.map((coin, index) => (
+                          <tr
+                            key={`${index}-tk-details`}
+                            className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
+                          >
+                            <td className="flex flex-row gap-2 items-center py-4">
+                              <a
+                                href={`/trading/${coin.token}`}
+                                target="_blank"
+                                className="text-lg flex items-center"
+                              >
+                                <img
+                                  src={coin.url}
+                                  alt="coinUrl"
+                                  className="rounded-full w-6 h-6 border border-[#E8E9EE]"
+                                />
+                                &nbsp;
+                                <span className="hover:underline">
+                                  {coin.ticker}
+                                </span>
+                              </a>
+                            </td>
+                            {/* <td className="py-2 text-right">
+                            {numberWithCommas(coin.balance || 0)}
+                          </td> */}
+                            <td className="py-2 text-right">
+                              {" "}
+                              {formatNumberKMB(Number(coin.marketcap || 0))}
+                            </td>
+                            {/* <td className="py-2 text-right">
+                            {numberWithCommas(coin.balance || 0)}
+                          </td> */}
+                            <td className="py-2 text-right">
+                              {dayjs(coin.date || Date.now()).format(
+                                "DD/MM/YYYY"
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
@@ -301,42 +303,44 @@ export default function ProfilePage() {
                 </div>
               ) : (
                 <div className="w-full h-full py-4 px-4 border-[#1A1C28] border rounded-lg mt-4">
-                  <table className="w-full h-full scroll-table">
-                    <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
-                      <tr className="text-lg">
-                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
-                          Token
-                        </th>
-                        <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
-                          Balance
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="">
-                      {ownedToken.tokenDetails
-                        .filter((tk) => tk.balance)
-                        .sort((a, b) => b.balance - a.balance)
-                        .map((tk, index) => (
-                          <tr
-                            key={`${index}-tk-details`}
-                            className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
-                          >
-                            <td className="flex flex-row gap-2 items-center py-4">
-                              <a
-                                href={`https://solscan.io/account/${tk.mint}`}
-                                target="_blank"
-                                className="text-lg underline hover:cursor-pointer"
-                              >
-                                {reduceString(tk.mint || "", 4, 4)}
-                              </a>
-                            </td>
-                            <td className="py-2 text-right">
-                              {numberWithCommas(tk.balance || 0)}
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                  <div className="scrollable-table-container">
+                    <table className="w-full h-full scroll-table">
+                      <thead className="w-full text-white border-b-[1px] border-b-[#1A1C28]">
+                        <tr className="text-lg">
+                          <th className="py-2 text-[#585A6B] text-[12px] uppercase text-left">
+                            Token
+                          </th>
+                          <th className="py-2 text-[#585A6B] text-[12px] uppercase text-right pr-4">
+                            Balance
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="">
+                        {ownedToken.tokenDetails
+                          .filter((tk) => tk.balance)
+                          .sort((a, b) => b.balance - a.balance)
+                          .map((tk, index) => (
+                            <tr
+                              key={`${index}-tk-details`}
+                              className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE]"
+                            >
+                              <td className="flex flex-row gap-2 items-center py-4">
+                                <a
+                                  href={`https://solscan.io/account/${tk.mint}`}
+                                  target="_blank"
+                                  className="text-lg underline hover:cursor-pointer"
+                                >
+                                  {reduceString(tk.mint || "", 4, 4)}
+                                </a>
+                              </td>
+                              <td className="py-2 text-right">
+                                {numberWithCommas(tk.balance || 0)}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
