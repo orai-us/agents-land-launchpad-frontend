@@ -3,7 +3,7 @@ name: Deploy vite Firebase
 on:
   push:
     branches:
-      - "feat/vitejs"
+      - "develop"
 
 jobs:
   deploy:
