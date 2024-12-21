@@ -174,7 +174,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </div>
-      {/* {pathname === "/" && <Banner />} */}
+      {pathname === "/" && <Banner />}
     </>
   );
 };
