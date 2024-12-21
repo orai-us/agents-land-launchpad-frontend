@@ -38,30 +38,35 @@ const Header: FC = () => {
   };
 
   const menu = [
+    // {
+    //   link: "/create-coin",
+    //   text: "Launch",
+    //   onclick: () => handleToRouter("/create-coin"),
+    // },
+    // {
+    //   link: "/how-it-work",
+    //   text: "How it works?",
+    //   onclick: () => setShowStepWork(true),
+    // },
+    // {
+    //   link: "/vaults",
+    //   text: "Strongbox Vaults",
+    //   onclick: () => handleToRouter("/vaults"),
+    // },
     {
-      link: "/create-coin",
-      text: "Launch",
-      onclick: () => handleToRouter("/create-coin"),
-    },
-    {
-      link: "/how-it-work",
-      text: "How it works?",
-      onclick: () => setShowStepWork(true),
-    },
-    {
-      link: "/vaults",
-      text: "Strongbox Vaults",
-      onclick: () => handleToRouter("/vaults"),
+      link: "https://docs.agents.land/",
+      text: "Docs",
+      onclick: null,
     },
   ];
 
   return (
     <>
-      <HowItWorkModal
+      {/* <HowItWorkModal
         isOpen={showStepWork}
         closeModal={() => setShowStepWork(false)}
       />
-      <MarqueeToken />
+      <MarqueeToken /> */}
       <header className="relative z-10 w-full h-[72px] md:h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
         <div className="py-6 px-2 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
@@ -71,14 +76,15 @@ const Header: FC = () => {
             <div className="hidden md:flex">
               {menu.map((item, key) => {
                 return (
-                  <button
-                    // href={item.link}
-                    onClick={item.onclick}
+                  <a
+                    target="_blank"
+                    href={item.link ? item.link : ""}
+                    onClick={item.onclick ? item.onclick : () => {}}
                     key={`${item.link}-${key}`}
                     className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
                   >
                     {item.text}
-                  </button>
+                  </a>
                 );
               })}
             </div>
@@ -161,7 +167,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </div>
-      {pathname === "/" && <Banner />}
+      {/* {pathname === "/" && <Banner />} */}
     </>
   );
 };

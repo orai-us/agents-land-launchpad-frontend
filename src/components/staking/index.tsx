@@ -66,6 +66,7 @@ export default function Staking() {
   ];
 
   const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
+  const isNegative = toBN(stakeAmount || 0).isLessThanOrEqualTo(0);
 
   const genMsgTextBtn = () => {
     if (!stakeAmount || !Number(stakeAmount)) {
@@ -80,7 +81,7 @@ export default function Staking() {
 
   const getBalance = async () => {
     if (!wallet.publicKey) {
-      return;
+      return setTokenBal(0);
     }
 
     try {
@@ -111,6 +112,7 @@ export default function Staking() {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (!isNaN(parseFloat(value))) {
+      // setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
       setStakeAmount(value);
     } else if (value === "") {
       setStakeAmount(""); // Allow empty string to clear the input
@@ -125,9 +127,12 @@ export default function Staking() {
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
-      <div onClick={() => handleToRouter("/")} className="w-fit">
-        <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2">
-          <svg
+      <div
+        // onClick={() => handleToRouter("/")}
+        className="w-fit"
+      >
+        <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2">
+          {/* <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="24"
@@ -136,9 +141,9 @@ export default function Staking() {
           >
             <path
               d="M10.5171 11.9999L18.3546 3.83901C18.5515 3.63745 18.5468 3.30464 18.3452 3.09839L16.9437 1.66401C16.7421 1.45776 16.414 1.45307 16.2171 1.65464L6.64521 11.6203C6.54209 11.7234 6.49521 11.864 6.50459 11.9999C6.4999 12.1406 6.54678 12.2765 6.64521 12.3796L16.2171 22.3499C16.414 22.5515 16.7421 22.5468 16.9437 22.3406L18.3452 20.9062C18.5468 20.6999 18.5515 20.3671 18.3546 20.1656L10.5171 11.9999Z"
-              fill="#585A6B"
+              fill="#FCFCFC"
             />
-          </svg>
+          </svg> */}
           Strongbox Vaults
         </div>
       </div>
@@ -149,7 +154,7 @@ export default function Staking() {
       <div className="flex justify-between items-start flex-col-reverse md:flex-row">
         <div className="w-full flex flex-col">
           <div className="text-[#E8E9EE] text-[18px] font-medium mb-4 md:mb-6">
-            Your locking
+            Your locked
           </div>
           {loadingList ? (
             <Loading />
@@ -159,10 +164,10 @@ export default function Staking() {
                 <img src={nodataImg} alt="nodata" />
               </div>
               <p className="mt-4 text-[16px] font-medium uppercase text-[#E8E9EE]">
-                No locking
+                No locked
               </p>
               <p className="mt-2 text-[14px] font-medium text-[#585A6B]">
-                Your locking history will appear here
+                Your locked history will appear here
               </p>
             </div>
           ) : (
@@ -239,7 +244,11 @@ export default function Staking() {
                   />
 
                   <span className="text-[10px] text-[#E8E9EE] font-medium">
-                    Balance: {numberWithCommas(Number(tokenBal))} MAX
+                    Balance:{" "}
+                    {numberWithCommas(Number(tokenBal), undefined, {
+                      maximumFractionDigits: SPL_DECIMAL,
+                    })}{" "}
+                    MAX
                   </span>
                 </div>
 
@@ -294,9 +303,12 @@ export default function Staking() {
             <div className="my-4 md:my-6 flex justify-between items-center">
               <div className="text-[#84869A]">Unlock on</div>
               <div>
-                {dayjs()
+                {dayjs(
+                  Date.now() + selectedLockTime.value * 30 * 24 * 60 * 60 * 1000
+                ).format("MMM DD YYYY HH:mm")}
+                {/* {dayjs()
                   .add(selectedLockTime.value, selectedLockTime.type)
-                  .format("MMM DD YYYY HH:mm")}
+                  .format("MMM DD YYYY HH:mm")} */}
               </div>
             </div>
 
@@ -305,7 +317,8 @@ export default function Staking() {
                 isLoading ||
                 !stakeAmount ||
                 !Number(stakeAmount) ||
-                isInsufficient
+                isInsufficient ||
+                isNegative
               }
               onClick={async () => {
                 console.log("Stake!!");
@@ -320,12 +333,13 @@ export default function Staking() {
                   ).toNumber();
                   const res = await web3Locking.stake(duration, amount, wallet);
                   if (res) {
-                    successAlert("Lock token successfully!");
+                    successAlert("Lock successfully!");
                     getBalance();
                     setIsRefreshList(!isRefreshList);
                   }
                 } catch (error) {
                   console.log("error lock", error);
+                  successAlert("Lock failed!");
                 } finally {
                   setIsLoading(false);
                 }

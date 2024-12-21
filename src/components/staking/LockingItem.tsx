@@ -45,7 +45,9 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
             {numberWithCommas(
               toBN(stakeAmount || 0)
                 .div(10 ** SPL_DECIMAL)
-                .toNumber()
+                .toNumber(),
+              undefined,
+              { maximumFractionDigits: SPL_DECIMAL }
             )}
           </span>
         </div>
@@ -87,7 +89,7 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
               />
             </svg>
           )}
-          <span className="ml-1">{!claimable ? "Locking" : "Complete"}</span>
+          <span className="ml-1">{!claimable ? "Locked" : "Complete"}</span>
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">

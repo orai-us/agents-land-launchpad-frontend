@@ -147,6 +147,7 @@ export class Web3SolanaLockingToken {
   }
 
   async getListLockedOfUser(lockPeriod: number, wallet: WalletContextState) {
+    let vaultInfo = { totalStaked: new BN("0") };
     try {
       if (!this.connection) {
         console.log("Warning: Wallet not connected");
@@ -174,7 +175,9 @@ export class Web3SolanaLockingToken {
         program.programId
       );
 
-      const vaultInfo = await program.account.vault.fetch(vaultPda);
+      vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
+        totalStaked: new BN("0"),
+      };
 
       if (!wallet.publicKey) {
         return { listLockedItems: [], vaultInfo };
@@ -221,7 +224,7 @@ export class Web3SolanaLockingToken {
       }
     } catch (error) {
       console.log("get list error", error);
-      return { listLockedItems: [], vaultInfo: { totalStaked: 0 } };
+      return { listLockedItems: [], vaultInfo };
     }
   }
 
