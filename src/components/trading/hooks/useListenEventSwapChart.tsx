@@ -51,7 +51,7 @@ const useListenEventSwapChart = ({ coin }) => {
     listener.setProgramEventCallback(
       "swapEvent",
       (result: ResultType) => {
-        if (coin._id !== result.mint) {
+        if (coin.token !== result.mint) {
           return;
         }
 
