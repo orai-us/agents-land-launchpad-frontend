@@ -245,10 +245,10 @@ export class Web3SolanaProgramInteraction {
         .div(100)
         .toNumber();
 
-      console.log("=== maxSolSwapIncludeFee ===", {
-        origin: maxSolSwap,
-        includeFee: maxSolSwapIncludeFee,
-      });
+      // console.log("=== maxSolSwapIncludeFee ===", {
+      //   origin: maxSolSwap,
+      //   includeFee: maxSolSwapIncludeFee,
+      // });
       return maxSolSwapIncludeFee;
     } catch (error) {
       console.log("Error in get config curve limit", error);

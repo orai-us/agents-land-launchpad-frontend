@@ -1,14 +1,22 @@
-import { PROGRAM_ID } from "@/config";
+import { Bar } from "@/charting_library";
+import {
+  channelToSubscription,
+  genOhlcData,
+} from "@/components/TVChart/streaming";
+import { PROGRAM_ID, SPL_DECIMAL } from "@/config";
+import UserContext from "@/context/UserContext";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import { commitmentLevel, endpoint } from "@/program/web3";
-import { recordInfo } from "@/utils/types";
+import { queryClient } from "@/provider/providers";
+import { RawChart, recordInfo } from "@/utils/types";
 import { calculateTokenPrice, getUserByWalletAddress } from "@/utils/util";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { isEmpty } from "lodash";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 const useListenEventSwapChart = ({ coin }) => {
+  const { solPrice } = useContext(UserContext);
   const [newSwapDatas, setNewSwapDatas] = useState([]);
   const [curPrice, setCurPrice] = useState(0);
 
@@ -42,35 +50,77 @@ const useListenEventSwapChart = ({ coin }) => {
     const listener = new AgentsLandEventListener(connection);
     listener.setProgramEventCallback(
       "swapEvent",
-      async (result: ResultType) => {
-        // const solPrice = await getSolPriceInUSD();
-        const userInfo = await getUserByWalletAddress({ wallet: result.user });
-        const tx = await connection.getTransaction(result.tx, {
-          commitment: "confirmed",
-          maxSupportedTransactionVersion: 0,
-        });
-
+      (result: ResultType) => {
         const newPrice = calculateTokenPrice(
           result.tokenReserves,
           result.lamportReserves,
           coin.decimals
           //   solPrice
         );
-        const newRecordInfo: recordInfo = {
-          holder: userInfo,
-          lamportAmount: result.lamportAmount,
-          tokenAmount: result.tokenAmount,
-          time: new Date(tx.blockTime),
-          tx: result.tx,
-          price: newPrice,
-          swapDirection: result.swapDirection as any,
-        };
-
         setCurPrice(newPrice);
-        setNewSwapDatas([...newSwapDatas, newRecordInfo]);
 
-        // const newTradeRecords = [newRecordInfo, ...trades.record];
-        // setTrades({ ...trades, record: newTradeRecords });
+        // socketChart
+        console.log("====listen=====>>>", result);
+        const newPriceUsd = calculateTokenPrice(
+          result.tokenReserves,
+          result.lamportReserves,
+          SPL_DECIMAL,
+          Number(solPrice)
+        );
+
+        const tradeTime = new Date().getTime() / 1000;
+        const priceUpdates = {
+          price: newPriceUsd,
+          ts: tradeTime,
+        };
+        const tokenId = result.mint;
+
+        const state = queryClient.getQueryState<RawChart[]>([
+          "chartTable",
+          result.mint,
+        ]);
+
+        if (!state || !state.data || !newPriceUsd) {
+          return;
+        }
+        console.log(
+          "SOCKET :>> tokenId, priceUpdates",
+          result.mint,
+          newPriceUsd
+        );
+
+        const priceHistory = [...state.data, priceUpdates];
+        const subscriptionItem = channelToSubscription.get(result.mint);
+
+        const dataChartTable = genOhlcData({
+          priceHistory,
+          range: Number(subscriptionItem?.resolution),
+        });
+
+        const bars = dataChartTable.map((bar) => ({
+          ...bar,
+          time: bar.time * 1000, // Convert from seconds to milliseconds
+        }));
+
+        const lastBar = bars[bars.length - 1];
+        let bar: Bar =
+          lastBar.close === lastBar.open && lastBar.high === lastBar.low
+            ? bars[bars.length - 2]
+            : lastBar;
+        console.log("bar", bar, lastBar);
+
+        if (!bar) return;
+        subscriptionItem.lastBar = bar;
+
+        // Send data to every subscriber of that symbol
+        subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
+
+        queryClient.setQueryData(
+          ["chartTable", tokenId],
+          (oldData: RawChart[]) => {
+            return [...(oldData || []), priceUpdates];
+          }
+        );
       },
       []
     );

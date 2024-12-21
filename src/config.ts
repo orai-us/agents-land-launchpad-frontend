@@ -1,5 +1,7 @@
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
+export const SOL_PRICE_KEY = "SOL_PRICE_KEY";
+
 export const SOLANA_ENV =
   import.meta.env.VITE_APP_SOLANA_ENV || "mainnet-beta-test";
 

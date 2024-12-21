@@ -128,7 +128,6 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         }
       })();
     } else {
-      console.log("sol", sol);
       setSimulateReceive(() => "");
     }
   }, [sol, curveLimit]);
@@ -144,7 +143,6 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
 
-      console.log("first", { tokenBal, solBal });
       setTokenBal(tokenBal ? tokenBal : 0);
       setSolBalance(solBal ? solBal : 0);
     } catch (error) {

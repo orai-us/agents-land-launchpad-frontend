@@ -1,9 +1,14 @@
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
-import { coinInfo, holderInfo } from "@/utils/types";
-import { calculateKotHProgress, findHolders, getKoth } from "@/utils/util";
-import { FC, useEffect, useState } from "react";
+import { coinInfo, holderInfo, RawChart } from "@/utils/types";
+import {
+  calculateKotHProgress,
+  calculateTokenPrice,
+  findHolders,
+  getKoth,
+} from "@/utils/util";
+import { FC, useContext, useEffect, useState } from "react";
 
-import { ALL_CONFIGS, PROGRAM_ID } from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID, SPL_DECIMAL } from "@/config";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import {
@@ -14,6 +19,10 @@ import {
 import { formatNumberKMB } from "@/utils/format";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, PublicKey } from "@solana/web3.js";
+import UserContext from "@/context/UserContext";
+import { queryClient } from "@/provider/providers";
+import { channelToSubscription, genOhlcData } from "../TVChart/streaming";
+import { Bar } from "@/charting_library";
 
 interface ModalProps {
   data: coinInfo;
@@ -97,7 +106,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       console.log("ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
-  }, [data]);
+  }, [data?._id]);
 
   return (
     <div className="flex flex-col justify-between pt-4">

@@ -4,11 +4,16 @@ import type {
   ResolutionString,
   SubscribeBarsCallback,
 } from "@/charting_library";
+import { SOL_PRICE_KEY, SPL_DECIMAL } from "@/config";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
+import { commitmentLevel, endpoint } from "@/program/web3";
 import { CandlePrice } from "@/utils/types";
+import { calculateTokenPrice } from "@/utils/util";
+import { Connection } from "@solana/web3.js";
 import { io, Socket } from "socket.io-client";
 import { queryClient } from "../../provider/providers";
 import { RawChart } from "./../../utils/types";
-import { EVENT_CHART_SOCKET } from "./config";
 
 let socket: Socket | undefined = undefined;
 let initialTimeStamp: number = new Date().getTime();
@@ -29,93 +34,16 @@ type SubscriptionItem = {
   pairIndex: string;
 };
 
-const channelToSubscription = new Map<string, SubscriptionItem>();
+export const channelToSubscription = new Map<string, SubscriptionItem>();
 
-if (socket) {
-  socket.on("connect", () => {
-    console.log("[socket] Connected", socket!.id);
-    initialTimeStamp = new Date().getTime();
-  });
+const connection = new Connection(endpoint, {
+  commitment: commitmentLevel,
+  wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+});
 
-  socket.on("disconnect", (reason) => {
-    console.log("[socket] Disconnected:", reason);
-  });
+const listener = new AgentsLandEventListener(connection);
 
-  socket.on("connect_error", (error) => {
-    if (socket!.active) {
-      // temporary failure, the socket will automatically try to reconnect
-    } else {
-      // the connection was denied by the server
-      // in that case, `socket.connect()` must be manually called in order to reconnect
-      console.log("[socket] Error:", error.message);
-    }
-  });
-
-  socket.on(EVENT_CHART_SOCKET, (tokenId: string, priceUpdates: RawChart) => {
-    try {
-    } catch (error) {}
-    const tradeTime = priceUpdates.ts * 1000;
-
-    const state = queryClient.getQueryState<RawChart[]>([
-      "chartTable",
-      tokenId,
-    ]);
-
-    console.log("SOCKET :>> state-chart :>>", state.data, priceUpdates);
-
-    if (!state || !state.data || !priceUpdates) {
-      return;
-    }
-    console.log("SOCKET :>> tokenId, priceUpdates", tokenId, priceUpdates);
-
-    const priceHistory = [...state.data, priceUpdates];
-    const subscriptionItem = channelToSubscription.get(tokenId);
-
-    // const lastBar = subscriptionItem.lastBar;
-    // const resolution = subscriptionItem.resolution;
-    // const nextBarTime = getNextBarTime(lastBar.time, +resolution);
-    const dataChartTable = genOhlcData({
-      priceHistory,
-      range: Number(subscriptionItem?.resolution),
-    });
-
-    const bars = dataChartTable.map((bar) => ({
-      ...bar,
-      time: bar.time * 1000, // Convert from seconds to milliseconds
-    }));
-
-    const lastBar = bars[bars.length - 1];
-    let bar: Bar =
-      lastBar.close === lastBar.open && lastBar.high === lastBar.low
-        ? bars[bars.length - 2]
-        : lastBar;
-    console.log("bar", bar, lastBar);
-
-    if (!bar) return;
-    // if (tradeTime >= nextBarTime) {
-    //   bar = {
-    //     ...bar,
-    //     time: nextBarTime,
-    //   };
-    //   console.log("[socket] Generate new bar", bar);
-    // } else {
-    //   bar = {
-    //     ...lastBar,
-    //     high: Math.max(lastBar.high, bar.close),
-    //     low: Math.min(lastBar.low, bar.low),
-    //     close: bar.close,
-    //   };
-    // }
-    subscriptionItem.lastBar = bar;
-
-    // Send data to every subscriber of that symbol
-    subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
-
-    queryClient.setQueryData(["chartTable", tokenId], (oldData: RawChart[]) => {
-      return [...(oldData || []), priceUpdates];
-    });
-  });
-}
+const solPrice = localStorage.getItem(SOL_PRICE_KEY);
 
 // barTime is millisec, resolution is mins
 function getNextBarTime(barTime: number, resolution: number) {

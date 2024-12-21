@@ -7,6 +7,7 @@ import { ConnectButton } from "../buttons/ConnectButton";
 import HowItWorkModal from "../modals/HowItWork";
 import Banner from "./Banner";
 import MarqueeToken from "./MarqueeToken";
+import { SOL_PRICE_KEY } from "@/config";
 
 const Header: FC = () => {
   const [pathname, setLocation] = useLocation();
@@ -19,6 +20,7 @@ const Header: FC = () => {
       try {
         const price = await getSolPriceInUSD();
         setSolPrice(price);
+        localStorage.setItem(SOL_PRICE_KEY, price);
       } catch (error) {
         console.log("error sol price", error);
       }
