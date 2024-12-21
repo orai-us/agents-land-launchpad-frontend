@@ -97,7 +97,7 @@ export const CONFIGS: Record<
       SECOND: 60,
       MINUTE: 60,
       HOUR: 24,
-      DAY_TO_SECONDS: 5 * 60,
+      DAY_TO_SECONDS: 15 * 60,
     },
     SHOW_DECIMALS_PRICE: 12,
   },
