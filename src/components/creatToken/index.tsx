@@ -937,7 +937,7 @@ export const TOKENOMICS_LIST = [
     color: `#9EEEDB`,
   },
   {
-    text: "97% for fairlaunch (bonding curve)",
+    text: "95% for fairlaunch (bonding curve)",
     color: `#7e9af9`,
   },
 ];

@@ -27,6 +27,7 @@ import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
 import { handleTransaction } from "./utils";
+import { toBN } from "@/utils/util";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -290,7 +291,9 @@ export class Web3SolanaProgramInteraction {
     mint: PublicKey,
     wallet: WalletContextState,
     amount: string,
-    type: number
+    type: number,
+    simulateReceive: string,
+    slippage: string
   ): Promise<any> => {
     console.log("==============trade swap==============");
 
@@ -338,6 +341,8 @@ export class Web3SolanaProgramInteraction {
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
       const coinDecimal = type === 0 ? 9 : 6;
+      const receiveDecimal = type !== 0 ? 9 : 6;
+      const addFee = type === 0 ? slippage : Number(slippage) + 1; // fee
       const fmtAmount = new anchor.BN(
         parseFloat(amount) * Math.pow(10, coinDecimal)
       );
@@ -351,8 +356,13 @@ export class Web3SolanaProgramInteraction {
       //   throw Error("Exceeded bonding curve limit");
       // }
 
+      const minAmount = toBN(simulateReceive)
+        .multipliedBy(Math.pow(10, receiveDecimal))
+        .multipliedBy(toBN(1).minus(Number(addFee) / 100))
+        .toNumber();
+
       const swapIx = await program.methods
-        .swap(fmtAmount, type, new anchor.BN(0))
+        .swap(fmtAmount, type, new anchor.BN(minAmount || 0))
         .accounts({
           teamWallet: configAccount.teamWallet,
           user: wallet.publicKey,
@@ -412,7 +422,8 @@ export class Web3SolanaProgramInteraction {
     wallet: WalletContextState,
     amount: string,
     type: number,
-    poolKey: string
+    poolKey: string,
+    slippage: string
   ) => {
     // check the connection
     if (!wallet.publicKey || !this.connection) {
@@ -440,7 +451,8 @@ export class Web3SolanaProgramInteraction {
           mint,
           fmtAmount,
           wallet,
-          poolId
+          poolId,
+          slippage
         );
       } else {
         swapTx = await raySellTx(
@@ -448,7 +460,8 @@ export class Web3SolanaProgramInteraction {
           mint,
           fmtAmount,
           wallet,
-          poolId
+          poolId,
+          slippage
         );
       }
       if (swapTx == null) {

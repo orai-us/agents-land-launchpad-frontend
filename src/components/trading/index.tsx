@@ -300,26 +300,26 @@ export default function TradingPage() {
                     <img
                       src={imgSrc}
                       alt="agentAvt"
-                      className="w-[60px] h-[60px] rounded-full border border-[#E8E9EE]"
+                      className="w-[32px] h-[32px] md:w-[60px] md:h-[60px] rounded-full border border-[#E8E9EE]"
                     />
                   ) : (
                     <img
                       src={imgSrc}
                       alt="agentAvt"
-                      className="w-[60px] h-[60px] rounded-full"
+                      className="w-[32px] h-[32px] md:w-[60px] md:h-[60px] rounded-full"
                     />
                   )}
                   <div>
-                    <div className="flex items-center">
-                      <div className="text-[#E8E9EE] text-[24px] font-medium">
+                    <div className="flex items-center flex-wrap">
+                      <div className="text-[#E8E9EE] text-[18px] md:text-[24px] font-medium">
                         {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
                         {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                       </div>
-                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
-                        - {dayjs(coin.date || Date.now()).fromNow()}
+                      <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
+                        &#x2022; {dayjs(coin.date || Date.now()).fromNow()}
                       </div>
-                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
-                        - Marketcap{" "}
+                      <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
+                        &#x2022; Marketcap{" "}
                         <span className="text-[#E8E9EE]">
                           {formatNumberKMB(Number(coin.marketcap || 0))}
                         </span>
@@ -356,14 +356,14 @@ export default function TradingPage() {
                   </div>
                 </div> */}
 
-                <div className="flex flex-col justify-between md:items-end items-start h-full">
-                  <div className="text-[12px] text-[#84869A] font-medium uppercase">
+                <div className="w-full md:w-fit flex md:flex-col justify-between md:items-end items-start h-full">
+                  <div className="text-[10px] md:text-[12px] text-[#84869A] font-medium uppercase">
                     CREATED BY{" "}
-                    <span className="text-[12px] text-[#E4775D] underline cursor-pointer">
+                    <span className="text-[10px] md:text-[12px] text-[#E4775D] underline cursor-pointer">
                       {reduceString(coin.creator?.["wallet"] || "", 4, 4)}
                     </span>
                   </div>
-                  <div className="flex gap-3 mt-4">
+                  <div className="flex gap-3 md:mt-4">
                     {/* AGENT info url */}
                     {coin.metadata?.agentId && (
                       <a
@@ -577,34 +577,42 @@ export default function TradingPage() {
                   ></div>
                 </div>
               </div>
-              <p className="text-[14px] text-[#585A6B]">
-                There are{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatLargeNumber(
-                    fromBig(coin.tokenReserves, coin.decimals)
-                  )}
-                </span>{" "}
-                tokens still available for sale in the bonding curve and there
-                is{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatLargeNumber(shownBondingCurve)} SOL
-                </span>{" "}
-                in the bonding curve.
-              </p>
-              <p className="text-[14px] text-[#585A6B]">
-                When the market cap reaches{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatNumberKMB(
-                    new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)
-                      .multipliedBy(solPrice)
-                      .div(LAMPORTS_PER_SOL)
-                      .toNumber()
-                  )}
-                </span>
-                &nbsp; all the liquidity from the bonding curve will be
-                deposited into Raydium and burned. progression increases as the
-                price goes up.
-              </p>
+              {isListedOnRay ? (
+                <p className="text-[14px] text-[#585A6B]">
+                  ⚡️ Raydium pool seeded!
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-[14px] text-[#585A6B]">
+                    There are{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatLargeNumber(
+                        fromBig(coin.tokenReserves, coin.decimals)
+                      )}
+                    </span>{" "}
+                    tokens still available for sale in the bonding curve and
+                    there is{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatLargeNumber(shownBondingCurve)} SOL
+                    </span>{" "}
+                    in the bonding curve.
+                  </p>
+                  <p className="text-[14px] text-[#585A6B]">
+                    When the market cap reaches{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatNumberKMB(
+                        new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)
+                          .multipliedBy(solPrice)
+                          .div(LAMPORTS_PER_SOL)
+                          .toNumber()
+                      )}
+                    </span>
+                    &nbsp; all the liquidity from the bonding curve will be
+                    deposited into Raydium and burned. progression increases as
+                    the price goes up.
+                  </p>
+                </div>
+              )}
             </div>
             <TokenDistribution data={coin} />
           </div>

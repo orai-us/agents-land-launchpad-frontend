@@ -18,6 +18,7 @@ import { successAlert } from "../others/ToastGroup";
 import { LOCK_TIME_OPTIONS } from "./constants";
 import useGetListLockedByUser from "./hooks/useGetListLockedByUser";
 import LockingItem from "./LockingItem";
+import NumberFormat from "react-number-format";
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -109,12 +110,10 @@ export default function Staking() {
     setLocation(path);
   };
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (!isNaN(parseFloat(value))) {
-      // setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
-      setStakeAmount(value);
-    } else if (value === "") {
+  const handleInputChange = (value: number) => {
+    if (value) {
+      setStakeAmount(value.toString());
+    } else {
       setStakeAmount(""); // Allow empty string to clear the input
     }
   };
@@ -232,7 +231,7 @@ export default function Staking() {
               </div>
               <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
                 <div className="py-2">
-                  <input
+                  {/* <input
                     type="number"
                     id="stakeAmount"
                     value={stakeAmount}
@@ -241,6 +240,26 @@ export default function Staking() {
                     className="w-full outline-none capitalize bg-transparent text-[#E8E9EE] placeholder:text-[#585A6B] text-[24px]"
                     placeholder="0.0"
                     required
+                  /> */}
+
+                  <NumberFormat
+                    placeholder={`0.0`}
+                    thousandSeparator
+                    className="w-full outline-none capitalize bg-transparent text-[#E8E9EE] placeholder:text-[#585A6B] text-[24px]"
+                    decimalScale={SPL_DECIMAL}
+                    type="text"
+                    value={stakeAmount}
+                    onChange={() => {}}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      // allow !floatValue to let user can clear their input
+                      return (
+                        !floatValue || (floatValue >= 0 && floatValue <= 1e14)
+                      );
+                    }}
+                    onValueChange={({ floatValue }) => {
+                      handleInputChange(floatValue);
+                    }}
                   />
 
                   <span className="text-[10px] text-[#E8E9EE] font-medium">

@@ -129,7 +129,7 @@ export const ConnectButton: FC = () => {
             </div>
             <div className="hidden md:block w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
               <ul className="border border-[rgba(88,90,107,0.24)] rounded bg-[#1A1C28] p-2 ">
-                {user?._id && false && (
+                {user?._id && (
                   <li>
                     <div
                       className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
@@ -169,7 +169,7 @@ export const ConnectButton: FC = () => {
       </button>
       {login && tempUser.wallet && (
         <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
-          {user?._id && false && (
+          {user?._id && (
             <div
               className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
               onClick={() =>

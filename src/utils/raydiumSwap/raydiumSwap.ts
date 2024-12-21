@@ -13,7 +13,8 @@ export const rayBuyTx = async (
   baseMint: PublicKey,
   buyAmount: number,
   wallet: WalletContextState,
-  poolId: PublicKey
+  poolId: PublicKey,
+  slippage: string
 ) => {
   let solBalance: number = 0;
   try {
@@ -37,7 +38,8 @@ export const rayBuyTx = async (
       baseMint,
       NATIVE_MINT,
       buyAmount,
-      poolId.toBase58()
+      poolId.toBase58(),
+      slippage
     );
 
     if (tx == null) {
@@ -55,7 +57,8 @@ export const raySellTx = async (
   baseMint: PublicKey,
   amount: number,
   wallet: WalletContextState,
-  poolId: PublicKey
+  poolId: PublicKey,
+  slippage: string
 ) => {
   try {
     const tokenAta = await getAssociatedTokenAddress(
@@ -81,7 +84,8 @@ export const raySellTx = async (
         baseMint,
         NATIVE_MINT,
         amount,
-        poolId.toBase58()
+        poolId.toBase58(),
+        slippage
       );
 
       if (sellTx == null) {
