@@ -215,7 +215,7 @@ export default function TradingPage() {
 
   const { curPrice } = useListenEventSwapChart({ coin });
 
-  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
+  const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
   const tokenPrice = isListedOnRay ? simulatePrice : curPrice;
   const priceUsd = new BigNumber(isNaN(Number(tokenPrice)) ? 0 : tokenPrice)
     .multipliedBy(solPrice)
@@ -224,6 +224,8 @@ export default function TradingPage() {
   const isRaydiumListed = coin["raydiumPoolAddr"];
   const isOraidexListed = coin["oraidexPoolAddr"];
   const isListed = coin["listed"];
+
+  console.log("isRaydiumListed", isOraidexListed, isRaydiumListed);
 
   return (
     <div className="w-full flex flex-col mx-auto gap-5">
@@ -250,7 +252,7 @@ export default function TradingPage() {
             {isListed && isRaydiumListed && (
               <a
                 // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
-                href={`https://raydium.io`}
+                href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
                 target="_blank"
                 className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
               >
@@ -267,7 +269,9 @@ export default function TradingPage() {
 
             {isListed && isOraidexListed && (
               <a
-                href={`https://app.oraidex.io`}
+                href={`https://app.oraidex.io/pools/v2/${encodeURIComponent(
+                  `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`
+                )}_orai`}
                 target="_blank"
                 className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[#AEE67F] p-1"
               >

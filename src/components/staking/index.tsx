@@ -111,7 +111,7 @@ export default function Staking() {
   };
 
   const handleInputChange = (value: number) => {
-    if (value) {
+    if (value || value === 0) {
       setStakeAmount(value.toString());
     } else {
       setStakeAmount(""); // Allow empty string to clear the input

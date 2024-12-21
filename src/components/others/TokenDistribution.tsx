@@ -77,36 +77,36 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
     fetchData();
   }, [data]);
 
-  // real-time koth progress
-  useEffect(() => {
-    if (!data) return;
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
-    const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback(
-      "swapEvent",
-      async (result: ResultType) => {
-        const currentKotHProgress = calculateKotHProgress(
-          result.lamportReserves,
-          data.bondingCurveLimit
-        );
-        setKotHProgress(currentKotHProgress);
-      },
-      []
-    );
+  // // real-time koth progress
+  // useEffect(() => {
+  //   if (!data) return;
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  //   });
+  //   const listener = new AgentsLandEventListener(connection);
+  //   listener.setProgramEventCallback(
+  //     "swapEvent",
+  //     async (result: ResultType) => {
+  //       const currentKotHProgress = calculateKotHProgress(
+  //         result.lamportReserves,
+  //         data.bondingCurveLimit
+  //       );
+  //       setKotHProgress(currentKotHProgress);
+  //     },
+  //     []
+  //   );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const { program, listenerIds } = listener.listenProgramEvents(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      if (!program) return;
-      console.log("ready to remove listeners");
-      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-    };
-  }, [data?._id]);
+  //   return () => {
+  //     if (!program) return;
+  //     console.log("ready to remove listeners");
+  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+  //   };
+  // }, [data?._id]);
 
   return (
     <div className="flex flex-col justify-between pt-4">

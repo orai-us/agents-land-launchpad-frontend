@@ -45,7 +45,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     { id: "0.5", price: "0.5 SOL" },
     { id: "1", price: "1 SOL" },
   ];
-  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
+  const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
   const isDisableSwapOnAgent =
     Number(progress) >= 100 &&
     !coin.raydiumPoolAddr &&
@@ -68,7 +68,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const canSimulate = (isBuy === 0 && !isExceedCurveLimit) || isBuy !== 0;
 
   const handleInputChange = (value: number) => {
-    if (value) {
+    if (value || value === 0) {
       setSol(value.toString());
     } else {
       setSimulateReceive("");
@@ -130,9 +130,15 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     } else {
       setSimulateReceive(() => "");
     }
-  }, [sol, curveLimit]);
+  }, [sol]); // curveLimit
 
   const getBalance = async () => {
+    if (!wallet.publicKey) {
+      setTokenBal(0);
+      setSolBalance(0);
+      return;
+    }
+
     if (!coin.token) {
       return;
     }
