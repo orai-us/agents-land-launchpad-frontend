@@ -11,7 +11,7 @@ export const SEED_GLOBAL = "global";
 export const TX_FEE = 0.25;
 
 /**
- * LOCKING
+ * LOCKING VAULTS
  */
 export const VAULT_SEED = "staking_vault";
 export const STAKE_CONFIG_SEED = "staking_config";
