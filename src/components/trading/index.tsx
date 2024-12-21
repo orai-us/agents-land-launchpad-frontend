@@ -35,6 +35,7 @@ import TokenDistribution from "../others/TokenDistribution";
 import { DexToolsChart } from "../TVChart/DexToolsChart";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 import NotForSale from "./NotForSale";
+import useWindowSize from "@/hooks/useWindowSize";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -62,6 +63,8 @@ const SLEEP_TIMEOUT = 1500;
 
 const web3Solana = new Web3SolanaProgramInteraction();
 export default function TradingPage() {
+  const { isMobileMode } = useWindowSize();
+  const [showOptional, setShowOptional] = useState<boolean>(true);
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
   const [param, setParam] = useState<string>("");
@@ -222,6 +225,7 @@ export default function TradingPage() {
     .toFixed(6);
 
   const isRaydiumListed = coin["raydiumPoolAddr"];
+  const isOraidexListed = coin["oraidexPoolAddr"];
   const isListed = coin["listed"];
 
   return (
@@ -246,39 +250,40 @@ export default function TradingPage() {
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
           <div className="flex">
-            {isListed &&
-              (isRaydiumListed ? (
-                <a
-                  // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
-                  href={`https://raydium.io`}
-                  target="_blank"
-                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
-                >
-                  <img
-                    src={raydiumIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN RAYDIUM</span>
-                </a>
-              ) : (
-                <a
-                  href={`https://app.oraidex.io`}
-                  target="_blank"
-                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1"
-                >
-                  <img
-                    src={oraidexIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN ORAIDEX</span>
-                </a>
-              ))}
+            {isListed && isRaydiumListed && (
+              <a
+                // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
+                href={`https://raydium.io`}
+                target="_blank"
+                className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
+              >
+                <img
+                  src={raydiumIcon}
+                  alt="icon_dex"
+                  className="mr-1"
+                  width={16}
+                  height={16}
+                />
+                <span>LISTED oN RAYDIUM</span>
+              </a>
+            )}
+
+            {isListed && isOraidexListed && (
+              <a
+                href={`https://app.oraidex.io`}
+                target="_blank"
+                className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[#AEE67F] p-1"
+              >
+                <img
+                  src={oraidexIcon}
+                  alt="icon_dex"
+                  className="mr-1"
+                  width={16}
+                  height={16}
+                />
+                <span>LISTED oN ORAIDEX</span>
+              </a>
+            )}
           </div>
 
           {/* trading view chart  */}
@@ -509,38 +514,62 @@ export default function TradingPage() {
             )}
 
             {!isNotForSale && (
-              <div className="hidden md:block">
-                {isListedOnRay && (
-                  <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
-                    <div
-                      onClick={() => setIsAgentChart(true)}
-                      className={twMerge(
-                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                        isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                      )}
-                    >
-                      Agent Land Chart
-                    </div>
-                    <div
-                      onClick={() => setIsAgentChart(false)}
-                      className={twMerge(
-                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                        !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                      )}
-                    >
-                      Current Chart
-                    </div>
-                  </div>
-                )}
+              <div className="">
+                <div
+                  className="w-fit md:hidden flex px-3 py-3 text-[12px] text-[#9192A0] items-center cursor-pointer"
+                  onClick={() => setShowOptional(!showOptional)}
+                >
+                  {showOptional ? "Hide" : "Show"} chart{" "}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
+                      fill="#9192A0"
+                    />
+                  </svg>
+                </div>
+                {showOptional && (
+                  <div className={twMerge("py-3 md:py-0 bg-[#1a1c28] rounded")}>
+                    {isListedOnRay && (
+                      <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
+                        <div
+                          onClick={() => setIsAgentChart(true)}
+                          className={twMerge(
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                          )}
+                        >
+                          Agent Land Chart
+                        </div>
+                        <div
+                          onClick={() => setIsAgentChart(false)}
+                          className={twMerge(
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                          )}
+                        >
+                          Current Chart
+                        </div>
+                      </div>
+                    )}
 
-                {isAgentChart ? (
-                  <div className="bg-[#101827] pb-6 rounded-b">
-                    <TradingChart param={coin}></TradingChart>
-                  </div>
-                ) : (
-                  <div className="bg-[#111114] rounded-b">
-                    {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
-                    <DexToolsChart param={coin}></DexToolsChart>
+                    {isAgentChart ? (
+                      <div className="bg-[#101827] pb-6 rounded-b">
+                        <TradingChart param={coin}></TradingChart>
+                      </div>
+                    ) : (
+                      <div className="bg-[#111114] rounded-b">
+                        {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
+                        <DexToolsChart param={coin}></DexToolsChart>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
