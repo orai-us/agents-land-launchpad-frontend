@@ -91,6 +91,9 @@ const useListenEventSwapChart = ({ coin }) => {
 
         const priceHistory = [...state.data, priceUpdates];
         const subscriptionItem = channelToSubscription.get(result.mint);
+        if (!subscriptionItem) {
+          return;
+        }
 
         const dataChartTable = genOhlcData({
           priceHistory,
