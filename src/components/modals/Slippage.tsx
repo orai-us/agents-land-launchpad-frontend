@@ -24,7 +24,7 @@ const Slippage: React.FC<ModalProps> = ({
         !isOpen && "hidden"
       )}
     >
-      <div className="flex w-full max-w-[400px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
+      <div className="flex w-full max-w-[420px] flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
         <div className="">
           <h2 className="text-[18px] font-medium text-[#fcfcfc]">
             Set Slippage
