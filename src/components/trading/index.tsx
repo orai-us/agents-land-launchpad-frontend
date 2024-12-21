@@ -88,10 +88,7 @@ export default function TradingPage() {
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
-  const isUnlock =
-    new Date(coin.date).getTime() +
-      ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
-    Date.now();
+  const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
   const isNotForSale = isUnlock && !isOnSaleCountdown;
 
   const fetchDataCoin = async (parameter) => {

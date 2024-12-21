@@ -263,7 +263,11 @@ const CountdownItem = ({ coin }) => {
   const startTime = Math.ceil(
     new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
   );
-  const endTime = startTime + ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
+  // const endTime = startTime + ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
+  const endTime = Math.floor(
+    new Date(coin.tradingTime || Date.now()).getTime() /
+      ALL_CONFIGS.TIMER.MILLISECOND
+  );
 
   const { timeRemaining } = useCountdown({
     startTime,
