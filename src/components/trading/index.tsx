@@ -478,7 +478,8 @@ export default function TradingPage() {
                         isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
                         undefined,
                         {
-                          maximumFractionDigits: 9,
+                          maximumFractionDigits:
+                            ALL_CONFIGS.SHOW_DECIMALS_PRICE,
                         }
                       )
                     ) : (

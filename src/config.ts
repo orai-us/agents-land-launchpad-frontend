@@ -38,6 +38,7 @@ export const CONFIGS: Record<
       HOUR: number;
       DAY_TO_SECONDS: number;
     };
+    SHOW_DECIMALS_PRICE: number;
   }
 > = {
   devnet: {
@@ -58,6 +59,7 @@ export const CONFIGS: Record<
       HOUR: 24,
       DAY_TO_SECONDS: 5 * 60,
     },
+    SHOW_DECIMALS_PRICE: 9,
   },
   "mainnet-beta": {
     PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
@@ -77,6 +79,7 @@ export const CONFIGS: Record<
       HOUR: 24,
       DAY_TO_SECONDS: 24 * 60 * 60,
     },
+    SHOW_DECIMALS_PRICE: 9,
   },
   "mainnet-beta-test": {
     PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
@@ -88,7 +91,7 @@ export const CONFIGS: Record<
     INIT_SOL_BONDING_CURVE: 0.3 * LAMPORTS_PER_SOL,
     TIMER: {
       MILLISECONDS: 1000,
-      MONTH_TO_SECONDS: 60,
+      MONTH_TO_SECONDS: 30 * 24 * 60 * 60,
       HAFT_MILLISECOND: 500,
       MILLISECOND: 1000,
       SECOND: 60,
@@ -96,6 +99,7 @@ export const CONFIGS: Record<
       HOUR: 24,
       DAY_TO_SECONDS: 5 * 60,
     },
+    SHOW_DECIMALS_PRICE: 12,
   },
 };
 
