@@ -125,7 +125,7 @@ export default function TradingPage() {
       )
       .toNumber();
 
-    const showCurrentChart = bondingCurvePercent >= 100 && data.raydiumPoolAddr;
+    const showCurrentChart = data.raydiumPoolAddr; // bondingCurvePercent >= 100 &&
 
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
@@ -173,7 +173,7 @@ export default function TradingPage() {
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log("bonding-curve----ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [coinId, wallet.publicKey]);
@@ -211,7 +211,7 @@ export default function TradingPage() {
     } else {
       setLoadingEst(false);
     }
-  }, [coin]);
+  }, [coin?._id]);
 
   const { curPrice } = useListenEventSwapChart({ coin });
 
@@ -224,8 +224,6 @@ export default function TradingPage() {
   const isRaydiumListed = coin["raydiumPoolAddr"];
   const isOraidexListed = coin["oraidexPoolAddr"];
   const isListed = coin["listed"];
-
-  console.log("isRaydiumListed", isOraidexListed, isRaydiumListed);
 
   return (
     <div className="w-full flex flex-col mx-auto gap-5">

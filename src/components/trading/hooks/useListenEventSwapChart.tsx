@@ -36,7 +36,7 @@ const useListenEventSwapChart = ({ coin }) => {
 
       setCurPrice(currentPrice);
     })();
-  }, [coin]);
+  }, [coin?._id]);
 
   // subscribe to real-time swap txs on trade
   useEffect(() => {
@@ -51,6 +51,10 @@ const useListenEventSwapChart = ({ coin }) => {
     listener.setProgramEventCallback(
       "swapEvent",
       (result: ResultType) => {
+        if (coin._id !== result.mint) {
+          return;
+        }
+
         const newPrice = calculateTokenPrice(
           result.tokenReserves,
           result.lamportReserves,
@@ -60,7 +64,7 @@ const useListenEventSwapChart = ({ coin }) => {
         setCurPrice(newPrice);
 
         // socketChart
-        console.log("====listen=====>>>", result);
+        console.log("======listen socket chart=====>>>", result);
         const newPriceUsd = calculateTokenPrice(
           result.tokenReserves,
           result.lamportReserves,
@@ -83,11 +87,11 @@ const useListenEventSwapChart = ({ coin }) => {
         if (!state || !state.data || !newPriceUsd) {
           return;
         }
-        console.log(
-          "SOCKET :>> tokenId, priceUpdates",
-          result.mint,
-          newPriceUsd
-        );
+        // console.log(
+        //   "SOCKET :>> tokenId, priceUpdates",
+        //   result.mint,
+        //   newPriceUsd
+        // );
 
         const priceHistory = [...state.data, priceUpdates];
         const subscriptionItem = channelToSubscription.get(result.mint);
@@ -110,7 +114,7 @@ const useListenEventSwapChart = ({ coin }) => {
           lastBar.close === lastBar.open && lastBar.high === lastBar.low
             ? bars[bars.length - 2]
             : lastBar;
-        console.log("bar", bar, lastBar);
+        // console.log("bar", bar, lastBar);
 
         if (!bar) return;
         subscriptionItem.lastBar = bar;
@@ -134,10 +138,10 @@ const useListenEventSwapChart = ({ coin }) => {
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log("socket-chart---ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
-  }, [coin]);
+  }, [coin?._id]);
 
   return {
     curPrice,

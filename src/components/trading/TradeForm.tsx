@@ -160,7 +160,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   useEffect(() => {
     getBalance();
-  }, [coin, wallet.publicKey]);
+  }, [coin?._id, wallet.publicKey]);
 
   const handlTrade = async () => {
     try {

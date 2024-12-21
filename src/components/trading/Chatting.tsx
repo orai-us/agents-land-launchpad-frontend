@@ -42,6 +42,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     solPrice,
   } = useContext(UserContext);
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [isTrades, setIsTrades] = useState<CHAT_TAB>(CHAT_TAB.CHAT);
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
 
@@ -62,13 +63,13 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
       "swapEvent",
       async (result: ResultType) => {
         // const solPrice = await getSolPriceInUSD();
-        const userInfo = await getUserByWalletAddress({ wallet: result.user });
+        // const userInfo = await getUserByWalletAddress({ wallet: result.user });
         const tx = await connection.getTransaction(result.tx, {
           commitment: "confirmed",
           maxSupportedTransactionVersion: 0,
         });
         const newRecordInfo: recordInfo = {
-          holder: userInfo,
+          holder: { wallet: result.user } as any,
           lamportAmount: result.lamportAmount,
           tokenAmount: result.tokenAmount,
           time: new Date(tx.blockTime),
@@ -82,8 +83,10 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           swapDirection: result.swapDirection as any,
         };
 
-        const newTradeRecords = [newRecordInfo, ...trades.record];
-        setTrades({ ...trades, record: newTradeRecords });
+        setTrades((trades) => {
+          const newTradeRecords = [newRecordInfo, ...trades.record];
+          return { ...trades, record: newTradeRecords };
+        });
       },
       []
     );
@@ -94,10 +97,10 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log("Trading---ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
-  }, [trades, coin]);
+  }, [coin?._id, loaded]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,11 +112,12 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           const coinAddress = coin.token;
           const data = await getCoinTrade(coinAddress);
           setTrades(data);
+          setLoaded(true);
         }
       }
     };
     fetchData();
-  }, [isTrades, param, coin]);
+  }, [isTrades, param, coin?._id]);
 
   useEffect(() => {
     if (coinId == coin._id) {

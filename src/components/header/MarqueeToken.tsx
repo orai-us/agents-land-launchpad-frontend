@@ -195,6 +195,7 @@ const MarqueeToken = () => {
     );
 
     return () => {
+      console.log("Notifications----ready to remove listeners");
       connection.removeOnLogsListener(subId);
     };
   }, []);

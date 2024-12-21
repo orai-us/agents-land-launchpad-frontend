@@ -44,16 +44,11 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       }
     };
     fetchData();
-  }, [wallet]);
+  }, [wallet.publicKey]);
 
   useEffect(() => {
     const fetchData = async () => {
       const kingCoin = await getKoth();
-      const configBondingAddr =
-        await new Web3SolanaProgramInteraction().getBondingAddressToken(wallet);
-      if (configBondingAddr) {
-        setConfigBondingAddress(configBondingAddr);
-      }
 
       if (kingCoin) {
         setKothCoin(kingCoin);
@@ -64,9 +59,10 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (data) {
+      if (data.token) {
         const holderData = await findHolders(data.token);
         setHolders(holderData ? holderData : []);
+
         const currentKotHProgress = calculateKotHProgress(
           data.lamportReserves,
           data.bondingCurveLimit
@@ -75,7 +71,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       }
     };
     fetchData();
-  }, [data]);
+  }, [data.token, data.lamportReserves, data.bondingCurveLimit]);
 
   // // real-time koth progress
   // useEffect(() => {
