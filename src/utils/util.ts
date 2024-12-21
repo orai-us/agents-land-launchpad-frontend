@@ -10,7 +10,7 @@ import {
   userInfo,
 } from "./types";
 import { BN } from "@coral-xyz/anchor";
-import { INIT_SOL_BONDING_CURVE } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import BigNumber from "bignumber.js";
 import { PublicKey, PublicKeyInitData } from "@solana/web3.js";
 
@@ -436,10 +436,10 @@ export function calculateKotHProgress(
   }
   if (bondingCurveLimit.toNumber() === 0) return 0;
   const calcLamportReserves = lamportReserves.sub(
-    new BN(INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
   );
   const calcBondingCurveLimit = bondingCurveLimit.sub(
-    new BN(INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
   );
   let currentKotHProgress =
     (fromBig(calcLamportReserves, 9) /

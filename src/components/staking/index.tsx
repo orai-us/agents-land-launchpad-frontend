@@ -1,7 +1,7 @@
 import LoadingImg from "@/assets/icons/loading-button.svg";
 import nodataImg from "@/assets/icons/nodata.svg";
 import MaxImg from "@/assets/images/richoldman.png";
-import { SPL_DECIMAL, STAKE_CURRENCY_MINT, TIMER } from "@/config";
+import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import { formatNumberKMB, numberWithCommas } from "@/utils/format";
@@ -88,7 +88,7 @@ export default function Staking() {
       const [tokenBal] = await Promise.all([
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
-          STAKE_CURRENCY_MINT
+          ALL_CONFIGS.STAKE_CURRENCY_MINT
         ),
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
@@ -325,7 +325,7 @@ export default function Staking() {
                 try {
                   setIsLoading(true);
                   const duration =
-                    selectedLockTime.value * TIMER.MONTH_TO_SECONDS;
+                    selectedLockTime.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
                   const amount = toBN(
                     toBN(stakeAmount || 0)
                       .multipliedBy(10 ** SPL_DECIMAL)

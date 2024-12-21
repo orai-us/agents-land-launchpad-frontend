@@ -1,6 +1,6 @@
 import crownImg from "@/assets/icons/crown.svg";
 import badgeKothImg from "@/assets/images/peak_evolution.svg";
-import { BONDING_CURVE_LIMIT } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
 import { getKoth, reduceString } from "@/utils/util";
 import BigNumber from "bignumber.js";
@@ -31,7 +31,7 @@ const Banner = () => {
     (kothCoin?.lamportReserves || 0).toString() || 0
   )
     .multipliedBy(100)
-    .div(BONDING_CURVE_LIMIT);
+    .div(ALL_CONFIGS.BONDING_CURVE_LIMIT);
 
   const bondingCurvePercent = bondingCurvePercentOrg.isGreaterThanOrEqualTo(100)
     ? 100

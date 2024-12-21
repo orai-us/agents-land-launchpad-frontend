@@ -3,7 +3,6 @@
 import { commitmentLevel, endpoint } from "@/program/web3";
 import { coinInfo } from "@/utils/types";
 import { Connection } from "@solana/web3.js";
-import Head from "next/head";
 import { useEffect, useState } from "react";
 
 interface TradingChartProps {
@@ -34,9 +33,6 @@ export const CoinGeckoChart: React.FC<TradingChartProps> = ({ param }) => {
   };
   return (
     <>
-      <Head>
-        <title>Sample Demo TradingView with NextJS</title>
-      </Head>
       <iframe
         height="500px"
         width="100%"

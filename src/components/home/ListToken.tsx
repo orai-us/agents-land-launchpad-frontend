@@ -4,7 +4,7 @@ import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import cloudIslandImg from "@/assets/images/islandCloud.png";
 import oraidexIsland from "@/assets/images/oraidex_island.png";
 import raydiumIsland from "@/assets/images/raydium_island.png";
-import { BONDING_CURVE_LIMIT, INIT_SOL_BONDING_CURVE } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
 import { coinInfo } from "@/utils/types";
 import { reduceString } from "@/utils/util";
@@ -14,13 +14,12 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { FC } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
+import ReactLoading from "react-loading";
 import { useLocation } from "wouter";
 import {
   formatCountdownTime,
-  TIMER,
   useCountdown,
 } from "../trading/hooks/useCountdown";
-import ReactLoading from "react-loading";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -150,12 +149,16 @@ export const ListLaunchToken = ({
         const bondingCurveValue = new BigNumber(
           (coinItem.lamportReserves || 0).toString()
         )
-          .minus(INIT_SOL_BONDING_CURVE)
+          .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
           .toNumber();
 
         const bondingCurvePercent = new BigNumber(bondingCurveValue)
           .multipliedBy(new BigNumber(100))
-          .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+          .div(
+            new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+              ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+            )
+          )
           .toNumber();
 
         const shownPercent =
@@ -167,7 +170,7 @@ export const ListLaunchToken = ({
 
         const isNotForSale =
           new Date(coinItem.date).getTime() +
-            TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+            ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
           Date.now();
 
         return (
@@ -258,9 +261,9 @@ export const ListLaunchToken = ({
 
 const CountdownItem = ({ coin }) => {
   const startTime = Math.ceil(
-    new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND
+    new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
   );
-  const endTime = startTime + TIMER.DAY_TO_SECONDS;
+  const endTime = startTime + ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
 
   const { timeRemaining } = useCountdown({
     startTime,

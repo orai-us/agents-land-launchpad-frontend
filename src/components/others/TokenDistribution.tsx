@@ -1,28 +1,19 @@
-import { coinInfo, holderInfo, recordInfo } from "@/utils/types";
-import { FC, useContext, useEffect, useState } from "react";
-import {
-  calculateKotHProgress,
-  calculateTokenPrice,
-  findHolders,
-  fromBig,
-  getKoth,
-  getSolPriceInUSD,
-  getUserByWalletAddress,
-} from "@/utils/util";
 import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import { coinInfo, holderInfo } from "@/utils/types";
+import { calculateKotHProgress, findHolders, getKoth } from "@/utils/util";
+import { FC, useEffect, useState } from "react";
 
-import { BN } from "@coral-xyz/anchor";
-import { PROGRAM_ID, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID } from "@/config";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import {
-  endpoint,
   commitmentLevel,
+  endpoint,
   Web3SolanaProgramInteraction,
 } from "@/program/web3";
-import { Connection, PublicKey } from "@solana/web3.js";
 import { formatNumberKMB } from "@/utils/format";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey } from "@solana/web3.js";
 
 interface ModalProps {
   data: coinInfo;
@@ -156,9 +147,14 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const isAgent =
                   String(item.owner).toLowerCase() ===
                   String(data.metadata?.agentAddress).toLowerCase();
+                const isVaults =
+                  String(item.owner).toLowerCase() ===
+                  String(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
-                  String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();
+                  String(
+                    ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET
+                  ).toLowerCase();
 
                 return (
                   <div
@@ -189,6 +185,11 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         {isAgent && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
                             (Agent)
+                          </span>
+                        )}
+                        {isVaults && (
+                          <span className="ml-1 text-[#585A6B] text-[12px]">
+                            (Strongbox Vaults)
                           </span>
                         )}
                       </a>

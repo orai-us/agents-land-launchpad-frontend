@@ -1,28 +1,24 @@
+import { ALL_CONFIGS, PROGRAM_ID } from "@/config";
+import UserContext from "@/context/UserContext";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
+import { commitmentLevel, endpoint } from "@/program/web3";
 import { coinInfo, recordInfo, tradeInfo } from "@/utils/types";
-import { MessageForm } from "../MessageForm";
-import { ChangeEvent, useContext, useEffect, useMemo, useState } from "react";
-import { Trade } from "./Trade";
 import {
   calculateTokenPrice,
   getCoinTrade,
   getMessageByCoin,
-  getSolPriceInUSD,
-  getUser,
   getUserByWalletAddress,
 } from "@/utils/util";
-import UserContext from "@/context/UserContext";
-import ReplyModal from "../modals/ReplyModal";
-import { BiSort } from "react-icons/bi";
-import { twMerge } from "tailwind-merge";
-import ThreadSection from "../modals/Thread";
-import { PROGRAM_ID } from "@/config";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import { endpoint, commitmentLevel } from "@/program/web3";
 import { Connection, PublicKey } from "@solana/web3.js";
 import _ from "lodash";
-import { TIMER } from "./hooks/useCountdown";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { TOKENOMICS_LIST } from "../creatToken";
+import { MessageForm } from "../MessageForm";
+import ReplyModal from "../modals/ReplyModal";
+import ThreadSection from "../modals/Thread";
+import { Trade } from "./Trade";
 
 interface ChattingProps {
   param: string | null;
@@ -50,7 +46,8 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
 
   const isNotForSale =
-    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
+    new Date(coin.date).getTime() +
+      ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
     Date.now();
 
   // subscribe to real-time swap txs on trade

@@ -1,4 +1,5 @@
 import { errorAlert } from "@/components/others/ToastGroup";
+import { SEED_GLOBAL } from "@/config";
 import {
   rayBuyTx,
   raySellTx,
@@ -7,6 +8,10 @@ import {
 import { launchDataInfo } from "@/utils/types";
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import {
   ComputeBudgetProgram,
@@ -15,18 +20,12 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   Transaction,
-  TransactionExpiredTimeoutError,
-  VersionedTransaction,
 } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
+import { ALL_CONFIGS } from "./../config";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
-import { SEED_GLOBAL } from "@/config";
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
 import { handleTransaction } from "./utils";
 
 export const commitmentLevel = "confirmed";
@@ -90,6 +89,16 @@ export class Web3SolanaProgramInteraction {
         mintKp.publicKey
       );
 
+      const stakingTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+        mintKp.publicKey
+      );
+
+      const communityPoolTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET),
+        mintKp.publicKey
+      );
+
       // console.log("aiAgentTokenAccount", aiAgentTokenAccount);
       // console.log("creatorTokenAccount", creatorTokenAccount);
 
@@ -107,7 +116,7 @@ export class Web3SolanaProgramInteraction {
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
           aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
-          teamWallet: configAccount.teamWallet,
+          stakingWallet: new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
         })
         .remainingAccounts([
           {
@@ -119,6 +128,16 @@ export class Web3SolanaProgramInteraction {
             isWritable: true,
             isSigner: false,
             pubkey: creatorTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: stakingTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: communityPoolTokenAccount,
           },
         ])
         .instruction();

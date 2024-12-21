@@ -1,17 +1,20 @@
-import { formatCountdownTime, TIMER, useCountdown } from './hooks/useCountdown';
+import { ALL_CONFIGS } from "@/config";
+import { formatCountdownTime, useCountdown } from "./hooks/useCountdown";
 
 const Countdown = ({ onEnd, coin }) => {
-  const startTime = Math.ceil(new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND);
-  const endTime = startTime + TIMER.DAY_TO_SECONDS;
+  const startTime = Math.ceil(
+    new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
+  );
+  const endTime = startTime + ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
 
   const { timeRemaining } = useCountdown({
     startTime,
     endTime,
     onStart: () => {},
     onEnd: () => {
-      console.log('Start for Sale');
+      console.log("Start for Sale");
       onEnd();
-    }
+    },
   });
 
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
@@ -19,7 +22,13 @@ const Countdown = ({ onEnd, coin }) => {
   return (
     <div className="bg-[rgba(99,_146,_232,_0.08)] p-4 rounded-lg">
       <div className="flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+        >
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -32,8 +41,12 @@ const Countdown = ({ onEnd, coin }) => {
 
       <div className="flex mt-3">
         <div className="text-[20px] text-[#6392E9] font-semibold">{hours}h</div>
-        <div className="text-[20px] text-[#6392E9] font-semibold">{minutes}m</div>
-        <div className="text-[20px] text-[#6392E9] font-semibold">{seconds}s</div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {minutes}m
+        </div>
+        <div className="text-[20px] text-[#6392E9] font-semibold">
+          {seconds}s
+        </div>
       </div>
     </div>
   );

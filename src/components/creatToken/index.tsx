@@ -933,8 +933,12 @@ export const TOKENOMICS_LIST = [
     color: `#C2F98F`,
   },
   {
-    text: "97% for fairlaunch (bonding curve)",
+    text: "2% for Strongbox Vaults",
     color: `#9EEEDB`,
+  },
+  {
+    text: "97% for fairlaunch (bonding curve)",
+    color: `#7e9af9`,
   },
 ];
 

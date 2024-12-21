@@ -1,7 +1,7 @@
 import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import React, { useEffect, useState } from "react";
 import { LOCK_TIME_OPTIONS } from "../constants";
-import { TIMER } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { toBN } from "@/utils/util";
 
@@ -23,7 +23,7 @@ const useGetListLockedByUser = (refreshCheck) => {
 
         await Promise.all(
           LOCK_TIME_OPTIONS.map(async (item) => {
-            const period = item.value * TIMER.MONTH_TO_SECONDS;
+            const period = item.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
             const { listLockedItems, vaultInfo } =
               await web3Locking.getListLockedOfUser(period, wallet);
 

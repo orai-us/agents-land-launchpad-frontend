@@ -2,11 +2,13 @@ import React from "react";
 import Countdown from "./Countdown";
 import dayjs from "dayjs";
 import islandLunch from "@/assets/images/islandLunch.png";
-import { TIMER } from "./hooks/useCountdown";
+import { ALL_CONFIGS } from "@/config";
 
 const NotForSale = ({ coin, onEnd }) => {
   const startTime = Math.ceil(new Date(coin.date || Date.now()).getTime());
-  const endTime = startTime + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND;
+  const endTime =
+    startTime +
+    ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND;
 
   return (
     <div className="relative w-full md:max-w-[384px] bg-[#13141D] border border-[#E8E9EE] rounded-xl p-6 h-fit">
