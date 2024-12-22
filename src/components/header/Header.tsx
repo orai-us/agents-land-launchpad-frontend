@@ -47,7 +47,7 @@ const Header: FC = () => {
     },
     {
       link: "",
-      text: "How it works?",
+      text: "How it works",
       onclick: () => setShowStepWork(true),
     },
     {
