@@ -30,7 +30,7 @@ const HowItWorkModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
     >
       <div className="flex w-full max-w-[480px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
         <div className="">
-          <h2 className="text-[18px] font-medium">How it works?</h2>
+          <h2 className="text-[18px] font-medium">How it works</h2>
           <button
             onClick={() => closeModal()}
             className="absolute top-6 right-6 text-gray-600"
@@ -124,7 +124,7 @@ const STEP_WORK = [
   'Bind Telegram and Twitter',
   'Publish your agent',
   'Initialize token for your agent',
-  'Wait for bonding curve when it reaches $66K market cap',
+  'Wait for bonding curve when it reaches ~$150k market cap (150 SOL)',
   'List graduated token at Raydium and OraiDEX',
   'Change the agent owner to token holders',
   'Govern the agent through DAO'
