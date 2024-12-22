@@ -184,7 +184,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         )}
                         {isCommunityPool && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
-                            (Distilled AI Community)
+                            (Distilled AI Treasury)
                           </span>
                         )}
                         {isAgent && (

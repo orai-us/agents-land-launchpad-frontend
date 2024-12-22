@@ -919,7 +919,7 @@ export const TOKENOMICS_LIST = [
     color: `#f9b48f`,
   },
   {
-    text: "1% for Distilled AI community ",
+    text: "1% for Distilled AI Treasury",
     color: `#f9dd8f`,
   },
   {
