@@ -27,7 +27,8 @@ import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
 import { handleTransaction } from "./utils";
-import { toBN } from "@/utils/util";
+import { genTokenKeypair, toBN } from "@/utils/util";
+import base58 from "bs58";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -78,8 +79,10 @@ export class Web3SolanaProgramInteraction {
       );
       const configAccount = await program.account.config.fetch(configPda);
 
-      const mintKp = Keypair.generate();
-      console.log(mintKp.publicKey.toBase58());
+      // const mintKp = Keypair.generate();
+      const key = await genTokenKeypair();
+      const mintKp: Keypair = Keypair.fromSecretKey(base58.decode(key));
+      console.log("tokenAddress:", mintKp.publicKey.toBase58());
 
       const aiAgentTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(coinData.metadata.agentAddress),

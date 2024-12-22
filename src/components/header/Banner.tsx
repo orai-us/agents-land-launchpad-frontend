@@ -45,7 +45,7 @@ const Banner = () => {
             <div className="mt-6 mb-14 text-base font-medium text-[#E8E9EE]">
               The First AI Agent Launch Platform
             </div>
-            <div className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
+            <div className="uppercase p-1 py-2 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
               <Link
                 href="/create-coin"
                 className="rounded bg-white px-6 py-2 text-[#080A14]"

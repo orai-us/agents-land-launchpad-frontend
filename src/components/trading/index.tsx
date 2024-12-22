@@ -36,6 +36,7 @@ import { DexToolsChart } from "../TVChart/DexToolsChart";
 import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
 import NotForSale from "./NotForSale";
 import useWindowSize from "@/hooks/useWindowSize";
+import { errorAlert } from "../others/ToastGroup";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -145,6 +146,17 @@ export default function TradingPage() {
     fetchData();
   }, [pathname, wallet.publicKey]);
 
+  useEffect(() => {
+    if (coin._id) {
+      console.log("data fullfil :>>", coin);
+
+      if (!coin.metadata?.agentAddress) {
+        setLocation("/");
+        errorAlert("Token not created with agent!");
+      }
+    }
+  }, [coin]);
+
   // realtime bonding curve
   useEffect(() => {
     if (!coinId || !wallet.publicKey) return;
@@ -189,13 +201,13 @@ export default function TradingPage() {
           const mint = new PublicKey(coin.token);
 
           const { numerator, denominator } =
-            await web3Solana.simulateRaydiumSwapTx(
+            (await web3Solana.simulateRaydiumSwapTx(
               mint,
               wallet,
               amountWithDecimal,
               1,
               coin.raydiumPoolAddr
-            );
+            )) || {};
 
           setSimulatePrice(
             new BigNumber((numerator || 0).toString())
