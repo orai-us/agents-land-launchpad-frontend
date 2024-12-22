@@ -1,31 +1,31 @@
-import LoadingImg from "@/assets/icons/loading-button.svg";
-import nodataImg from "@/assets/icons/nodata.svg";
-import MaxImg from "@/assets/images/richoldman.png";
-import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { Web3SolanaLockingToken } from "@/program/web3Locking";
-import { formatNumberKMB, numberWithCommas } from "@/utils/format";
-import { toBN } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import dayjs from "dayjs";
-import tz from "dayjs/plugin/timezone";
-import utc from "dayjs/plugin/utc";
-import { ChangeEvent, useEffect, useState } from "react";
-import ReactLoading from "react-loading";
-import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
-import { successAlert } from "../others/ToastGroup";
-import { LOCK_TIME_OPTIONS } from "./constants";
-import useGetListLockedByUser from "./hooks/useGetListLockedByUser";
-import LockingItem from "./LockingItem";
-import NumberFormat from "react-number-format";
+import LoadingImg from '@/assets/icons/loading-button.svg';
+import nodataImg from '@/assets/icons/nodata.svg';
+import MaxImg from '@/assets/images/richoldman.png';
+import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { Web3SolanaLockingToken } from '@/program/web3Locking';
+import { formatNumberKMB, numberWithCommas } from '@/utils/format';
+import { toBN } from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import dayjs from 'dayjs';
+import tz from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import { ChangeEvent, useEffect, useState } from 'react';
+import ReactLoading from 'react-loading';
+import { twMerge } from 'tailwind-merge';
+import { useLocation } from 'wouter';
+import { successAlert } from '../others/ToastGroup';
+import { LOCK_TIME_OPTIONS } from './constants';
+import useGetListLockedByUser from './hooks/useGetListLockedByUser';
+import LockingItem from './LockingItem';
+import NumberFormat from 'react-number-format';
 
 dayjs.extend(utc);
 dayjs.extend(tz);
 
 export enum STEP_TOKEN {
   INFO,
-  BEHAVIOR,
+  BEHAVIOR
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
@@ -40,30 +40,30 @@ export default function Staking() {
   );
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
-  const [stakeAmount, setStakeAmount] = useState<string>("");
+  const [stakeAmount, setStakeAmount] = useState<string>('');
   const wallet = useWallet();
   const {
     loading: loadingList,
     lockingList,
-    totalLocked,
+    totalLocked
   } = useGetListLockedByUser(isRefreshList);
   const AMOUNT_LIST = [
     {
-      label: "25%",
-      value: tokenBal / 4,
+      label: '25%',
+      value: tokenBal / 4
     },
     {
-      label: "50%",
-      value: tokenBal / 2,
+      label: '50%',
+      value: tokenBal / 2
     },
     {
-      label: "75%",
-      value: (tokenBal / 4) * 3,
+      label: '75%',
+      value: (tokenBal / 4) * 3
     },
     {
-      label: "100%",
-      value: tokenBal,
-    },
+      label: '100%',
+      value: tokenBal
+    }
   ];
 
   const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
@@ -71,13 +71,13 @@ export default function Staking() {
 
   const genMsgTextBtn = () => {
     if (!stakeAmount || !Number(stakeAmount)) {
-      return "Lock amount required";
+      return 'Lock amount required';
     }
     if (isInsufficient) {
-      return "Insufficient amount";
+      return 'Insufficient amount';
     }
 
-    return "Lock";
+    return 'Lock';
   };
 
   const getBalance = async () => {
@@ -90,13 +90,13 @@ export default function Staking() {
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
           ALL_CONFIGS.STAKE_CURRENCY_MINT
-        ),
+        )
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
       setTokenBal(tokenBal ? tokenBal : 0);
       // setSolBalance(solBal ? solBal : 0);
     } catch (error) {
-      console.log("error", error);
+      console.log('error', error);
     }
   };
 
@@ -104,32 +104,23 @@ export default function Staking() {
     getBalance();
   }, [wallet.publicKey]);
 
-  const [, setLocation] = useLocation();
-
-  const handleToRouter = (path: string) => {
-    setLocation(path);
-  };
-
   const handleInputChange = (value: number) => {
     if (value || value === 0) {
       setStakeAmount(value.toString());
     } else {
-      setStakeAmount(""); // Allow empty string to clear the input
+      setStakeAmount(''); // Allow empty string to clear the input
     }
   };
 
   const Loading = () => (
     <div className="flex h-screen items-start justify-center bg-tizz-background">
-      <ReactLoading height={20} width={50} type={"bars"} color={"#36d7b7"} />
+      <ReactLoading height={20} width={50} type={'bars'} color={'#36d7b7'} />
     </div>
   );
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
-      <div
-        // onClick={() => handleToRouter("/")}
-        className="w-fit"
-      >
+      <div className="w-fit">
         <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2">
           {/* <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -263,10 +254,10 @@ export default function Staking() {
                   />
 
                   <span className="text-[10px] text-[#E8E9EE] font-medium">
-                    Balance:{" "}
+                    Balance:{' '}
                     {numberWithCommas(Number(tokenBal), undefined, {
-                      maximumFractionDigits: SPL_DECIMAL,
-                    })}{" "}
+                      maximumFractionDigits: SPL_DECIMAL
+                    })}{' '}
                     MAX
                   </span>
                 </div>
@@ -306,9 +297,9 @@ export default function Staking() {
                   return (
                     <div
                       className={twMerge(
-                        "cursor-pointer flex flex-1 items-center justify-center h-10 bg-[#080A14] border border-[#30344A] rounded hover:brightness-125 text-[#9192A0] text-[12px] md:text-[14px] font-medium",
+                        'cursor-pointer flex flex-1 items-center justify-center h-10 bg-[#080A14] border border-[#30344A] rounded hover:brightness-125 text-[#9192A0] text-[12px] md:text-[14px] font-medium',
                         selectedLockTime.label === item.label &&
-                          "border-[#E8E9EE] text-[#E8E9EE] rounded-lg "
+                          'border-[#E8E9EE] text-[#E8E9EE] rounded-lg '
                       )}
                       key={`key-lock-time-${idx}---`}
                       onClick={() => setSelectedLockTime(item)}
@@ -324,7 +315,7 @@ export default function Staking() {
               <div>
                 {dayjs(
                   Date.now() + selectedLockTime.value * 30 * 24 * 60 * 60 * 1000
-                ).format("MMM DD YYYY HH:mm")}
+                ).format('MMM DD YYYY HH:mm')}
                 {/* {dayjs()
                   .add(selectedLockTime.value, selectedLockTime.type)
                   .format("MMM DD YYYY HH:mm")} */}
@@ -340,7 +331,7 @@ export default function Staking() {
                 isNegative
               }
               onClick={async () => {
-                console.log("Stake!!");
+                console.log('Stake!!');
                 try {
                   setIsLoading(true);
                   const duration =
@@ -352,13 +343,13 @@ export default function Staking() {
                   ).toNumber();
                   const res = await web3Locking.stake(duration, amount, wallet);
                   if (res) {
-                    successAlert("Lock successfully!");
+                    successAlert('Lock successfully!');
                     getBalance();
                     setIsRefreshList(!isRefreshList);
                   }
                 } catch (error) {
-                  console.log("error lock", error);
-                  successAlert("Lock failed!");
+                  console.log('error lock', error);
+                  successAlert('Lock failed!');
                 } finally {
                   setIsLoading(false);
                 }
@@ -380,7 +371,7 @@ export default function Staking() {
                     .div(10 ** SPL_DECIMAL)
                     .toNumber(),
                   false
-                )}{" "}
+                )}{' '}
                 MAX
               </div>
             </div>
@@ -400,30 +391,30 @@ export default function Staking() {
 export const LIST_LOCKING_ITEMS = [
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 1,
+    status: 1
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
-  },
+    status: 0
+  }
 ];

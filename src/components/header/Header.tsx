@@ -1,16 +1,16 @@
-import LogoFullIcon from "@/assets/icons/logo.svg";
-import UserContext from "@/context/UserContext";
-import { getSolPriceInUSD } from "@/utils/util";
-import { FC, useContext, useEffect, useState } from "react";
-import { Link, useLocation } from "wouter";
-import { ConnectButton } from "../buttons/ConnectButton";
-import HowItWorkModal from "../modals/HowItWork";
-import Banner from "./Banner";
-import MarqueeToken from "./MarqueeToken";
-import { SOL_PRICE_KEY } from "@/config";
+import LogoFullIcon from '@/assets/icons/logo.svg';
+import UserContext from '@/context/UserContext';
+import { getSolPriceInUSD } from '@/utils/util';
+import { FC, useContext, useEffect, useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import { ConnectButton } from '../buttons/ConnectButton';
+import HowItWorkModal from '../modals/HowItWork';
+import Banner from './Banner';
+import MarqueeToken from './MarqueeToken';
+import { SOL_PRICE_KEY } from '@/config';
 
 const Header: FC = () => {
-  const [pathname, setLocation] = useLocation();
+  const [pathname] = useLocation();
   const { solPrice, setSolPrice } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
@@ -22,7 +22,7 @@ const Header: FC = () => {
         setSolPrice(price);
         localStorage.setItem(SOL_PRICE_KEY, price);
       } catch (error) {
-        console.log("error sol price", error);
+        console.log('error sol price', error);
       }
     };
 
@@ -35,31 +35,25 @@ const Header: FC = () => {
     }
   }, [pathname]);
 
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
-
   const menu = [
     {
-      link: "",
-      text: "Launch",
-      onclick: () => handleToRouter("/create-coin"),
+      text: 'Launch',
+      link: '/create-coin'
     },
     {
-      link: "",
-      text: "How it works?",
-      onclick: () => setShowStepWork(true),
+      text: 'How it works?',
+      onClick: () => setShowStepWork(true)
     },
     {
-      link: "",
-      text: "Strongbox Vaults",
-      onclick: () => handleToRouter("/vaults"),
+      text: 'Strongbox Vaults',
+      link: '/vaults'
     },
     {
-      link: "https://docs.agents.land/",
-      text: "Docs",
-      onclick: null,
-    },
+      onClick: () => {
+        window.open('https://docs.agents.land');
+      },
+      text: 'Docs'
+    }
   ];
 
   return (
@@ -77,23 +71,22 @@ const Header: FC = () => {
             </Link>
             <div className="hidden md:flex">
               {menu.map((item, key) => {
-                return item.link ? (
-                  <a
-                    target="_blank"
-                    href={item.link ? item.link : ""}
-                    key={`${item.link}-${key}`}
-                    className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
-                  >
-                    {item.text}
-                  </a>
-                ) : (
+                return item.onClick ? (
                   <button
-                    onClick={item.onclick ? item.onclick : () => {}}
-                    key={`${item.link}-${key}`}
+                    onClick={item.onClick}
+                    key={key}
                     className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
                   >
                     {item.text}
                   </button>
+                ) : (
+                  <Link
+                    href={item.link}
+                    key={key}
+                    className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125 ml-6"
+                  >
+                    {item.text}
+                  </Link>
                 );
               })}
             </div>
@@ -131,8 +124,8 @@ const Header: FC = () => {
 
       <div
         className={
-          "fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5" +
-          ` ${isOpenMobileMenu ? "" : "translate-x-[-100%]"}`
+          'fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5' +
+          ` ${isOpenMobileMenu ? '' : 'translate-x-[-100%]'}`
         }
       >
         <div className="flex h-[72px] items-center justify-between border-b border-[#1A1C28] px-2">
@@ -158,25 +151,34 @@ const Header: FC = () => {
           </div>
         </div>
         <div className="flex-1 px-[24px]">
-          {menu?.map((item, i) => (
-            <button
-              // href={item.link}
-              onClick={() => {
-                item.onclick();
-                setOpenMobileMenu(false);
-              }}
-              key={`${item.link}-${i}-mobile`}
-              className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125"
-            >
-              {item.text}
-            </button>
-          ))}
+          {menu?.map((item, i) =>
+            item.onClick ? (
+              <button
+                onClick={() => {
+                  item.onClick();
+                  setOpenMobileMenu(false);
+                }}
+                key={i}
+                className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125"
+              >
+                {item.text}
+              </button>
+            ) : (
+              <Link
+                href={item.link}
+                key={i}
+                className="flex items-center h-12 font-medium text-base text-[#E8E9EE] brightness-75 hover:brightness-125"
+              >
+                {item.text}
+              </Link>
+            )
+          )}
         </div>
         <div className="w-full">
           <ConnectButton />
         </div>
       </div>
-      {pathname === "/" && <Banner />}
+      {pathname === '/' && <Banner />}
     </>
   );
 };

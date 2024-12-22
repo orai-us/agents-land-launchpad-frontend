@@ -14,7 +14,8 @@ const TAB_QUERY = 'tab';
 const SEARCH_QUERY = 'keyword';
 
 const HomePage: FC = () => {
-  const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } = useContext(UserContext);
+  const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } =
+    useContext(UserContext);
   const [changeTabLoading, setChangeTabLoading] = useState(false);
   const [token, setToken] = useState('');
   const [data, setData] = useState<coinInfo[]>(null);
@@ -49,10 +50,6 @@ const HomePage: FC = () => {
     label: string;
     value: string;
   }>(SORT_LIST[0]);
-
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
 
   useEffect(() => {
     let pathname = location;
@@ -132,7 +129,9 @@ const HomePage: FC = () => {
           sortedData.sort((a, b) => +a.tokenReserves - +b.tokenReserves);
           break;
         case 'creation time':
-          sortedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
           break;
         default:
           sortedData = data;
@@ -153,7 +152,9 @@ const HomePage: FC = () => {
           sortedData.sort((a, b) => +b.tokenReserves - +a.tokenReserves);
           break;
         case 'creation time':
-          sortedData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          sortedData.sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          );
           break;
         default:
           sortedData = data;
@@ -166,7 +167,12 @@ const HomePage: FC = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target) && dropdownRef1.current && !dropdownRef1.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        dropdownRef1.current &&
+        !dropdownRef1.current.contains(event.target)
+      ) {
         setIsSort(0);
       }
     };
@@ -200,7 +206,12 @@ const HomePage: FC = () => {
         }}
       />
 
-      <ListToken type={currentTab} data={data} handleLoadMore={() => setPage((page) => page + 1)} totalData={totalData} />
+      <ListToken
+        type={currentTab}
+        data={data}
+        handleLoadMore={() => setPage((page) => page + 1)}
+        totalData={totalData}
+      />
     </div>
   );
 };

@@ -1,16 +1,16 @@
-"use client";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
-import { userInfo } from "@/utils/types";
-import { confirmWallet, walletConnect } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import base58 from "bs58";
-import { FC, useContext, useEffect, useMemo } from "react";
-import { RiExchangeDollarLine } from "react-icons/ri";
-import { VscDebugDisconnect } from "react-icons/vsc";
+'use client';
+import { errorAlert, successAlert } from '@/components/others/ToastGroup';
+import UserContext from '@/context/UserContext';
+import { userInfo } from '@/utils/types';
+import { confirmWallet, walletConnect } from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import base58 from 'bs58';
+import { FC, useContext, useEffect, useMemo } from 'react';
+import { RiExchangeDollarLine } from 'react-icons/ri';
+import { VscDebugDisconnect } from 'react-icons/vsc';
 
-import { useLocation } from "wouter";
+import { Link, useLocation } from 'wouter';
 
 export const ConnectButton: FC = () => {
   const [, setLocation] = useLocation();
@@ -25,7 +25,7 @@ export const ConnectButton: FC = () => {
     connecting,
     wallet,
     wallets,
-    select,
+    select
   } = useWallet();
   const { visible, setVisible } = useWalletModal();
 
@@ -37,7 +37,7 @@ export const ConnectButton: FC = () => {
         const updatedUser: userInfo = {
           name: publicKey.toBase58().slice(0, 6),
           wallet: publicKey.toBase58(),
-          isLedger: false,
+          isLedger: false
         };
         await sign(updatedUser);
       }
@@ -54,7 +54,7 @@ export const ConnectButton: FC = () => {
           name: connection.name,
           wallet: connection.wallet,
           _id: connection._id,
-          avatar: connection.avatar,
+          avatar: connection.avatar
         };
         setUser(newUser as userInfo);
         setLogin(true);
@@ -75,14 +75,14 @@ export const ConnectButton: FC = () => {
         setLogin(true);
         setIsLoading(false);
       }
-      successAlert("Message signed.");
+      successAlert('Message signed.');
     } catch (error) {
-      errorAlert("Sign-in failed.");
+      errorAlert('Sign-in failed.');
     }
   };
 
   const logOut = async () => {
-    if (typeof disconnect === "function") {
+    if (typeof disconnect === 'function') {
       await disconnect();
       // setLocation("/");
     }
@@ -92,7 +92,7 @@ export const ConnectButton: FC = () => {
     localStorage.clear();
   };
 
-  const { adapter: { icon = "", name = "" } = {} } = wallet || {};
+  const { adapter: { icon = '', name = '' } = {} } = wallet || {};
 
   const handleToProfile = (id: string) => {
     setLocation(id);
@@ -129,21 +129,15 @@ export const ConnectButton: FC = () => {
             </div>
             <div className="hidden md:block w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
               <ul className="border border-[rgba(88,90,107,0.24)] rounded bg-[#1A1C28] p-2 ">
-                {user?._id && (
+                {tempUser.wallet && (
                   <li>
-                    <div
+                    <Link
                       className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
-                      onClick={() =>
-                        handleToProfile(
-                          `/profile/${
-                            tempUser._id || "6746eb08d90318c6a4b2a386"
-                          }`
-                        )
-                      }
+                      href={`/profile/${tempUser.wallet}`}
                     >
                       <RiExchangeDollarLine />
                       View Profile
-                    </div>
+                    </Link>
                   </li>
                 )}
                 <li>
@@ -169,18 +163,14 @@ export const ConnectButton: FC = () => {
       </button>
       {login && tempUser.wallet && (
         <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
-          {user?._id && (
-            <div
+          {user?.wallet && (
+            <Link
               className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
-              onClick={() =>
-                handleToProfile(
-                  `/profile/${tempUser._id || "6746eb08d90318c6a4b2a386"}`
-                )
-              }
+              href={`/profile/${tempUser.wallet}`}
             >
               <RiExchangeDollarLine />
               View Profile
-            </div>
+            </Link>
           )}
           <div
             className="p-2 flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"

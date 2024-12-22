@@ -15,7 +15,7 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import { FC } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import ReactLoading from 'react-loading';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import {
   formatCountdownTime,
   useCountdown
@@ -112,14 +112,6 @@ export const ListLaunchToken = ({
   totalData,
   isUpcoming
 }) => {
-  const [, setLocation] = useLocation();
-  const handleToProfile = (id: string) => {
-    setLocation(`/profile/${id}`);
-  };
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
-
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -174,10 +166,10 @@ export const ListLaunchToken = ({
           Date.now();
 
         return (
-          <div
+          <Link
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}`}
-            onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
+            href={`/trading/${coinItem.token}`}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
@@ -208,8 +200,9 @@ export const ListLaunchToken = ({
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
                     created by{' '}
-                    <span
-                      className="text-[#E4775D] underline"
+                    <Link
+                      className="text-[#E4775D] underline normal-case"
+                      href={`/profile/${coinItem.creator?.['wallet']}`}
                       // onClick={(event) => {
                       //   event.preventDefault();
                       //   event.stopPropagation();
@@ -219,7 +212,7 @@ export const ListLaunchToken = ({
                       {coinItem.creator?.['wallet']
                         ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
                         : coinItem.creator.toString()}
-                    </span>
+                    </Link>
                   </div>
                   <span className="uppercase text-[12px] text-[#84869A] text-right">
                     {dayjs(coinItem.date || Date.now()).fromNow()}
@@ -252,7 +245,7 @@ export const ListLaunchToken = ({
                 </div>
               )}
             </div>
-          </div>
+          </Link>
         );
       })}
     </InfiniteScroll>
@@ -312,14 +305,6 @@ const CountdownItem = ({ coin }) => {
 };
 
 export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
-  const [, setLocation] = useLocation();
-  const handleToProfile = (id: string) => {
-    setLocation(`/profile/${id}`);
-  };
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
-
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -351,10 +336,10 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
         const isOraidexListed =
           coinItem.oraidexPoolAddr && !coinItem.raydiumPoolAddr;
         return (
-          <div
+          <Link
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}-listed`}
-            onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
+            href={`/trading/${coinItem.token}`}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
@@ -390,14 +375,15 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
                     created by{' '}
-                    <span
-                      className="text-[#E4775D] underline"
+                    <Link
+                      className="text-[#E4775D] underline normal-case"
+                      href={`/profile/${coinItem.creator?.['wallet']}`}
                       // onClick={() => handleToProfile(ind as any)}
                     >
                       {coinItem.creator?.['wallet']
                         ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
                         : coinItem.creator.toString()}
-                    </span>
+                    </Link>
                   </div>
 
                   <span className="uppercase text-[12px] text-[#84869A] text-right">
@@ -437,7 +423,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 )}
               </div>
             </div>
-          </div>
+          </Link>
         );
       })}
     </InfiniteScroll>
