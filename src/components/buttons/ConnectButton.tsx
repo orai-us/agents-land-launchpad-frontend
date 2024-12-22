@@ -1,16 +1,16 @@
-'use client';
-import { errorAlert, successAlert } from '@/components/others/ToastGroup';
-import UserContext from '@/context/UserContext';
-import { userInfo } from '@/utils/types';
-import { confirmWallet, walletConnect } from '@/utils/util';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useWalletModal } from '@solana/wallet-adapter-react-ui';
-import base58 from 'bs58';
-import { FC, useContext, useEffect, useMemo } from 'react';
-import { RiExchangeDollarLine } from 'react-icons/ri';
-import { VscDebugDisconnect } from 'react-icons/vsc';
+"use client";
+import { errorAlert, successAlert } from "@/components/others/ToastGroup";
+import UserContext from "@/context/UserContext";
+import { userInfo } from "@/utils/types";
+import { confirmWallet, walletConnect } from "@/utils/util";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
+import base58 from "bs58";
+import { FC, useContext, useEffect, useMemo } from "react";
+import { RiExchangeDollarLine } from "react-icons/ri";
+import { VscDebugDisconnect } from "react-icons/vsc";
 
-import { Link, useLocation } from 'wouter';
+import { Link, useLocation } from "wouter";
 
 export const ConnectButton: FC = () => {
   const [, setLocation] = useLocation();
@@ -25,7 +25,7 @@ export const ConnectButton: FC = () => {
     connecting,
     wallet,
     wallets,
-    select
+    select,
   } = useWallet();
   const { visible, setVisible } = useWalletModal();
 
@@ -37,7 +37,7 @@ export const ConnectButton: FC = () => {
         const updatedUser: userInfo = {
           name: publicKey.toBase58().slice(0, 6),
           wallet: publicKey.toBase58(),
-          isLedger: false
+          isLedger: false,
         };
         await sign(updatedUser);
       }
@@ -54,7 +54,7 @@ export const ConnectButton: FC = () => {
           name: connection.name,
           wallet: connection.wallet,
           _id: connection._id,
-          avatar: connection.avatar
+          avatar: connection.avatar,
         };
         setUser(newUser as userInfo);
         setLogin(true);
@@ -70,19 +70,21 @@ export const ConnectButton: FC = () => {
       const signedWallet = { ...connection, signature: res };
       const confirm = await confirmWallet({ data: signedWallet });
 
+      console.log("confirm", confirm);
+
       if (confirm) {
         setUser(confirm);
         setLogin(true);
         setIsLoading(false);
       }
-      successAlert('Message signed.');
+      successAlert("Message signed.");
     } catch (error) {
-      errorAlert('Sign-in failed.');
+      errorAlert("Sign-in failed.");
     }
   };
 
   const logOut = async () => {
-    if (typeof disconnect === 'function') {
+    if (typeof disconnect === "function") {
       await disconnect();
       // setLocation("/");
     }
@@ -92,7 +94,7 @@ export const ConnectButton: FC = () => {
     localStorage.clear();
   };
 
-  const { adapter: { icon = '', name = '' } = {} } = wallet || {};
+  const { adapter: { icon = "", name = "" } = {} } = wallet || {};
 
   const handleToProfile = (id: string) => {
     setLocation(id);
