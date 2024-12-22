@@ -75,7 +75,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           holder: { wallet: result.user } as any,
           lamportAmount: result.lamportAmount,
           tokenAmount: result.tokenAmount,
-          time: new Date(tx.blockTime),
+          time: new Date(tx.blockTime * ALL_CONFIGS.TIMER.MILLISECONDS),
           tx: result.tx,
           price: calculateTokenPrice(
             result.tokenReserves,
