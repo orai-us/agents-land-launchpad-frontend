@@ -1,62 +1,63 @@
-import LoadingImg from '@/assets/icons/loading-button.svg';
-import oraidexIcon from '@/assets/icons/oraidex_ic.svg';
-import raydiumIcon from '@/assets/icons/raydium_ic.svg';
-import defaultUserImg from '@/assets/images/userAgentDefault.svg';
-import { Chatting } from '@/components/trading/Chatting';
-import { TradeForm } from '@/components/trading/TradeForm';
-import { TradingChart } from '@/components/TVChart/TradingChart';
-import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from '@/config';
-import UserContext from '@/context/UserContext';
-import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
-import { ResultType } from '@/program/logListeners/types';
+import LoadingImg from "@/assets/icons/loading-button.svg";
+import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
+import raydiumIcon from "@/assets/icons/raydium_ic.svg";
+import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import { Chatting } from "@/components/trading/Chatting";
+import { TradeForm } from "@/components/trading/TradeForm";
+import { TradingChart } from "@/components/TVChart/TradingChart";
+import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from "@/config";
+import UserContext from "@/context/UserContext";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
 import {
   commitmentLevel,
   endpoint,
-  Web3SolanaProgramInteraction
-} from '@/program/web3';
+  Web3SolanaProgramInteraction,
+} from "@/program/web3";
 import {
   formatLargeNumber,
   formatNumberKMB,
-  numberWithCommas
-} from '@/utils/format';
-import { coinInfo } from '@/utils/types';
-import { fromBig, getCoinInfo, reduceString, sleep } from '@/utils/util';
-import { BN } from '@coral-xyz/anchor';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import BigNumber from 'bignumber.js';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import updateLocale from 'dayjs/plugin/updateLocale';
-import { useContext, useEffect, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
-import { Link, useLocation } from 'wouter';
-import TokenDistribution from '../others/TokenDistribution';
-import { DexToolsChart } from '../TVChart/DexToolsChart';
-import useListenEventSwapChart from './hooks/useListenEventSwapChart';
-import NotForSale from './NotForSale';
-import useWindowSize from '@/hooks/useWindowSize';
+  numberWithCommas,
+} from "@/utils/format";
+import { coinInfo } from "@/utils/types";
+import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
+import { BN } from "@coral-xyz/anchor";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import BigNumber from "bignumber.js";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import updateLocale from "dayjs/plugin/updateLocale";
+import { useContext, useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import { Link, useLocation } from "wouter";
+import TokenDistribution from "../others/TokenDistribution";
+import { DexToolsChart } from "../TVChart/DexToolsChart";
+import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
+import NotForSale from "./NotForSale";
+import useWindowSize from "@/hooks/useWindowSize";
+import { errorAlert } from "../others/ToastGroup";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
 
 // Custom locale configuration
-dayjs.updateLocale('en', {
+dayjs.updateLocale("en", {
   relativeTime: {
-    future: 'in %s',
-    past: '%s ago',
-    s: 'a few seconds',
-    m: '1m', // 1 minute
-    mm: '%dm', // 2-59 minutes
-    h: '1h', // 1 hour
-    hh: '%dh', // 2-23 hours
-    d: '1d', // 1 day
-    dd: '%dd', // 2-30 days
-    M: '1mo', // 1 month
-    MM: '%dmo', // 2-12 months
-    y: '1y', // 1 year
-    yy: '%dy' // 2+ years
-  }
+    future: "in %s",
+    past: "%s ago",
+    s: "a few seconds",
+    m: "1m", // 1 minute
+    mm: "%dm", // 2-59 minutes
+    h: "1h", // 1 hour
+    hh: "%dh", // 2-23 hours
+    d: "1d", // 1 day
+    dd: "%dd", // 2-30 days
+    M: "1mo", // 1 month
+    MM: "%dmo", // 2-12 months
+    y: "1y", // 1 year
+    yy: "%dy", // 2+ years
+  },
 });
 
 const SLEEP_TIMEOUT = 1500;
@@ -67,14 +68,14 @@ export default function TradingPage() {
   const [showOptional, setShowOptional] = useState<boolean>(true);
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
-  const [param, setParam] = useState<string>('');
+  const [param, setParam] = useState<string>("");
   const [progress, setProgress] = useState<Number>(0);
   const [curveLimit, setCurveLimit] = useState<number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const [pathname, setLocation] = useLocation();
   const [loadingEst, setLoadingEst] = useState<boolean>(true);
   const wallet = useWallet();
-  const [simulatePrice, setSimulatePrice] = useState<string>('');
+  const [simulatePrice, setSimulatePrice] = useState<string>("");
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
 
@@ -97,7 +98,7 @@ export default function TradingPage() {
     if (!data) {
       let retry = 1;
       while (retry < 3 && !data) {
-        console.log('Retry LoadToken', retry);
+        console.log("Retry LoadToken", retry);
         await sleep(SLEEP_TIMEOUT);
         ++retry;
         data = await getCoinInfo(parameter);
@@ -135,7 +136,7 @@ export default function TradingPage() {
   useEffect(() => {
     const fetchData = async () => {
       // Split the pathname and extract the last segment
-      const segments = pathname.split('/');
+      const segments = pathname.split("/");
       const parameter = segments[segments.length - 1];
       setParam(parameter);
       setCoinId(parameter);
@@ -145,22 +146,33 @@ export default function TradingPage() {
     fetchData();
   }, [pathname, wallet.publicKey]);
 
+  useEffect(() => {
+    if (coin._id) {
+      console.log("data fullfil :>>", coin);
+
+      if (!coin.metadata?.agentAddress) {
+        setLocation("/");
+        errorAlert("Token not created with agent!");
+      }
+    }
+  }, [coin]);
+
   // realtime bonding curve
   useEffect(() => {
     if (!coinId || !wallet.publicKey) return;
     const connection = new Connection(endpoint, {
       commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS
+      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
     });
     const listener = new AgentsLandEventListener(connection);
     listener.setProgramEventCallback(
-      'swapEvent',
+      "swapEvent",
       async (result: ResultType) => {
-        const segments = pathname.split('/');
+        const segments = pathname.split("/");
         const parameter = segments[segments.length - 1];
 
         if (result.mint === parameter) {
-          console.log('==== UPDATE BONDING CURVE ====');
+          console.log("==== UPDATE BONDING CURVE ====");
           await fetchDataCoin(parameter);
         }
       },
@@ -173,7 +185,7 @@ export default function TradingPage() {
 
     return () => {
       if (!program) return;
-      console.log('bonding-curve----ready to remove listeners');
+      console.log("bonding-curve----ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [coinId, wallet.publicKey]);
@@ -189,13 +201,13 @@ export default function TradingPage() {
           const mint = new PublicKey(coin.token);
 
           const { numerator, denominator } =
-            await web3Solana.simulateRaydiumSwapTx(
+            (await web3Solana.simulateRaydiumSwapTx(
               mint,
               wallet,
               amountWithDecimal,
               1,
               coin.raydiumPoolAddr
-            );
+            )) || {};
 
           setSimulatePrice(
             new BigNumber((numerator || 0).toString())
@@ -203,7 +215,7 @@ export default function TradingPage() {
               .toString()
           );
         } catch (error) {
-          console.log('simulate failed', error);
+          console.log("simulate failed", error);
         } finally {
           setLoadingEst(false);
         }
@@ -221,9 +233,9 @@ export default function TradingPage() {
     .multipliedBy(solPrice)
     .toFixed(6);
 
-  const isRaydiumListed = coin['raydiumPoolAddr'];
-  const isOraidexListed = coin['oraidexPoolAddr'];
-  const isListed = coin['listed'];
+  const isRaydiumListed = coin["raydiumPoolAddr"];
+  const isOraidexListed = coin["oraidexPoolAddr"];
+  const isListed = coin["listed"];
 
   return (
     <div className="w-full flex flex-col mx-auto gap-5">
@@ -289,18 +301,18 @@ export default function TradingPage() {
           <div className="w-full">
             <div
               className={twMerge(
-                'bg-[#1A1C28] rounded-t p-6',
-                isNotForSale && 'rounded'
+                "bg-[#1A1C28] rounded-t p-6",
+                isNotForSale && "rounded"
               )}
             >
               <div
                 className={twMerge(
-                  'mb-4 flex justify-between items-start flex-wrap gap-4',
-                  isNotForSale && 'mb-0'
+                  "mb-4 flex justify-between items-start flex-wrap gap-4",
+                  isNotForSale && "mb-0"
                 )}
               >
                 <div className="flex gap-2 items-start md:items-center">
-                  {typeof imgSrc === 'string' ? (
+                  {typeof imgSrc === "string" ? (
                     <img
                       src={imgSrc}
                       alt="agentAvt"
@@ -317,19 +329,19 @@ export default function TradingPage() {
                     <div className="flex items-center flex-wrap">
                       <div className="text-[#E8E9EE] text-[18px] md:text-[24px] font-medium">
                         {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
-                        {coin.name || '--'}&nbsp;(${coin.ticker || '--'})
+                        {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                       </div>
                       <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
                         &#x2022; {dayjs(coin.date || Date.now()).fromNow()}
                       </div>
                       <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
-                        &#x2022; Marketcap{' '}
+                        &#x2022; Marketcap{" "}
                         <span className="text-[#E8E9EE]">
                           {formatNumberKMB(Number(coin.marketcap || 0))}
                         </span>
                       </div>
                     </div>
-                    <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium uppercase break-all">
+                    <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium break-all">
                       CONTRACT: {coin.token}
                     </p>
                   </div>
@@ -361,13 +373,13 @@ export default function TradingPage() {
                 </div> */}
 
                 <div className="w-full md:w-fit flex md:flex-col justify-between md:items-end items-start h-full">
-                  <div className="text-[10px] md:text-[12px] text-[#84869A] font-medium uppercase">
-                    CREATED BY{' '}
+                  <div className="text-[10px] md:text-[12px] text-[#84869A] font-medium">
+                    CREATED BY{" "}
                     <Link
                       className="text-[10px] md:text-[12px] text-[#E4775D] underline cursor-pointer normal-case"
-                      href={`/profile/${coin.creator?.['wallet']}`}
+                      href={`/profile/${coin.creator?.["wallet"]}`}
                     >
-                      {reduceString(coin.creator?.['wallet'] || '', 4, 4)}
+                      {reduceString(coin.creator?.["wallet"] || "", 4, 4)}
                     </Link>
                   </div>
                   <div className="flex gap-3 md:mt-4">
@@ -485,20 +497,21 @@ export default function TradingPage() {
                         isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
                         undefined,
                         {
-                          maximumFractionDigits: ALL_CONFIGS.SHOW_DECIMALS_PRICE
+                          maximumFractionDigits:
+                            ALL_CONFIGS.SHOW_DECIMALS_PRICE,
                         }
                       )
                     ) : (
                       <img src={LoadingImg} />
-                    )}{' '}
+                    )}{" "}
                     SOL
                   </p>
                   <p
                     className={twMerge(
-                      'mt-1 font-medium text-[14px] text-[#84869A]'
+                      "mt-1 font-medium text-[14px] text-[#84869A]"
                     )}
                   >
-                    ≈ ${isNaN(Number(priceUsd)) ? '--' : priceUsd}
+                    ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
                   </p>
                 </div>
               )}
@@ -520,7 +533,7 @@ export default function TradingPage() {
                   className="w-fit md:hidden flex px-3 py-3 text-[12px] text-[#9192A0] items-center cursor-pointer"
                   onClick={() => setShowOptional(!showOptional)}
                 >
-                  {showOptional ? 'Hide' : 'Show'} chart{' '}
+                  {showOptional ? "Hide" : "Show"} chart{" "}
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"
@@ -537,14 +550,14 @@ export default function TradingPage() {
                   </svg>
                 </div>
                 {showOptional && (
-                  <div className={twMerge('py-3 md:py-0 bg-[#1a1c28] rounded')}>
+                  <div className={twMerge("py-3 md:py-0 bg-[#1a1c28] rounded")}>
                     {isListedOnRay && (
                       <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
                         <div
                           onClick={() => setIsAgentChart(true)}
                           className={twMerge(
-                            'cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-                            isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]'
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
                           )}
                         >
                           Agent Land Chart
@@ -552,8 +565,8 @@ export default function TradingPage() {
                         <div
                           onClick={() => setIsAgentChart(false)}
                           className={twMerge(
-                            'cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-                            !isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]'
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
                           )}
                         >
                           Current Chart
@@ -614,21 +627,21 @@ export default function TradingPage() {
               ) : (
                 <div className="flex flex-col gap-2">
                   <p className="text-[14px] text-[#585A6B]">
-                    There are{' '}
+                    There are{" "}
                     <span className="text-[#E8E9EE]">
                       {formatLargeNumber(
                         fromBig(coin.tokenReserves, coin.decimals)
                       )}
-                    </span>{' '}
+                    </span>{" "}
                     tokens still available for sale in the bonding curve and
-                    there is{' '}
+                    there is{" "}
                     <span className="text-[#E8E9EE]">
                       {formatLargeNumber(shownBondingCurve)} SOL
-                    </span>{' '}
+                    </span>{" "}
                     in the bonding curve.
                   </p>
                   <p className="text-[14px] text-[#585A6B]">
-                    When the market cap reaches{' '}
+                    When the market cap reaches{" "}
                     <span className="text-[#E8E9EE]">
                       {formatNumberKMB(
                         new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)

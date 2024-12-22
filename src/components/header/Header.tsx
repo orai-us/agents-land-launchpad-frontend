@@ -1,13 +1,13 @@
-import LogoFullIcon from '@/assets/icons/logo.svg';
-import UserContext from '@/context/UserContext';
-import { getSolPriceInUSD } from '@/utils/util';
-import { FC, useContext, useEffect, useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { ConnectButton } from '../buttons/ConnectButton';
-import HowItWorkModal from '../modals/HowItWork';
-import Banner from './Banner';
-import MarqueeToken from './MarqueeToken';
-import { SOL_PRICE_KEY } from '@/config';
+import LogoFullIcon from "@/assets/icons/logo.svg";
+import UserContext from "@/context/UserContext";
+import { getSolPriceInUSD } from "@/utils/util";
+import { FC, useContext, useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { ConnectButton } from "../buttons/ConnectButton";
+import HowItWorkModal from "../modals/HowItWork";
+import Banner from "./Banner";
+import MarqueeToken from "./MarqueeToken";
+import { SOL_PRICE_KEY } from "@/config";
 
 const Header: FC = () => {
   const [pathname] = useLocation();
@@ -22,7 +22,7 @@ const Header: FC = () => {
         setSolPrice(price);
         localStorage.setItem(SOL_PRICE_KEY, price);
       } catch (error) {
-        console.log('error sol price', error);
+        console.log("error sol price", error);
       }
     };
 
@@ -37,23 +37,23 @@ const Header: FC = () => {
 
   const menu = [
     {
-      text: 'Launch',
-      link: '/create-coin'
+      text: "Launch",
+      link: "/create-coin",
     },
     {
-      text: 'How it works?',
-      onClick: () => setShowStepWork(true)
+      text: "How it works?",
+      onClick: () => setShowStepWork(true),
     },
     {
-      text: 'Strongbox Vaults',
-      link: '/vaults'
+      text: "Strongbox Vaults",
+      link: "/vaults",
     },
     {
       onClick: () => {
-        window.open('https://docs.agents.land');
+        window.open("https://docs.agents.land");
       },
-      text: 'Docs'
-    }
+      text: "Docs",
+    },
   ];
 
   return (
@@ -124,8 +124,8 @@ const Header: FC = () => {
 
       <div
         className={
-          'fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5' +
-          ` ${isOpenMobileMenu ? '' : 'translate-x-[-100%]'}`
+          "fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5" +
+          ` ${isOpenMobileMenu ? "" : "translate-x-[-100%]"}`
         }
       >
         <div className="flex h-[72px] items-center justify-between border-b border-[#1A1C28] px-2">
@@ -178,7 +178,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </div>
-      {pathname === '/' && <Banner />}
+      {pathname === "/" && <Banner />}
     </>
   );
 };

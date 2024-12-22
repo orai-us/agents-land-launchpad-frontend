@@ -1,12 +1,12 @@
-import crownImg from '@/assets/icons/crown.svg';
-import badgeKothImg from '@/assets/images/peak_evolution.svg';
-import { ALL_CONFIGS } from '@/config';
-import { formatNumberKMB } from '@/utils/format';
-import { getKoth, reduceString } from '@/utils/util';
-import BigNumber from 'bignumber.js';
-import { useEffect, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
-import { Link } from 'wouter';
+import crownImg from "@/assets/icons/crown.svg";
+import badgeKothImg from "@/assets/images/peak_evolution.svg";
+import { ALL_CONFIGS } from "@/config";
+import { formatNumberKMB } from "@/utils/format";
+import { getKoth, reduceString } from "@/utils/util";
+import BigNumber from "bignumber.js";
+import { useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import { Link } from "wouter";
 
 const Banner = () => {
   const [kothCoin, setKothCoin] = useState(null);
@@ -14,7 +14,7 @@ const Banner = () => {
   useEffect(() => {
     const fetchData = async () => {
       const kingCoin = await getKoth();
-      console.log('kingCoin', kingCoin);
+      console.log("kingCoin", kingCoin);
       if (kingCoin) {
         setKothCoin(kingCoin);
       }
@@ -45,7 +45,7 @@ const Banner = () => {
             <div className="mt-6 mb-14 text-base font-medium text-[#E8E9EE]">
               The First AI Agent Launch Platform
             </div>
-            <div className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
+            <div className="uppercase p-1 py-2 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
               <Link
                 href="/create-coin"
                 className="rounded bg-white px-6 py-2 text-[#080A14]"
@@ -95,7 +95,7 @@ const Banner = () => {
                       href={`/profile/${kothCoin.creator?.wallet}`}
                       className="text-[#E4775D] underline normal-case"
                     >
-                      {reduceString(kothCoin.creator?.wallet || '', 4, 4)}
+                      {reduceString(kothCoin.creator?.wallet || "", 4, 4)}
                     </Link>
                   </div>
                   <div className="text-[16px] font-medium leading-6 mt-2">
@@ -123,8 +123,8 @@ const Banner = () => {
       </div>
       <div
         className={twMerge(
-          'md:hidden mt-6 flex flex-col items-start px-4',
-          kothCoin && 'mt-[96px]'
+          "md:hidden mt-6 flex flex-col items-start px-4",
+          kothCoin && "mt-[96px]"
         )}
       >
         <div className="text-[30px] text-[#E8E9EE] leading-[48px] uppercase font-medium">

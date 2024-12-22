@@ -76,7 +76,7 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
         errorAlert("Failed to save the data.");
       } else {
         successAlert("Successfully updated.");
-        setUser(updatedUser);
+        setUser({ ...index, ...updatedUser });
         setProfileEditModal(false);
       }
       setIsLoading(false);
