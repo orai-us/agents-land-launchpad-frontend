@@ -44,8 +44,8 @@ dayjs.updateLocale("en", {
 });
 
 export enum STATUS_TOKEN {
-  LUNCH = "Live Launch",
   UPCOMING = "UPCOMING",
+  LUNCH = "Live Launch",
   LISTED = "Listed",
 }
 
@@ -425,16 +425,16 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
 };
 
 export const TokenTab = {
-  [STATUS_TOKEN.LUNCH]: {
-    label: STATUS_TOKEN.LUNCH,
-    value: KeyByStatus[STATUS_TOKEN.LUNCH],
-    link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
-    content: ListLaunchToken,
-  },
   [STATUS_TOKEN.UPCOMING]: {
     label: STATUS_TOKEN.UPCOMING,
     value: KeyByStatus[STATUS_TOKEN.UPCOMING],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.UPCOMING]}`,
+    content: ListLaunchToken,
+  },
+  [STATUS_TOKEN.LUNCH]: {
+    label: STATUS_TOKEN.LUNCH,
+    value: KeyByStatus[STATUS_TOKEN.LUNCH],
+    link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
     content: ListLaunchToken,
   },
   [STATUS_TOKEN.LISTED]: {

@@ -27,7 +27,9 @@ const HomePage: FC = () => {
   const dropdownRef = useRef(null);
   const dropdownRef1 = useRef(null);
   const [location, setLocation] = useLocation();
-  const [currentTab, setCurrentTab] = useState(KeyByStatus[STATUS_TOKEN.LUNCH]);
+  const [currentTab, setCurrentTab] = useState(
+    KeyByStatus[STATUS_TOKEN.UPCOMING]
+  );
 
   // useEffect(() => {
   // const queryString = window.location.search;
@@ -64,7 +66,7 @@ const HomePage: FC = () => {
         .includes(currentTab)
     ) {
       // params.set(TAB_QUERY, KeyByStatus[STATUS_TOKEN.LUNCH]);
-      pathname = `${pathname}?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`;
+      pathname = `${pathname}?tab=${KeyByStatus[STATUS_TOKEN.UPCOMING]}`;
     } else if (currentTab !== tab) {
       // params.set(TAB_QUERY, KeyByStatus[currentTab]);
       pathname = `${pathname}?tab=${currentTab}`;
