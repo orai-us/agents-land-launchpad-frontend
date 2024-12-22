@@ -1,58 +1,58 @@
-import nodataImg from "@/assets/icons/nodata.svg";
-import oraidexIcon from "@/assets/icons/oraidex_ic.svg";
-import raydiumIcon from "@/assets/icons/raydium_ic.svg";
-import cloudIslandImg from "@/assets/images/islandCloud.png";
-import oraidexIsland from "@/assets/images/oraidex_island.png";
-import raydiumIsland from "@/assets/images/raydium_island.png";
-import { ALL_CONFIGS } from "@/config";
-import { formatNumberKMB } from "@/utils/format";
-import { coinInfo } from "@/utils/types";
-import { reduceString } from "@/utils/util";
-import BigNumber from "bignumber.js";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import updateLocale from "dayjs/plugin/updateLocale";
-import { FC } from "react";
-import InfiniteScroll from "react-infinite-scroll-component";
-import ReactLoading from "react-loading";
-import { useLocation } from "wouter";
+import nodataImg from '@/assets/icons/nodata.svg';
+import oraidexIcon from '@/assets/icons/oraidex_ic.svg';
+import raydiumIcon from '@/assets/icons/raydium_ic.svg';
+import cloudIslandImg from '@/assets/images/islandCloud.png';
+import oraidexIsland from '@/assets/images/oraidex_island.png';
+import raydiumIsland from '@/assets/images/raydium_island.png';
+import { ALL_CONFIGS } from '@/config';
+import { formatNumberKMB } from '@/utils/format';
+import { coinInfo } from '@/utils/types';
+import { reduceString } from '@/utils/util';
+import BigNumber from 'bignumber.js';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import updateLocale from 'dayjs/plugin/updateLocale';
+import { FC } from 'react';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import ReactLoading from 'react-loading';
+import { useLocation } from 'wouter';
 import {
   formatCountdownTime,
-  useCountdown,
-} from "../trading/hooks/useCountdown";
+  useCountdown
+} from '../trading/hooks/useCountdown';
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
 
 // Custom locale configuration
-dayjs.updateLocale("en", {
+dayjs.updateLocale('en', {
   relativeTime: {
-    future: "in %s",
-    past: "%s ago",
-    s: "a few seconds",
-    m: "1m", // 1 minute
-    mm: "%dm", // 2-59 minutes
-    h: "1h", // 1 hour
-    hh: "%dh", // 2-23 hours
-    d: "1d", // 1 day
-    dd: "%dd", // 2-30 days
-    M: "1mo", // 1 month
-    MM: "%dmo", // 2-12 months
-    y: "1y", // 1 year
-    yy: "%dy", // 2+ years
-  },
+    future: 'in %s',
+    past: '%s ago',
+    s: 'a few seconds',
+    m: '1m', // 1 minute
+    mm: '%dm', // 2-59 minutes
+    h: '1h', // 1 hour
+    hh: '%dh', // 2-23 hours
+    d: '1d', // 1 day
+    dd: '%dd', // 2-30 days
+    M: '1mo', // 1 month
+    MM: '%dmo', // 2-12 months
+    y: '1y', // 1 year
+    yy: '%dy' // 2+ years
+  }
 });
 
 export enum STATUS_TOKEN {
-  LUNCH = "Live Launch",
-  UPCOMING = "UPCOMING",
-  LISTED = "Listed",
+  LUNCH = 'Live Launch',
+  UPCOMING = 'UPCOMING',
+  LISTED = 'Listed'
 }
 
 export const KeyByStatus = {
-  [STATUS_TOKEN.LUNCH]: "live",
-  [STATUS_TOKEN.UPCOMING]: "upcoming",
-  [STATUS_TOKEN.LISTED]: "listed",
+  [STATUS_TOKEN.LUNCH]: 'live',
+  [STATUS_TOKEN.UPCOMING]: 'upcoming',
+  [STATUS_TOKEN.LISTED]: 'listed'
 };
 
 const NoToken = () => (
@@ -65,7 +65,7 @@ const NoToken = () => (
 
 const Loading = () => (
   <div className="flex h-screen items-start justify-center bg-tizz-background">
-    <ReactLoading height={20} width={50} type={"bars"} color={"#36d7b7"} />
+    <ReactLoading height={20} width={50} type={'bars'} color={'#36d7b7'} />
   </div>
 );
 
@@ -110,7 +110,7 @@ export const ListLaunchToken = ({
   data,
   handleLoadMore,
   totalData,
-  isUpcoming,
+  isUpcoming
 }) => {
   const [, setLocation] = useLocation();
   const handleToProfile = (id: string) => {
@@ -207,7 +207,7 @@ export const ListLaunchToken = ({
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{" "}
+                    created by{' '}
                     <span
                       className="text-[#E4775D] underline"
                       // onClick={(event) => {
@@ -216,8 +216,8 @@ export const ListLaunchToken = ({
                       //   handleToProfile(ind as any);
                       // }}
                     >
-                      {coinItem.creator?.["wallet"]
-                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                      {coinItem.creator?.['wallet']
+                        ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
                         : coinItem.creator.toString()}
                     </span>
                   </div>
@@ -229,7 +229,7 @@ export const ListLaunchToken = ({
                   {coinItem.name} (${coinItem.ticker})
                 </div>
                 <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
-                  {coinItem.description || ""}
+                  {coinItem.description || ''}
                 </div>
               </div>
               {isUpcoming ? (
@@ -237,7 +237,7 @@ export const ListLaunchToken = ({
               ) : (
                 <div>
                   <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
-                    Marketcap{" "}
+                    Marketcap{' '}
                     <span className="text-[#E8E9EE]">
                       {formatNumberKMB(Number(coinItem.marketcap || 0))}(
                       {shownPercent.toFixed(2)}%)
@@ -273,7 +273,7 @@ const CountdownItem = ({ coin }) => {
     startTime,
     endTime,
     onStart: () => {},
-    onEnd: () => {},
+    onEnd: () => {}
   });
 
   const { days, hours, minutes, seconds } = formatCountdownTime(timeRemaining);
@@ -380,7 +380,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 <img
                   src={isRaydiumListed ? raydiumIsland : oraidexIsland}
                   alt={
-                    isRaydiumListed ? "raydiumIslandImg" : "oraidexIslandImg"
+                    isRaydiumListed ? 'raydiumIslandImg' : 'oraidexIslandImg'
                   }
                 />
               </div>
@@ -389,13 +389,13 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{" "}
+                    created by{' '}
                     <span
                       className="text-[#E4775D] underline"
                       // onClick={() => handleToProfile(ind as any)}
                     >
-                      {coinItem.creator?.["wallet"]
-                        ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
+                      {coinItem.creator?.['wallet']
+                        ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
                         : coinItem.creator.toString()}
                     </span>
                   </div>
@@ -408,7 +408,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                   {coinItem.name} (${coinItem.ticker})
                 </div>
                 <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
-                  {coinItem.description || ""}
+                  {coinItem.description || ''}
                 </div>
               </div>
               <div>
@@ -449,18 +449,18 @@ export const TokenTab = {
     label: STATUS_TOKEN.LUNCH,
     value: KeyByStatus[STATUS_TOKEN.LUNCH],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.LUNCH]}`,
-    content: ListLaunchToken,
+    content: ListLaunchToken
   },
   [STATUS_TOKEN.UPCOMING]: {
     label: STATUS_TOKEN.UPCOMING,
     value: KeyByStatus[STATUS_TOKEN.UPCOMING],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.UPCOMING]}`,
-    content: ListLaunchToken,
+    content: ListLaunchToken
   },
   [STATUS_TOKEN.LISTED]: {
     label: STATUS_TOKEN.LISTED,
     value: KeyByStatus[STATUS_TOKEN.LISTED],
     link: `/?tab=${KeyByStatus[STATUS_TOKEN.LISTED]}`,
-    content: ListListedToken,
-  },
+    content: ListListedToken
+  }
 };
