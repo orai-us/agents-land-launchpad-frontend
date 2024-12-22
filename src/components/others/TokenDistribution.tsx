@@ -1,28 +1,28 @@
-import { coinInfo, holderInfo, recordInfo } from "@/utils/types";
-import { FC, useContext, useEffect, useState } from "react";
+import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import { coinInfo, holderInfo, RawChart } from "@/utils/types";
 import {
   calculateKotHProgress,
   calculateTokenPrice,
   findHolders,
-  fromBig,
   getKoth,
-  getSolPriceInUSD,
-  getUserByWalletAddress,
 } from "@/utils/util";
-import defaultUserImg from "@/assets/images/userAgentDefault.svg";
+import { FC, useContext, useEffect, useState } from "react";
 
-import { BN } from "@coral-xyz/anchor";
-import { PROGRAM_ID, DISTILL_COMMUNITY_POOL_WALLET } from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID, SPL_DECIMAL } from "@/config";
 import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
 import { ResultType } from "@/program/logListeners/types";
 import {
-  endpoint,
   commitmentLevel,
+  endpoint,
   Web3SolanaProgramInteraction,
 } from "@/program/web3";
-import { Connection, PublicKey } from "@solana/web3.js";
 import { formatNumberKMB } from "@/utils/format";
 import { useWallet } from "@solana/wallet-adapter-react";
+import { Connection, PublicKey } from "@solana/web3.js";
+import UserContext from "@/context/UserContext";
+import { queryClient } from "@/provider/providers";
+import { channelToSubscription, genOhlcData } from "../TVChart/streaming";
+import { Bar } from "@/charting_library";
 
 interface ModalProps {
   data: coinInfo;
@@ -44,16 +44,11 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       }
     };
     fetchData();
-  }, [wallet]);
+  }, [wallet.publicKey]);
 
   useEffect(() => {
     const fetchData = async () => {
       const kingCoin = await getKoth();
-      const configBondingAddr =
-        await new Web3SolanaProgramInteraction().getBondingAddressToken(wallet);
-      if (configBondingAddr) {
-        setConfigBondingAddress(configBondingAddr);
-      }
 
       if (kingCoin) {
         setKothCoin(kingCoin);
@@ -64,9 +59,10 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (data) {
+      if (data.token) {
         const holderData = await findHolders(data.token);
         setHolders(holderData ? holderData : []);
+
         const currentKotHProgress = calculateKotHProgress(
           data.lamportReserves,
           data.bondingCurveLimit
@@ -75,38 +71,38 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
       }
     };
     fetchData();
-  }, [data]);
+  }, [data.token, data.lamportReserves, data.bondingCurveLimit]);
 
-  // real-time koth progress
-  useEffect(() => {
-    if (!data) return;
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
-    const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback(
-      "swapEvent",
-      async (result: ResultType) => {
-        const currentKotHProgress = calculateKotHProgress(
-          result.lamportReserves,
-          data.bondingCurveLimit
-        );
-        setKotHProgress(currentKotHProgress);
-      },
-      []
-    );
+  // // real-time koth progress
+  // useEffect(() => {
+  //   if (!data) return;
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  //   });
+  //   const listener = new AgentsLandEventListener(connection);
+  //   listener.setProgramEventCallback(
+  //     "swapEvent",
+  //     async (result: ResultType) => {
+  //       const currentKotHProgress = calculateKotHProgress(
+  //         result.lamportReserves,
+  //         data.bondingCurveLimit
+  //       );
+  //       setKotHProgress(currentKotHProgress);
+  //     },
+  //     []
+  //   );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const { program, listenerIds } = listener.listenProgramEvents(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      if (!program) return;
-      console.log("ready to remove listeners");
-      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-    };
-  }, [data]);
+  //   return () => {
+  //     if (!program) return;
+  //     console.log("ready to remove listeners");
+  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+  //   };
+  // }, [data?._id]);
 
   return (
     <div className="flex flex-col justify-between pt-4">
@@ -156,9 +152,14 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const isAgent =
                   String(item.owner).toLowerCase() ===
                   String(data.metadata?.agentAddress).toLowerCase();
+                const isVaults =
+                  String(item.owner).toLowerCase() ===
+                  String(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
-                  String(DISTILL_COMMUNITY_POOL_WALLET).toLowerCase();
+                  String(
+                    ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET
+                  ).toLowerCase();
 
                 return (
                   <div
@@ -189,6 +190,11 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         {isAgent && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
                             (Agent)
+                          </span>
+                        )}
+                        {isVaults && (
+                          <span className="ml-1 text-[#585A6B] text-[12px]">
+                            (Strongbox Vaults)
                           </span>
                         )}
                       </a>

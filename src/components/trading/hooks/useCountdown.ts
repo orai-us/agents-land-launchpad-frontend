@@ -1,3 +1,4 @@
+import { ALL_CONFIGS } from "@/config";
 import { useEffect, useRef, useState } from "react";
 
 export type CountDownType = {
@@ -5,16 +6,6 @@ export type CountDownType = {
   endTime: number;
   onStart: () => void;
   onEnd: () => void;
-};
-
-export const TIMER = {
-  HAFT_MILLISECOND: 500,
-  MILLISECOND: 1000,
-  SECOND: 60,
-  MINUTE: 60,
-  HOUR: 24,
-  // DAY_TO_SECONDS: 24 * 60 * 60,
-  DAY_TO_SECONDS: 5 * 60, // FIXME: updateTime later current is 5mins
 };
 
 export const calcDiffTime = (
@@ -26,8 +17,8 @@ export const calcDiffTime = (
 
 export const calcPercent = (start: number, end: number, current: number) => {
   const total =
-    new Date(end * TIMER.MILLISECOND).getTime() -
-    new Date(start * TIMER.MILLISECOND).getTime();
+    new Date(end * ALL_CONFIGS.TIMER.MILLISECOND).getTime() -
+    new Date(start * ALL_CONFIGS.TIMER.MILLISECOND).getTime();
 
   if (current <= 0) return 100;
   return total > 0 ? 100 - (current * 100) / total : 100;
@@ -35,14 +26,16 @@ export const calcPercent = (start: number, end: number, current: number) => {
 
 export const formatCountdownTime = (milliseconds: number) => {
   const formatMilliseconds = milliseconds < 0 ? 0 : milliseconds;
-  const seconds = Math.floor(formatMilliseconds / TIMER.MILLISECOND);
-  const minutes = Math.floor(seconds / TIMER.SECOND);
-  const hours = Math.floor(minutes / TIMER.MINUTE);
-  const days = Math.floor(hours / TIMER.HOUR);
+  const seconds = Math.floor(
+    formatMilliseconds / ALL_CONFIGS.TIMER.MILLISECOND
+  );
+  const minutes = Math.floor(seconds / ALL_CONFIGS.TIMER.SECOND);
+  const hours = Math.floor(minutes / ALL_CONFIGS.TIMER.MINUTE);
+  const days = Math.floor(hours / ALL_CONFIGS.TIMER.HOUR);
 
-  const remainingHours = hours % TIMER.HOUR;
-  const remainingMinutes = minutes % TIMER.MINUTE;
-  const remainingSeconds = seconds % TIMER.SECOND;
+  const remainingHours = hours % ALL_CONFIGS.TIMER.HOUR;
+  const remainingMinutes = minutes % ALL_CONFIGS.TIMER.MINUTE;
+  const remainingSeconds = seconds % ALL_CONFIGS.TIMER.SECOND;
 
   return {
     days: String(days).padStart(2, "0"),
@@ -66,23 +59,27 @@ export const useCountdown = ({
   const [isEnd, setIsEnd] = useState(false);
   const countdownRef = useRef<any>(null);
   const getTimeDateNow = Date.now();
-  const [start, setStart] = useState(startTime * TIMER.MILLISECOND);
-  const [end, setEnd] = useState(endTime * TIMER.MILLISECOND);
+  const [start, setStart] = useState(startTime * ALL_CONFIGS.TIMER.MILLISECOND);
+  const [end, setEnd] = useState(endTime * ALL_CONFIGS.TIMER.MILLISECOND);
   const [timeRemaining, setTimeRemaining] = useState(() => {
-    return calcDiffTime(getTimeDateNow, endTime * TIMER.MILLISECOND);
+    return calcDiffTime(
+      getTimeDateNow,
+      endTime * ALL_CONFIGS.TIMER.MILLISECOND
+    );
   });
   const [isStarted, setIsStarted] = useState(() => {
-    const isStart = getTimeDateNow >= startTime * TIMER.MILLISECOND;
+    const isStart = getTimeDateNow >= startTime * ALL_CONFIGS.TIMER.MILLISECOND;
     return isStart;
   });
 
   useEffect(() => {
     if (!startTime || !endTime) return;
 
-    setStart(startTime * TIMER.MILLISECOND);
-    setEnd(endTime * TIMER.MILLISECOND);
+    setStart(startTime * ALL_CONFIGS.TIMER.MILLISECOND);
+    setEnd(endTime * ALL_CONFIGS.TIMER.MILLISECOND);
     setIsStarted(() => {
-      const isStart = getTimeDateNow >= startTime * TIMER.MILLISECOND;
+      const isStart =
+        getTimeDateNow >= startTime * ALL_CONFIGS.TIMER.MILLISECOND;
 
       if (isStart) {
         onStart();
@@ -92,12 +89,12 @@ export const useCountdown = ({
     });
 
     setTimeRemaining(() =>
-      calcDiffTime(getTimeDateNow, endTime * TIMER.MILLISECOND)
+      calcDiffTime(getTimeDateNow, endTime * ALL_CONFIGS.TIMER.MILLISECOND)
     );
 
     const decrementTime = () => {
       setTimeRemaining((prev) => {
-        const newRemain = prev - TIMER.MILLISECOND;
+        const newRemain = prev - ALL_CONFIGS.TIMER.MILLISECOND;
         if (newRemain <= 0) {
           clearInterval(countdownRef.current as any);
           countdownRef.current = null;
@@ -108,7 +105,10 @@ export const useCountdown = ({
         return newRemain;
       });
     };
-    countdownRef.current = setInterval(decrementTime, TIMER.MILLISECOND);
+    countdownRef.current = setInterval(
+      decrementTime,
+      ALL_CONFIGS.TIMER.MILLISECOND
+    );
 
     return () => {
       if (countdownRef.current) {
@@ -123,7 +123,10 @@ export const useCountdown = ({
     const newPercent = calcPercent(startTime, endTime, timeRemaining);
     setPercent(() => newPercent);
 
-    if (getTimeDateNow >= startTime * TIMER.MILLISECOND && !isStarted) {
+    if (
+      getTimeDateNow >= startTime * ALL_CONFIGS.TIMER.MILLISECOND &&
+      !isStarted
+    ) {
       setIsStarted(true);
       onStart();
     }
@@ -134,7 +137,7 @@ export const useCountdown = ({
     timeRemaining,
     isEnd,
     percent,
-    start: new Date(start * TIMER.MILLISECOND),
-    end: new Date(end * TIMER.MILLISECOND),
+    start: new Date(start * ALL_CONFIGS.TIMER.MILLISECOND),
+    end: new Date(end * ALL_CONFIGS.TIMER.MILLISECOND),
   };
 };

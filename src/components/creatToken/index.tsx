@@ -12,7 +12,7 @@ import { getAgentsData, getAgentsDataByUser, reduceString } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import DropzoneFile from "../uploadFile/DropzoneFile";
 import CreateTokenSuccess from "./CreateTokenSuccess";
 import PreSaleModal from "./Presale";
@@ -58,8 +58,6 @@ export default function CreateToken() {
   });
 
   const wallet = useWallet();
-  const [, setLocation] = useLocation();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     // Clear errors when newCoin changes
@@ -83,10 +81,6 @@ export default function CreateToken() {
       })();
     }
   }, [wallet.publicKey]);
-
-  const handleToRouter = (path: string) => {
-    setLocation(path);
-  };
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -251,8 +245,8 @@ export default function CreateToken() {
         coin={coinCreatedData}
         closeModal={() => setShowModalSuccess(false)}
       />
-      <div onClick={() => handleToRouter("/")} className="w-fit">
-        <div className="uppercase cursor-pointer text-[#84869A] text-2xl flex flex-row items-center gap-2 pb-2">
+      <Link href="/" className="w-fit">
+        <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
@@ -262,12 +256,12 @@ export default function CreateToken() {
           >
             <path
               d="M10.5171 11.9999L18.3546 3.83901C18.5515 3.63745 18.5468 3.30464 18.3452 3.09839L16.9437 1.66401C16.7421 1.45776 16.414 1.45307 16.2171 1.65464L6.64521 11.6203C6.54209 11.7234 6.49521 11.864 6.50459 11.9999C6.4999 12.1406 6.54678 12.2765 6.64521 12.3796L16.2171 22.3499C16.414 22.5515 16.7421 22.5468 16.9437 22.3406L18.3452 20.9062C18.5468 20.6999 18.5515 20.3671 18.3546 20.1656L10.5171 11.9999Z"
-              fill="#585A6B"
+              fill="#FCFCFC"
             />
           </svg>
           tokenize agent
         </div>
-      </div>
+      </Link>
 
       {isLoading && (
         <div className="w-full h-full fixed inset-0 flex items-center justify-center bg-black bg-opacity-20 backdrop-blur-lg z-50">
@@ -933,8 +927,12 @@ export const TOKENOMICS_LIST = [
     color: `#C2F98F`,
   },
   {
-    text: "97% for fairlaunch (bonding curve)",
+    text: "2% for Strongbox Vaults",
     color: `#9EEEDB`,
+  },
+  {
+    text: "95% for fairlaunch (bonding curve)",
+    color: `#7e9af9`,
   },
 ];
 

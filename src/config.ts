@@ -1,34 +1,110 @@
-import { LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
-export const SOLANA_RPC = import.meta.env.VITE_SOLANA_RPC ?? "";
-export const PROGRAM_ID = import.meta.env.VITE_PROGRAM_ID ?? "";
+export const SOL_PRICE_KEY = "SOL_PRICE_KEY";
+
+export const SOLANA_ENV =
+  import.meta.env.VITE_APP_SOLANA_ENV || "mainnet-beta-test";
+
+export const SPL_DECIMAL = 6;
 export const SOL_DECIMAL = 9;
 export const MAX_RETRY_QUERY_TOKEN = 3;
-
-// export const BONDING_CURVE_LIMIT = 85 * LAMPORTS_PER_SOL;
-export const BONDING_CURVE_LIMIT = 10 * LAMPORTS_PER_SOL; // FIXME: fix limit
-export const INIT_SOL_BONDING_CURVE = 3 * LAMPORTS_PER_SOL; // FIXME: fix limit
 export const LIMIT_PAGINATION = 8;
-export const DISTILL_COMMUNITY_POOL_WALLET =
-  import.meta.env.VITE_DISTILL_COMMUNITY ||
-  "HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d";
-// "CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN";
 export const SEED_GLOBAL = "global";
 export const TX_FEE = 0.25;
 
 /**
- * LOCKING
+ * LOCKING VAULTS
  */
-export const SPL_DECIMAL = 6;
-export const TIMER = {
-  MILLISECONDS: 1000,
-  MONTH_TO_SECONDS: 30 * 24 * 60 * 60, // FIXME: update time
-  // MONTH_TO_SECONDS: 60, // FIXME: update time
-};
 export const VAULT_SEED = "staking_vault";
 export const STAKE_CONFIG_SEED = "staking_config";
 export const STAKER_INFO_SEED = "staker_info";
 export const STAKE_INFO_SEED = "stake_info";
 export const STAKE_DETAIL_SEED = "stake_detail";
-export const STAKE_CURRENCY_MINT =
-  "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h";
+
+export const CONFIGS: Record<
+  string,
+  {
+    PROGRAM_ID: string;
+    DISTILL_COMMUNITY_POOL_WALLET: string;
+    STAKE_CURRENCY_MINT: string;
+    STAKE_POOL_PROGRAM_ID: string;
+    BONDING_CURVE_LIMIT: number;
+    INIT_SOL_BONDING_CURVE: number;
+    TIMER: {
+      MILLISECONDS: number;
+      MONTH_TO_SECONDS: number;
+      HAFT_MILLISECOND: number;
+      MILLISECOND: number;
+      SECOND: number;
+      MINUTE: number;
+      HOUR: number;
+      DAY_TO_SECONDS: number;
+    };
+    SHOW_DECIMALS_PRICE: number;
+  }
+> = {
+  devnet: {
+    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+    DISTILL_COMMUNITY_POOL_WALLET:
+      "CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN",
+    STAKE_CURRENCY_MINT: "3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4",
+    STAKE_POOL_PROGRAM_ID: "9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy",
+    BONDING_CURVE_LIMIT: 10 * LAMPORTS_PER_SOL,
+    INIT_SOL_BONDING_CURVE: 3 * LAMPORTS_PER_SOL,
+    TIMER: {
+      MILLISECONDS: 1000,
+      MONTH_TO_SECONDS: 60,
+      HAFT_MILLISECOND: 500,
+      MILLISECOND: 1000,
+      SECOND: 60,
+      MINUTE: 60,
+      HOUR: 24,
+      DAY_TO_SECONDS: 5 * 60,
+    },
+    SHOW_DECIMALS_PRICE: 9,
+  },
+  "mainnet-beta": {
+    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+    DISTILL_COMMUNITY_POOL_WALLET:
+      "HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d",
+    STAKE_CURRENCY_MINT: "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h",
+    STAKE_POOL_PROGRAM_ID: "Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH",
+    BONDING_CURVE_LIMIT: 150 * LAMPORTS_PER_SOL,
+    INIT_SOL_BONDING_CURVE: 30 * LAMPORTS_PER_SOL,
+    TIMER: {
+      MILLISECONDS: 1000,
+      MONTH_TO_SECONDS: 30 * 24 * 60 * 60,
+      HAFT_MILLISECOND: 500,
+      MILLISECOND: 1000,
+      SECOND: 60,
+      MINUTE: 60,
+      HOUR: 24,
+      DAY_TO_SECONDS: 24 * 60 * 60,
+    },
+    SHOW_DECIMALS_PRICE: 9,
+  },
+  "mainnet-beta-test": {
+    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+    DISTILL_COMMUNITY_POOL_WALLET:
+      "HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d",
+    STAKE_CURRENCY_MINT: "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h",
+    STAKE_POOL_PROGRAM_ID: "Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH",
+    BONDING_CURVE_LIMIT: 1.5 * LAMPORTS_PER_SOL,
+    INIT_SOL_BONDING_CURVE: 0.3 * LAMPORTS_PER_SOL,
+    TIMER: {
+      MILLISECONDS: 1000,
+      MONTH_TO_SECONDS: 30 * 24 * 60 * 60,
+      HAFT_MILLISECOND: 500,
+      MILLISECOND: 1000,
+      SECOND: 60,
+      MINUTE: 60,
+      HOUR: 24,
+      DAY_TO_SECONDS: 15 * 60,
+    },
+    SHOW_DECIMALS_PRICE: 12,
+  },
+};
+
+export const ALL_CONFIGS = CONFIGS[SOLANA_ENV] || CONFIGS["mainnet-beta-test"];
+
+export const PROGRAM_ID = ALL_CONFIGS.PROGRAM_ID ?? "";

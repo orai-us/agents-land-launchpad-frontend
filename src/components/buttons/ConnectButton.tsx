@@ -10,7 +10,7 @@ import { FC, useContext, useEffect, useMemo } from "react";
 import { RiExchangeDollarLine } from "react-icons/ri";
 import { VscDebugDisconnect } from "react-icons/vsc";
 
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 
 export const ConnectButton: FC = () => {
   const [, setLocation] = useLocation();
@@ -69,6 +69,8 @@ export const ConnectButton: FC = () => {
       const res = base58.encode(sig as Uint8Array);
       const signedWallet = { ...connection, signature: res };
       const confirm = await confirmWallet({ data: signedWallet });
+
+      console.log("confirm", confirm);
 
       if (confirm) {
         setUser(confirm);
@@ -129,21 +131,15 @@ export const ConnectButton: FC = () => {
             </div>
             <div className="hidden md:block w-[200px] absolute right-0 top-12 pt-2 invisible group-hover:visible">
               <ul className="border border-[rgba(88,90,107,0.24)] rounded bg-[#1A1C28] p-2 ">
-                {user?._id && false && (
+                {tempUser.wallet && (
                   <li>
-                    <div
+                    <Link
                       className="p-2 flex gap-2 items-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
-                      onClick={() =>
-                        handleToProfile(
-                          `/profile/${
-                            tempUser._id || "6746eb08d90318c6a4b2a386"
-                          }`
-                        )
-                      }
+                      href={`/profile/${tempUser.wallet}`}
                     >
                       <RiExchangeDollarLine />
                       View Profile
-                    </div>
+                    </Link>
                   </li>
                 )}
                 <li>
@@ -169,18 +165,14 @@ export const ConnectButton: FC = () => {
       </button>
       {login && tempUser.wallet && (
         <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
-          {user?._id && false && (
-            <div
+          {user?.wallet && (
+            <Link
               className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
-              onClick={() =>
-                handleToProfile(
-                  `/profile/${tempUser._id || "6746eb08d90318c6a4b2a386"}`
-                )
-              }
+              href={`/profile/${tempUser.wallet}`}
             >
               <RiExchangeDollarLine />
               View Profile
-            </div>
+            </Link>
           )}
           <div
             className="p-2 flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"

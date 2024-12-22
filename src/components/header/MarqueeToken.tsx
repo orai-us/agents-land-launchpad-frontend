@@ -1,17 +1,17 @@
-import React, { FC, useEffect, useState } from "react";
-import Marquee from "react-fast-marquee";
 import coinImg from "@/assets/images/richoldman.png";
-import { twMerge } from "tailwind-merge";
-import { coinInfo, SwapInfo } from "@/utils/types";
+import { PROGRAM_ID } from "@/config";
 import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
 import { commitmentLevel, endpoint } from "@/program/web3";
-import dayjs from "dayjs";
+import { numberWithCommas } from "@/utils/format";
+import { coinInfo, SwapInfo } from "@/utils/types";
 import { reduceString } from "@/utils/util";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import { PROGRAM_ID } from "@/config";
-import { BN } from "bn.js";
-import { numberWithCommas } from "@/utils/format";
 import BigNumber from "bignumber.js";
+import { BN } from "bn.js";
+import dayjs from "dayjs";
+import { FC, useEffect, useState } from "react";
+import Marquee from "react-fast-marquee";
+import { twMerge } from "tailwind-merge";
 
 export enum ACTION_TYPE {
   Bought = "Bought",
@@ -195,6 +195,7 @@ const MarqueeToken = () => {
     );
 
     return () => {
+      console.log("Notifications----ready to remove listeners");
       connection.removeOnLogsListener(subId);
     };
   }, []);

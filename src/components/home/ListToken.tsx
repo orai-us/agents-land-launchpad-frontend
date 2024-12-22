@@ -4,7 +4,7 @@ import raydiumIcon from "@/assets/icons/raydium_ic.svg";
 import cloudIslandImg from "@/assets/images/islandCloud.png";
 import oraidexIsland from "@/assets/images/oraidex_island.png";
 import raydiumIsland from "@/assets/images/raydium_island.png";
-import { BONDING_CURVE_LIMIT, INIT_SOL_BONDING_CURVE } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
 import { coinInfo } from "@/utils/types";
 import { reduceString } from "@/utils/util";
@@ -14,13 +14,12 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
 import { FC } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import { useLocation } from "wouter";
+import ReactLoading from "react-loading";
+import { Link, useLocation } from "wouter";
 import {
   formatCountdownTime,
-  TIMER,
   useCountdown,
 } from "../trading/hooks/useCountdown";
-import ReactLoading from "react-loading";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -113,14 +112,6 @@ export const ListLaunchToken = ({
   totalData,
   isUpcoming,
 }) => {
-  const [, setLocation] = useLocation();
-  const handleToProfile = (id: string) => {
-    setLocation(`/profile/${id}`);
-  };
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
-
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -150,12 +141,16 @@ export const ListLaunchToken = ({
         const bondingCurveValue = new BigNumber(
           (coinItem.lamportReserves || 0).toString()
         )
-          .minus(INIT_SOL_BONDING_CURVE)
+          .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
           .toNumber();
 
         const bondingCurvePercent = new BigNumber(bondingCurveValue)
           .multipliedBy(new BigNumber(100))
-          .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+          .div(
+            new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+              ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+            )
+          )
           .toNumber();
 
         const shownPercent =
@@ -165,16 +160,11 @@ export const ListLaunchToken = ({
             ? 100
             : bondingCurvePercent;
 
-        const isNotForSale =
-          new Date(coinItem.date).getTime() +
-            TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
-          Date.now();
-
         return (
-          <div
+          <Link
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}`}
-            onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
+            href={`/trading/${coinItem.token}`}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
@@ -204,9 +194,10 @@ export const ListLaunchToken = ({
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{" "}
-                    <span
-                      className="text-[#E4775D] underline"
+                    created by{" "}
+                    <Link
+                      className="text-[#E4775D] underline normal-case"
+                      href={`/profile/${coinItem.creator?.["wallet"]}`}
                       // onClick={(event) => {
                       //   event.preventDefault();
                       //   event.stopPropagation();
@@ -216,7 +207,7 @@ export const ListLaunchToken = ({
                       {coinItem.creator?.["wallet"]
                         ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
                         : coinItem.creator.toString()}
-                    </span>
+                    </Link>
                   </div>
                   <span className="uppercase text-[12px] text-[#84869A] text-right">
                     {dayjs(coinItem.date || Date.now()).fromNow()}
@@ -249,7 +240,7 @@ export const ListLaunchToken = ({
                 </div>
               )}
             </div>
-          </div>
+          </Link>
         );
       })}
     </InfiniteScroll>
@@ -258,9 +249,12 @@ export const ListLaunchToken = ({
 
 const CountdownItem = ({ coin }) => {
   const startTime = Math.ceil(
-    new Date(coin.date || Date.now()).getTime() / TIMER.MILLISECOND
+    new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
   );
-  const endTime = startTime + TIMER.DAY_TO_SECONDS;
+  const endTime = Math.floor(
+    new Date(coin.tradingTime || Date.now()).getTime() /
+      ALL_CONFIGS.TIMER.MILLISECOND
+  );
 
   const { timeRemaining } = useCountdown({
     startTime,
@@ -305,14 +299,6 @@ const CountdownItem = ({ coin }) => {
 };
 
 export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
-  const [, setLocation] = useLocation();
-  const handleToProfile = (id: string) => {
-    setLocation(`/profile/${id}`);
-  };
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
-
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -344,10 +330,10 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
         const isOraidexListed =
           coinItem.oraidexPoolAddr && !coinItem.raydiumPoolAddr;
         return (
-          <div
+          <Link
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
             key={`item-token-${ind}-${coinItem.token}-listed`}
-            onClick={() => handleToRouter(`/trading/${coinItem.token}`)}
+            href={`/trading/${coinItem.token}`}
           >
             <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
               <div className="relative w-full h-full flex items-start justify-center">
@@ -382,15 +368,16 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
               <div>
                 <div className="flex justify-between items-center">
                   <div className="uppercase text-[#84869A] text-[12px] font-medium">
-                    create by{" "}
-                    <span
-                      className="text-[#E4775D] underline"
+                    created by{" "}
+                    <Link
+                      className="text-[#E4775D] underline normal-case"
+                      href={`/profile/${coinItem.creator?.["wallet"]}`}
                       // onClick={() => handleToProfile(ind as any)}
                     >
                       {coinItem.creator?.["wallet"]
                         ? reduceString(coinItem.creator?.["wallet"] || "", 4, 4)
                         : coinItem.creator.toString()}
-                    </span>
+                    </Link>
                   </div>
 
                   <span className="uppercase text-[12px] text-[#84869A] text-right">
@@ -430,7 +417,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                 )}
               </div>
             </div>
-          </div>
+          </Link>
         );
       })}
     </InfiniteScroll>

@@ -1,4 +1,5 @@
 import { errorAlert } from "@/components/others/ToastGroup";
+import { SEED_GLOBAL } from "@/config";
 import {
   rayBuyTx,
   raySellTx,
@@ -7,6 +8,10 @@ import {
 import { launchDataInfo } from "@/utils/types";
 import * as anchor from "@coral-xyz/anchor";
 import { BN, Program } from "@coral-xyz/anchor";
+import {
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 import {
   ComputeBudgetProgram,
@@ -15,19 +20,15 @@ import {
   LAMPORTS_PER_SOL,
   PublicKey,
   Transaction,
-  TransactionExpiredTimeoutError,
-  VersionedTransaction,
 } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
+import { ALL_CONFIGS } from "./../config";
 import { Pumpfun } from "./pumpfun";
 import idl from "./pumpfun.json";
 import { SEED_BONDING_CURVE, SEED_CONFIG } from "./seed";
-import { SEED_GLOBAL } from "@/config";
-import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
-} from "@solana/spl-token";
 import { handleTransaction } from "./utils";
+import { genTokenKeypair, toBN } from "@/utils/util";
+import base58 from "bs58";
 
 export const commitmentLevel = "confirmed";
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -78,8 +79,10 @@ export class Web3SolanaProgramInteraction {
       );
       const configAccount = await program.account.config.fetch(configPda);
 
-      const mintKp = Keypair.generate();
-      console.log(mintKp.publicKey.toBase58());
+      // const mintKp = Keypair.generate();
+      const key = await genTokenKeypair();
+      const mintKp: Keypair = Keypair.fromSecretKey(base58.decode(key));
+      console.log("tokenAddress:", mintKp.publicKey.toBase58());
 
       const aiAgentTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(coinData.metadata.agentAddress),
@@ -87,6 +90,16 @@ export class Web3SolanaProgramInteraction {
       );
       const creatorTokenAccount = this.getAssociatedTokenAccount(
         wallet.publicKey,
+        mintKp.publicKey
+      );
+
+      const stakingTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+        mintKp.publicKey
+      );
+
+      const communityPoolTokenAccount = this.getAssociatedTokenAccount(
+        new PublicKey(ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET),
         mintKp.publicKey
       );
 
@@ -107,7 +120,7 @@ export class Web3SolanaProgramInteraction {
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
           aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
-          teamWallet: configAccount.teamWallet,
+          stakingWallet: new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
         })
         .remainingAccounts([
           {
@@ -119,6 +132,16 @@ export class Web3SolanaProgramInteraction {
             isWritable: true,
             isSigner: false,
             pubkey: creatorTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: stakingTokenAccount,
+          },
+          {
+            isWritable: true,
+            isSigner: false,
+            pubkey: communityPoolTokenAccount,
           },
         ])
         .instruction();
@@ -225,10 +248,10 @@ export class Web3SolanaProgramInteraction {
         .div(100)
         .toNumber();
 
-      console.log("=== maxSolSwapIncludeFee ===", {
-        origin: maxSolSwap,
-        includeFee: maxSolSwapIncludeFee,
-      });
+      // console.log("=== maxSolSwapIncludeFee ===", {
+      //   origin: maxSolSwap,
+      //   includeFee: maxSolSwapIncludeFee,
+      // });
       return maxSolSwapIncludeFee;
     } catch (error) {
       console.log("Error in get config curve limit", error);
@@ -271,7 +294,9 @@ export class Web3SolanaProgramInteraction {
     mint: PublicKey,
     wallet: WalletContextState,
     amount: string,
-    type: number
+    type: number,
+    simulateReceive: string,
+    slippage: string
   ): Promise<any> => {
     console.log("==============trade swap==============");
 
@@ -319,6 +344,8 @@ export class Web3SolanaProgramInteraction {
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
       const coinDecimal = type === 0 ? 9 : 6;
+      const receiveDecimal = type !== 0 ? 9 : 6;
+      const addFee = type === 0 ? slippage : Number(slippage) + 1; // fee
       const fmtAmount = new anchor.BN(
         parseFloat(amount) * Math.pow(10, coinDecimal)
       );
@@ -332,8 +359,13 @@ export class Web3SolanaProgramInteraction {
       //   throw Error("Exceeded bonding curve limit");
       // }
 
+      const minAmount = toBN(simulateReceive)
+        .multipliedBy(Math.pow(10, receiveDecimal))
+        .multipliedBy(toBN(1).minus(Number(addFee) / 100))
+        .toNumber();
+
       const swapIx = await program.methods
-        .swap(fmtAmount, type, new anchor.BN(0))
+        .swap(fmtAmount, type, new anchor.BN(minAmount || 0))
         .accounts({
           teamWallet: configAccount.teamWallet,
           user: wallet.publicKey,
@@ -393,7 +425,8 @@ export class Web3SolanaProgramInteraction {
     wallet: WalletContextState,
     amount: string,
     type: number,
-    poolKey: string
+    poolKey: string,
+    slippage: string
   ) => {
     // check the connection
     if (!wallet.publicKey || !this.connection) {
@@ -421,7 +454,8 @@ export class Web3SolanaProgramInteraction {
           mint,
           fmtAmount,
           wallet,
-          poolId
+          poolId,
+          slippage
         );
       } else {
         swapTx = await raySellTx(
@@ -429,7 +463,8 @@ export class Web3SolanaProgramInteraction {
           mint,
           fmtAmount,
           wallet,
-          poolId
+          poolId,
+          slippage
         );
       }
       if (swapTx == null) {

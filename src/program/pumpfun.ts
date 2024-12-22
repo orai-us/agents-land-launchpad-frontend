@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pumpfun.json`.
  */
 export type Pumpfun = {
-  address: "3uHJMHzeiqdqQ3LNc5bNVxuCp224HGtStPkv1JUEcabr";
+  address: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM";
   metadata: {
     name: "pumpfun";
     version: "0.1.0";
@@ -441,192 +441,13 @@ export type Pumpfun = {
           writable: true;
         },
         {
-          name: "communityPoolWalletAta";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "account";
-                path: "communityPoolWallet";
-              },
-              {
-                kind: "const";
-                value: [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ];
-              },
-              {
-                kind: "account";
-                path: "token";
-              }
-            ];
-            program: {
-              kind: "const";
-              value: [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ];
-            };
-          };
-        },
-        {
           name: "aiAgentWallet";
+          docs: ["CHECK"];
           writable: true;
         },
         {
-          name: "teamWallet";
+          name: "stakingWallet";
           writable: true;
-        },
-        {
-          name: "teamWalletAta";
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: "account";
-                path: "teamWallet";
-              },
-              {
-                kind: "const";
-                value: [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ];
-              },
-              {
-                kind: "account";
-                path: "token";
-              }
-            ];
-            program: {
-              kind: "const";
-              value: [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ];
-            };
-          };
         },
         {
           name: "systemProgram";
@@ -1150,7 +971,7 @@ export type Pumpfun = {
           };
         },
         {
-          name: "admin";
+          name: "migrator";
           writable: true;
           signer: true;
         },
@@ -1278,13 +1099,13 @@ export type Pumpfun = {
           };
         },
         {
-          name: "adminAta";
+          name: "migratorAta";
           writable: true;
           pda: {
             seeds: [
               {
                 kind: "account";
-                path: "admin";
+                path: "migrator";
               },
               {
                 kind: "const";
@@ -1506,6 +1327,10 @@ export type Pumpfun = {
             type: "u64";
           },
           {
+            name: "initToken";
+            type: "u64";
+          },
+          {
             name: "reserveLamport";
             type: "u64";
           },
@@ -1562,7 +1387,15 @@ export type Pumpfun = {
             type: "pubkey";
           },
           {
+            name: "migrator";
+            type: "pubkey";
+          },
+          {
             name: "communityPoolWallet";
+            type: "pubkey";
+          },
+          {
+            name: "stakingPoolWallet";
             type: "pubkey";
           },
           {
@@ -1607,6 +1440,10 @@ export type Pumpfun = {
           },
           {
             name: "aiAgentFee";
+            type: "f64";
+          },
+          {
+            name: "stakingFee";
             type: "f64";
           }
         ];

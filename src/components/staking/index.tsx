@@ -1,7 +1,7 @@
 import LoadingImg from "@/assets/icons/loading-button.svg";
 import nodataImg from "@/assets/icons/nodata.svg";
 import MaxImg from "@/assets/images/richoldman.png";
-import { SPL_DECIMAL, STAKE_CURRENCY_MINT, TIMER } from "@/config";
+import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
 import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import { formatNumberKMB, numberWithCommas } from "@/utils/format";
@@ -13,11 +13,12 @@ import utc from "dayjs/plugin/utc";
 import { ChangeEvent, useEffect, useState } from "react";
 import ReactLoading from "react-loading";
 import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { successAlert } from "../others/ToastGroup";
 import { LOCK_TIME_OPTIONS } from "./constants";
 import useGetListLockedByUser from "./hooks/useGetListLockedByUser";
 import LockingItem from "./LockingItem";
+import NumberFormat from "react-number-format";
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -88,7 +89,7 @@ export default function Staking() {
       const [tokenBal] = await Promise.all([
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
-          STAKE_CURRENCY_MINT
+          ALL_CONFIGS.STAKE_CURRENCY_MINT
         ),
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
@@ -103,18 +104,10 @@ export default function Staking() {
     getBalance();
   }, [wallet.publicKey]);
 
-  const [, setLocation] = useLocation();
-
-  const handleToRouter = (path: string) => {
-    setLocation(path);
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (!isNaN(parseFloat(value))) {
-      // setStakeAmount(toBN(toBN(value || 0).toFixed(SPL_DECIMAL, 1)).toString());
-      setStakeAmount(value);
-    } else if (value === "") {
+  const handleInputChange = (value: number) => {
+    if (value || value === 0) {
+      setStakeAmount(value.toString());
+    } else {
       setStakeAmount(""); // Allow empty string to clear the input
     }
   };
@@ -127,12 +120,12 @@ export default function Staking() {
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
-      <div
-        // onClick={() => handleToRouter("/")}
-        className="w-fit"
-      >
-        <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2">
-          {/* <svg
+      <div className="w-fit">
+        <Link
+          href="/"
+          className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2"
+        >
+          <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
             height="24"
@@ -143,9 +136,9 @@ export default function Staking() {
               d="M10.5171 11.9999L18.3546 3.83901C18.5515 3.63745 18.5468 3.30464 18.3452 3.09839L16.9437 1.66401C16.7421 1.45776 16.414 1.45307 16.2171 1.65464L6.64521 11.6203C6.54209 11.7234 6.49521 11.864 6.50459 11.9999C6.4999 12.1406 6.54678 12.2765 6.64521 12.3796L16.2171 22.3499C16.414 22.5515 16.7421 22.5468 16.9437 22.3406L18.3452 20.9062C18.5468 20.6999 18.5515 20.3671 18.3546 20.1656L10.5171 11.9999Z"
               fill="#FCFCFC"
             />
-          </svg> */}
+          </svg>
           Strongbox Vaults
-        </div>
+        </Link>
       </div>
       <div className="w-full text-[14px] text-[#9192A0] mb-3 md:mb-12 mt-4">
         Lock your $MAX today to gain advantages of coming projects and so much
@@ -232,7 +225,7 @@ export default function Staking() {
               </div>
               <div className="px-4 w-full flex flex-row items-center bg-transparent border-[1px] border-[#30344A] rounded">
                 <div className="py-2">
-                  <input
+                  {/* <input
                     type="number"
                     id="stakeAmount"
                     value={stakeAmount}
@@ -241,6 +234,26 @@ export default function Staking() {
                     className="w-full outline-none capitalize bg-transparent text-[#E8E9EE] placeholder:text-[#585A6B] text-[24px]"
                     placeholder="0.0"
                     required
+                  /> */}
+
+                  <NumberFormat
+                    placeholder={`0.0`}
+                    thousandSeparator
+                    className="w-full outline-none capitalize bg-transparent text-[#E8E9EE] placeholder:text-[#585A6B] text-[24px]"
+                    decimalScale={SPL_DECIMAL}
+                    type="text"
+                    value={stakeAmount}
+                    onChange={() => {}}
+                    isAllowed={(values) => {
+                      const { floatValue } = values;
+                      // allow !floatValue to let user can clear their input
+                      return (
+                        !floatValue || (floatValue >= 0 && floatValue <= 1e14)
+                      );
+                    }}
+                    onValueChange={({ floatValue }) => {
+                      handleInputChange(floatValue);
+                    }}
                   />
 
                   <span className="text-[10px] text-[#E8E9EE] font-medium">
@@ -325,7 +338,7 @@ export default function Staking() {
                 try {
                   setIsLoading(true);
                   const duration =
-                    selectedLockTime.value * TIMER.MONTH_TO_SECONDS;
+                    selectedLockTime.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
                   const amount = toBN(
                     toBN(stakeAmount || 0)
                       .multipliedBy(10 ** SPL_DECIMAL)

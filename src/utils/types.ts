@@ -77,6 +77,7 @@ export interface coinInfo {
   oraidexPoolAddr?: string;
   raydiumPoolAddr?: string;
   bondingCurve?: boolean;
+  tradingTime?: Date;
 }
 export interface createCoinInfo {
   name: string;

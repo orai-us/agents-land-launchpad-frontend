@@ -1,28 +1,24 @@
+import { ALL_CONFIGS, PROGRAM_ID } from "@/config";
+import UserContext from "@/context/UserContext";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
+import { commitmentLevel, endpoint } from "@/program/web3";
 import { coinInfo, recordInfo, tradeInfo } from "@/utils/types";
-import { MessageForm } from "../MessageForm";
-import { ChangeEvent, useContext, useEffect, useMemo, useState } from "react";
-import { Trade } from "./Trade";
 import {
   calculateTokenPrice,
   getCoinTrade,
   getMessageByCoin,
-  getSolPriceInUSD,
-  getUser,
   getUserByWalletAddress,
 } from "@/utils/util";
-import UserContext from "@/context/UserContext";
-import ReplyModal from "../modals/ReplyModal";
-import { BiSort } from "react-icons/bi";
-import { twMerge } from "tailwind-merge";
-import ThreadSection from "../modals/Thread";
-import { PROGRAM_ID } from "@/config";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import { endpoint, commitmentLevel } from "@/program/web3";
 import { Connection, PublicKey } from "@solana/web3.js";
 import _ from "lodash";
-import { TIMER } from "./hooks/useCountdown";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { twMerge } from "tailwind-merge";
 import { TOKENOMICS_LIST } from "../creatToken";
+import { MessageForm } from "../MessageForm";
+import ReplyModal from "../modals/ReplyModal";
+import ThreadSection from "../modals/Thread";
+import { Trade } from "./Trade";
 
 interface ChattingProps {
   param: string | null;
@@ -46,12 +42,17 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     solPrice,
   } = useContext(UserContext);
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [isTrades, setIsTrades] = useState<CHAT_TAB>(CHAT_TAB.CHAT);
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
 
-  const isNotForSale =
-    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
-    Date.now();
+  const ENDDATE =
+    new Date(coin.date).getTime() +
+    ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND;
+  const tradingTime = coin?.tradingTime
+    ? new Date(coin?.tradingTime).getTime()
+    : ENDDATE;
+  const isNotForSale = tradingTime > Date.now();
 
   // subscribe to real-time swap txs on trade
   useEffect(() => {
@@ -65,16 +66,16 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
       "swapEvent",
       async (result: ResultType) => {
         // const solPrice = await getSolPriceInUSD();
-        const userInfo = await getUserByWalletAddress({ wallet: result.user });
+        // const userInfo = await getUserByWalletAddress({ wallet: result.user });
         const tx = await connection.getTransaction(result.tx, {
           commitment: "confirmed",
           maxSupportedTransactionVersion: 0,
         });
         const newRecordInfo: recordInfo = {
-          holder: userInfo,
+          holder: { wallet: result.user } as any,
           lamportAmount: result.lamportAmount,
           tokenAmount: result.tokenAmount,
-          time: new Date(tx.blockTime),
+          time: new Date(tx.blockTime * ALL_CONFIGS.TIMER.MILLISECONDS),
           tx: result.tx,
           price: calculateTokenPrice(
             result.tokenReserves,
@@ -85,8 +86,10 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           swapDirection: result.swapDirection as any,
         };
 
-        const newTradeRecords = [newRecordInfo, ...trades.record];
-        setTrades({ ...trades, record: newTradeRecords });
+        setTrades((trades) => {
+          const newTradeRecords = [newRecordInfo, ...trades.record];
+          return { ...trades, record: newTradeRecords };
+        });
       },
       []
     );
@@ -97,10 +100,10 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log("Trading---ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
-  }, [trades, coin]);
+  }, [coin?._id, loaded]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -112,11 +115,12 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
           const coinAddress = coin.token;
           const data = await getCoinTrade(coinAddress);
           setTrades(data);
+          setLoaded(true);
         }
       }
     };
     fetchData();
-  }, [isTrades, param, coin]);
+  }, [isTrades, param, coin?._id]);
 
   useEffect(() => {
     if (coinId == coin._id) {

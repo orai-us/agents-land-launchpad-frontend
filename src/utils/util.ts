@@ -10,7 +10,7 @@ import {
   userInfo,
 } from "./types";
 import { BN } from "@coral-xyz/anchor";
-import { INIT_SOL_BONDING_CURVE } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import BigNumber from "bignumber.js";
 import { PublicKey, PublicKeyInitData } from "@solana/web3.js";
 
@@ -32,7 +32,12 @@ export const test = async () => {
   const data = await res.json();
   console.log(data);
 };
-export const getUser = async ({ id }: { id: string }): Promise<userInfo> => {
+export const getUser = async ({
+  id,
+}: {
+  id?: string;
+  address?: string;
+}): Promise<userInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/user/${id}`, config);
     // console.log("response:", response.data);
@@ -163,6 +168,13 @@ export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
   }));
 };
 
+export const genTokenKeypair = async (): Promise<string> => {
+  const res = await axios.get<{
+    privateKey: string;
+  }>(`${BACKEND_URL}/keypair`, config);
+  return res.data.privateKey;
+};
+
 export const getCoinInfo = async (data: string): Promise<coinInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/coin/${data}`, config);
@@ -200,16 +212,6 @@ export const fetchRetry = async (
         throw e;
       }
     }
-  }
-};
-
-export const getUserInfo = async (data: string): Promise<any> => {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/user/${data}`, config);
-    return response.data;
-  } catch (err) {
-    console.log("err get user info: ", err);
-    throw new Error(err);
   }
 };
 
@@ -293,7 +295,7 @@ export const findHolders = async (mint: string) => {
           id: "helius-test",
           params: {
             page: page,
-            limit: 1000,
+            limit: 30,
             displayOptions: {},
             //mint address for the token we are interested in
             mint: mint,
@@ -436,10 +438,10 @@ export function calculateKotHProgress(
   }
   if (bondingCurveLimit.toNumber() === 0) return 0;
   const calcLamportReserves = lamportReserves.sub(
-    new BN(INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
   );
   const calcBondingCurveLimit = bondingCurveLimit.sub(
-    new BN(INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
   );
   let currentKotHProgress =
     (fromBig(calcLamportReserves, 9) /

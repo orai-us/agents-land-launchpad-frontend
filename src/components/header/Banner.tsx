@@ -1,20 +1,15 @@
 import crownImg from "@/assets/icons/crown.svg";
 import badgeKothImg from "@/assets/images/peak_evolution.svg";
-import { BONDING_CURVE_LIMIT } from "@/config";
+import { ALL_CONFIGS } from "@/config";
 import { formatNumberKMB } from "@/utils/format";
 import { getKoth, reduceString } from "@/utils/util";
 import BigNumber from "bignumber.js";
 import { useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
+import { Link } from "wouter";
 
 const Banner = () => {
   const [kothCoin, setKothCoin] = useState(null);
-  const [, setLocation] = useLocation();
-
-  const handleToRouter = (id: string) => {
-    setLocation(id);
-  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +26,7 @@ const Banner = () => {
     (kothCoin?.lamportReserves || 0).toString() || 0
   )
     .multipliedBy(100)
-    .div(BONDING_CURVE_LIMIT);
+    .div(ALL_CONFIGS.BONDING_CURVE_LIMIT);
 
   const bondingCurvePercent = bondingCurvePercentOrg.isGreaterThanOrEqualTo(100)
     ? 100
@@ -50,20 +45,20 @@ const Banner = () => {
             <div className="mt-6 mb-14 text-base font-medium text-[#E8E9EE]">
               The First AI Agent Launch Platform
             </div>
-            <div
-              onClick={() => handleToRouter("/create-coin")}
-              className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
-            >
-              <div className="rounded bg-white px-6 py-2 text-[#080A14]">
+            <div className="uppercase p-1 py-2 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
+              <Link
+                href="/create-coin"
+                className="rounded bg-white px-6 py-2 text-[#080A14]"
+              >
                 Launch your AGENT
-              </div>
+              </Link>
             </div>
           </div>
           {kothCoin && (
             // <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
-            <div
+            <Link
               className="translate-y-1/2 md:translate-y-0 relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px] cursor-pointer"
-              onClick={() => handleToRouter(`/trading/${kothCoin.token}`)}
+              href={`/trading/${kothCoin.token}`}
             >
               <img
                 src={badgeKothImg}
@@ -95,10 +90,13 @@ const Banner = () => {
                 </div>
                 <div className="flex flex-col text-[#E8E9EE]">
                   <div className="text-[#84869A] uppercase text-[12px]">
-                    create by&nbsp;
-                    <span className="text-[#E4775D] underline ">
+                    created by&nbsp;
+                    <Link
+                      href={`/profile/${kothCoin.creator?.wallet}`}
+                      className="text-[#E4775D] underline normal-case"
+                    >
                       {reduceString(kothCoin.creator?.wallet || "", 4, 4)}
-                    </span>
+                    </Link>
                   </div>
                   <div className="text-[16px] font-medium leading-6 mt-2">
                     {/* Vanga the prophet (${kothCoin.ticker}) */}
@@ -119,7 +117,7 @@ const Banner = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           )}
         </div>
       </div>
@@ -137,13 +135,13 @@ const Banner = () => {
         <div className="mt-6 mb-5 text-base font-medium text-[#E8E9EE]">
           The First AI Agent Launch Platform
         </div>
-        <div
-          onClick={() => handleToRouter("/create-coin")}
-          className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
-        >
-          <div className="rounded bg-white px-6 py-2 text-[#080A14]">
+        <div className="uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150">
+          <Link
+            href="/create-coin"
+            className="rounded bg-white px-6 py-2 text-[#080A14]"
+          >
             Launch your AGENT
-          </div>
+          </Link>
         </div>
       </div>
     </>

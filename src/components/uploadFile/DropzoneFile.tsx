@@ -50,7 +50,7 @@ function DropzoneFile({ onDrop, file, setFile }) {
             <img
               src={URL.createObjectURL(file)}
               alt="Preview"
-              className="w-20 h-20 border rounded-lg overflow-hidden mx-auto"
+              className="w-20 h-20 border rounded-lg overflow-hidden mx-auto object-cover"
             />
             <div
               className="absolute top-0 right-0 bg-red-500 rounded-full h-5 w-5 flex items-center justify-center text-white cursor-pointer"

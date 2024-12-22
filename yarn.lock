@@ -2367,6 +2367,88 @@
     "@noble/hashes" "~1.6.0"
     "@scure/base" "~1.2.1"
 
+"@sentry-internal/feedback@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/feedback/-/feedback-7.99.0.tgz#c3fec1500cb24c9a5e09479d478fddca909477da"
+  integrity sha512-exIO1o+bE0MW4z30FxC0cYzJ4ZHSMlDPMHCBDPzU+MWGQc/fb8s58QUrx5Dnm6HTh9G3H+YlroCxIo9u0GSwGQ==
+  dependencies:
+    "@sentry/core" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry-internal/replay-canvas@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/replay-canvas/-/replay-canvas-7.99.0.tgz#d6ba7eec7ab2f7210a7deb6daa4dd82f7b1e9e29"
+  integrity sha512-PoIkfusToDq0snfl2M6HJx/1KJYtXxYhQplrn11kYadO04SdG0XGXf4h7wBTMEQ7LDEAtQyvsOu4nEQtTO3YjQ==
+  dependencies:
+    "@sentry/core" "7.99.0"
+    "@sentry/replay" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry-internal/tracing@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry-internal/tracing/-/tracing-7.99.0.tgz#ad13f8343444ecf7323a4220d4e57a55166565d7"
+  integrity sha512-z3JQhHjoM1KdM20qrHwRClKJrNLr2CcKtCluq7xevLtXHJWNAQQbafnWD+Aoj85EWXBzKt9yJMv2ltcXJ+at+w==
+  dependencies:
+    "@sentry/core" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry/browser@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/browser/-/browser-7.99.0.tgz#3e78beb490d141c988038ea902689a1e9171c6cf"
+  integrity sha512-bgfoUv3wkwwLgN5YUOe0ibB3y268ZCnamZh6nLFqnY/UBKC1+FXWFdvzVON/XKUm62LF8wlpCybOf08ebNj2yg==
+  dependencies:
+    "@sentry-internal/feedback" "7.99.0"
+    "@sentry-internal/replay-canvas" "7.99.0"
+    "@sentry-internal/tracing" "7.99.0"
+    "@sentry/core" "7.99.0"
+    "@sentry/replay" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry/core@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/core/-/core-7.99.0.tgz#6881aae5ac1436637b3d88e0b12df4ab56016c5f"
+  integrity sha512-vOAtzcAXEUtS/oW7wi3wMkZ3hsb5Ch96gKyrrj/mXdOp2zrcwdNV6N9/pawq2E9P/7Pw8AXw4CeDZztZrjQLuA==
+  dependencies:
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry/react@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/react/-/react-7.99.0.tgz#5adab8f0e3314ad12a128ae6a79f587c46b32243"
+  integrity sha512-RtHwgzMHJhzJfSQpVG0SDPQYMTGDX3Q37/YWI59S4ALMbSW4/F6n/eQAvGVYZKbh2UCSqgFuRWaXOYkSZT17wA==
+  dependencies:
+    "@sentry/browser" "7.99.0"
+    "@sentry/core" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+    hoist-non-react-statics "^3.3.2"
+
+"@sentry/replay@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/replay/-/replay-7.99.0.tgz#c63f2bd79a791538ba54bcd91f02379dc4d5c1cc"
+  integrity sha512-gyN/I2WpQrLAZDT+rScB/0jnFL2knEVBo8U8/OVt8gNP20Pq8T/rDZKO/TG0cBfvULDUbJj2P4CJryn2p/O2rA==
+  dependencies:
+    "@sentry-internal/tracing" "7.99.0"
+    "@sentry/core" "7.99.0"
+    "@sentry/types" "7.99.0"
+    "@sentry/utils" "7.99.0"
+
+"@sentry/types@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/types/-/types-7.99.0.tgz#bba7a514abab445026ee42f40f92f81275a6deba"
+  integrity sha512-94qwOw4w40sAs5mCmzcGyj8ZUu/KhnWnuMZARRq96k+SjRW/tHFAOlIdnFSrt3BLPvSOK7R3bVAskZQ0N4FTmA==
+
+"@sentry/utils@7.99.0":
+  version "7.99.0"
+  resolved "https://registry.yarnpkg.com/@sentry/utils/-/utils-7.99.0.tgz#ef96c3b59e23c79f3ef500db508234a48fa1cfbe"
+  integrity sha512-cYZy5WNTkWs5GgggGnjfGqC44CWir0pAv4GVVSx0fsup4D4pMKBJPrtub15f9uC+QkUf3vVkqwpBqeFxtmJQTQ==
+  dependencies:
+    "@sentry/types" "7.99.0"
+
 "@sinclair/typebox@^0.33.7":
   version "0.33.22"
   resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.33.22.tgz#3339d85172509095a8384cb4b44834a7c9309d86"
@@ -7230,6 +7312,13 @@ hmac-drbg@^1.0.1:
     minimalistic-assert "^1.0.0"
     minimalistic-crypto-utils "^1.0.1"
 
+hoist-non-react-statics@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.2.tgz#ece0acaf71d62c2969c2ec59feff42a4b1a85b45"
+  integrity sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==
+  dependencies:
+    react-is "^16.7.0"
+
 http-cache-semantics@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/http-cache-semantics/-/http-cache-semantics-4.1.1.tgz#abe02fcb2985460bf0323be664436ec3476a6d5a"
@@ -10025,7 +10114,7 @@ react-infinite-scroll-component@^6.1.0:
   dependencies:
     throttle-debounce "^2.1.0"
 
-react-is@^16.13.1:
+react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
   integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
@@ -10062,6 +10151,13 @@ react-modal@^3.12.1:
     prop-types "^15.7.2"
     react-lifecycles-compat "^3.0.0"
     warning "^4.0.3"
+
+react-number-format@^4.9.1:
+  version "4.9.4"
+  resolved "https://registry.npmjs.org/react-number-format/-/react-number-format-4.9.4.tgz#013ae526000e676e491763ce14da66fb330a9bd8"
+  integrity sha512-Gq20Z3ugqPLFgeaidnx5on9cNpbQZntPN3QgNAL/WJrNNlQnNznY0LCx7g8xtssmRBw0/hw+SCqw6zAcajooiA==
+  dependencies:
+    prop-types "^15.7.2"
 
 react-qr-reader@^2.2.1:
   version "2.2.1"

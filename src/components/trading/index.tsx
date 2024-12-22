@@ -5,13 +5,10 @@ import defaultUserImg from "@/assets/images/userAgentDefault.svg";
 import { Chatting } from "@/components/trading/Chatting";
 import { TradeForm } from "@/components/trading/TradeForm";
 import { TradingChart } from "@/components/TVChart/TradingChart";
-import {
-  BONDING_CURVE_LIMIT,
-  INIT_SOL_BONDING_CURVE,
-  PROGRAM_ID,
-  SOL_DECIMAL,
-} from "@/config";
+import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from "@/config";
 import UserContext from "@/context/UserContext";
+import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
+import { ResultType } from "@/program/logListeners/types";
 import {
   commitmentLevel,
   endpoint,
@@ -22,25 +19,24 @@ import {
   formatNumberKMB,
   numberWithCommas,
 } from "@/utils/format";
-import { coinInfo, SwapInfo } from "@/utils/types";
+import { coinInfo } from "@/utils/types";
 import { fromBig, getCoinInfo, reduceString, sleep } from "@/utils/util";
 import { BN } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import BigNumber from "bignumber.js";
-import { useContext, useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
-import TokenDistribution from "../others/TokenDistribution";
-import { DexToolsChart } from "../TVChart/DexToolsChart";
-import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
-import { TIMER } from "./hooks/useCountdown";
-import NotForSale from "./NotForSale";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import updateLocale from "dayjs/plugin/updateLocale";
+import { useContext, useEffect, useState } from "react";
+import { twMerge } from "tailwind-merge";
+import { Link, useLocation } from "wouter";
+import TokenDistribution from "../others/TokenDistribution";
+import { DexToolsChart } from "../TVChart/DexToolsChart";
+import useListenEventSwapChart from "./hooks/useListenEventSwapChart";
+import NotForSale from "./NotForSale";
+import useWindowSize from "@/hooks/useWindowSize";
+import { errorAlert } from "../others/ToastGroup";
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -68,6 +64,8 @@ const SLEEP_TIMEOUT = 1500;
 
 const web3Solana = new Web3SolanaProgramInteraction();
 export default function TradingPage() {
+  const { isMobileMode } = useWindowSize();
+  const [showOptional, setShowOptional] = useState<boolean>(true);
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
   const [param, setParam] = useState<string>("");
@@ -84,16 +82,14 @@ export default function TradingPage() {
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
   )
-    .minus(INIT_SOL_BONDING_CURVE)
+    .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
     .div(10 ** 9)
     .toNumber();
   const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
-  const isUnlock =
-    new Date(coin.date).getTime() + TIMER.DAY_TO_SECONDS * TIMER.MILLISECOND >
-    Date.now();
+  const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
   const isNotForSale = isUnlock && !isOnSaleCountdown;
 
   const fetchDataCoin = async (parameter) => {
@@ -118,15 +114,19 @@ export default function TradingPage() {
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString()
     )
-      .minus(INIT_SOL_BONDING_CURVE)
+      .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
       .toNumber();
 
     const bondingCurvePercent = new BigNumber(bondingCurveValue)
       .multipliedBy(new BigNumber(100))
-      .div(new BigNumber(BONDING_CURVE_LIMIT).minus(INIT_SOL_BONDING_CURVE))
+      .div(
+        new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+          ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+        )
+      )
       .toNumber();
 
-    const showCurrentChart = bondingCurvePercent >= 100 && data.raydiumPoolAddr;
+    const showCurrentChart = data.raydiumPoolAddr; // bondingCurvePercent >= 100 &&
 
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
@@ -145,6 +145,17 @@ export default function TradingPage() {
     };
     fetchData();
   }, [pathname, wallet.publicKey]);
+
+  useEffect(() => {
+    if (coin._id) {
+      console.log("data fullfil :>>", coin);
+
+      if (!coin.metadata?.agentAddress) {
+        setLocation("/");
+        errorAlert("Token not created with agent!");
+      }
+    }
+  }, [coin]);
 
   // realtime bonding curve
   useEffect(() => {
@@ -174,7 +185,7 @@ export default function TradingPage() {
 
     return () => {
       if (!program) return;
-      console.log("ready to remove listeners");
+      console.log("bonding-curve----ready to remove listeners");
       Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
     };
   }, [coinId, wallet.publicKey]);
@@ -190,13 +201,13 @@ export default function TradingPage() {
           const mint = new PublicKey(coin.token);
 
           const { numerator, denominator } =
-            await web3Solana.simulateRaydiumSwapTx(
+            (await web3Solana.simulateRaydiumSwapTx(
               mint,
               wallet,
               amountWithDecimal,
               1,
               coin.raydiumPoolAddr
-            );
+            )) || {};
 
           setSimulatePrice(
             new BigNumber((numerator || 0).toString())
@@ -212,17 +223,18 @@ export default function TradingPage() {
     } else {
       setLoadingEst(false);
     }
-  }, [coin]);
+  }, [coin?._id]);
 
   const { curPrice } = useListenEventSwapChart({ coin });
 
-  const isListedOnRay = Number(progress) >= 100 && !!coin.raydiumPoolAddr;
+  const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
   const tokenPrice = isListedOnRay ? simulatePrice : curPrice;
   const priceUsd = new BigNumber(isNaN(Number(tokenPrice)) ? 0 : tokenPrice)
     .multipliedBy(solPrice)
     .toFixed(6);
 
   const isRaydiumListed = coin["raydiumPoolAddr"];
+  const isOraidexListed = coin["oraidexPoolAddr"];
   const isListed = coin["listed"];
 
   return (
@@ -247,39 +259,42 @@ export default function TradingPage() {
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
           <div className="flex">
-            {isListed &&
-              (isRaydiumListed ? (
-                <a
-                  // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
-                  href={`https://raydium.io`}
-                  target="_blank"
-                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
-                >
-                  <img
-                    src={raydiumIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN RAYDIUM</span>
-                </a>
-              ) : (
-                <a
-                  href={`https://app.oraidex.io`}
-                  target="_blank"
-                  className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[12px] font-medium bg-[#AEE67F] p-1"
-                >
-                  <img
-                    src={oraidexIcon}
-                    alt="icon_dex"
-                    className="mr-1"
-                    width={16}
-                    height={16}
-                  />
-                  <span>LISTED oN ORAIDEX</span>
-                </a>
-              ))}
+            {isListed && isRaydiumListed && (
+              <a
+                // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
+                href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
+                target="_blank"
+                className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
+              >
+                <img
+                  src={raydiumIcon}
+                  alt="icon_dex"
+                  className="mr-1"
+                  width={16}
+                  height={16}
+                />
+                <span>LISTED oN RAYDIUM</span>
+              </a>
+            )}
+
+            {isListed && isOraidexListed && (
+              <a
+                href={`https://app.oraidex.io/pools/v2/${encodeURIComponent(
+                  `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`
+                )}_orai`}
+                target="_blank"
+                className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[#AEE67F] p-1"
+              >
+                <img
+                  src={oraidexIcon}
+                  alt="icon_dex"
+                  className="mr-1"
+                  width={16}
+                  height={16}
+                />
+                <span>LISTED oN ORAIDEX</span>
+              </a>
+            )}
           </div>
 
           {/* trading view chart  */}
@@ -301,32 +316,32 @@ export default function TradingPage() {
                     <img
                       src={imgSrc}
                       alt="agentAvt"
-                      className="w-[60px] h-[60px] rounded-full border border-[#E8E9EE]"
+                      className="w-[32px] h-[32px] md:w-[60px] md:h-[60px] rounded-full border border-[#E8E9EE]"
                     />
                   ) : (
                     <img
                       src={imgSrc}
                       alt="agentAvt"
-                      className="w-[60px] h-[60px] rounded-full"
+                      className="w-[32px] h-[32px] md:w-[60px] md:h-[60px] rounded-full"
                     />
                   )}
                   <div>
-                    <div className="flex items-center">
-                      <div className="text-[#E8E9EE] text-[24px] font-medium">
+                    <div className="flex items-center flex-wrap">
+                      <div className="text-[#E8E9EE] text-[18px] md:text-[24px] font-medium">
                         {/* {"Jordan’s Investor Coach"}&nbsp;(${coin.ticker}) */}
                         {coin.name || "--"}&nbsp;(${coin.ticker || "--"})
                       </div>
-                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
-                        - {dayjs(coin.date || Date.now()).fromNow()}
+                      <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
+                        &#x2022; {dayjs(coin.date || Date.now()).fromNow()}
                       </div>
-                      <div className="text-[#84869A] text-[12px] font-medium ml-1">
-                        - Marketcap{" "}
+                      <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
+                        &#x2022; Marketcap{" "}
                         <span className="text-[#E8E9EE]">
                           {formatNumberKMB(Number(coin.marketcap || 0))}
                         </span>
                       </div>
                     </div>
-                    <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium uppercase break-all">
+                    <p className="text-[#84869A] text-[10px] md:text-[12px] mt-2 font-medium break-all">
                       CONTRACT: {coin.token}
                     </p>
                   </div>
@@ -357,14 +372,17 @@ export default function TradingPage() {
                   </div>
                 </div> */}
 
-                <div className="flex flex-col justify-between md:items-end items-start h-full">
-                  <div className="text-[12px] text-[#84869A] font-medium uppercase">
+                <div className="w-full md:w-fit flex md:flex-col justify-between md:items-end items-start h-full">
+                  <div className="text-[10px] md:text-[12px] text-[#84869A] font-medium">
                     CREATED BY{" "}
-                    <span className="text-[12px] text-[#E4775D] underline cursor-pointer">
+                    <Link
+                      className="text-[10px] md:text-[12px] text-[#E4775D] underline cursor-pointer normal-case"
+                      href={`/profile/${coin.creator?.["wallet"]}`}
+                    >
                       {reduceString(coin.creator?.["wallet"] || "", 4, 4)}
-                    </span>
+                    </Link>
                   </div>
-                  <div className="flex gap-3 mt-4">
+                  <div className="flex gap-3 md:mt-4">
                     {/* AGENT info url */}
                     {coin.metadata?.agentId && (
                       <a
@@ -479,7 +497,8 @@ export default function TradingPage() {
                         isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
                         undefined,
                         {
-                          maximumFractionDigits: 9,
+                          maximumFractionDigits:
+                            ALL_CONFIGS.SHOW_DECIMALS_PRICE,
                         }
                       )
                     ) : (
@@ -509,38 +528,62 @@ export default function TradingPage() {
             )}
 
             {!isNotForSale && (
-              <div className="hidden md:block">
-                {isListedOnRay && (
-                  <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
-                    <div
-                      onClick={() => setIsAgentChart(true)}
-                      className={twMerge(
-                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                        isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                      )}
-                    >
-                      Agent Land Chart
-                    </div>
-                    <div
-                      onClick={() => setIsAgentChart(false)}
-                      className={twMerge(
-                        "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                        !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
-                      )}
-                    >
-                      Current Chart
-                    </div>
-                  </div>
-                )}
+              <div className="">
+                <div
+                  className="w-fit md:hidden flex px-3 py-3 text-[12px] text-[#9192A0] items-center cursor-pointer"
+                  onClick={() => setShowOptional(!showOptional)}
+                >
+                  {showOptional ? "Hide" : "Show"} chart{" "}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                      d="M19.2071 8.24992C18.8166 7.8594 18.1834 7.8594 17.7929 8.24992L12 14.0428L6.20711 8.24992C5.81658 7.8594 5.18342 7.8594 4.79289 8.24992C4.40237 8.64044 4.40237 9.27361 4.79289 9.66413L10.5858 15.457C11.3668 16.2381 12.6332 16.2381 13.4142 15.457L19.2071 9.66414C19.5976 9.27361 19.5976 8.64045 19.2071 8.24992Z"
+                      fill="#9192A0"
+                    />
+                  </svg>
+                </div>
+                {showOptional && (
+                  <div className={twMerge("py-3 md:py-0 bg-[#1a1c28] rounded")}>
+                    {isListedOnRay && (
+                      <div className="p-2 pt-0 bg-[#1a1c28] flex-row items-center text-white font-semibold text-[12px] flex">
+                        <div
+                          onClick={() => setIsAgentChart(true)}
+                          className={twMerge(
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                          )}
+                        >
+                          Agent Land Chart
+                        </div>
+                        <div
+                          onClick={() => setIsAgentChart(false)}
+                          className={twMerge(
+                            "cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
+                            !isAgentChart && "bg-[#585A6B] text-[#E8E9EE]"
+                          )}
+                        >
+                          Current Chart
+                        </div>
+                      </div>
+                    )}
 
-                {isAgentChart ? (
-                  <div className="bg-[#101827] pb-6 rounded-b">
-                    <TradingChart param={coin}></TradingChart>
-                  </div>
-                ) : (
-                  <div className="bg-[#111114] rounded-b">
-                    {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
-                    <DexToolsChart param={coin}></DexToolsChart>
+                    {isAgentChart ? (
+                      <div className="bg-[#101827] pb-6 rounded-b">
+                        <TradingChart param={coin}></TradingChart>
+                      </div>
+                    ) : (
+                      <div className="bg-[#111114] rounded-b">
+                        {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
+                        <DexToolsChart param={coin}></DexToolsChart>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -577,34 +620,42 @@ export default function TradingPage() {
                   ></div>
                 </div>
               </div>
-              <p className="text-[14px] text-[#585A6B]">
-                There are{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatLargeNumber(
-                    fromBig(coin.tokenReserves, coin.decimals)
-                  )}
-                </span>{" "}
-                tokens still available for sale in the bonding curve and there
-                is{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatLargeNumber(shownBondingCurve)} SOL
-                </span>{" "}
-                in the bonding curve.
-              </p>
-              <p className="text-[14px] text-[#585A6B]">
-                When the market cap reaches{" "}
-                <span className="text-[#E8E9EE]">
-                  {formatNumberKMB(
-                    new BigNumber(BONDING_CURVE_LIMIT)
-                      .multipliedBy(solPrice)
-                      .div(LAMPORTS_PER_SOL)
-                      .toNumber()
-                  )}
-                </span>
-                &nbsp; all the liquidity from the bonding curve will be
-                deposited into Raydium and burned. progression increases as the
-                price goes up.
-              </p>
+              {isListedOnRay ? (
+                <p className="text-[14px] text-[#585A6B]">
+                  ⚡️ Raydium pool seeded!
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <p className="text-[14px] text-[#585A6B]">
+                    There are{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatLargeNumber(
+                        fromBig(coin.tokenReserves, coin.decimals)
+                      )}
+                    </span>{" "}
+                    tokens still available for sale in the bonding curve and
+                    there is{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatLargeNumber(shownBondingCurve)} SOL
+                    </span>{" "}
+                    in the bonding curve.
+                  </p>
+                  <p className="text-[14px] text-[#585A6B]">
+                    When the market cap reaches{" "}
+                    <span className="text-[#E8E9EE]">
+                      {formatNumberKMB(
+                        new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)
+                          .multipliedBy(solPrice)
+                          .div(LAMPORTS_PER_SOL)
+                          .toNumber()
+                      )}
+                    </span>
+                    &nbsp; all the liquidity from the bonding curve will be
+                    deposited into Raydium and burned. progression increases as
+                    the price goes up.
+                  </p>
+                </div>
+              )}
             </div>
             <TokenDistribution data={coin} />
           </div>
