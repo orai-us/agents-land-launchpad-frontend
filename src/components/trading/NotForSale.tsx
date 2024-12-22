@@ -26,7 +26,7 @@ const NotForSale = ({ coin, onEnd }) => {
       <Countdown onEnd={onEnd} coin={coin} />
       {coin.date && (
         <div className="text-[14px] font-medium text-[#585A6B] mt-4">
-          {dayjs(endTime).format("DD-MM-YYYY HH:mm Z")}
+          {dayjs(coin.tradingTime || endTime).format("DD-MM-YYYY HH:mm Z")}
         </div>
       )}
     </div>

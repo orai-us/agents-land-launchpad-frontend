@@ -160,11 +160,6 @@ export const ListLaunchToken = ({
             ? 100
             : bondingCurvePercent;
 
-        const isNotForSale =
-          new Date(coinItem.date).getTime() +
-            ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
-          Date.now();
-
         return (
           <Link
             className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
@@ -256,7 +251,6 @@ const CountdownItem = ({ coin }) => {
   const startTime = Math.ceil(
     new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
   );
-  // const endTime = startTime + ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
   const endTime = Math.floor(
     new Date(coin.tradingTime || Date.now()).getTime() /
       ALL_CONFIGS.TIMER.MILLISECOND

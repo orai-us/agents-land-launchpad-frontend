@@ -46,10 +46,13 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   const [isTrades, setIsTrades] = useState<CHAT_TAB>(CHAT_TAB.CHAT);
   const tempNewMsg = useMemo(() => newMsg, [newMsg]);
 
-  const isNotForSale =
+  const ENDDATE =
     new Date(coin.date).getTime() +
-      ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND >
-    Date.now();
+    ALL_CONFIGS.TIMER.DAY_TO_SECONDS * ALL_CONFIGS.TIMER.MILLISECOND;
+  const tradingTime = coin?.tradingTime
+    ? new Date(coin?.tradingTime).getTime()
+    : ENDDATE;
+  const isNotForSale = tradingTime > Date.now();
 
   // subscribe to real-time swap txs on trade
   useEffect(() => {
