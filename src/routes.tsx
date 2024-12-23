@@ -1,10 +1,10 @@
-import { Router, Switch, Route } from "wouter";
-import Home from "./app/page";
-import TradingPage from "./app/trading/page";
-import CreateToken from "./app/create-coin/page";
-import DashBoard from "./app/dashboard/page";
-import ProfilePage from "./app/profile/page";
-import Staking from "./app/staking/page";
+import { Router, Switch, Route } from 'wouter';
+import Home from './app/page';
+import TradingPage from './app/trading/page';
+import CreateToken from './app/create-coin/page';
+import DashBoard from './app/dashboard/page';
+import ProfilePage from './app/profile/page';
+import Staking from './app/staking/page';
 
 export function Routes() {
   return (
