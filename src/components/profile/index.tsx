@@ -9,7 +9,6 @@ import { formatNumberKMB, numberWithCommas } from '@/utils/format';
 import { coinInfo, userInfo } from '@/utils/types';
 import {
   getCoinsInfoBy,
-  getUser,
   getUserByWalletAddress,
   reduceString,
   toPublicKey
@@ -30,27 +29,17 @@ export default function ProfilePage() {
     tokenDetails: any;
   }>({ uniqueTokenCount: 0, tokenDetails: [] });
   const [coins, setCoins] = useState<coinInfo[]>([]);
-  const [idUser, setIdUser] = useState('');
   const [copySuccess, setCopySuccess] = useState<string>('');
   const [pathname, setLocation] = useLocation();
   const { publicKey } = useWallet();
 
-  const handleToRouter = (id: string) => {
-    if (id.startsWith('http')) {
-      window.location.href = id; // For external links
-    } else {
-      setLocation(id); // For internal routing
-    }
-  };
-
   const fetchUserData = async (wallet: string) => {
     try {
       const response = await getUserByWalletAddress({ wallet });
-      setIdUser(response._id);
       setUserData(response);
     } catch (error) {
       console.error('Error fetching user:', error);
-      handleToRouter('/');
+      setLocation('/');
     }
   };
 
@@ -80,10 +69,10 @@ export default function ProfilePage() {
   }, [pathname]);
 
   useEffect(() => {
-    if (option === 2 && idUser) {
-      fetchCoinsData(idUser);
+    if (option === 2 && userData) {
+      fetchCoinsData(userData._id);
     }
-  }, [option, idUser]);
+  }, [option, userData]);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -123,14 +112,13 @@ export default function ProfilePage() {
                 className="cursor-pointer text-2xl hover:text-[#143F72] text-white"
               /> */}
             </div>
-            {/* <div
+            {/* <a
               className="flex flex-col w-[165px] text-lg cursor-pointer border-b-[1px] hover:text-[#143F72] text-white hover:border-b-[#143F72] border-b-white px-2 justify-center xs:justify-start"
-              onClick={() =>
-                handleToRouter(`https://solscan.io/account/${userData.wallet}`)
-              }
+              target="_blank"
+              href=`https://solscan.io/account/${userData.wallet}`              
             >
               View on Solscan
-            </div> */}
+            </a> */}
             <div className="flex items-center">
               <p className="mr-2 text-[14px] text-[#9192A0]">
                 {reduceString(userData?.wallet || '', 4, 4)}
