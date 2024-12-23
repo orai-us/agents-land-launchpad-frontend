@@ -7,7 +7,12 @@ import { errorAlert } from '@/components/others/ToastGroup';
 import { useSocket } from '@/contexts/SocketContext';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { uploadImage, uploadMetadata } from '@/utils/fileUpload';
-import { createCoinInfo, launchDataInfo, metadataInfo } from '@/utils/types';
+import {
+  coinInfo,
+  createCoinInfo,
+  launchDataInfo,
+  metadataInfo,
+} from '@/utils/types';
 import {
   getAgentsData,
   getAgentsDataByUser,
@@ -25,6 +30,7 @@ import PreSaleModal from './Presale';
 import { Circles } from 'react-loader-spinner';
 import ZappingText from '../zapping';
 import useOnClickOutside from '@/hooks/useOnClickOutside';
+import { ALL_CONFIGS } from '@/config';
 
 export enum STEP_TOKEN {
   INFO,
@@ -59,9 +65,7 @@ export default function CreateToken() {
     image: false,
   });
   const wallet = useWallet();
-  const [unCreatableToken, setUnCreatableToken] = useState<
-    Record<string, boolean>
-  >({});
+  const [unCreatableToken, setUnCreatableToken] = useState<coinInfo[]>([]);
 
   const fetchCountdownCoin = async (userAddress: string) => {
     try {
@@ -71,22 +75,8 @@ export default function CreateToken() {
       if (!userId) return;
       const coinsBy = await getCoinsInfoBy(userId);
       if (coinsBy) {
-        const unCreatableStatus = {};
-        const unCreatableList = {};
-        coinsBy.map((e) => {
-          const agentAddr = e.metadata?.agentAddress;
-          const canTrading =
-            new Date(e.tradingTime || Date.now()).getTime() <= Date.now();
-
-          unCreatableStatus[agentAddr] = [
-            ...(unCreatableStatus[agentAddr] || []),
-            canTrading,
-          ];
-          unCreatableList[agentAddr] = !!unCreatableStatus[agentAddr].find(
-            (elm) => !elm
-          );
-        });
-        setUnCreatableToken(unCreatableList);
+        setUnCreatableToken(coinsBy);
+        return coinsBy;
       }
     } catch (error) {
       console.log('Error fetching coins:', error);
@@ -96,7 +86,7 @@ export default function CreateToken() {
     if (wallet.publicKey) {
       fetchCountdownCoin(wallet.publicKey.toBase58());
     }
-  }, [wallet.publicKey, isLoading]);
+  }, [wallet.publicKey]);
 
   useOnClickOutside(refAgent, () => {
     setSelectedGroup(false);
@@ -195,6 +185,25 @@ export default function CreateToken() {
 
     try {
       setIsLoading(true);
+
+      const unCreatableToken = await fetchCountdownCoin(
+        wallet.publicKey?.toBase58()
+      );
+
+      if (unCreatableToken) {
+        const isSelectedAgentHasCoin = unCreatableToken.find(
+          (tk) =>
+            tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
+        );
+
+        if (isSelectedAgentHasCoin) {
+          errorAlert(
+            'Your agent has been tokenized! Please select another agent!'
+          );
+          return;
+        }
+      }
+
       // Process image upload
       const uploadedImageUrl = await uploadImage(imageUrl);
       if (!uploadedImageUrl) {
@@ -245,6 +254,7 @@ export default function CreateToken() {
       }
       // setLocation("/");
       setShowModalSuccess(true);
+      setSelectedAgent(null);
       setCoinCreatedData({ ...res, jsonData });
     } catch (error) {
       errorAlert('An unexpected error occurred.');
@@ -265,6 +275,10 @@ export default function CreateToken() {
     imageUrl &&
     selectedAgent;
 
+  const isSelectedAgentHasCoin = unCreatableToken.find(
+    (tk) => tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
+  );
+
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
       <PreSaleModal
@@ -280,7 +294,7 @@ export default function CreateToken() {
         closeModal={() => setShowModalSuccess(false)}
       />
       <Link href="/" className="w-fit">
-        <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2 pb-2">
+        <div className="w-fit uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
@@ -440,18 +454,20 @@ export default function CreateToken() {
                           </div>
                         ) : (
                           agentList.map((e, ind) => {
+                            const agentHasCoin = unCreatableToken.find(
+                              (tk) =>
+                                tk.metadata?.agentAddress ===
+                                e?.botWallet?.solAddr
+                            );
                             return (
                               <button
-                                disabled={
-                                  unCreatableToken[e?.botWallet?.solAddr]
-                                }
+                                disabled={!!agentHasCoin}
                                 className={twMerge(
                                   'flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3 disabled:cursor-not-allowed',
                                   e?.botWallet?.solAddr ===
                                     selectedAgent?.botWallet?.solAddr &&
                                     'bg-[#13141D] cursor-not-allowed',
-                                  unCreatableToken[e?.botWallet?.solAddr] &&
-                                    'hover:bg-transparent'
+                                  agentHasCoin && 'hover:bg-transparent'
                                 )}
                                 key={`agent-item-${ind}`}
                                 onClick={() => setSelectedAgent(e)}
@@ -486,7 +502,7 @@ export default function CreateToken() {
                                   </div>
                                 </div>
                                 <>
-                                  {unCreatableToken[e?.botWallet?.solAddr] && (
+                                  {agentHasCoin && (
                                     <div className="flex items-center text-[#585A6B] text-[12px] font-medium ">
                                       <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -503,7 +519,7 @@ export default function CreateToken() {
                                           stroke-linejoin="round"
                                         />
                                       </svg>
-                                      <span className="ml-1">Tokenzied</span>
+                                      <span className="ml-1">Tokenized</span>
                                     </div>
                                   )}
                                 </>
@@ -847,7 +863,7 @@ export default function CreateToken() {
               !formValid ||
               isLoading ||
               !wallet.publicKey ||
-              unCreatableToken[selectedAgent?.botWallet?.solAddr]
+              !!isSelectedAgentHasCoin
             }
             onClick={createCoin}
             // onClick={() => setShowModalPreSale(true)}
