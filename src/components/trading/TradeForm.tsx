@@ -1,20 +1,20 @@
-import UserContext from "@/context/UserContext";
-import { coinInfo } from "@/utils/types";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
-import { errorAlert, successAlert } from "../others/ToastGroup";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { numberWithCommas } from "@/utils/format";
-import solIcon from "@/assets/icons/sol_ic.svg";
-import LoadingImg from "@/assets/icons/loading-button.svg";
+import UserContext from '@/context/UserContext';
+import { coinInfo } from '@/utils/types';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
+import { ChangeEvent, useContext, useEffect, useState } from 'react';
+import { errorAlert, successAlert } from '../others/ToastGroup';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { numberWithCommas } from '@/utils/format';
+import solIcon from '@/assets/icons/sol_ic.svg';
+import LoadingImg from '@/assets/icons/loading-button.svg';
 
-import { debounce } from "lodash";
-import BigNumber from "bignumber.js";
-import { SOL_DECIMAL, SPL_DECIMAL } from "@/config";
-import Slippage from "../modals/Slippage";
-import { toBN } from "@/utils/util";
-import NumberFormat from "react-number-format";
+import { debounce } from 'lodash';
+import BigNumber from 'bignumber.js';
+import { SOL_DECIMAL, SPL_DECIMAL } from '@/config';
+import Slippage from '../modals/Slippage';
+import { toBN } from '@/utils/util';
+import NumberFormat from 'react-number-format';
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -29,10 +29,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   curveLimit,
 }) => {
   const [openSlippage, setOpenSlippage] = useState<boolean>(false);
-  const [slippage, setSlippage] = useState<string>("0.3");
+  const [slippage, setSlippage] = useState<string>('0.3');
   const [loading, setLoading] = useState<boolean>(false);
-  const [sol, setSol] = useState<string>("");
-  const [simulateReceive, setSimulateReceive] = useState<string>("");
+  const [sol, setSol] = useState<string>('');
+  const [simulateReceive, setSimulateReceive] = useState<string>('');
   const [isBuy, setIsBuy] = useState<number>(0);
   const [loadingEst, setLoadingEst] = useState<boolean>(false);
   const [tokenBal, setTokenBal] = useState<number>(0);
@@ -40,10 +40,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const { user } = useContext(UserContext);
   const wallet = useWallet();
   const SolList = [
-    { id: "", price: "Reset" },
-    { id: "0.1", price: "0.1 SOL" },
-    { id: "0.5", price: "0.5 SOL" },
-    { id: "1", price: "1 SOL" },
+    { id: '', price: 'Reset' },
+    { id: '0.1', price: '0.1 SOL' },
+    { id: '0.5', price: '0.5 SOL' },
+    { id: '1', price: '1 SOL' },
   ];
   const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
   const isDisableSwapOnAgent =
@@ -71,8 +71,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     if (value || value === 0) {
       setSol(value.toString());
     } else {
-      setSimulateReceive("");
-      setSol(""); // Allow empty string to clear the input
+      setSimulateReceive('');
+      setSol(''); // Allow empty string to clear the input
     }
   };
 
@@ -90,7 +90,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             .toFixed(0, 1);
           const mint = new PublicKey(coin.token);
 
-          let receive = "";
+          let receive = '';
           if (!isListedOnRay) {
             let amt = amountWithDecimal;
             if (isSimulateWhenExceedCurve) {
@@ -113,7 +113,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
             receive = (numerator || 0).toString();
 
-            console.log("receive", receive);
+            console.log('receive', receive);
           }
 
           setSimulateReceive(() =>
@@ -122,13 +122,13 @@ export const TradeForm: React.FC<TradingFormProps> = ({
               .toString()
           );
         } catch (error) {
-          console.log("simulate failed", error);
+          console.log('simulate failed', error);
         } finally {
           setLoadingEst(false);
         }
       })();
     } else {
-      setSimulateReceive(() => "");
+      setSimulateReceive(() => '');
     }
   }, [sol]); // curveLimit
 
@@ -152,7 +152,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       setTokenBal(tokenBal ? tokenBal : 0);
       setSolBalance(solBal ? solBal : 0);
     } catch (error) {
-      console.log("error", error);
+      console.log('error', error);
       // setTokenBal(0);
       // setSolBalance(0);
     }
@@ -188,17 +188,17 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       }
 
       if (res) {
-        console.log("res", res);
-        successAlert("Transaction successfully!");
+        console.log('res', res);
+        successAlert('Submit successfully!');
         getBalance();
       } else {
-        errorAlert("Transaction Failed!");
+        errorAlert('Transaction Failed!');
       }
 
       return res;
     } catch (error) {
-      console.log("error trade", error);
-      errorAlert("Transaction Failed!");
+      console.log('error trade', error);
+      errorAlert('Transaction Failed!');
     } finally {
       setLoading(false);
     }
@@ -215,26 +215,26 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         <button
           className={`uppercase rounded py-2 h-12 w-full ${
             isBuy === 0
-              ? "bg-[#9FF4CF] text-[#080A14]"
-              : "bg-[#1A1C28] hover:brightness-125"
+              ? 'bg-[#9FF4CF] text-[#080A14]'
+              : 'bg-[#1A1C28] hover:brightness-125'
           }`}
           onClick={() => {
             setIsBuy(0);
-            setSol("");
+            setSol('');
           }}
         >
-          {" "}
+          {' '}
           Buy
         </button>
         <button
           className={`uppercase rounded py-2 h-12 w-full ${
             isBuy === 1
-              ? "bg-[#E75787] text-[#080A14]"
-              : "bg-[#1A1C28] hover:brightness-125"
+              ? 'bg-[#E75787] text-[#080A14]'
+              : 'bg-[#1A1C28] hover:brightness-125'
           }`}
           onClick={() => {
             setIsBuy(1);
-            setSol("");
+            setSol('');
           }}
         >
           Sell
@@ -269,7 +269,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
                 onClick={() => setSol(fmtCurve)}
                 className="underline text-center disabled:cursor-not-allowed text-[10px] text-[#9192A0] md:text-[12px] font-medium hover:brightness-150 cursor-pointer"
               >
-                Max Bonding Curve Limit:{" "}
+                Max Bonding Curve Limit:{' '}
                 {numberWithCommas(new BigNumber(fmtCurve).toNumber())} SOL
               </button>
             )}
@@ -331,15 +331,15 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             />
 
             <span className="text-[10px] text-[#E8E9EE] font-medium">
-              Balance:{" "}
+              Balance:{' '}
               {isBuy !== 0
                 ? numberWithCommas(tokenBal, undefined, {
                     maximumFractionDigits: 6,
                   })
                 : numberWithCommas(solBalance, undefined, {
                     maximumFractionDigits: 6,
-                  })}{" "}
-              {isBuy === 0 ? "SOL" : coin.ticker}
+                  })}{' '}
+              {isBuy === 0 ? 'SOL' : coin.ticker}
             </span>
           </div>
 
@@ -387,7 +387,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           <div className="flex flex-row py-2 gap-3">
             <div
               className="text-center flex-1 text-[10px] border-[#30344A] bg-[#080A14] rounded px-2 py-1 text-[#9192A0] md:text-[12px] font-medium border-[1px] hover:brightness-125 cursor-pointer"
-              onClick={() => setSol("")}
+              onClick={() => setSol('')}
             >
               Reset
             </div>
@@ -425,9 +425,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         ) : ( */}
 
         <div className="mt-2 flex items-center gap-1">
-          Receive: ≈{" "}
+          Receive: ≈{' '}
           {isInsufficientFund ? (
-            "--"
+            '--'
           ) : !loadingEst ? (
             simulateReceive ? (
               numberWithCommas(
@@ -436,12 +436,12 @@ export const TradeForm: React.FC<TradingFormProps> = ({
                 { maximumFractionDigits: 6 }
               )
             ) : (
-              "--"
+              '--'
             )
           ) : (
             <img src={LoadingImg} />
-          )}{" "}
-          {!isBuy ? coin.ticker : "SOL"}
+          )}{' '}
+          {!isBuy ? coin.ticker : 'SOL'}
         </div>
 
         <button
