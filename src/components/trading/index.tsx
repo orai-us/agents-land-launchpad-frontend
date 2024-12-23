@@ -5,7 +5,12 @@ import defaultUserImg from '@/assets/images/userAgentDefault.svg';
 import { Chatting } from '@/components/trading/Chatting';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradingChart } from '@/components/TVChart/TradingChart';
-import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from '@/config';
+import {
+  ALL_CONFIGS,
+  BLACK_LIST_ADDRESS,
+  PROGRAM_ID,
+  SOL_DECIMAL,
+} from '@/config';
 import UserContext from '@/context/UserContext';
 import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
 import { ResultType } from '@/program/logListeners/types';
@@ -20,7 +25,7 @@ import {
   numberWithCommas,
 } from '@/utils/format';
 import { coinInfo } from '@/utils/types';
-import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
+import { fromBig, getCoinInfo, reduceString, sleep } from '@/utils/util';
 import { BN } from '@coral-xyz/anchor';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
@@ -140,6 +145,13 @@ export default function TradingPage() {
       const parameter = segments[segments.length - 1];
       setParam(parameter);
       setCoinId(parameter);
+
+      const isBlackList = BLACK_LIST_ADDRESS.includes(parameter);
+
+      if (isBlackList) {
+        setLocation('/');
+        // errorAlert("Token not created with agent!");
+      }
 
       await fetchDataCoin(parameter);
     };
