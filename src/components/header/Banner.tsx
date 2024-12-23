@@ -1,12 +1,12 @@
-import crownImg from "@/assets/icons/crown.svg";
-import badgeKothImg from "@/assets/images/peak_evolution.svg";
-import { ALL_CONFIGS } from "@/config";
-import { formatNumberKMB } from "@/utils/format";
-import { getKoth, reduceString } from "@/utils/util";
-import BigNumber from "bignumber.js";
-import { useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { Link } from "wouter";
+import crownImg from '@/assets/icons/crown.svg';
+import badgeKothImg from '@/assets/images/peak_evolution.svg';
+import { ALL_CONFIGS } from '@/config';
+import { formatNumberKMB } from '@/utils/format';
+import { getKoth, reduceString } from '@/utils/util';
+import BigNumber from 'bignumber.js';
+import { useEffect, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { Link } from 'wouter';
 
 const Banner = () => {
   const [kothCoin, setKothCoin] = useState(null);
@@ -14,7 +14,7 @@ const Banner = () => {
   useEffect(() => {
     const fetchData = async () => {
       const kingCoin = await getKoth();
-      console.log("kingCoin", kingCoin);
+      console.log('kingCoin', kingCoin);
       if (kingCoin) {
         setKothCoin(kingCoin);
       }
@@ -40,7 +40,7 @@ const Banner = () => {
             <div className="text-[56px] text-[#E8E9EE] leading-[64px] uppercase font-medium">
               Take your agent
               <br />
-              to the promise land
+              to the promised land
             </div>
             <div className="mt-6 mb-14 text-base font-medium text-[#E8E9EE]">
               The First AI Agent Launch Platform
@@ -95,7 +95,7 @@ const Banner = () => {
                       href={`/profile/${kothCoin.creator?.wallet}`}
                       className="text-[#E4775D] underline normal-case"
                     >
-                      {reduceString(kothCoin.creator?.wallet || "", 4, 4)}
+                      {reduceString(kothCoin.creator?.wallet || '', 4, 4)}
                     </Link>
                   </div>
                   <div className="text-[16px] font-medium leading-6 mt-2">
@@ -123,14 +123,14 @@ const Banner = () => {
       </div>
       <div
         className={twMerge(
-          "md:hidden mt-6 flex flex-col items-start px-4",
-          kothCoin && "mt-[96px]"
+          'md:hidden mt-6 flex flex-col items-start px-4',
+          kothCoin && 'mt-[96px]'
         )}
       >
         <div className="text-[30px] text-[#E8E9EE] leading-[48px] uppercase font-medium">
           Take your agent
           <br />
-          to the promise land
+          to the promised land
         </div>
         <div className="mt-6 mb-5 text-base font-medium text-[#E8E9EE]">
           The First AI Agent Launch Platform
