@@ -153,7 +153,7 @@ export default function ProfilePage() {
         <div className="w-full flex flex-row pt-6 items-center justify-between">
           <div className="w-fit flex flex-col justify-center gap-1 text-center">
             <div className="text-[12px] text-[#9192A0] uppercase">
-              TOKEN HELD
+              tokens held
             </div>
             <div className="text-[16px] text-white font-medium">
               {ownedToken.uniqueTokenCount || 0}
