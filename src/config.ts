@@ -1,25 +1,25 @@
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
-export const SOL_PRICE_KEY = "SOL_PRICE_KEY";
+export const SOL_PRICE_KEY = 'SOL_PRICE_KEY';
 
 export const SOLANA_ENV =
-  import.meta.env.VITE_APP_SOLANA_ENV || "mainnet-beta-test";
+  import.meta.env.VITE_APP_SOLANA_ENV || 'mainnet-beta-test';
 
 export const SPL_DECIMAL = 6;
 export const SOL_DECIMAL = 9;
 export const MAX_RETRY_QUERY_TOKEN = 3;
 export const LIMIT_PAGINATION = 8;
-export const SEED_GLOBAL = "global";
+export const SEED_GLOBAL = 'global';
 export const TX_FEE = 0.25;
 
 /**
  * LOCKING VAULTS
  */
-export const VAULT_SEED = "staking_vault";
-export const STAKE_CONFIG_SEED = "staking_config";
-export const STAKER_INFO_SEED = "staker_info";
-export const STAKE_INFO_SEED = "stake_info";
-export const STAKE_DETAIL_SEED = "stake_detail";
+export const VAULT_SEED = 'staking_vault';
+export const STAKE_CONFIG_SEED = 'staking_config';
+export const STAKER_INFO_SEED = 'staker_info';
+export const STAKE_INFO_SEED = 'stake_info';
+export const STAKE_DETAIL_SEED = 'stake_detail';
 
 export const CONFIGS: Record<
   string,
@@ -44,11 +44,11 @@ export const CONFIGS: Record<
   }
 > = {
   devnet: {
-    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+    PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
     DISTILL_COMMUNITY_POOL_WALLET:
-      "CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN",
-    STAKE_CURRENCY_MINT: "3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4",
-    STAKE_POOL_PROGRAM_ID: "9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy",
+      'CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN',
+    STAKE_CURRENCY_MINT: '3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4',
+    STAKE_POOL_PROGRAM_ID: '9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy',
     BONDING_CURVE_LIMIT: 10 * LAMPORTS_PER_SOL,
     INIT_SOL_BONDING_CURVE: 3 * LAMPORTS_PER_SOL,
     TIMER: {
@@ -63,12 +63,12 @@ export const CONFIGS: Record<
     },
     SHOW_DECIMALS_PRICE: 9,
   },
-  "mainnet-beta": {
-    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+  'mainnet-beta': {
+    PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
     DISTILL_COMMUNITY_POOL_WALLET:
-      "HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d",
-    STAKE_CURRENCY_MINT: "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h",
-    STAKE_POOL_PROGRAM_ID: "Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH",
+      'HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d',
+    STAKE_CURRENCY_MINT: 'oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h',
+    STAKE_POOL_PROGRAM_ID: 'Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH',
     BONDING_CURVE_LIMIT: 150 * LAMPORTS_PER_SOL,
     INIT_SOL_BONDING_CURVE: 30 * LAMPORTS_PER_SOL,
     TIMER: {
@@ -83,12 +83,12 @@ export const CONFIGS: Record<
     },
     SHOW_DECIMALS_PRICE: 9,
   },
-  "mainnet-beta-test": {
-    PROGRAM_ID: "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+  'mainnet-beta-test': {
+    PROGRAM_ID: '69dh5zQEhCMYYpnTvy8tBxZG5PFGsZTBU9ntLxd965Po',
     DISTILL_COMMUNITY_POOL_WALLET:
-      "HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d",
-    STAKE_CURRENCY_MINT: "oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h",
-    STAKE_POOL_PROGRAM_ID: "Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH",
+      'HJbs8zNyiMQP46S1MrcVsyPQs9hDnf5bcmscU1rPxi3d',
+    STAKE_CURRENCY_MINT: 'oraim8c9d1nkfuQk9EzGYEUGxqL3MHQYndRw1huVo5h',
+    STAKE_POOL_PROGRAM_ID: 'Fke77idjs2D92Ha6uGJKfe94z62nDgjY3mHGsm9kskiH',
     BONDING_CURVE_LIMIT: 1.5 * LAMPORTS_PER_SOL,
     INIT_SOL_BONDING_CURVE: 0.3 * LAMPORTS_PER_SOL,
     TIMER: {
@@ -99,12 +99,12 @@ export const CONFIGS: Record<
       SECOND: 60,
       MINUTE: 60,
       HOUR: 24,
-      DAY_TO_SECONDS: 15 * 60,
+      DAY_TO_SECONDS: 5 * 60,
     },
     SHOW_DECIMALS_PRICE: 12,
   },
 };
 
-export const ALL_CONFIGS = CONFIGS[SOLANA_ENV] || CONFIGS["mainnet-beta-test"];
+export const ALL_CONFIGS = CONFIGS[SOLANA_ENV] || CONFIGS['mainnet-beta-test'];
 
-export const PROGRAM_ID = ALL_CONFIGS.PROGRAM_ID ?? "";
+export const PROGRAM_ID = ALL_CONFIGS.PROGRAM_ID ?? '';
