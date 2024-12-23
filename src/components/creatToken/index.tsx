@@ -490,9 +490,9 @@ export default function CreateToken() {
                                       className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
                                     />
                                   )}
-                                  <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
+                                  <div className="text-[#E8E9EE] text-left text-[14px] font-medium ml-[10px]">
                                     <p>{e.username}</p>
-                                    <p className="text-[#585A6B] text-[12px] font-medium ">
+                                    <p className="text-[#585A6B] text-[12px] font-medium text-left">
                                       {reduceString(
                                         e?.botWallet?.solAddr,
                                         4,
