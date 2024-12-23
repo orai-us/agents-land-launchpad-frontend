@@ -620,7 +620,7 @@ export default function TradingPage() {
                   ></div>
                 </div>
               </div>
-              {!isListedOnRay ? (
+              {isListedOnRay ? (
                 <p className="text-[14px] text-[#585A6B]">
                   ⚡️ Raydium pool seeded!
                 </p>
