@@ -68,8 +68,9 @@ export default function CreateToken() {
       if (coinsBy) {
         const unCreatableList = {};
         coinsBy.map((e) => {
-          const canTrading = new Date(e.tradingTime).getTime() <= Date.now();
-          unCreatableList[e.metadata?.agentAddress] = canTrading;
+          const canTrading =
+            new Date(e.tradingTime || Date.now()).getTime() <= Date.now();
+          unCreatableList[e.metadata?.agentAddress] = !canTrading;
         });
         setUnCreatableToken(unCreatableList);
       }
