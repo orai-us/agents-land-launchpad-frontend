@@ -12,6 +12,7 @@ import {
   getAgentsData,
   getAgentsDataByUser,
   getCoinsInfoBy,
+  getUserByWalletAddress,
   reduceString,
 } from '@/utils/util';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -64,13 +65,26 @@ export default function CreateToken() {
 
   const fetchCountdownCoin = async (userAddress: string) => {
     try {
-      const coinsBy = await getCoinsInfoBy(userAddress);
+      const response = await getUserByWalletAddress({ wallet: userAddress });
+      const userId = response?._id;
+
+      if (!userId) return;
+      const coinsBy = await getCoinsInfoBy(userId);
       if (coinsBy) {
+        const unCreatableStatus = {};
         const unCreatableList = {};
         coinsBy.map((e) => {
+          const agentAddr = e.metadata?.agentAddress;
           const canTrading =
             new Date(e.tradingTime || Date.now()).getTime() <= Date.now();
-          unCreatableList[e.metadata?.agentAddress] = !canTrading;
+
+          unCreatableStatus[agentAddr] = [
+            ...(unCreatableStatus[agentAddr] || []),
+            canTrading,
+          ];
+          unCreatableList[agentAddr] = !!unCreatableStatus[agentAddr].find(
+            (elm) => !elm
+          );
         });
         setUnCreatableToken(unCreatableList);
       }
