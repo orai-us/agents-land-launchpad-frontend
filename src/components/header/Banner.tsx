@@ -14,7 +14,6 @@ const Banner = () => {
   useEffect(() => {
     const fetchData = async () => {
       const kingCoin = await getKoth();
-      console.log('kingCoin', kingCoin);
       if (kingCoin) {
         setKothCoin(kingCoin);
       }
