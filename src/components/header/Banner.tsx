@@ -1,6 +1,6 @@
 import crownImg from '@/assets/icons/crown.svg';
 import badgeKothImg from '@/assets/images/peak_evolution.svg';
-import { ALL_CONFIGS } from '@/config';
+import { ALL_CONFIGS, BLACK_LIST_ADDRESS } from '@/config';
 import { formatNumberKMB } from '@/utils/format';
 import { getKoth, reduceString } from '@/utils/util';
 import BigNumber from 'bignumber.js';
@@ -54,7 +54,7 @@ const Banner = () => {
               </Link>
             </div>
           </div>
-          {kothCoin && (
+          {kothCoin && !BLACK_LIST_ADDRESS.includes(kothCoin.token) && (
             // <div className="bg-[linear-gradient(180deg,_#E4775D_0%,_#292D46_100%)] rounded-xl p-0.5">
             <Link
               className="translate-y-1/2 md:translate-y-0 relative bg-[#E4775D] rounded-xl p-0.5 min-w-[310px] cursor-pointer"
