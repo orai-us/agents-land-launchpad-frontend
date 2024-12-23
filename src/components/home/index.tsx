@@ -1,4 +1,4 @@
-import { LIMIT_PAGINATION } from '@/config';
+import { BLACK_LIST_ADDRESS, LIMIT_PAGINATION } from '@/config';
 import UserContext from '@/context/UserContext';
 import { coinInfo } from '@/utils/types';
 import { getCoinsInfo } from '@/utils/util';
@@ -87,7 +87,7 @@ const HomePage: FC = () => {
         page,
         keyword: (token || '').trim(),
         listed: currentTab,
-        sortBy: filterState.value
+        sortBy: filterState.value,
       });
       if (coins !== null) {
         setTotalData(total);
@@ -210,7 +210,11 @@ const HomePage: FC = () => {
 
       <ListToken
         type={currentTab}
-        data={data?.filter((e) => !!e.metadata?.agentAddress)}
+        data={data?.filter((e) => {
+          const isBlackList = BLACK_LIST_ADDRESS.includes(e.token);
+
+          return !!e.metadata.agentAddress && !isBlackList;
+        })}
         handleLoadMore={() => setPage((page) => page + 1)}
         totalData={totalData}
       />
