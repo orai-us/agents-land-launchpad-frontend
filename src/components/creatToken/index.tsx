@@ -470,24 +470,28 @@ export default function CreateToken() {
                                     </p>
                                   </div>
                                 </div>
-                                <div className="flex items-center text-[#585A6B] text-[12px] font-medium ">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="12"
-                                    height="12"
-                                    viewBox="0 0 12 12"
-                                    fill="none"
-                                  >
-                                    <path
-                                      d="M9.75 3L4.5 9L2.25 6.75"
-                                      stroke="#9192A0"
-                                      stroke-width="2"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                    />
-                                  </svg>
-                                  <span className="ml-1">Tokenzied</span>
-                                </div>
+                                <>
+                                  {unCreatableToken[e?.botWallet?.solAddr] && (
+                                    <div className="flex items-center text-[#585A6B] text-[12px] font-medium ">
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="12"
+                                        height="12"
+                                        viewBox="0 0 12 12"
+                                        fill="none"
+                                      >
+                                        <path
+                                          d="M9.75 3L4.5 9L2.25 6.75"
+                                          stroke="#9192A0"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                        />
+                                      </svg>
+                                      <span className="ml-1">Tokenzied</span>
+                                    </div>
+                                  )}
+                                </>
                               </button>
                             );
                           })
