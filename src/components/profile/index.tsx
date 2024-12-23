@@ -207,7 +207,7 @@ export default function ProfilePage() {
                   <img src={nodataImg} alt="nodata" />
                   <p className="mt-4 text-[#E8E9EE] text-[16px]">No Token</p>
                   <p className="mt-2 text-[#585A6B] text-[14px]">
-                    No Token Created
+                    No Tokens Created
                   </p>
                 </div>
               ) : (
