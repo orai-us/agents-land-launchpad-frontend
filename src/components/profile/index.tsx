@@ -1,30 +1,28 @@
-import nodataImg from "@/assets/icons/nodata.svg";
-import defaultUserImg from "@/assets/images/userAgentDefault.svg";
-import Modal from "@/components/modals/Modal";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import { ProfileMenuList } from "@/config/TextData";
-import UserContext from "@/context/UserContext";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { formatNumberKMB, numberWithCommas } from "@/utils/format";
-import { coinInfo, userInfo } from "@/utils/types";
+import nodataImg from '@/assets/icons/nodata.svg';
+import defaultUserImg from '@/assets/images/userAgentDefault.svg';
+import Modal from '@/components/modals/Modal';
+import { errorAlert, successAlert } from '@/components/others/ToastGroup';
+import { ProfileMenuList } from '@/config/TextData';
+import UserContext from '@/context/UserContext';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { formatNumberKMB, numberWithCommas } from '@/utils/format';
+import { coinInfo, userInfo } from '@/utils/types';
 import {
   getCoinsInfoBy,
   getUser,
   getUserByWalletAddress,
   reduceString,
-  toPublicKey,
-} from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { useLocation } from "wouter";
+  toPublicKey
+} from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import dayjs from 'dayjs';
+import { useContext, useEffect, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { useLocation } from 'wouter';
 
 export default function ProfilePage() {
   const { user, setProfileEditModal, profileEditModal } =
     useContext(UserContext);
-  const [param, setParam] = useState<string | null>(null);
   const [userData, setUserData] = useState<userInfo>({} as userInfo);
   const [option, setOption] = useState<number>(1);
   const [ownedToken, setOwnedToken] = useState<{
@@ -32,27 +30,13 @@ export default function ProfilePage() {
     tokenDetails: any;
   }>({ uniqueTokenCount: 0, tokenDetails: [] });
   const [coins, setCoins] = useState<coinInfo[]>([]);
-  const [idUser, setIdUser] = useState("");
-  const [copySuccess, setCopySuccess] = useState<string>("");
+  const [idUser, setIdUser] = useState('');
+  const [copySuccess, setCopySuccess] = useState<string>('');
   const [pathname, setLocation] = useLocation();
   const { publicKey } = useWallet();
 
-  useEffect(() => {
-    if (!param || !publicKey) {
-      return;
-    }
-    (async () => {
-      const wallet =
-        param === publicKey.toBase58() ? publicKey : toPublicKey(param);
-      const { uniqueTokenCount, tokenDetails } =
-        await new Web3SolanaProgramInteraction().getNumberOfOwnedToken(wallet);
-
-      setOwnedToken({ uniqueTokenCount, tokenDetails });
-    })();
-  }, [publicKey, param]);
-
   const handleToRouter = (id: string) => {
-    if (id.startsWith("http")) {
+    if (id.startsWith('http')) {
       window.location.href = id; // For external links
     } else {
       setLocation(id); // For internal routing
@@ -65,29 +49,35 @@ export default function ProfilePage() {
       setIdUser(response._id);
       setUserData(response);
     } catch (error) {
-      console.error("Error fetching user:", error);
-      handleToRouter("/");
+      console.error('Error fetching user:', error);
+      handleToRouter('/');
     }
   };
 
   const fetchCoinsData = async (userId: string) => {
     try {
       const coinsBy = await getCoinsInfoBy(userId);
-
       setCoins(coinsBy);
     } catch (error) {
-      console.error("Error fetching coins:", error);
+      console.error('Error fetching coins:', error);
     }
   };
 
   useEffect(() => {
-    const segments = pathname.split("/");
+    const segments = pathname.split('/');
     const address = segments[segments.length - 1];
     if (address) {
-      setParam(address);
+      (async () => {
+        const wallet = toPublicKey(address);
+        const { uniqueTokenCount, tokenDetails } =
+          await new Web3SolanaProgramInteraction().getNumberOfOwnedToken(
+            wallet
+          );
+        setOwnedToken({ uniqueTokenCount, tokenDetails });
+      })();
       fetchUserData(address);
     }
-  }, [pathname, profileEditModal]);
+  }, [pathname]);
 
   useEffect(() => {
     if (option === 2 && idUser) {
@@ -98,11 +88,11 @@ export default function ProfilePage() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopySuccess("Copied!");
-      successAlert("Copied to clipboard!");
+      setCopySuccess('Copied!');
+      successAlert('Copied to clipboard!');
     } catch (err) {
-      setCopySuccess("Failed to copy!");
-      errorAlert("Failed to copy!");
+      setCopySuccess('Failed to copy!');
+      errorAlert('Failed to copy!');
     }
   };
 
@@ -143,7 +133,7 @@ export default function ProfilePage() {
             </div> */}
             <div className="flex items-center">
               <p className="mr-2 text-[14px] text-[#9192A0]">
-                {reduceString(userData?.wallet || "", 4, 4)}
+                {reduceString(userData?.wallet || '', 4, 4)}
               </p>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -210,8 +200,8 @@ export default function ProfilePage() {
               key={item.id}
               onClick={() => setOption(item.id)}
               className={twMerge(
-                "cursor-pointer uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]",
-                option === item.id && "bg-[#585A6B] text-[#E8E9EE]"
+                'cursor-pointer uppercase mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
+                option === item.id && 'bg-[#585A6B] text-[#E8E9EE]'
               )}
             >
               {item.text}
@@ -282,7 +272,7 @@ export default function ProfilePage() {
                             {numberWithCommas(coin.balance || 0)}
                           </td> */}
                             <td className="py-2 text-right">
-                              {" "}
+                              {' '}
                               {formatNumberKMB(Number(coin.marketcap || 0))}
                             </td>
                             {/* <td className="py-2 text-right">
@@ -290,7 +280,7 @@ export default function ProfilePage() {
                           </td> */}
                             <td className="py-2 text-right">
                               {dayjs(coin.date || Date.now()).format(
-                                "DD/MM/YYYY"
+                                'DD/MM/YYYY'
                               )}
                             </td>
                           </tr>
@@ -341,7 +331,7 @@ export default function ProfilePage() {
                                   target="_blank"
                                   className="text-lg underline hover:cursor-pointer"
                                 >
-                                  {reduceString(tk.mint || "", 4, 4)}
+                                  {reduceString(tk.mint || '', 4, 4)}
                                 </a>
                               </td>
                               <td className="py-2 text-right">
