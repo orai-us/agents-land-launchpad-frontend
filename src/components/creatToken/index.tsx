@@ -1,24 +1,36 @@
-"use client";
-import nodataImg from "@/assets/icons/noagentdata.svg";
-import MountainImg from "@/assets/images/mount_guide.png";
-import AgentImg from "@/assets/images/userAgentDefault.svg";
-import { Spinner } from "@/components/loadings/Spinner";
-import { errorAlert } from "@/components/others/ToastGroup";
-import { useSocket } from "@/contexts/SocketContext";
-import { Web3SolanaProgramInteraction } from "@/program/web3";
-import { uploadImage, uploadMetadata } from "@/utils/fileUpload";
-import { createCoinInfo, launchDataInfo, metadataInfo } from "@/utils/types";
-import { getAgentsData, getAgentsDataByUser, reduceString } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { Link, useLocation } from "wouter";
-import DropzoneFile from "../uploadFile/DropzoneFile";
-import CreateTokenSuccess from "./CreateTokenSuccess";
-import PreSaleModal from "./Presale";
-import { Circles } from "react-loader-spinner";
-import ZappingText from "../zapping";
-import useOnClickOutside from "@/hooks/useOnClickOutside";
+'use client';
+import nodataImg from '@/assets/icons/noagentdata.svg';
+import MountainImg from '@/assets/images/mount_guide.png';
+import AgentImg from '@/assets/images/userAgentDefault.svg';
+import { Spinner } from '@/components/loadings/Spinner';
+import { errorAlert } from '@/components/others/ToastGroup';
+import { useSocket } from '@/contexts/SocketContext';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { uploadImage, uploadMetadata } from '@/utils/fileUpload';
+import {
+  coinInfo,
+  createCoinInfo,
+  launchDataInfo,
+  metadataInfo,
+} from '@/utils/types';
+import {
+  getAgentsData,
+  getAgentsDataByUser,
+  getCoinsInfoBy,
+  getUserByWalletAddress,
+  reduceString,
+} from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { Link, useLocation } from 'wouter';
+import DropzoneFile from '../uploadFile/DropzoneFile';
+import CreateTokenSuccess from './CreateTokenSuccess';
+import PreSaleModal from './Presale';
+import { Circles } from 'react-loader-spinner';
+import ZappingText from '../zapping';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
+import { ALL_CONFIGS } from '@/config';
 
 export enum STEP_TOKEN {
   INFO,
@@ -26,7 +38,7 @@ export enum STEP_TOKEN {
 }
 
 export default function CreateToken() {
-  const [imageUrl, setIamgeUrl] = useState<string>("");
+  const [imageUrl, setIamgeUrl] = useState<string>('');
   const { isLoading, setIsLoading } = useSocket();
   const [agentPersonality, setAgentPersonality] = useState<string>(
     AGENT_PERSONALITY[0].value
@@ -37,7 +49,7 @@ export default function CreateToken() {
   const [showModalSuccess, setShowModalSuccess] = useState<boolean>(false);
   const [coinCreatedData, setCoinCreatedData] = useState(null);
   const [newCoin, setNewCoin] = useState<createCoinInfo>({} as createCoinInfo);
-  const [selectedFileName, setSelectedFileName] = useState<string>("");
+  const [selectedFileName, setSelectedFileName] = useState<string>('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [getAmt, setGetAmt] = useState<number>(0);
@@ -52,12 +64,33 @@ export default function CreateToken() {
     description: false,
     image: false,
   });
+  const wallet = useWallet();
+  const [unCreatableToken, setUnCreatableToken] = useState<coinInfo[]>([]);
+
+  const fetchCountdownCoin = async (userAddress: string) => {
+    try {
+      const response = await getUserByWalletAddress({ wallet: userAddress });
+      const userId = response?._id;
+
+      if (!userId) return;
+      const coinsBy = await getCoinsInfoBy(userId);
+      if (coinsBy) {
+        setUnCreatableToken(coinsBy);
+        return coinsBy;
+      }
+    } catch (error) {
+      console.log('Error fetching coins:', error);
+    }
+  };
+  useEffect(() => {
+    if (wallet.publicKey) {
+      fetchCountdownCoin(wallet.publicKey.toBase58());
+    }
+  }, [wallet.publicKey]);
 
   useOnClickOutside(refAgent, () => {
     setSelectedGroup(false);
   });
-
-  const wallet = useWallet();
 
   useEffect(() => {
     // Clear errors when newCoin changes
@@ -75,8 +108,8 @@ export default function CreateToken() {
         const res = await getAgentsDataByUser({ user: wallet.publicKey });
 
         if (res) {
-          setAgentList(res["items"]);
-          setSelectedAgent(res["items"][0]);
+          setAgentList(res['items']);
+          // setSelectedAgent(res['items'][0]); // TODO: dont auto select
         }
       })();
     }
@@ -96,7 +129,7 @@ export default function CreateToken() {
     // Validate input
     const numericValue = parseFloat(value);
     if (numericValue > 1.5 || numericValue < 0) {
-      errorAlert("Presale amount must be between 0 and 1.5 SOL");
+      errorAlert('Presale amount must be between 0 and 1.5 SOL');
       return;
     }
     // Set the input value regardless of validation
@@ -110,7 +143,7 @@ export default function CreateToken() {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log("file--->", file);
+    console.log('file--->', file);
     if (file) {
       setSelectedFileName(file.name);
       setImagePreview(URL.createObjectURL(file));
@@ -119,7 +152,7 @@ export default function CreateToken() {
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log("Accepted files:", acceptedFiles);
+    console.log('Accepted files:', acceptedFiles);
     const file = acceptedFiles?.[0];
     if (file) {
       setSelectedFileName(file.name);
@@ -128,15 +161,6 @@ export default function CreateToken() {
       setIamgeUrl(URL.createObjectURL(file));
     }
   }, []);
-
-  console.log("newCoin", {
-    newCoin,
-    imageUrl,
-    imagePreview,
-    imageFile,
-    agentPersonality,
-    agentStyle,
-  });
 
   const validateForm = () => {
     const validationErrors = {
@@ -153,18 +177,37 @@ export default function CreateToken() {
   };
 
   const createCoin = async () => {
-    console.log("imageUrl--->", imageUrl, imagePreview);
+    console.log('imageUrl--->', imageUrl, imagePreview);
     if (!validateForm()) {
-      errorAlert("Please fix the errors before submitting.");
+      errorAlert('Please fix the errors before submitting.');
       return;
     }
 
     try {
       setIsLoading(true);
+
+      const unCreatableToken = await fetchCountdownCoin(
+        wallet.publicKey?.toBase58()
+      );
+
+      if (unCreatableToken) {
+        const isSelectedAgentHasCoin = unCreatableToken.find(
+          (tk) =>
+            tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
+        );
+
+        if (isSelectedAgentHasCoin) {
+          errorAlert(
+            'Your agent has been tokenized! Please select another agent!'
+          );
+          return;
+        }
+      }
+
       // Process image upload
       const uploadedImageUrl = await uploadImage(imageUrl);
       if (!uploadedImageUrl) {
-        errorAlert("Image upload failed.");
+        errorAlert('Image upload failed.');
         setIsLoading(false);
         return;
       }
@@ -175,7 +218,7 @@ export default function CreateToken() {
         description: newCoin.description,
         agentPersonality: agentPersonality || undefined,
         agentStyle: agentStyle || undefined,
-        createdOn: "https://agent.land",
+        createdOn: 'https://agent.land',
         twitter: newCoin.twitter || undefined, // Only assign if it exists
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
@@ -186,12 +229,12 @@ export default function CreateToken() {
       // Process metadata upload
       const uploadMetadataUrl = await uploadMetadata(jsonData);
       if (!uploadMetadataUrl) {
-        errorAlert("Metadata upload failed.");
+        errorAlert('Metadata upload failed.');
         setIsLoading(false);
         return;
       }
 
-      console.log("uploadMetadataUrl", uploadedImageUrl, uploadMetadataUrl);
+      console.log('uploadMetadataUrl', uploadedImageUrl, uploadMetadataUrl);
       const coinData: launchDataInfo = {
         name: newCoin.name,
         symbol: newCoin.ticker,
@@ -200,20 +243,21 @@ export default function CreateToken() {
         metadata: jsonData,
         decimals: 6,
       };
-      console.log("coinData--->", coinData);
+      console.log('coinData--->', coinData);
 
       const web3Solana = new Web3SolanaProgramInteraction();
       const res = await web3Solana.createToken(wallet, coinData);
-      if (res === "WalletError" || !res) {
-        errorAlert("Payment failed or was rejected.");
+      if (res === 'WalletError' || !res) {
+        errorAlert('Payment failed or was rejected.');
         setIsLoading(false);
         return;
       }
       // setLocation("/");
       setShowModalSuccess(true);
+      setSelectedAgent(null);
       setCoinCreatedData({ ...res, jsonData });
     } catch (error) {
-      errorAlert("An unexpected error occurred.");
+      errorAlert('An unexpected error occurred.');
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -231,6 +275,10 @@ export default function CreateToken() {
     imageUrl &&
     selectedAgent;
 
+  const isSelectedAgentHasCoin = unCreatableToken.find(
+    (tk) => tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
+  );
+
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
       <PreSaleModal
@@ -246,7 +294,7 @@ export default function CreateToken() {
         closeModal={() => setShowModalSuccess(false)}
       />
       <Link href="/" className="w-fit">
-        <div className="uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2 pb-2">
+        <div className="w-fit uppercase cursor-pointer text-[#FCFCFC] text-2xl flex flex-row items-center gap-2 pb-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="25"
@@ -259,7 +307,7 @@ export default function CreateToken() {
               fill="#FCFCFC"
             />
           </svg>
-          tokenize agent
+          tokenized agent
         </div>
       </Link>
 
@@ -295,7 +343,7 @@ export default function CreateToken() {
               />
 
               <div className="right-6 text-1xl p-2">
-                <ZappingText text={"Transaction processing"} dot={5} />
+                <ZappingText text={'Transaction processing'} dot={5} />
               </div>
             </div>
           </div>
@@ -308,7 +356,7 @@ export default function CreateToken() {
       <div className="flex justify-between items-start flex-col md:flex-row">
         <div className="w-full flex flex-col gap-6 bg-[#13141D] rounded-lg p-4 md:p-8">
           <div className="text-[#E8E9EE] text-[18px] font-medium">
-            {step === STEP_TOKEN.INFO ? "Project info" : "Agent Behaviors"}
+            {step === STEP_TOKEN.INFO ? 'Project info' : 'Agent Behaviors'}
           </div>
           {step === STEP_TOKEN.INFO && (
             <div className="flex flex-col gap-6">
@@ -369,7 +417,7 @@ export default function CreateToken() {
                       )}
 
                       <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
-                        {selectedAgent?.username || "--"}
+                        {selectedAgent?.username || '--'}
                       </div>
                     </div>
                     <svg
@@ -406,19 +454,26 @@ export default function CreateToken() {
                           </div>
                         ) : (
                           agentList.map((e, ind) => {
+                            const agentHasCoin = unCreatableToken.find(
+                              (tk) =>
+                                tk.metadata?.agentAddress ===
+                                e?.botWallet?.solAddr
+                            );
                             return (
-                              <div
+                              <button
+                                disabled={!!agentHasCoin}
                                 className={twMerge(
-                                  "flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3",
+                                  'flex items-center justify-between rounded-lg hover:bg-[#13141D] p-3 disabled:cursor-not-allowed',
                                   e?.botWallet?.solAddr ===
                                     selectedAgent?.botWallet?.solAddr &&
-                                    "bg-[#13141D] cursor-not-allowed"
+                                    'bg-[#13141D] cursor-not-allowed',
+                                  agentHasCoin && 'hover:bg-transparent'
                                 )}
                                 key={`agent-item-${ind}`}
                                 onClick={() => setSelectedAgent(e)}
                               >
                                 <div className="flex items-center">
-                                  {typeof e.img === "string" ? (
+                                  {typeof e.img === 'string' ? (
                                     <img
                                       src={e.avatar as any}
                                       alt="agentImg"
@@ -435,14 +490,40 @@ export default function CreateToken() {
                                       className="border-[1.5px] w-8 h-8 object-cover border-[#ADADAD] rounded-full"
                                     />
                                   )}
-                                  <div className="text-[#E8E9EE] text-[14px] font-medium ml-[10px]">
-                                    {e.username}
+                                  <div className="text-[#E8E9EE] text-left text-[14px] font-medium ml-[10px]">
+                                    <p>{e.username}</p>
+                                    <p className="text-[#585A6B] text-[12px] font-medium text-left">
+                                      {reduceString(
+                                        e?.botWallet?.solAddr,
+                                        4,
+                                        4
+                                      )}
+                                    </p>
                                   </div>
                                 </div>
-                                <span className="text-[#585A6B] text-[14px] font-medium ">
-                                  {reduceString(e?.botWallet?.solAddr, 4, 4)}
-                                </span>
-                              </div>
+                                <>
+                                  {agentHasCoin && (
+                                    <div className="flex items-center text-[#585A6B] text-[12px] font-medium ">
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="12"
+                                        height="12"
+                                        viewBox="0 0 12 12"
+                                        fill="none"
+                                      >
+                                        <path
+                                          d="M9.75 3L4.5 9L2.25 6.75"
+                                          stroke="#9192A0"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round"
+                                        />
+                                      </svg>
+                                      <span className="ml-1">Tokenized</span>
+                                    </div>
+                                  )}
+                                </>
+                              </button>
                             );
                           })
                         )}
@@ -465,7 +546,7 @@ export default function CreateToken() {
                     autoComplete="off"
                     id="name"
                     type="text"
-                    value={newCoin.name || ""}
+                    value={newCoin.name || ''}
                     onChange={handleChange}
                     className={twMerge(
                       `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -480,13 +561,13 @@ export default function CreateToken() {
                     className="text-[12px] font-medium text-[#84869A]"
                   >
                     TOKEN SYMBOL <span className="text-red-700">*</span>
-                  </label>{" "}
+                  </label>{' '}
                   <input
                     role="presentation"
                     autoComplete="off"
                     id="ticker"
                     type="text"
-                    value={newCoin.ticker || ""}
+                    value={newCoin.ticker || ''}
                     onChange={handleChange}
                     className={twMerge(
                       `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -505,7 +586,7 @@ export default function CreateToken() {
                 </label>
                 <textarea
                   id="description"
-                  value={newCoin.description || ""}
+                  value={newCoin.description || ''}
                   onChange={handleChange}
                   rows={4}
                   className={twMerge(
@@ -548,8 +629,8 @@ export default function CreateToken() {
                   setFile={(file: File) => {
                     setSelectedFileName(file?.name);
                     setImageFile(file);
-                    setImagePreview(!file ? "" : URL.createObjectURL(file));
-                    setIamgeUrl(!file ? "" : URL.createObjectURL(file));
+                    setImagePreview(!file ? '' : URL.createObjectURL(file));
+                    setIamgeUrl(!file ? '' : URL.createObjectURL(file));
                   }}
                 />
               </div>
@@ -558,7 +639,7 @@ export default function CreateToken() {
                 className="flex cursor-pointer"
                 onClick={() => setShowOptional(!showOptional)}
               >
-                More optional{" "}
+                More optional{' '}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -590,7 +671,7 @@ export default function CreateToken() {
                         autoComplete="off"
                         id="twitter"
                         type="text"
-                        value={newCoin.twitter || ""}
+                        value={newCoin.twitter || ''}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -605,13 +686,13 @@ export default function CreateToken() {
                         className="text-[12px] font-medium text-[#84869A]"
                       >
                         TELEGRAM
-                      </label>{" "}
+                      </label>{' '}
                       <input
                         role="presentation"
                         autoComplete="off"
                         id="telegram"
                         type="text"
-                        value={newCoin.telegram || ""}
+                        value={newCoin.telegram || ''}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -634,7 +715,7 @@ export default function CreateToken() {
                         autoComplete="off"
                         id="discord"
                         type="text"
-                        value={newCoin.discord || ""}
+                        value={newCoin.discord || ''}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -649,13 +730,13 @@ export default function CreateToken() {
                         className="text-[12px] font-medium text-[#84869A]"
                       >
                         WEBSITE
-                      </label>{" "}
+                      </label>{' '}
                       <input
                         role="presentation"
                         autoComplete="off"
                         id="website"
                         type="text"
-                        value={newCoin.website || ""}
+                        value={newCoin.website || ''}
                         onChange={handleChange}
                         className={twMerge(
                           `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`
@@ -686,9 +767,9 @@ export default function CreateToken() {
                         }}
                         key={`${idx}-personality`}
                         className={twMerge(
-                          "text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer",
+                          'text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer',
                           e.value === agentPersonality &&
-                            "border-2 border-[#E4775D]"
+                            'border-2 border-[#E4775D]'
                         )}
                       >
                         {e.label}
@@ -733,8 +814,8 @@ export default function CreateToken() {
                         }}
                         key={`${idx}-styles-agent`}
                         className={twMerge(
-                          "text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer",
-                          e.value === agentStyle && "border-2 border-[#E4775D]"
+                          'text-[#E8E9EE] flex items-center rounded-lg md:p-4 p-2 md:text-[14px] text-[12px] bg-[#080A14] border border-[#30344A] cursor-pointer',
+                          e.value === agentStyle && 'border-2 border-[#E4775D]'
                         )}
                       >
                         {e.label}
@@ -778,7 +859,12 @@ export default function CreateToken() {
             </button>
           ) : ( */}
           <button
-            disabled={!formValid || isLoading}
+            disabled={
+              !formValid ||
+              isLoading ||
+              !wallet.publicKey ||
+              !!isSelectedAgentHasCoin
+            }
             onClick={createCoin}
             // onClick={() => setShowModalPreSale(true)}
             className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
@@ -915,122 +1001,122 @@ export default function CreateToken() {
 
 export const TOKENOMICS_LIST = [
   {
-    text: "1% for creator",
+    text: '1% for creator',
     color: `#f9b48f`,
   },
   {
-    text: "1% for Distilled AI Treasury",
+    text: '1% for Distilled AI Treasury',
     color: `#f9dd8f`,
   },
   {
-    text: "1% for AI Agent wallet",
+    text: '1% for AI Agent wallet',
     color: `#C2F98F`,
   },
   {
-    text: "2% for Strongbox Vaults",
+    text: '2% for Strongbox Vaults',
     color: `#9EEEDB`,
   },
   {
-    text: "95% for fairlaunch (bonding curve)",
+    text: '95% for fairlaunch (bonding curve)',
     color: `#7e9af9`,
   },
 ];
 
 export const AGENT_PERSONALITY = [
   {
-    label: "😊 Friendly",
-    value: "Friendly",
+    label: '😊 Friendly',
+    value: 'Friendly',
   },
   {
-    label: "💼 Professional",
-    value: "Professional",
+    label: '💼 Professional',
+    value: 'Professional',
   },
   {
-    label: "🤡 Humorous",
-    value: "Humorous",
+    label: '🤡 Humorous',
+    value: 'Humorous',
   },
   {
-    label: "🛟 Supportive",
-    value: "Supportive",
+    label: '🛟 Supportive',
+    value: 'Supportive',
   },
   {
-    label: "🥰 Empathetic",
-    value: "Empathetic",
+    label: '🥰 Empathetic',
+    value: 'Empathetic',
   },
   {
-    label: "🤓 Informative",
-    value: "Informative",
+    label: '🤓 Informative',
+    value: 'Informative',
   },
   {
-    label: "🤠 Adventurous",
-    value: "Adventurous",
+    label: '🤠 Adventurous',
+    value: 'Adventurous',
   },
   {
-    label: "⭐️ Custom",
-    value: "Custom",
+    label: '⭐️ Custom',
+    value: 'Custom',
   },
 ];
 
 export const AGENT_STYLE = [
   {
-    label: "👔 Formal",
-    value: "Formal",
+    label: '👔 Formal',
+    value: 'Formal',
   },
   {
-    label: "🧢 Casual",
-    value: "Casual",
+    label: '🧢 Casual',
+    value: 'Casual',
   },
   {
-    label: "🔥 Enthusiastic",
-    value: "Enthusiastic",
+    label: '🔥 Enthusiastic',
+    value: 'Enthusiastic',
   },
   {
-    label: "🍃 Calm",
-    value: "Calm",
+    label: '🍃 Calm',
+    value: 'Calm',
   },
   {
-    label: "👀 Direct",
-    value: "Direct",
+    label: '👀 Direct',
+    value: 'Direct',
   },
   {
-    label: "📝 Storytelling",
-    value: "Informative",
+    label: '📝 Storytelling',
+    value: 'Informative',
   },
   {
-    label: "⭐️ Custom",
-    value: "Custom",
+    label: '⭐️ Custom',
+    value: 'Custom',
   },
 ];
 
 const MOCK_AGENTS = [
   {
     img: AgentImg,
-    name: "Jordan’s Investor Coach",
-    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+    name: 'Jordan’s Investor Coach',
+    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
   {
     img: AgentImg,
-    name: "Max",
-    address: "2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt",
+    name: 'Max',
+    address: '2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt',
   },
   {
     img: AgentImg,
-    name: "Max2",
-    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+    name: 'Max2',
+    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
   {
     img: AgentImg,
-    name: "Max2",
-    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+    name: 'Max2',
+    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
   {
     img: AgentImg,
-    name: "Max2",
-    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+    name: 'Max2',
+    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
   {
     img: AgentImg,
-    name: "Max2",
-    address: "0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b",
+    name: 'Max2',
+    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
 ];
