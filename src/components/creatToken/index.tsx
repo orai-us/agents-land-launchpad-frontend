@@ -1,10 +1,7 @@
-'use client';
 import nodataImg from '@/assets/icons/noagentdata.svg';
-import MountainImg from '@/assets/images/mount_guide.png';
 import AgentImg from '@/assets/images/userAgentDefault.svg';
-import { Spinner } from '@/components/loadings/Spinner';
 import { errorAlert } from '@/components/others/ToastGroup';
-import { useSocket } from '@/contexts/SocketContext';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { uploadImage, uploadMetadata } from '@/utils/fileUpload';
 import {
@@ -14,7 +11,6 @@ import {
   metadataInfo,
 } from '@/utils/types';
 import {
-  getAgentsData,
   getAgentsDataByUser,
   getCoinsInfoBy,
   getUserByWalletAddress,
@@ -22,15 +18,13 @@ import {
 } from '@/utils/util';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Circles } from 'react-loader-spinner';
 import { twMerge } from 'tailwind-merge';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import DropzoneFile from '../uploadFile/DropzoneFile';
+import ZappingText from '../zapping';
 import CreateTokenSuccess from './CreateTokenSuccess';
 import PreSaleModal from './Presale';
-import { Circles } from 'react-loader-spinner';
-import ZappingText from '../zapping';
-import useOnClickOutside from '@/hooks/useOnClickOutside';
-import { ALL_CONFIGS } from '@/config';
 
 export enum STEP_TOKEN {
   INFO,
@@ -39,7 +33,7 @@ export enum STEP_TOKEN {
 
 export default function CreateToken() {
   const [imageUrl, setIamgeUrl] = useState<string>('');
-  const { isLoading, setIsLoading } = useSocket();
+  const [isLoading, setIsLoading] = useState(false);
   const [agentPersonality, setAgentPersonality] = useState<string>(
     AGENT_PERSONALITY[0].value
   );

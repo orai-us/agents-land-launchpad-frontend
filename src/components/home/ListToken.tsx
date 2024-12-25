@@ -75,7 +75,11 @@ const ListToken: FC<{
   data: coinInfo[];
   handleLoadMore;
   totalData;
-}> = ({ type, data, handleLoadMore, totalData }) => {
+  isDataFromRpc;
+}> = ({ type, data, handleLoadMore, totalData, isDataFromRpc }) => {
+  if (isDataFromRpc) {
+    return <ListTokenFromRpc data={data} />;
+  }
   return (
     <>
       {type === KeyByStatus[STATUS_TOKEN.LISTED] && (
@@ -83,6 +87,7 @@ const ListToken: FC<{
           data={data}
           handleLoadMore={handleLoadMore}
           totalData={totalData}
+          isDataFromRpc={isDataFromRpc}
         />
       )}
       {type === KeyByStatus[STATUS_TOKEN.UPCOMING] && (
@@ -91,6 +96,7 @@ const ListToken: FC<{
           handleLoadMore={handleLoadMore}
           totalData={totalData}
           isUpcoming={true}
+          isDataFromRpc={isDataFromRpc}
         />
       )}
       {type === KeyByStatus[STATUS_TOKEN.LUNCH] && (
@@ -99,6 +105,7 @@ const ListToken: FC<{
           handleLoadMore={handleLoadMore}
           totalData={totalData}
           isUpcoming={false}
+          isDataFromRpc={isDataFromRpc}
         />
       )}
     </>
@@ -107,11 +114,111 @@ const ListToken: FC<{
 
 export default ListToken;
 
+export const ListTokenFromRpc = ({ data }) => {
+  // waiting for data to be ready
+  if (!data) return <Loading />;
+  // no data
+  if (!data.length) return <NoToken />;
+
+  return (
+    <div className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden">
+      {data.map((coinItem: coinInfo, ind) => {
+        const bondingCurveValue = new BigNumber(
+          (coinItem.lamportReserves || 0).toString()
+        )
+          .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+          .toNumber();
+
+        const bondingCurvePercent = new BigNumber(bondingCurveValue)
+          .multipliedBy(new BigNumber(100))
+          .div(
+            new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+              ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+            )
+          )
+          .toNumber();
+
+        const shownPercent =
+          bondingCurvePercent < 0
+            ? 0
+            : bondingCurvePercent > 100
+            ? 100
+            : bondingCurvePercent;
+
+        return (
+          <Link
+            className="relative border border-[#1A1C28] bg-[#080a14] rounded-lg cursor-pointer transition-all ease-in hover:shadow-md hover:shadow-[rgba(255,_255,_255,_0.24)] flex flex-col"
+            key={`item-token-${ind}-${coinItem.token}`}
+            href={`/trading/${coinItem.token}`}
+          >
+            <div className="relative h-[216px] pt-4 flex flex-col justify-center items-center bg-[#080a14] rounded-t-lg">
+              <div className="relative w-full h-full flex items-start justify-center">
+                <div className="w-[112px] h-[112px]">
+                  <img
+                    src={coinItem.metadata?.image || coinItem.url}
+                    alt="logoCoinImg"
+                    width={112}
+                    height={112}
+                    className="border-4 border-[#E8E9EE] rounded-full w-[112px] h-[112px] object-cover"
+                  />
+                </div>
+              </div>
+              <div className="absolute bottom-0">
+                <img src={cloudIslandImg} alt="cloudIslandImg" />
+              </div>
+            </div>
+            <div className="bg-[#13141d] rounded-lg p-6 flex-1 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-center">
+                  <div className="uppercase text-[#84869A] text-[12px] font-medium">
+                    created by{' '}
+                    <Link
+                      className="text-[#E4775D] underline normal-case"
+                      href={`/profile/${coinItem.creator}`}
+                    >
+                      {reduceString(coinItem.creator as string, 4, 4)}
+                    </Link>
+                  </div>
+                  <span className="uppercase text-[12px] text-[#84869A] text-right">
+                    {dayjs(coinItem.date || Date.now()).fromNow()}
+                  </span>
+                </div>
+                <div className="my-3 text-[#E8E9EE] text-[18px] font-medium">
+                  {coinItem.name} (${coinItem.ticker})
+                </div>
+                <div className="line-clamp-3 font-medium text-[#84869A] text-[14px] mb-6">
+                  {coinItem.description || ''}
+                </div>
+              </div>
+              <div>
+                <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
+                  Marketcap{' '}
+                  <span className="text-[#E8E9EE]">
+                    {formatNumberKMB(Number(coinItem.marketcap || 0))}(
+                    {shownPercent.toFixed(2)}%)
+                  </span>
+                </div>
+                <div className="w-full mt-4 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
+                  <div
+                    className="rounded-[999px] h-2 bg-barrie"
+                    style={{ width: `${shownPercent}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+};
+
 export const ListLaunchToken = ({
   data,
   handleLoadMore,
   totalData,
   isUpcoming,
+  isDataFromRpc,
 }) => {
   // waiting for data to be ready
   if (!data) return <Loading />;
@@ -122,7 +229,7 @@ export const ListLaunchToken = ({
     <InfiniteScroll
       next={handleLoadMore}
       className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
-      hasMore={data.length < totalData}
+      hasMore={!isDataFromRpc || data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"
       loader={
@@ -189,9 +296,9 @@ export const ListLaunchToken = ({
               </div>
               <div className="absolute bottom-0">
                 {isUpcoming ? (
-                  <img src={rockIslandImg} alt="cloudIslandImg" />
-                ) : (
                   <img src={rockIslandImg} alt="rockIslandImg" />
+                ) : (
+                  <img src={cloudIslandImg} alt="cloudIslandImg" />
                 )}
               </div>
             </div>
@@ -203,11 +310,6 @@ export const ListLaunchToken = ({
                     <Link
                       className="text-[#E4775D] underline normal-case"
                       href={`/profile/${coinItem.creator?.['wallet']}`}
-                      // onClick={(event) => {
-                      //   event.preventDefault();
-                      //   event.stopPropagation();
-                      //   handleToProfile(ind as any);
-                      // }}
                     >
                       {coinItem.creator?.['wallet']
                         ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
@@ -303,7 +405,12 @@ const CountdownItem = ({ coin }) => {
   );
 };
 
-export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
+export const ListListedToken = ({
+  data,
+  handleLoadMore,
+  totalData,
+  isDataFromRpc,
+}) => {
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -313,7 +420,7 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
     <InfiniteScroll
       next={handleLoadMore}
       className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
-      hasMore={data.length < totalData}
+      hasMore={isDataFromRpc || data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"
       loader={
@@ -376,11 +483,11 @@ export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
                     created by{' '}
                     <Link
                       className="text-[#E4775D] underline normal-case"
-                      href={`/profile/${coinItem.creator?.['wallet']}`}
+                      href={`/profile/${coinItem.creator}`}
                       // onClick={() => handleToProfile(ind as any)}
                     >
-                      {coinItem.creator?.['wallet']
-                        ? reduceString(coinItem.creator?.['wallet'] || '', 4, 4)
+                      {coinItem.creator
+                        ? reduceString(coinItem.creator || '', 4, 4)
                         : coinItem.creator.toString()}
                     </Link>
                   </div>

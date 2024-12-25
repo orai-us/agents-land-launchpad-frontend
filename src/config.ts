@@ -23,7 +23,10 @@ export const STAKE_DETAIL_SEED = 'stake_detail';
 
 export const BLACK_LIST_ADDRESS = [
   'oraigyiRnYoCgFiaLnpiaPvJjZbs5zzmWHp4sxBgZq3', // BlackRack
+  'Au2AaBHBJ2b5E9eERrff58Byspu4Esg7CxJYrkNBeZa6', // TSM
 ];
+export const OFFICIAL_TIME = 1735059600000; // time go live 0h00 - 25/12/2024
+// export const OFFICIAL_TIME = 1735059600; // time go live
 
 export const CONFIGS: Record<
   string,

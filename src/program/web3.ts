@@ -1,11 +1,11 @@
 import { errorAlert } from '@/components/others/ToastGroup';
-import { SEED_GLOBAL } from '@/config';
+import { SEED_GLOBAL, SPL_DECIMAL } from '@/config';
 import {
   rayBuyTx,
   raySellTx,
   simulateSwapOnRaydium,
 } from '@/utils/raydiumSwap/raydiumSwap';
-import { launchDataInfo } from '@/utils/types';
+import { launchDataInfo, metadataInfo } from '@/utils/types';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
 import {
@@ -27,8 +27,15 @@ import { Pumpfun } from './pumpfun';
 import idl from './pumpfun.json';
 import { SEED_BONDING_CURVE, SEED_CONFIG } from './seed';
 import { handleTransaction } from './utils';
-import { genTokenKeypair, toBN } from '@/utils/util';
+import {
+  calculateMarketCap,
+  calculateTokenPrice,
+  genTokenKeypair,
+  toBN,
+} from '@/utils/util';
 import base58 from 'bs58';
+import { Metaplex } from '@metaplex-foundation/js';
+import { fetchJSONDataFromUrl } from './logListeners/utils';
 
 export const commitmentLevel = 'confirmed';
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -750,6 +757,211 @@ export class Web3SolanaProgramInteraction {
     } catch (error) {
       console.log('error', error);
       return '';
+    }
+  };
+
+  getListTokenFromContract = async (wallet) => {
+    try {
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const metaplex = Metaplex.make(this.connection);
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const tokens = await this.connection.getParsedProgramAccounts(
+        program.programId,
+        {
+          commitment: 'confirmed',
+          filters: [
+            {
+              dataSize: 120,
+            },
+          ],
+        }
+      );
+
+      const list = await Promise.all(
+        tokens.map(async (item) => {
+          const detail = program.coder.accounts.decode(
+            'bondingCurve',
+            item.account.data as any
+          );
+
+          const metadata = await metaplex
+            .nfts()
+            .findByMint(
+              { mintAddress: detail.tokenMint },
+              { commitment: 'confirmed' }
+            );
+
+          let metadataJson: metadataInfo = {} as any;
+          if (metadata.uri) {
+            const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
+            metadataJson = dataJson;
+          }
+
+          const [configPda] = PublicKey.findProgramAddressSync(
+            [Buffer.from(SEED_CONFIG)],
+            program.programId
+          );
+
+          const configAccount = await program.account.config.fetch(configPda);
+
+          const solPrice = Number(localStorage.getItem('solPrice'));
+          const newPrice = calculateTokenPrice(
+            detail.reserveToken,
+            detail.reserveLamport,
+            detail.decimals || SPL_DECIMAL,
+            solPrice
+          );
+          const marketcap = calculateMarketCap(
+            detail.reserveToken,
+            detail.decimals || SPL_DECIMAL,
+            newPrice
+          );
+
+          const tokenDetail = {
+            creator: detail.creator.toBase58(),
+            decimals: detail.decimals || SPL_DECIMAL,
+            name: metadata.name,
+            ticker: metadata.symbol,
+            description: metadataJson.description,
+            token: detail.tokenMint.toBase58(),
+            url: metadataJson.image,
+            tokenReserves: detail.reserveToken,
+            lamportReserves: detail.reserveLamport,
+            marketcap,
+            bondingCurveLimit:
+              configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
+            metadata: { ...metadata, ...metadataJson } as any,
+            listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
+            tradingTime: new Date(
+              toBN(detail.tradingTime)
+                .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+                .toNumber()
+            ),
+            date: new Date(
+              toBN(detail.tradingTime)
+                .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
+                .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+                .toNumber()
+            ),
+          };
+
+          return { ...detail, ...tokenDetail };
+        })
+      );
+
+      const listFmt = list.filter(Boolean);
+      return {
+        coins: listFmt,
+        total: listFmt.length,
+        fromRpc: true,
+      };
+    } catch (error) {
+      console.log('getListTokenFromContract error', error);
+      return {
+        coins: [],
+        total: 0,
+      };
+    }
+  };
+
+  getTokenDetailFromContract = async (
+    wallet: WalletContextState,
+    tokenMint: PublicKey
+  ) => {
+    try {
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const metaplex = Metaplex.make(this.connection);
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const metadata = await metaplex
+        .nfts()
+        .findByMint({ mintAddress: tokenMint }, { commitment: 'confirmed' });
+
+      let metadataJson: metadataInfo = {} as any;
+      if (metadata.uri) {
+        const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
+        metadataJson = dataJson;
+      }
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+      const [bondingCurvePda, _] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), tokenMint.toBytes()],
+        program.programId
+      );
+
+      const [configAccount, bondingCurve] = await Promise.all([
+        program.account.config.fetch(configPda),
+        program.account.bondingCurve.fetch(bondingCurvePda),
+      ]);
+
+      const solPrice = Number(localStorage.getItem('solPrice'));
+      const newPrice = calculateTokenPrice(
+        bondingCurve.reserveToken,
+        bondingCurve.reserveLamport,
+        SPL_DECIMAL,
+        solPrice
+      );
+      const marketcap = calculateMarketCap(
+        bondingCurve.reserveToken,
+        SPL_DECIMAL,
+        newPrice
+      );
+
+      const tokenDetail = {
+        creator: '',
+        decimals: SPL_DECIMAL,
+        name: metadata.name,
+        ticker: metadata.symbol,
+        description: metadataJson.description,
+        token: tokenMint.toBase58(),
+        url: metadataJson.image,
+        tokenReserves: bondingCurve.reserveToken.toNumber(),
+        lamportReserves: bondingCurve.reserveLamport.toNumber(),
+        bondingCurveLimit:
+          configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
+        metadata: { ...metadata, ...metadataJson } as any,
+        listed: bondingCurve.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
+        tradingTime: new Date(
+          toBN(bondingCurve.tradingTime.toNumber())
+            .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+            .toNumber()
+        ),
+        date: new Date(
+          toBN(bondingCurve.tradingTime.toNumber())
+            .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
+            .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+            .toNumber()
+        ),
+      };
+
+      return tokenDetail;
+    } catch (error) {
+      console.log('getTokenDetailFromContract error', error);
+      return;
     }
   };
 }

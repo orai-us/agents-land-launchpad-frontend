@@ -19,6 +19,7 @@ interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
   curveLimit: number;
+  isFromRpc: boolean;
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
@@ -27,6 +28,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   coin,
   progress,
   curveLimit,
+  isFromRpc,
 }) => {
   const [openSlippage, setOpenSlippage] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.3');
@@ -45,7 +47,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     { id: '0.5', price: '0.5 SOL' },
     { id: '1', price: '1 SOL' },
   ];
-  const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
+  const isCanBuyOnRaydium = isFromRpc && coin.listed;
+  const isListedOnRay = !!coin.raydiumPoolAddr || isCanBuyOnRaydium; // Number(progress) >= 100 && ||
   const isDisableSwapOnAgent =
     Number(progress) >= 100 &&
     !coin.raydiumPoolAddr &&

@@ -8,6 +8,7 @@ import { TradingChart } from '@/components/TVChart/TradingChart';
 import {
   ALL_CONFIGS,
   BLACK_LIST_ADDRESS,
+  OFFICIAL_TIME,
   PROGRAM_ID,
   SOL_DECIMAL,
 } from '@/config';
@@ -42,6 +43,7 @@ import useListenEventSwapChart from './hooks/useListenEventSwapChart';
 import NotForSale from './NotForSale';
 import useWindowSize from '@/hooks/useWindowSize';
 import { errorAlert } from '../others/ToastGroup';
+import { toPublicKey } from '@metaplex-foundation/js';
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -83,6 +85,7 @@ export default function TradingPage() {
   const [simulatePrice, setSimulatePrice] = useState<string>('');
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
+  const [fromRpc, setFromRpc] = useState(false);
 
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
@@ -100,13 +103,25 @@ export default function TradingPage() {
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
 
-    if (!data) {
+    if (!data?.token) {
       let retry = 1;
       while (retry < 3 && !data) {
         console.log('Retry LoadToken', retry);
         await sleep(SLEEP_TIMEOUT);
         ++retry;
         data = await getCoinInfo(parameter);
+      }
+    }
+
+    if (!data?.token) {
+      // data =
+      data = (await web3Solana.getTokenDetailFromContract(
+        wallet,
+        toPublicKey(parameter)
+      )) as any;
+
+      if (data) {
+        setFromRpc(true);
       }
     }
 
@@ -159,12 +174,26 @@ export default function TradingPage() {
   }, [pathname, wallet.publicKey]);
 
   useEffect(() => {
-    if (coin._id) {
+    if (coin.token) {
       console.log('data fullfil :>>', coin);
+
+      const isBlackList = BLACK_LIST_ADDRESS.includes(coin.token);
+      const dateNeedToFilter =
+        coin.tradingTime && coin.tradingTime.getTime() > OFFICIAL_TIME;
 
       if (!coin.metadata?.agentAddress) {
         setLocation('/');
         errorAlert('Token not created with agent!');
+      }
+
+      if (isBlackList) {
+        setLocation('/');
+        errorAlert('Token not valid!');
+      }
+
+      if (!dateNeedToFilter) {
+        setLocation('/');
+        errorAlert('Token not valid!');
       }
     }
   }, [coin]);
@@ -245,6 +274,7 @@ export default function TradingPage() {
     .multipliedBy(solPrice)
     .toFixed(6);
 
+  const isCanBuyOnRaydium = fromRpc && coin.listed;
   const isRaydiumListed = coin['raydiumPoolAddr'];
   const isOraidexListed = coin['oraidexPoolAddr'];
   const isListed = coin['listed'];
@@ -271,7 +301,7 @@ export default function TradingPage() {
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
           <div className="flex">
-            {isListed && isRaydiumListed && (
+            {isListed && (isRaydiumListed || isCanBuyOnRaydium) && (
               <a
                 // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
                 href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
@@ -289,7 +319,7 @@ export default function TradingPage() {
               </a>
             )}
 
-            {isListed && isOraidexListed && (
+            {isListed && (isOraidexListed || isCanBuyOnRaydium) && (
               <a
                 href={`https://app.oraidex.io/pools/v2/${encodeURIComponent(
                   `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`
@@ -535,6 +565,7 @@ export default function TradingPage() {
                   coin={coin}
                   progress={progress}
                   curveLimit={curveLimit}
+                  isFromRpc={fromRpc}
                 ></TradeForm>
               </div>
             )}
@@ -618,6 +649,7 @@ export default function TradingPage() {
                 coin={coin}
                 progress={progress}
                 curveLimit={curveLimit}
+                isFromRpc={fromRpc}
               ></TradeForm>
             </div>
             <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">

@@ -1,28 +1,12 @@
-import defaultUserImg from "@/assets/images/userAgentDefault.svg";
-import { coinInfo, holderInfo, RawChart } from "@/utils/types";
-import {
-  calculateKotHProgress,
-  calculateTokenPrice,
-  findHolders,
-  getKoth,
-} from "@/utils/util";
-import { FC, useContext, useEffect, useState } from "react";
+import defaultUserImg from '@/assets/images/userAgentDefault.svg';
+import { coinInfo, holderInfo } from '@/utils/types';
+import { calculateKotHProgress, findHolders, getKoth } from '@/utils/util';
+import { FC, useEffect, useState } from 'react';
 
-import { ALL_CONFIGS, PROGRAM_ID, SPL_DECIMAL } from "@/config";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import {
-  commitmentLevel,
-  endpoint,
-  Web3SolanaProgramInteraction,
-} from "@/program/web3";
-import { formatNumberKMB } from "@/utils/format";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection, PublicKey } from "@solana/web3.js";
-import UserContext from "@/context/UserContext";
-import { queryClient } from "@/provider/providers";
-import { channelToSubscription, genOhlcData } from "../TVChart/streaming";
-import { Bar } from "@/charting_library";
+import { ALL_CONFIGS } from '@/config';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { formatNumberKMB } from '@/utils/format';
+import { useWallet } from '@solana/wallet-adapter-react';
 
 interface ModalProps {
   data: coinInfo;
@@ -121,7 +105,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
         </div>
 
         <span className="text-[#585A6B] text-[14px]">
-          Dethrone the current king at{" "}
+          Dethrone the current king at{' '}
           {formatNumberKMB(kothCoin?.marketcap || 0)} market cap
         </span>
       </div>
@@ -145,7 +129,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const imgSrc = item.creator?.avatar || defaultUserImg;
                 const isCreator =
                   String(item.owner).toLowerCase() ===
-                  String(data.creator["wallet"]).toLowerCase();
+                  String(data.creator['wallet']).toLowerCase();
                 const isBondingAddr =
                   String(item.owner).toLowerCase() ===
                   String(configBondingAddress).toLowerCase();
