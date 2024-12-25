@@ -8,16 +8,14 @@ import {
   calculateTokenPrice,
   getCoinTrade,
   getMessageByCoin,
-  getUserByWalletAddress,
 } from '@/utils/util';
 import { Connection, PublicKey } from '@solana/web3.js';
 import _ from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { TOKENOMICS_LIST } from '../creatToken';
-import { MessageForm } from '../MessageForm';
+import ListFungibleStake from '../launchingLock/ListFungibleStake';
 import ReplyModal from '../modals/ReplyModal';
-import ThreadSection from '../modals/Thread';
 import { Trade } from './Trade';
 
 interface ChattingProps {
@@ -107,8 +105,8 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     const fetchData = async () => {
       if (param) {
         if (isTrades === CHAT_TAB.LOCK) {
-          const data = await getMessageByCoin(param);
-          setMessages(data);
+          // const data = await getMessageByCoin(param);
+          // setMessages(data);
         } else if (coin?.token && isTrades === CHAT_TAB.TRADE) {
           const coinAddress = coin.token;
           const data = await getCoinTrade(coinAddress);
@@ -163,7 +161,8 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
       <div>
         {isTrades === CHAT_TAB.LOCK && coin && (
           <div>
-            <ThreadSection data={coin}></ThreadSection>
+            <ListFungibleStake />
+            {/* <ThreadSection data={coin}></ThreadSection>
 
             <div className="mt-4 mb-12 h-screen max-h-[450px] overflow-y-auto">
               {messages &&
@@ -175,7 +174,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                   .map((message, index) => (
                     <MessageForm key={index} msg={message}></MessageForm>
                   ))}
-            </div>
+            </div> */}
           </div>
         )}
 

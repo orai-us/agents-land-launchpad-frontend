@@ -1,6 +1,6 @@
 import crownImg from '@/assets/icons/crown.svg';
 import badgeKothImg from '@/assets/images/peak_evolution.svg';
-import { ALL_CONFIGS, BLACK_LIST_ADDRESS, OFFICIAL_TIME } from '@/config';
+import { ALL_CONFIGS, BLACK_LIST_ADDRESS } from '@/config';
 import { formatNumberKMB } from '@/utils/format';
 import { getKoth, reduceString } from '@/utils/util';
 import BigNumber from 'bignumber.js';
@@ -34,7 +34,7 @@ const Banner = () => {
   const enableTokenAfterGolive =
     kothCoin?.date &&
     new Date(kothCoin.date).getTime() >
-      OFFICIAL_TIME - ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
+      ALL_CONFIGS.OFFICIAL_TIME - ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
 
   return (
     <>

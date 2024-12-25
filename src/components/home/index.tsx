@@ -1,4 +1,4 @@
-import { BLACK_LIST_ADDRESS, LIMIT_PAGINATION, OFFICIAL_TIME } from '@/config';
+import { ALL_CONFIGS, BLACK_LIST_ADDRESS, LIMIT_PAGINATION } from '@/config';
 import UserContext from '@/context/UserContext';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { coinInfo } from '@/utils/types';
@@ -219,7 +219,8 @@ const HomePage: FC = () => {
           ?.filter((e) => {
             const isBlackList = BLACK_LIST_ADDRESS.includes(e.token);
             const dateNeedToFilter =
-              e.tradingTime && e.tradingTime.getTime() > OFFICIAL_TIME;
+              e.tradingTime &&
+              e.tradingTime.getTime() > ALL_CONFIGS.OFFICIAL_TIME;
 
             return (
               !!e.metadata?.agentAddress && dateNeedToFilter && !isBlackList

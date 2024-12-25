@@ -18,6 +18,7 @@ export const TX_FEE = 0.25;
 export const VAULT_SEED = 'staking_vault';
 export const STAKE_CONFIG_SEED = 'staking_config';
 export const STAKER_INFO_SEED = 'staker_info';
+export const STAKE_FUNGIBLE_INFO_SEED = 'stake_info';
 export const STAKE_INFO_SEED = 'stake_info';
 export const STAKE_DETAIL_SEED = 'stake_detail';
 
@@ -25,7 +26,7 @@ export const BLACK_LIST_ADDRESS = [
   'oraigyiRnYoCgFiaLnpiaPvJjZbs5zzmWHp4sxBgZq3', // BlackRack
   'Au2AaBHBJ2b5E9eERrff58Byspu4Esg7CxJYrkNBeZa6', // TSM
 ];
-export const OFFICIAL_TIME = 1735059600000; // time go live 0h00 - 25/12/2024
+// export const OFFICIAL_TIME = 1735059600000; // time go live 0h00 - 25/12/2024
 // export const OFFICIAL_TIME = 1735059600; // time go live
 
 export const CONFIGS: Record<
@@ -48,6 +49,8 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: number;
     };
     SHOW_DECIMALS_PRICE: number;
+    OFFICIAL_TIME: number;
+    LOCK_FUNGIBLE_STAKE: number;
   }
 > = {
   devnet: {
@@ -69,6 +72,8 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: 5 * 60,
     },
     SHOW_DECIMALS_PRICE: 9,
+    OFFICIAL_TIME: 1735059600,
+    LOCK_FUNGIBLE_STAKE: 300,
   },
   'mainnet-beta': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -89,6 +94,8 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: 24 * 60 * 60,
     },
     SHOW_DECIMALS_PRICE: 9,
+    OFFICIAL_TIME: 1735059600000,
+    LOCK_FUNGIBLE_STAKE: 14 * 86400,
   },
   'mainnet-beta-test': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -109,6 +116,8 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: 15 * 60,
     },
     SHOW_DECIMALS_PRICE: 12,
+    OFFICIAL_TIME: 1735059600,
+    LOCK_FUNGIBLE_STAKE: 86400 * 14,
   },
 };
 

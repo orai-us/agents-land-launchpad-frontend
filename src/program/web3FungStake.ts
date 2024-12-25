@@ -1,10 +1,10 @@
 import {
   ALL_CONFIGS,
   STAKE_CONFIG_SEED,
-  STAKE_DETAIL_SEED,
-  STAKER_INFO_SEED,
+  STAKE_FUNGIBLE_INFO_SEED,
   VAULT_SEED,
 } from '@/config';
+import { toPublicKey } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
 import { WalletContextState } from '@solana/wallet-adapter-react';
@@ -14,17 +14,17 @@ import {
   PublicKey,
   Transaction,
 } from '@solana/web3.js';
-import { Vault } from './locking/locking';
-import idl from './locking/locking.json';
+import { Fungstake } from './fungstake/fungstake';
+import idl from './fungstake/fungstake.json';
 import { handleTransaction } from './utils';
 import { commitmentLevel, endpoint } from './web3';
 
-export const vaultProgramId = new PublicKey(idl.address);
-export const vaultInterface = JSON.parse(JSON.stringify(idl));
+export const stakeProgramId = new PublicKey(idl.address);
+export const stakeInterface = JSON.parse(JSON.stringify(idl));
 
 const stakeCurrencyMint = ALL_CONFIGS.STAKE_CURRENCY_MINT;
 
-export class Web3SolanaLockingToken {
+export class web3FungibleStake {
   constructor(
     private readonly connection = new Connection(endpoint, {
       commitment: commitmentLevel,
@@ -32,7 +32,11 @@ export class Web3SolanaLockingToken {
     })
   ) {}
 
-  async stake(lockPeriod: number, amount: number, wallet: WalletContextState) {
+  async stake(
+    rewardCurrencyMint: PublicKey,
+    amount: number,
+    wallet: WalletContextState
+  ) {
     try {
       if (!this.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
@@ -42,47 +46,10 @@ export class Web3SolanaLockingToken {
         preflightCommitment: 'confirmed',
       });
       anchor.setProvider(provider);
-      const program = new Program(vaultInterface, provider) as Program<Vault>;
-
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKE_CONFIG_SEED),
-          new PublicKey(stakeCurrencyMint).toBytes(),
-        ],
-        program.programId
-      );
-      let [vaultPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(VAULT_SEED),
-          configPda.toBytes(),
-          new BN(lockPeriod).toBuffer('le', 8),
-        ],
-        program.programId
-      );
-      let [stakerInfoPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKER_INFO_SEED),
-          vaultPda.toBytes(),
-          wallet.publicKey.toBytes(),
-        ],
-        program.programId
-      );
-      let currentId = 0;
-      try {
-        let stakerInfo = await program.account.stakerInfo.fetch(stakerInfoPda);
-        currentId = stakerInfo.currentId.toNumber();
-      } catch (error) {
-        console.log('get number of locked items error', error);
-      }
-
-      let [userStakeDetailPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKE_DETAIL_SEED),
-          stakerInfoPda.toBytes(),
-          new BN(currentId + 1).toBuffer('le', 8),
-        ],
-        program.programId
-      );
+      const program = new Program(
+        stakeInterface,
+        provider
+      ) as Program<Fungstake>;
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -91,11 +58,11 @@ export class Web3SolanaLockingToken {
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
       const stakeIx = await program.methods
-        .stake(new BN(lockPeriod), new BN(amount))
+        .stake(new BN(amount))
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          stakeDetailPda: userStakeDetailPda,
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .instruction();
 
@@ -142,91 +109,8 @@ export class Web3SolanaLockingToken {
     }
   }
 
-  async getListLockedOfUser(lockPeriod: number, wallet: WalletContextState) {
-    let vaultInfo = { totalStaked: new BN('0') };
-    try {
-      if (!this.connection) {
-        console.log('Warning: Wallet not connected');
-        return;
-      }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
-      const program = new Program(vaultInterface, provider) as Program<Vault>;
-
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKE_CONFIG_SEED),
-          new PublicKey(stakeCurrencyMint).toBytes(),
-        ],
-        program.programId
-      );
-      const [vaultPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(VAULT_SEED),
-          configPda.toBytes(),
-          new BN(lockPeriod).toBuffer('le', 8),
-        ],
-        program.programId
-      );
-
-      vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
-        totalStaked: new BN('0'),
-      };
-
-      if (!wallet.publicKey) {
-        return { listLockedItems: [], vaultInfo };
-      }
-
-      const [stakerInfoPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKER_INFO_SEED),
-          vaultPda.toBytes(),
-          wallet.publicKey.toBytes(),
-        ],
-        program.programId
-      );
-
-      let currentId = 0;
-      try {
-        const stakerInfo = await program.account.stakerInfo.fetch(
-          stakerInfoPda
-        );
-        currentId = stakerInfo.currentId.toNumber();
-
-        const listLockedItems = await Promise.all(
-          [...new Array(currentId)].map(async (_item, key) => {
-            const [userStakeDetailPda] = PublicKey.findProgramAddressSync(
-              [
-                Buffer.from(STAKE_DETAIL_SEED),
-                stakerInfoPda.toBytes(),
-                new BN(key + 1).toBuffer('le', 8),
-              ],
-              program.programId
-            );
-
-            const info = await program.account.stakeDetail.fetch(
-              userStakeDetailPda
-            );
-
-            return { ...(info || {}), lockPeriod };
-          })
-        );
-
-        return { listLockedItems, vaultInfo };
-      } catch (error) {
-        throw error;
-      }
-    } catch (error) {
-      console.log('get list error', error);
-      return { listLockedItems: [], vaultInfo };
-    }
-  }
-
   async unStake(
-    lockPeriod: number,
-    id: number,
+    rewardCurrencyMint: PublicKey,
     amount: number,
     wallet: WalletContextState
   ) {
@@ -239,15 +123,10 @@ export class Web3SolanaLockingToken {
         preflightCommitment: 'confirmed',
       });
       anchor.setProvider(provider);
-      const program = new Program(vaultInterface, provider) as Program<Vault>;
-
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKE_CONFIG_SEED),
-          new PublicKey(stakeCurrencyMint).toBytes(),
-        ],
-        program.programId
-      );
+      const program = new Program(
+        stakeInterface,
+        provider
+      ) as Program<Fungstake>;
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
@@ -256,10 +135,11 @@ export class Web3SolanaLockingToken {
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
       const unStakeIx = await program.methods
-        .destake(new BN(id), new BN(lockPeriod), new BN(amount))
+        .destake(new BN(amount))
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .instruction();
 
@@ -303,6 +183,73 @@ export class Web3SolanaLockingToken {
         console.log('----confirm----', { transaction, result });
         return { transaction, result };
       }
+    }
+  }
+
+  async getStakeInfo(
+    rewardCurrencyMint: PublicKey,
+    wallet: WalletContextState
+  ) {
+    let vaultInfo = { totalStaked: new BN('0') };
+    try {
+      if (!this.connection) {
+        console.log('Warning: connection not connected');
+        return;
+      }
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        stakeInterface,
+        provider
+      ) as Program<Fungstake>;
+
+      let [configPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(STAKE_CONFIG_SEED),
+          toPublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
+        ],
+        program.programId
+      );
+      let [vaultPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(VAULT_SEED),
+          configPda.toBytes(),
+          new PublicKey(rewardCurrencyMint).toBytes(),
+        ],
+        program.programId
+      );
+
+      vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
+        totalStaked: new BN('0'),
+      };
+
+      if (!wallet.publicKey) {
+        return { stakerInfo: null, vaultInfo };
+      }
+
+      let [stakerInfoPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(STAKE_FUNGIBLE_INFO_SEED),
+          vaultPda.toBytes(),
+          wallet.publicKey.toBytes(),
+        ],
+        program.programId
+      );
+      const stakerInfo = await program.account.stakeInfo.fetch(stakerInfoPda);
+
+      return {
+        stakerInfo,
+        vaultInfo,
+      };
+    } catch (error) {
+      console.log('Error in get stake token transaction', error, error.error);
+
+      return {
+        stakerInfo: null,
+        vaultInfo,
+      };
     }
   }
 }
