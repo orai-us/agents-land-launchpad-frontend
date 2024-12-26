@@ -85,6 +85,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   const fetchMaxBuy = async () => {
     if (coin.token) {
+      console.log('=== Update Limit Buy ===');
+
       const isCreator = !wallet.publicKey
         ? false
         : wallet.publicKey.toBase58() ===
@@ -526,8 +528,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           </div>
         )}
         {isBuy === 1 && disableSellOnParty && (
-          <div className="mt-2 flex items-center gap-1">
-            You are not allow to sell token in party round
+          <div className="mt-2 flex items-center gap-1 text-[12px]">
+            * You are not allow to sell token in party round
           </div>
         )}
 

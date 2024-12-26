@@ -50,7 +50,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   const tradingTime = coin?.tradingTime
     ? new Date(coin?.tradingTime).getTime()
     : ENDDATE;
-  const isNotForSale = tradingTime > Date.now();
+  // const isNotForSale = tradingTime > Date.now();
 
   // subscribe to real-time swap txs on trade
   useEffect(() => {
@@ -126,7 +126,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
 
   return (
     <div className={twMerge('pt-8')}>
-      {!isNotForSale && (
+      {
         <div className="flex flex-row items-center text-white font-semibold">
           <div
             onClick={() => setIsTrades(CHAT_TAB.LOCK)}
@@ -156,7 +156,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
             Tokenomics
           </div>
         </div>
-      )}
+      }
 
       <div>
         {isTrades === CHAT_TAB.LOCK && coin && (
