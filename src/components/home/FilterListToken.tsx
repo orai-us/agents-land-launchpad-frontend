@@ -130,14 +130,14 @@ const FilterListToken: FC<{
 export default FilterListToken;
 
 export const SORT_LIST = [
-  // {
-  //   label: "Featured",
-  //   value: "totalTrades",
-  // },
-  // {
-  //   label: "Last trade",
-  //   value: "lastTraded",
-  // },
+  {
+    label: 'Featured',
+    value: 'totalTrades',
+  },
+  {
+    label: 'Last trade',
+    value: 'lastTraded',
+  },
   {
     label: 'Creation time',
     value: 'date',
