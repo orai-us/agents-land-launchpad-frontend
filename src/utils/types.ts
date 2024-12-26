@@ -80,6 +80,8 @@ export interface coinInfo {
   raydiumPoolAddr?: string;
   bondingCurve?: boolean;
   tradingTime?: Date;
+  partyTradingTime?: Date;
+  publicTradingTime?: Date;
 }
 export interface createCoinInfo {
   name: string;

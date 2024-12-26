@@ -87,7 +87,6 @@ const ListToken: FC<{
           data={data}
           handleLoadMore={handleLoadMore}
           totalData={totalData}
-          isDataFromRpc={isDataFromRpc}
         />
       )}
       {type === KeyByStatus[STATUS_TOKEN.UPCOMING] && (
@@ -96,7 +95,6 @@ const ListToken: FC<{
           handleLoadMore={handleLoadMore}
           totalData={totalData}
           isUpcoming={true}
-          isDataFromRpc={isDataFromRpc}
         />
       )}
       {type === KeyByStatus[STATUS_TOKEN.LUNCH] && (
@@ -105,7 +103,6 @@ const ListToken: FC<{
           handleLoadMore={handleLoadMore}
           totalData={totalData}
           isUpcoming={false}
-          isDataFromRpc={isDataFromRpc}
         />
       )}
     </>
@@ -218,7 +215,6 @@ export const ListLaunchToken = ({
   handleLoadMore,
   totalData,
   isUpcoming,
-  isDataFromRpc,
 }) => {
   // waiting for data to be ready
   if (!data) return <Loading />;
@@ -229,7 +225,7 @@ export const ListLaunchToken = ({
     <InfiniteScroll
       next={handleLoadMore}
       className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
-      hasMore={!isDataFromRpc || data.length < totalData}
+      hasMore={data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"
       loader={
@@ -328,7 +324,19 @@ export const ListLaunchToken = ({
                 </div>
               </div>
               {isUpcoming ? (
-                <CountdownItem coin={coinItem} />
+                coinItem.partyTradingTime ? (
+                  <CountdownItem coin={coinItem} />
+                ) : (
+                  <div className="flex flex-col">
+                    <p className="text-[14px] md:text-[16px] mb-1 font-medium text-[#E8E9EE]">
+                      In Launching Vault
+                    </p>
+                    <p className="text-[12px] text-[#84869A]">
+                      {/* Waiting for countdown time */}
+                      Lock MAX to get early access to the buy token
+                    </p>
+                  </div>
+                )
               ) : (
                 <div>
                   <div className="text-[#84869A] text-[12px] font-medium uppercase mb-4">
@@ -359,7 +367,7 @@ const CountdownItem = ({ coin }) => {
     new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
   );
   const endTime = Math.floor(
-    new Date(coin.tradingTime || Date.now()).getTime() /
+    new Date(coin.partyTradingTime || Date.now()).getTime() /
       ALL_CONFIGS.TIMER.MILLISECOND
   );
 
@@ -389,7 +397,9 @@ const CountdownItem = ({ coin }) => {
             fill="#9192A0"
           />
         </svg>
-        <span className="text-[#9192A0] text-[12px] ml-1">Phase start at</span>
+        <span className="text-[#9192A0] text-[12px] ml-1">
+          Party round start at
+        </span>
       </div>
 
       <div className="flex mt-1">
@@ -405,12 +415,7 @@ const CountdownItem = ({ coin }) => {
   );
 };
 
-export const ListListedToken = ({
-  data,
-  handleLoadMore,
-  totalData,
-  isDataFromRpc,
-}) => {
+export const ListListedToken = ({ data, handleLoadMore, totalData }) => {
   // waiting for data to be ready
   if (!data) return <Loading />;
   // no data
@@ -420,7 +425,7 @@ export const ListListedToken = ({
     <InfiniteScroll
       next={handleLoadMore}
       className="mt-8 mb-14 pb-2 grid xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-6 w-full overflow-hidden"
-      hasMore={isDataFromRpc || data.length < totalData}
+      hasMore={data.length < totalData}
       dataLength={data.length}
       scrollThreshold="80%"
       loader={
