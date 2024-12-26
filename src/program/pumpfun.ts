@@ -53,6 +53,17 @@ export type Pumpfun = {
           };
         },
         {
+          name: 'pause';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 97, 117, 115, 101];
+              }
+            ];
+          };
+        },
+        {
           name: 'stakingProgram';
           address: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u';
         },
@@ -98,7 +109,20 @@ export type Pumpfun = {
             seeds: [
               {
                 kind: 'const';
-                value: [99, 108, 97, 105, 109, 95, 115, 116, 97, 116, 117, 115];
+                value: [
+                  112,
+                  97,
+                  114,
+                  116,
+                  121,
+                  95,
+                  115,
+                  116,
+                  97,
+                  116,
+                  117,
+                  115
+                ];
               },
               {
                 kind: 'account';
@@ -705,6 +729,18 @@ export type Pumpfun = {
           };
         },
         {
+          name: 'pause';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 97, 117, 115, 101];
+              }
+            ];
+          };
+        },
+        {
           name: 'globalVault';
           writable: true;
           pda: {
@@ -1161,6 +1197,46 @@ export type Pumpfun = {
       ];
     },
     {
+      name: 'pauseContract';
+      discriminator: [210, 36, 5, 85, 177, 65, 35, 89];
+      accounts: [
+        {
+          name: 'authority';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'globalConfig';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'pause';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 97, 117, 115, 101];
+              }
+            ];
+          };
+        }
+      ];
+      args: [
+        {
+          name: 'status';
+          type: 'bool';
+        }
+      ];
+    },
+    {
       name: 'registerWhitelist';
       discriminator: [188, 210, 164, 38, 220, 170, 155, 148];
       accounts: [
@@ -1177,6 +1253,17 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'pause';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 97, 117, 115, 101];
               }
             ];
           };
@@ -1344,6 +1431,17 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'pause';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [112, 97, 117, 115, 101];
               }
             ];
           };
@@ -1575,6 +1673,26 @@ export type Pumpfun = {
                 89
               ];
             };
+          };
+        },
+        {
+          name: 'userInfo';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [117, 115, 101, 114, 95, 105, 110, 102, 111];
+              },
+              {
+                kind: 'account';
+                path: 'bondingCurve';
+              },
+              {
+                kind: 'account';
+                path: 'user';
+              }
+            ];
           };
         },
         {
@@ -1950,6 +2068,14 @@ export type Pumpfun = {
     {
       name: 'partyStatus';
       discriminator: [132, 54, 20, 62, 213, 204, 35, 22];
+    },
+    {
+      name: 'pause';
+      discriminator: [168, 183, 252, 225, 28, 17, 138, 174];
+    },
+    {
+      name: 'userInfo';
+      discriminator: [83, 134, 200, 56, 144, 56, 10, 62];
     }
   ];
   events: [
@@ -2070,6 +2196,21 @@ export type Pumpfun = {
       code: 6019;
       name: 'swapAmountTooLarge';
       msg: 'Swap amount is too large';
+    },
+    {
+      code: 6020;
+      name: 'cannotBuy';
+      msg: 'Cannot buy';
+    },
+    {
+      code: 6021;
+      name: 'invalidStakingToken';
+      msg: 'Invalid staking token';
+    },
+    {
+      code: 6022;
+      name: 'paused';
+      msg: 'paused';
     }
   ];
   types: [
@@ -2260,12 +2401,20 @@ export type Pumpfun = {
             type: 'pubkey';
           },
           {
+            name: 'stakingToken';
+            type: 'pubkey';
+          },
+          {
             name: 'maxTokenBuyInParty';
             type: 'u64';
           },
           {
             name: 'maxSolBuyInPublic';
             type: 'u64';
+          },
+          {
+            name: 'txBuyLimit';
+            type: 'u16';
           }
         ];
       };
@@ -2369,6 +2518,18 @@ export type Pumpfun = {
       };
     },
     {
+      name: 'pause';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'paused';
+            type: 'bool';
+          }
+        ];
+      };
+    },
+    {
       name: 'swapEvent';
       type: {
         kind: 'struct';
@@ -2407,6 +2568,19 @@ export type Pumpfun = {
           },
           {
             name: 'reserveToken';
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'userInfo';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'lastBuy';
+            docs: ['last buy'];
             type: 'u64';
           }
         ];

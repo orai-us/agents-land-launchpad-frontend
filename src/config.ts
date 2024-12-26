@@ -52,6 +52,7 @@ export const CONFIGS: Record<
     OFFICIAL_TIME: number;
     LOCK_FUNGIBLE_STAKE: number;
     STAKE_SOFT_CAP: number;
+    STAKING_PROGRAM: string;
   }
 > = {
   devnet: {
@@ -70,12 +71,13 @@ export const CONFIGS: Record<
       SECOND: 60,
       MINUTE: 60,
       HOUR: 24,
-      DAY_TO_SECONDS: 5 * 60,
+      DAY_TO_SECONDS: 24 * 60 * 60,
     },
     SHOW_DECIMALS_PRICE: 9,
     OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 300,
     STAKE_SOFT_CAP: 5000000,
+    STAKING_PROGRAM: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u',
   },
   'mainnet-beta': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -99,6 +101,7 @@ export const CONFIGS: Record<
     OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 14 * 86400,
     STAKE_SOFT_CAP: 5000000,
+    STAKING_PROGRAM: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u',
   },
   'mainnet-beta-test': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -122,6 +125,7 @@ export const CONFIGS: Record<
     OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 86400 * 14,
     STAKE_SOFT_CAP: 5000000,
+    STAKING_PROGRAM: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u',
   },
 };
 

@@ -1,15 +1,22 @@
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { toBN, toPublicKey } from '@/utils/util';
-import { useCoinActions } from '@/zustand-store/coin/selector';
+import {
+  useCoinActions,
+  useGetCoinInfoState,
+} from '@/zustand-store/coin/selector';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 
 const web3Locking = new web3FungibleStake();
 
 const useGetStakedByUser = (rewardCurrencyMint, refreshCheck) => {
-  const { handleSetStakeInfo, handleSetTotalVault } = useCoinActions();
-  const [totalLocked, setTotalLocked] = useState(0);
-  const [stakeInfo, setStakeInfo] = useState({});
+  const stakeEndTime = useGetCoinInfoState('stakeEndTime');
+  const stakeInfo = useGetCoinInfoState('stakeInfo');
+  const totalLocked = useGetCoinInfoState('totalVault');
+  const { handleSetStakeInfo, handleSetTotalVault, handleSetStakeEndTime } =
+    useCoinActions();
+  // const [totalLocked, setTotalLocked] = useState(0);
+  // const [stakeInfo, setStakeInfo] = useState({});
   const [loading, setLoading] = useState(true);
   const wallet = useWallet();
 
@@ -29,9 +36,9 @@ const useGetStakedByUser = (rewardCurrencyMint, refreshCheck) => {
           .plus(vaultInfo.totalStaked?.toString() || 0)
           .toNumber();
 
-        setStakeInfo(stakerInfo);
-        setTotalLocked(totalVault);
-
+        // setStakeInfo(stakerInfo);
+        // setTotalLocked(totalVault);
+        handleSetStakeEndTime(vaultInfo.stakeEndTime.toNumber());
         handleSetStakeInfo(stakerInfo);
         handleSetTotalVault(totalVault);
       } catch (error) {
@@ -46,6 +53,7 @@ const useGetStakedByUser = (rewardCurrencyMint, refreshCheck) => {
     loading,
     stakeInfo,
     totalLocked,
+    stakeEndTime,
   };
 };
 

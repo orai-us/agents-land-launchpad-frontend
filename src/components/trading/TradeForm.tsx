@@ -11,10 +11,14 @@ import LoadingImg from '@/assets/icons/loading-button.svg';
 
 import { debounce } from 'lodash';
 import BigNumber from 'bignumber.js';
-import { SOL_DECIMAL, SPL_DECIMAL } from '@/config';
+import { ALL_CONFIGS, SOL_DECIMAL, SPL_DECIMAL } from '@/config';
 import Slippage from '../modals/Slippage';
 import { toBN } from '@/utils/util';
 import NumberFormat from 'react-number-format';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
+import CountdownPublic from './CountdownPublic';
+import { web3FungibleStake } from '@/program/web3FungStake';
+import { useGetConfigState } from '@/zustand-store/config/selector';
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -23,6 +27,7 @@ interface TradingFormProps {
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
+const web3Stake = new web3FungibleStake();
 
 export const TradeForm: React.FC<TradingFormProps> = ({
   coin,
@@ -30,6 +35,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   curveLimit,
   isFromRpc,
 }) => {
+  const curveConfig = useGetConfigState('bondingCurveConfig');
+  const stakeInfo = useGetCoinInfoState('stakeInfo');
+  const curveInfo = useGetCoinInfoState('curveInfo');
   const [openSlippage, setOpenSlippage] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.3');
   const [loading, setLoading] = useState<boolean>(false);
@@ -40,6 +48,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
   const { user } = useContext(UserContext);
+  const [showCountdown, setShowCountdown] = useState<Boolean>(true);
+  const [rewardAmt, setRewardAmt] = useState(0);
   const wallet = useWallet();
   const SolList = [
     { id: '', price: 'Reset' },
@@ -54,6 +64,55 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     !coin.raydiumPoolAddr &&
     !coin.oraidexPoolAddr &&
     !coin.listed;
+
+  const isShowLocked =
+    stakeInfo && toBN(stakeInfo['stakeAmount'] || 0).isGreaterThan(0);
+  const partyStart = curveInfo?.partyStart?.toNumber();
+  const publicStart = curveInfo?.publicStart?.toNumber();
+  const isPartyStart =
+    partyStart && partyStart * ALL_CONFIGS.TIMER.MILLISECONDS <= Date.now();
+  const isPublicStart =
+    publicStart && publicStart * ALL_CONFIGS.TIMER.MILLISECONDS <= Date.now();
+
+  const showPublicCountdown = showCountdown && isPartyStart;
+
+  const hasParty = isPartyStart && !isPublicStart && isShowLocked;
+
+  const isOnParty = !isPublicStart && isPartyStart;
+
+  const disableBuyOnParty = isBuy === 0 && isOnParty && !isShowLocked;
+  const disableSellOnParty = isBuy === 1 && isOnParty;
+
+  const fetchMaxBuy = async () => {
+    if (coin.token) {
+      const isCreator = !wallet.publicKey
+        ? false
+        : wallet.publicKey.toBase58() ===
+          (coin.creator['wallet'] || coin.creator);
+      const boughtTokenAmount = toBN(tokenBal).minus(isCreator ? 10 ** 7 : 0);
+      const rw = await web3Stake.getReward(wallet, coin.token);
+      const rwNumber = toBN(rw || 0)
+        .div(10 ** coin.decimals || SPL_DECIMAL)
+        .toNumber();
+      const maxTokenBuyInParty = toBN(
+        curveConfig.maxTokenBuyInParty?.toNumber() || 0
+      )
+        .div(10 ** coin.decimals || SPL_DECIMAL)
+        .toNumber();
+      const initRw =
+        rwNumber < maxTokenBuyInParty ? rwNumber : maxTokenBuyInParty;
+
+      const rwAmount = toBN(initRw)
+        .minus(boughtTokenAmount.isLessThan(0) ? 0 : boughtTokenAmount)
+        .toNumber();
+
+      setRewardAmt(rwAmount);
+    }
+  };
+
+  useEffect(() => {
+    fetchMaxBuy();
+  }, [partyStart, coin, tokenBal]);
 
   const fmtCurve = new BigNumber(
     new BigNumber(curveLimit).div(10 ** 9).toFixed(3, 1)
@@ -177,7 +236,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           sol,
           isBuy,
           simulateReceive,
-          slippage
+          slippage,
+          hasParty
         );
       } else {
         res = await web3Solana.raydiumSwapTx(
@@ -193,7 +253,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       if (res) {
         console.log('res', res);
         successAlert('Submit successfully!');
-        getBalance();
+        await getBalance();
+        // await fetchMaxBuy();
       } else {
         errorAlert('Transaction Failed!');
       }
@@ -214,6 +275,19 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           Trade via Raydium
         </div>
       )}
+
+      {showPublicCountdown && (
+        <div className="mb-2">
+          <CountdownPublic
+            endTime={publicStart}
+            onEnd={() => {
+              console.log('Party round end');
+              setShowCountdown(false);
+            }}
+          />
+        </div>
+      )}
+
       <div className="flex flex-row justify-center items-center w-full gap-2 text-[#E8E9EE] uppercase text-[14px]">
         <button
           className={`uppercase rounded py-2 h-12 w-full ${
@@ -446,6 +520,16 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           )}{' '}
           {!isBuy ? coin.ticker : 'SOL'}
         </div>
+        {isBuy === 0 && isShowLocked && !isPublicStart && (
+          <div className="mt-2 flex items-center gap-1">
+            Max buy amounts: {numberWithCommas(rewardAmt)} {coin.ticker}
+          </div>
+        )}
+        {isBuy === 1 && disableSellOnParty && (
+          <div className="mt-2 flex items-center gap-1">
+            You are not allow to sell token in party round
+          </div>
+        )}
 
         <button
           disabled={
@@ -454,7 +538,9 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             loading ||
             isInsufficientFund ||
             isDisableSwapOnAgent ||
-            isNegativeAmount
+            isNegativeAmount ||
+            disableBuyOnParty ||
+            disableSellOnParty
           }
           onClick={handlTrade}
           className="disabled:cursor-not-allowed mt-4 disabled:opacity-75 uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"

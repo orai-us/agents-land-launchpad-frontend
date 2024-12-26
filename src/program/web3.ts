@@ -277,10 +277,6 @@ export class Web3SolanaProgramInteraction {
         .div(100)
         .toNumber();
 
-      // console.log("=== maxSolSwapIncludeFee ===", {
-      //   origin: maxSolSwap,
-      //   includeFee: maxSolSwapIncludeFee,
-      // });
       return { curveAccount, maxSolSwapIncludeFee };
     } catch (error) {
       console.log('Error in get config curve limit', error);
@@ -361,7 +357,8 @@ export class Web3SolanaProgramInteraction {
     amount: string,
     type: number,
     simulateReceive: string,
-    slippage: string
+    slippage: string,
+    isParty?: boolean
   ): Promise<any> => {
     console.log('==============trade swap==============');
 
@@ -429,7 +426,7 @@ export class Web3SolanaProgramInteraction {
         .multipliedBy(toBN(1).minus(Number(addFee) / 100))
         .toNumber();
 
-      const swapIx = await program.methods
+      let swapIx = await program.methods
         .swap(fmtAmount, type, new anchor.BN(minAmount || 0))
         .accounts({
           teamWallet: configAccount.teamWallet,
@@ -437,6 +434,65 @@ export class Web3SolanaProgramInteraction {
           tokenMint: mint,
         })
         .instruction();
+
+      if (isParty && type === 0) {
+        let [stakeConfigPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('staking_config'),
+            new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+        );
+
+        let [vaultPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('staking_vault'),
+            stakeConfigPda.toBytes(),
+            mint.toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+        );
+        let [userStakePda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('stake_info'),
+            vaultPda.toBytes(),
+            wallet.publicKey.toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+        );
+
+        swapIx = await program.methods
+          .buyParty(fmtAmount, new anchor.BN(minAmount || 0))
+          .accounts({
+            teamWallet: configAccount.teamWallet,
+            user: wallet.publicKey,
+            tokenMint: mint,
+          })
+          .remainingAccounts([
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: stakeConfigPda,
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: vaultPda,
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: userStakePda,
+            },
+          ])
+          .instruction();
+      }
+
       transaction.add(swapIx);
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
@@ -447,10 +503,6 @@ export class Web3SolanaProgramInteraction {
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        // console.log(
-        //   "----",
-        //   await this.connection.simulateTransaction(signedTx)
-        // );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
@@ -1012,13 +1064,13 @@ export class Web3SolanaProgramInteraction {
         metadata: { ...metadata, ...metadataJson } as any,
         listed: bondingCurve.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
         tradingTime: new Date(
-          toBN(bondingCurve.tradingTime.toNumber())
+          toBN(bondingCurve.partyStart.toNumber())
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber()
         ),
         marketcap,
         date: new Date(
-          toBN(bondingCurve.tradingTime.toNumber())
+          toBN(bondingCurve.publicStart.toNumber())
             .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber()

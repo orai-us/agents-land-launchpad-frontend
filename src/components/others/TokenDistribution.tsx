@@ -129,7 +129,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const imgSrc = item.creator?.avatar || defaultUserImg;
                 const isCreator =
                   String(item.owner).toLowerCase() ===
-                  String(data.creator['wallet']).toLowerCase();
+                  String(data.creator['wallet'] || data.creator).toLowerCase();
                 const isBondingAddr =
                   String(item.owner).toLowerCase() ===
                   String(configBondingAddress).toLowerCase();

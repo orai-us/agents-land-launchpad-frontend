@@ -190,7 +190,7 @@ export class web3FungibleStake {
     rewardCurrencyMint: PublicKey,
     wallet: WalletContextState
   ) {
-    let vaultInfo = { totalStaked: new BN('0') };
+    let vaultInfo = { totalStaked: new BN('0'), stakeEndTime: new BN('0') };
     try {
       if (!this.connection) {
         console.log('Warning: connection not connected');
@@ -223,6 +223,7 @@ export class web3FungibleStake {
 
       vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
         totalStaked: new BN('0'),
+        stakeEndTime: new BN('0'),
       };
 
       if (!wallet.publicKey) {
@@ -281,6 +282,38 @@ export class web3FungibleStake {
       console.log('Error in get stake config transaction', error, error.error);
 
       return;
+    }
+  }
+
+  async getReward(wallet: WalletContextState, token: string) {
+    try {
+      if (!this.connection || !wallet.publicKey) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        stakeInterface,
+        provider
+      ) as Program<Fungstake>;
+
+      const tx = await program.methods
+        .queryReward()
+        .accounts({
+          user: wallet.publicKey,
+          stakeCurrencyMint: stakeCurrencyMint,
+          rewardCurrencyMint: new PublicKey(token),
+        })
+        .view();
+
+      return tx;
+    } catch (error) {
+      console.log('Error in get stake config transaction', error, error.error);
+
+      return 0;
     }
   }
 }

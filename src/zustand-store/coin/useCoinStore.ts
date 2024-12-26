@@ -9,6 +9,7 @@ export type CoinInfoState = {
   refreshStakeCheck: boolean;
   balanceStakeMint: string;
   totalVault: number;
+  stakeEndTime: number;
   stakeInfo: any;
   curveInfo: Partial<{
     tokenMint: PublicKey;
@@ -26,6 +27,7 @@ export type CoinInfoState = {
 export type CoinStateAction = {
   handleSetStakeInfo: (stakeInfo: CoinInfoState['stakeInfo']) => void;
   handleSetTotalVault: (totalVault: CoinInfoState['totalVault']) => void;
+  handleSetStakeEndTime: (stakeEndTime: CoinInfoState['stakeEndTime']) => void;
   handleSetCurveInfo: (coin: CoinInfoState['curveInfo']) => void;
   handleSetCoinInfo: (curveInfo: CoinInfoState['coin']) => void;
   handleSetRefreshCheck: (refresh: CoinInfoState['refreshStakeCheck']) => void;
@@ -48,6 +50,7 @@ const initialState: CoinInfoState = {
   balanceStakeMint: '0',
   stakeInfo: null,
   totalVault: 0,
+  stakeEndTime: 0,
 };
 
 export type DepositStoreType = CoinInfoState & { actions: CoinStateAction };
@@ -65,6 +68,7 @@ const useDetectionStore = create<DepositStoreType>()((set) => ({
     handleSetRefreshCheck: (refreshStakeCheck) => set({ refreshStakeCheck }),
     handleSetStakeInfo: (stakeInfo) => set({ stakeInfo }),
     handleSetTotalVault: (totalVault) => set({ totalVault }),
+    handleSetStakeEndTime: (stakeEndTime) => set({ stakeEndTime }),
 
     resetState: () =>
       set((state) => {
