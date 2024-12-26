@@ -11,7 +11,7 @@ import { twMerge } from 'tailwind-merge';
 import { successAlert } from '../others/ToastGroup';
 import { LOCK_TIME_OPTIONS } from './constants';
 import { web3FungibleStake } from '@/program/web3FungStake';
-import { useGetCoinInfoState } from '@/zustand-store/detectionModal/selector';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
 const web3Stake = new web3FungibleStake();
 

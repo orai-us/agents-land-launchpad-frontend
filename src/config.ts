@@ -51,6 +51,7 @@ export const CONFIGS: Record<
     SHOW_DECIMALS_PRICE: number;
     OFFICIAL_TIME: number;
     LOCK_FUNGIBLE_STAKE: number;
+    STAKE_SOFT_CAP: number;
   }
 > = {
   devnet: {
@@ -59,7 +60,7 @@ export const CONFIGS: Record<
       'CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN',
     STAKE_CURRENCY_MINT: '3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4',
     STAKE_POOL_PROGRAM_ID: '9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy',
-    BONDING_CURVE_LIMIT: 10 * LAMPORTS_PER_SOL,
+    BONDING_CURVE_LIMIT: 85 * LAMPORTS_PER_SOL,
     INIT_SOL_BONDING_CURVE: 3 * LAMPORTS_PER_SOL,
     TIMER: {
       MILLISECONDS: 1000,
@@ -72,8 +73,9 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: 5 * 60,
     },
     SHOW_DECIMALS_PRICE: 9,
-    OFFICIAL_TIME: 1735059600,
+    OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 300,
+    STAKE_SOFT_CAP: 5000000,
   },
   'mainnet-beta': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -96,6 +98,7 @@ export const CONFIGS: Record<
     SHOW_DECIMALS_PRICE: 9,
     OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 14 * 86400,
+    STAKE_SOFT_CAP: 5000000,
   },
   'mainnet-beta-test': {
     PROGRAM_ID: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM',
@@ -116,8 +119,9 @@ export const CONFIGS: Record<
       DAY_TO_SECONDS: 15 * 60,
     },
     SHOW_DECIMALS_PRICE: 12,
-    OFFICIAL_TIME: 1735059600,
+    OFFICIAL_TIME: 1735059600000,
     LOCK_FUNGIBLE_STAKE: 86400 * 14,
+    STAKE_SOFT_CAP: 5000000,
   },
 };
 

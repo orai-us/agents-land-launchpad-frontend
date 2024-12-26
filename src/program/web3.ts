@@ -1,5 +1,5 @@
 import { errorAlert } from '@/components/others/ToastGroup';
-import { SEED_GLOBAL, SPL_DECIMAL } from '@/config';
+import { BLACK_LIST_ADDRESS, SEED_GLOBAL, SPL_DECIMAL } from '@/config';
 import {
   rayBuyTx,
   raySellTx,
@@ -25,6 +25,8 @@ import BigNumber from 'bignumber.js';
 import { ALL_CONFIGS } from './../config';
 import { Pumpfun } from './pumpfun';
 import idl from './pumpfun.json';
+import { Fungstake } from './fungstake/fungstake';
+import idlStake from './fungstake/fungstake.json';
 import { SEED_BONDING_CURVE, SEED_CONFIG } from './seed';
 import { handleTransaction } from './utils';
 import {
@@ -44,7 +46,9 @@ export const FAKE_AGENT = 'oCQLttxhiCGMbTYQjiYNRcpu5M3LXX8RxURBP6xB9Zk';
 
 export const endpoint = import.meta.env.VITE_SOLANA_RPC;
 export const pumpProgramId = new PublicKey(idl.address);
+export const stakeProgramId = new PublicKey(idlStake.address);
 export const pumpProgramInterface = JSON.parse(JSON.stringify(idl));
+export const stakeProgramInterface = JSON.parse(JSON.stringify(idlStake));
 
 export class Web3SolanaProgramInteraction {
   constructor(
@@ -68,6 +72,11 @@ export class Web3SolanaProgramInteraction {
       pumpProgramInterface as Pumpfun,
       provider
     ) as Program<Pumpfun>;
+
+    const programStake = new Program(
+      stakeProgramInterface as Fungstake,
+      provider
+    ) as Program<Fungstake>;
 
     console.log('========Fee Pay==============');
 
@@ -114,15 +123,12 @@ export class Web3SolanaProgramInteraction {
         mintKp.publicKey
       );
 
-      // console.log("aiAgentTokenAccount", aiAgentTokenAccount);
-      // console.log("creatorTokenAccount", creatorTokenAccount);
-
       const transaction = new Transaction();
       const updateCpIx = ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1_000_000,
       });
       const updateCuIx = ComputeBudgetProgram.setComputeUnitLimit({
-        units: 300_000,
+        units: 500_000,
       });
       const createIx = await program.methods
         .launch(coinData.name, coinData.symbol, coinData.uri)
@@ -176,6 +182,17 @@ export class Web3SolanaProgramInteraction {
           .instruction();
         transaction.add(swapIx);
       }
+
+      const ixInstructions = await programStake.methods
+        .createVault()
+        .accounts({
+          signer: wallet.publicKey,
+          stakeCurrencyMint: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
+          rewardCurrencyMint: mintKp.publicKey,
+        })
+        .instruction();
+
+      transaction.add(ixInstructions);
 
       transaction.feePayer = wallet.publicKey;
       const blockhash = await this.connection.getLatestBlockhash();
@@ -251,6 +268,7 @@ export class Web3SolanaProgramInteraction {
       const curveAccount = await program.account.bondingCurve.fetch(
         bondingCurvePda
       );
+
       const solReserve = curveAccount.reserveLamport.toNumber();
       const maxSolSwap = curveLimit - solReserve;
 
@@ -263,10 +281,46 @@ export class Web3SolanaProgramInteraction {
       //   origin: maxSolSwap,
       //   includeFee: maxSolSwapIncludeFee,
       // });
-      return maxSolSwapIncludeFee;
+      return { curveAccount, maxSolSwapIncludeFee };
     } catch (error) {
       console.log('Error in get config curve limit', error);
-      return 0;
+      return { curveAccount: {}, maxSolSwapIncludeFee: 0 };
+    }
+  };
+
+  getBondingCurveOfToken = async (
+    mint: PublicKey,
+    wallet: WalletContextState
+  ): Promise<any> => {
+    // check the connection
+    if (!this.connection) {
+      console.log('Warning: connection not connected');
+      return;
+    }
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      preflightCommitment: 'confirmed',
+    });
+    anchor.setProvider(provider);
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+
+    try {
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
+        program.programId
+      );
+      const curveInfo = await program.account.bondingCurve.fetch(
+        bondingCurvePda
+      );
+
+      console.log('curveInfo', curveInfo);
+
+      return curveInfo;
+    } catch (error) {
+      console.log('Error in get config curve limit', error);
+      return;
     }
   };
 
@@ -782,83 +836,95 @@ export class Web3SolanaProgramInteraction {
           commitment: 'confirmed',
           filters: [
             {
-              dataSize: 120,
+              dataSize: 128,
             },
           ],
         }
       );
 
       const list = await Promise.all(
-        tokens.map(async (item) => {
-          const detail = program.coder.accounts.decode(
-            'bondingCurve',
-            item.account.data as any
-          );
-
-          const metadata = await metaplex
-            .nfts()
-            .findByMint(
-              { mintAddress: detail.tokenMint },
-              { commitment: 'confirmed' }
+        tokens
+          .map((item) => {
+            const detail = program.coder.accounts.decode(
+              'bondingCurve',
+              item.account.data as any
             );
 
-          let metadataJson: metadataInfo = {} as any;
-          if (metadata.uri) {
-            const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
-            metadataJson = dataJson;
-          }
+            return detail;
+          })
+          // .filter((item: any) => {
+          //   console.log('item', item, item.tokenMint.toBase58());
+          //   const isBlackList = BLACK_LIST_ADDRESS.includes(
+          //     item.tokenMint.toBase58()
+          //   );
+          //   return !isBlackList;
+          // })
+          .map(async (detail: any) => {
+            const metadata = await metaplex
+              .nfts()
+              .findByMint(
+                { mintAddress: detail.tokenMint },
+                { commitment: 'confirmed' }
+              );
 
-          const [configPda] = PublicKey.findProgramAddressSync(
-            [Buffer.from(SEED_CONFIG)],
-            program.programId
-          );
+            let metadataJson: metadataInfo = {} as any;
+            if (metadata.uri) {
+              const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
+              metadataJson = dataJson;
+            }
 
-          const configAccount = await program.account.config.fetch(configPda);
+            const [configPda] = PublicKey.findProgramAddressSync(
+              [Buffer.from(SEED_CONFIG)],
+              program.programId
+            );
 
-          const solPrice = Number(localStorage.getItem('solPrice'));
-          const newPrice = calculateTokenPrice(
-            detail.reserveToken,
-            detail.reserveLamport,
-            detail.decimals || SPL_DECIMAL,
-            solPrice
-          );
-          const marketcap = calculateMarketCap(
-            detail.reserveToken,
-            detail.decimals || SPL_DECIMAL,
-            newPrice
-          );
+            const configAccount = await program.account.config.fetch(configPda);
 
-          const tokenDetail = {
-            creator: detail.creator.toBase58(),
-            decimals: detail.decimals || SPL_DECIMAL,
-            name: metadata.name,
-            ticker: metadata.symbol,
-            description: metadataJson.description,
-            token: detail.tokenMint.toBase58(),
-            url: metadataJson.image,
-            tokenReserves: detail.reserveToken,
-            lamportReserves: detail.reserveLamport,
-            marketcap,
-            bondingCurveLimit:
-              configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
-            metadata: { ...metadata, ...metadataJson } as any,
-            listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
-            tradingTime: new Date(
-              toBN(detail.tradingTime)
-                .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
-                .toNumber()
-            ),
-            date: new Date(
-              toBN(detail.tradingTime)
-                .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
-                .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
-                .toNumber()
-            ),
-          };
+            const solPrice = Number(localStorage.getItem('solPrice'));
+            const newPrice = calculateTokenPrice(
+              detail.reserveToken,
+              detail.reserveLamport,
+              detail.decimals || SPL_DECIMAL,
+              solPrice
+            );
+            const marketcap = calculateMarketCap(
+              detail.reserveToken,
+              detail.decimals || SPL_DECIMAL,
+              newPrice
+            );
 
-          return { ...detail, ...tokenDetail };
-        })
+            const tokenDetail = {
+              creator: detail.creator.toBase58(),
+              decimals: detail.decimals || SPL_DECIMAL,
+              name: metadata.name,
+              ticker: metadata.symbol,
+              description: metadataJson.description,
+              token: detail.tokenMint.toBase58(),
+              url: metadataJson.image,
+              tokenReserves: detail.reserveToken,
+              lamportReserves: detail.reserveLamport,
+              marketcap,
+              bondingCurveLimit:
+                configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
+              metadata: { ...metadata, ...metadataJson } as any,
+              listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
+              tradingTime: new Date(
+                toBN(detail.tradingTime)
+                  .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+                  .toNumber()
+              ),
+              date: new Date(
+                toBN(detail.tradingTime)
+                  .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
+                  .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+                  .toNumber()
+              ),
+            };
+
+            return { ...detail, ...tokenDetail };
+          })
       );
+      console.log('list', list);
 
       const listFmt = list.filter(Boolean);
       return {
@@ -932,7 +998,7 @@ export class Web3SolanaProgramInteraction {
       );
 
       const tokenDetail = {
-        creator: '',
+        creator: bondingCurve.creator.toBase58(),
         decimals: SPL_DECIMAL,
         name: metadata.name,
         ticker: metadata.symbol,
@@ -950,6 +1016,7 @@ export class Web3SolanaProgramInteraction {
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber()
         ),
+        marketcap,
         date: new Date(
           toBN(bondingCurve.tradingTime.toNumber())
             .minus(ALL_CONFIGS.TIMER.DAY_TO_SECONDS)
@@ -959,6 +1026,34 @@ export class Web3SolanaProgramInteraction {
       };
 
       return tokenDetail;
+    } catch (error) {
+      console.log('getTokenDetailFromContract error', error);
+      return;
+    }
+  };
+
+  getConfigCurve = async (wallet: WalletContextState) => {
+    try {
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+
+      const configAccount = await program.account.config.fetch(configPda);
+      return configAccount;
     } catch (error) {
       console.log('getTokenDetailFromContract error', error);
       return;

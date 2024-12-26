@@ -1,5 +1,7 @@
 import { coinInfo } from '@/utils/types';
+import { PublicKey } from '@solana/web3.js';
 import { create } from 'zustand';
+import { BN } from '@coral-xyz/anchor';
 
 export type CoinInfoState = {
   coin: Partial<coinInfo>;
@@ -8,12 +10,24 @@ export type CoinInfoState = {
   balanceStakeMint: string;
   totalVault: number;
   stakeInfo: any;
+  curveInfo: Partial<{
+    tokenMint: PublicKey;
+    creator: PublicKey;
+    initLamport: BN;
+    initToken: BN;
+    reserveLamport: BN;
+    reserveToken: BN;
+    isCompleted: boolean;
+    partyStart: BN;
+    publicStart: BN;
+  }>;
 };
 
 export type CoinStateAction = {
   handleSetStakeInfo: (stakeInfo: CoinInfoState['stakeInfo']) => void;
   handleSetTotalVault: (totalVault: CoinInfoState['totalVault']) => void;
-  handleSetCoinInfo: (coin: CoinInfoState['coin']) => void;
+  handleSetCurveInfo: (coin: CoinInfoState['curveInfo']) => void;
+  handleSetCoinInfo: (curveInfo: CoinInfoState['coin']) => void;
   handleSetRefreshCheck: (refresh: CoinInfoState['refreshStakeCheck']) => void;
   handleSetTokenAddress: (tokenAddress: CoinInfoState['tokenAddress']) => void;
   handleSetStakeMintBalance: (
@@ -28,6 +42,7 @@ export type CoinStateAction = {
 
 const initialState: CoinInfoState = {
   coin: {},
+  curveInfo: {},
   tokenAddress: '',
   refreshStakeCheck: false,
   balanceStakeMint: '0',
@@ -45,6 +60,7 @@ const useDetectionStore = create<DepositStoreType>()((set) => ({
   actions: {
     handleSetStakeMintBalance: (balanceStakeMint) => set({ balanceStakeMint }),
     handleSetCoinInfo: (coin) => set({ coin }),
+    handleSetCurveInfo: (curveInfo) => set({ curveInfo }),
     handleSetTokenAddress: (tokenAddress) => set({ tokenAddress }),
     handleSetRefreshCheck: (refreshStakeCheck) => set({ refreshStakeCheck }),
     handleSetStakeInfo: (stakeInfo) => set({ stakeInfo }),

@@ -30,7 +30,7 @@ import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
-} from '@/zustand-store/detectionModal/selector';
+} from '@/zustand-store/coin/selector';
 import { BN } from '@coral-xyz/anchor';
 import { toPublicKey } from '@metaplex-foundation/js';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -90,7 +90,8 @@ export default function TradingPage() {
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
   const [fromRpc, setFromRpc] = useState(false);
-  const { handleSetRefreshCheck, handleSetCoinInfo } = useCoinActions();
+  const { handleSetCurveInfo, handleSetCoinInfo } = useCoinActions();
+  const curveInfo = useGetCoinInfoState('curveInfo');
   const stakerInfo = useGetCoinInfoState('stakeInfo');
   const hasStaked =
     stakerInfo && toBN(stakerInfo['stakeAmount'] || 0).isGreaterThan(0);
@@ -105,8 +106,16 @@ export default function TradingPage() {
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
-  const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
-  const isNotForSale = isUnlock && !isOnSaleCountdown;
+  const partyStart = curveInfo?.partyStart?.toNumber();
+  const publicStart = curveInfo?.publicStart?.toNumber();
+  // const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
+  const isLock =
+    !partyStart ||
+    (partyStart &&
+      new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS).getTime() >
+        Date.now());
+  const isNotForSale = isLock && !isOnSaleCountdown;
+  console.log('curveInfo', curveInfo, partyStart, isLock, isNotForSale);
 
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
@@ -133,11 +142,14 @@ export default function TradingPage() {
       }
     }
 
-    const maxCurve = await web3Solana.getMaxBondingCurveLimit(
-      new PublicKey(data.token),
-      wallet
-    );
-    setCurveLimit(maxCurve || 0);
+    const { curveAccount, maxSolSwapIncludeFee } =
+      await web3Solana.getMaxBondingCurveLimit(
+        new PublicKey(data.token),
+        wallet
+      );
+
+    setCurveLimit(maxSolSwapIncludeFee || 0);
+    handleSetCurveInfo(curveAccount);
 
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString()
@@ -412,7 +424,11 @@ export default function TradingPage() {
                       className="text-[10px] md:text-[12px] text-[#E4775D] underline cursor-pointer normal-case"
                       href={`/profile/${coin.creator?.['wallet']}`}
                     >
-                      {reduceString(coin.creator?.['wallet'] || '', 4, 4)}
+                      {reduceString(
+                        coin.creator?.['wallet'] || coin.creator || '',
+                        4,
+                        4
+                      )}
                     </Link>
                   </div>
                   <div className="flex gap-3 md:mt-4">
@@ -632,7 +648,12 @@ export default function TradingPage() {
           </div>
         </div>
         {isNotForSale ? (
-          <NotForSale coin={coin} onEnd={() => setIsOnSaleCountdown(true)} />
+          <NotForSale
+            coin={coin}
+            onEnd={() => setIsOnSaleCountdown(true)}
+            partyStart={partyStart}
+            publicStart={publicStart}
+          />
         ) : (
           <div className="w-full md:max-w-[384px]">
             <div className="hidden md:flex">

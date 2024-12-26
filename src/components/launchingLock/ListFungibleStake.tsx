@@ -10,7 +10,7 @@ import { SPL_DECIMAL } from '@/config';
 import {
   useCoinActions,
   useGetCoinInfoState,
-} from '@/zustand-store/detectionModal/selector';
+} from '@/zustand-store/coin/selector';
 
 const ListFungibleStake: FC<{}> = () => {
   const coin = useGetCoinInfoState('coin');

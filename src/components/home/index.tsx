@@ -83,6 +83,8 @@ const HomePage: FC = () => {
         coins = res.coins || [];
         total = res.total;
 
+        console.log('data', res.coins);
+
         const fromRpc = res.fromRpc;
 
         if (fromRpc) {
@@ -218,9 +220,14 @@ const HomePage: FC = () => {
         data={data
           ?.filter((e) => {
             const isBlackList = BLACK_LIST_ADDRESS.includes(e.token);
-            const dateNeedToFilter =
-              e.tradingTime &&
-              e.tradingTime.getTime() > ALL_CONFIGS.OFFICIAL_TIME;
+
+            let dateNeedToFilter = true;
+            if (fromRpc) {
+              console.log('fromRpc', fromRpc);
+              dateNeedToFilter =
+                e.tradingTime &&
+                new Date(e.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
+            }
 
             return (
               !!e.metadata?.agentAddress && dateNeedToFilter && !isBlackList
@@ -232,9 +239,9 @@ const HomePage: FC = () => {
             if (fromRpc && token) {
               condition =
                 condition &&
-                (item.token?.toLowerCase() === token.toLowerCase() ||
-                  item.name?.toLowerCase() === token.toLowerCase() ||
-                  item.ticker?.toLowerCase() === token.toLowerCase());
+                (item.token?.toLowerCase().includes(token.toLowerCase()) ||
+                  item.name?.toLowerCase().includes(token.toLowerCase()) ||
+                  item.ticker?.toLowerCase().includes(token.toLowerCase()));
             }
 
             return condition;

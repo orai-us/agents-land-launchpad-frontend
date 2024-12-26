@@ -82,7 +82,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   useEffect(() => {
     const isSimulateWhenExceedCurve =
       isBuy === 0 && toBN(sol).isGreaterThanOrEqualTo(fmtCurve);
-    if (sol && !isNegativeAmount) {
+    if (sol && !isNegativeAmount && coin.token) {
       (async () => {
         try {
           setLoadingEst(true);
@@ -133,7 +133,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     } else {
       setSimulateReceive(() => '');
     }
-  }, [sol]); // curveLimit
+  }, [sol, coin]); // curveLimit
 
   const getBalance = async () => {
     if (!wallet.publicKey) {
@@ -163,7 +163,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   useEffect(() => {
     getBalance();
-  }, [coin?._id, wallet.publicKey]);
+  }, [coin?.token, wallet.publicKey]);
 
   const handlTrade = async () => {
     try {

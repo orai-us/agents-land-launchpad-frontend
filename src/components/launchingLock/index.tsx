@@ -8,7 +8,7 @@ import { toBN, toPublicKey } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
-} from '@/zustand-store/detectionModal/selector';
+} from '@/zustand-store/coin/selector';
 import { useWallet } from '@solana/wallet-adapter-react';
 import dayjs from 'dayjs';
 import tz from 'dayjs/plugin/timezone';

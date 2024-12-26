@@ -215,13 +215,15 @@ export default function CreateToken() {
         description: newCoin.description,
         agentPersonality: agentPersonality || undefined,
         agentStyle: agentStyle || undefined,
-        createdOn: 'https://agent.land',
+        createdOn: 'https://agents.land',
         twitter: newCoin.twitter || undefined, // Only assign if it exists
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
         discord: newCoin.discord || undefined, // Only assign if it exists
         agentId: selectedAgent?.id,
         agentAddress: selectedAgent?.botWallet?.solAddr,
+        creatorAddress: wallet.publicKey?.toBase58(),
+        createdAt: Date.now(),
       };
       // Process metadata upload
       const uploadMetadataUrl = await uploadMetadata(jsonData);

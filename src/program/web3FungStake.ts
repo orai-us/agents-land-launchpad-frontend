@@ -252,4 +252,35 @@ export class web3FungibleStake {
       };
     }
   }
+
+  async getStakeConfig(wallet: WalletContextState) {
+    try {
+      if (!this.connection) {
+        console.log('Warning: connection not connected');
+        return;
+      }
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        preflightCommitment: 'confirmed',
+      });
+      anchor.setProvider(provider);
+      const program = new Program(
+        stakeInterface,
+        provider
+      ) as Program<Fungstake>;
+
+      let [configPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(STAKE_CONFIG_SEED),
+          toPublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
+        ],
+        program.programId
+      );
+      const config = await program.account.stakeConfig.fetch(configPda);
+      return config;
+    } catch (error) {
+      console.log('Error in get stake config transaction', error, error.error);
+
+      return;
+    }
+  }
 }

@@ -1,6 +1,6 @@
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { toBN, toPublicKey } from '@/utils/util';
-import { useCoinActions } from '@/zustand-store/detectionModal/selector';
+import { useCoinActions } from '@/zustand-store/coin/selector';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
 

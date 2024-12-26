@@ -116,7 +116,7 @@ export const getCoinsInfo = async (
     const res = await axios.get(`${BACKEND_URL}/coin`, {
       ...config,
       params,
-    })[0];
+    });
     return res.data;
   } catch (error) {
     console.log('Get List token from BE failed', error);
