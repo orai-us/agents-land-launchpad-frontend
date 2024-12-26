@@ -1,10 +1,7 @@
-'use client';
 import nodataImg from '@/assets/icons/noagentdata.svg';
-import MountainImg from '@/assets/images/mount_guide.png';
 import AgentImg from '@/assets/images/userAgentDefault.svg';
-import { Spinner } from '@/components/loadings/Spinner';
 import { errorAlert } from '@/components/others/ToastGroup';
-import { useSocket } from '@/contexts/SocketContext';
+import useOnClickOutside from '@/hooks/useOnClickOutside';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { uploadImage, uploadMetadata } from '@/utils/fileUpload';
 import {
@@ -14,7 +11,6 @@ import {
   metadataInfo,
 } from '@/utils/types';
 import {
-  getAgentsData,
   getAgentsDataByUser,
   getCoinsInfoBy,
   getUserByWalletAddress,
@@ -22,15 +18,13 @@ import {
 } from '@/utils/util';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { Circles } from 'react-loader-spinner';
 import { twMerge } from 'tailwind-merge';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import DropzoneFile from '../uploadFile/DropzoneFile';
+import ZappingText from '../zapping';
 import CreateTokenSuccess from './CreateTokenSuccess';
 import PreSaleModal from './Presale';
-import { Circles } from 'react-loader-spinner';
-import ZappingText from '../zapping';
-import useOnClickOutside from '@/hooks/useOnClickOutside';
-import { ALL_CONFIGS } from '@/config';
 
 export enum STEP_TOKEN {
   INFO,
@@ -38,8 +32,9 @@ export enum STEP_TOKEN {
 }
 
 export default function CreateToken() {
+  const isDevnet = import.meta.env.VITE_APP_SOLANA_ENV === 'devnet';
   const [imageUrl, setIamgeUrl] = useState<string>('');
-  const { isLoading, setIsLoading } = useSocket();
+  const [isLoading, setIsLoading] = useState(false);
   const [agentPersonality, setAgentPersonality] = useState<string>(
     AGENT_PERSONALITY[0].value
   );
@@ -109,7 +104,9 @@ export default function CreateToken() {
 
         if (res) {
           setAgentList(res['items']);
-          // setSelectedAgent(res['items'][0]); // TODO: dont auto select
+          if (isDevnet) {
+            setSelectedAgent(res['items'][0]); // TODO: only on test
+          }
         }
       })();
     }
@@ -196,7 +193,7 @@ export default function CreateToken() {
             tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
         );
 
-        if (isSelectedAgentHasCoin) {
+        if (isSelectedAgentHasCoin && !isDevnet) {
           errorAlert(
             'Your agent has been tokenized! Please select another agent!'
           );
@@ -218,13 +215,15 @@ export default function CreateToken() {
         description: newCoin.description,
         agentPersonality: agentPersonality || undefined,
         agentStyle: agentStyle || undefined,
-        createdOn: 'https://agent.land',
+        createdOn: 'https://agents.land',
         twitter: newCoin.twitter || undefined, // Only assign if it exists
         website: newCoin.website || undefined, // Only assign if it exists
         telegram: newCoin.telegram || undefined, // Only assign if it exists
         discord: newCoin.discord || undefined, // Only assign if it exists
         agentId: selectedAgent?.id,
         agentAddress: selectedAgent?.botWallet?.solAddr,
+        creatorAddress: wallet.publicKey?.toBase58(),
+        createdAt: Date.now(),
       };
       // Process metadata upload
       const uploadMetadataUrl = await uploadMetadata(jsonData);
@@ -275,9 +274,11 @@ export default function CreateToken() {
     imageUrl &&
     selectedAgent;
 
-  const isSelectedAgentHasCoin = unCreatableToken.find(
-    (tk) => tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
-  );
+  const isSelectedAgentHasCoin =
+    !isDevnet &&
+    unCreatableToken.find(
+      (tk) => tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr
+    );
 
   return (
     <div className="w-full m-auto my-24 mt-4 md:mt-10">
@@ -596,24 +597,6 @@ export default function CreateToken() {
                 />
               </div>
 
-              {/* <div>
-                <label
-                  htmlFor="description"
-                  className="text-[12px] font-medium text-[#84869A]"
-                >
-                  PRESALE (0 ~ 1.5 SOL)
-                </label>
-                <input
-                  role="presentation"
-                  autoComplete="off"
-                  id="presale"
-                  type="number"
-                  value={newCoin.presale || ""}
-                  onChange={handlePresaleChange}
-                  className="outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent"
-                />
-              </div> */}
-
               <div className="w-full flex flex-col justify-between gap-3">
                 <div className="w-full justify-between flex flex-col xs:flex-row items-start xs:items-center gap-2">
                   <label
@@ -847,17 +830,6 @@ export default function CreateToken() {
             </div>
           )}
 
-          {/* {step === STEP_TOKEN.INFO ? (
-            <button
-              onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
-              // disabled={!formValid || isLoading}
-              className="disabled:opacity-75 disabled:cursor-not-allowed uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"
-            >
-              <div className="uppercase rounded bg-white px-6 py-2 text-[#080A14]">
-                Next
-              </div>
-            </button>
-          ) : ( */}
           <button
             disabled={
               !formValid ||
@@ -873,98 +845,7 @@ export default function CreateToken() {
               Launch
             </div>
           </button>
-          {/* )} */}
         </div>
-        {/* <div className="w-full md:max-w-[490px] flex justify-end">
-          <div className="hidden md:block">
-            <div className="flex">
-              <div className="relative translate-y-[0%]">
-                <div
-                  onClick={() => setStep(STEP_TOKEN.INFO)}
-                  className="cursor-pointer relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]"
-                >
-                  1
-                </div>
-                <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute top-0 left-1/2 -translate-x-1/2"></div>
-              </div>
-              <div className="ml-4 pb-5">
-                <div className="text-[#E8E9EE] font-medium text-[18px]">
-                  Agent info
-                </div>
-                <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                  Information to help the community identify you.
-                </span>
-              </div>
-            </div>
-            <div className="flex">
-              <div className="relative translate-y-[0%] flex flex-col justify-end">
-                <div className="border-[1px] border-[#585A6B] border-dashed h-full absolute bottom-0 left-1/2 -translate-x-1/2"></div>
-                <div
-                  onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
-                  className={twMerge(
-                    "relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]",
-                    step === STEP_TOKEN.BEHAVIOR &&
-                      " bg-[#E4775D] text-[#080A14]"
-                  )}
-                >
-                  2
-                </div>
-              </div>
-              <div className="ml-4">
-                <div className="text-[#E8E9EE] font-medium text-[18px]">
-                  Agent Behaviors
-                </div>
-                <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                  Set unique behaviors your agent
-                </span>
-              </div>
-            </div>
-            <div className="mt-[72px] hidden md:block">
-              <img src={MountainImg} alt="MountainImg" />
-            </div>
-          </div>
-          <div className="block md:hidden w-full mb-6">
-            <div className="flex w-full items-center justify-between">
-              <div
-                onClick={() => setStep(STEP_TOKEN.INFO)}
-                className="cursor-pointer relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#E4775D] text-[#080A14] font-semibold text-[14px]"
-              >
-                1
-              </div>
-              <div className="border-b border-dashed border-[#585A6B] flex-1"></div>
-              <div
-                onClick={() => setStep(STEP_TOKEN.BEHAVIOR)}
-                className={twMerge(
-                  "relative z-10 flex items-center justify-center w-8 h-8 rounded-full bg-[#1A1C28] text-[#E8E9EE] font-semibold text-[14px]",
-                  step === STEP_TOKEN.BEHAVIOR && " bg-[#E4775D] text-[#080A14]"
-                )}
-              >
-                2
-              </div>
-            </div>
-            <div>
-              {step === STEP_TOKEN.INFO ? (
-                <div className="mt-2">
-                  <div className="text-[#E8E9EE] font-medium text-[18px]">
-                    Agent info
-                  </div>
-                  <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                    Information to help the community identify you.
-                  </span>
-                </div>
-              ) : (
-                <div className="text-right mt-2">
-                  <div className="text-[#E8E9EE] font-medium text-[18px]">
-                    Agent Behaviors
-                  </div>
-                  <span className="mt-8 text-[14px] text-[#9192A0] w-screen max-w-[300px]">
-                    Set unique behaviors your agent
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div> */}
         <div className="flex justify-end w-full md:max-w-[490px] border border-[#1A1C28] rounded p-3 md:p-6 mt-4 md:mt-0 md:ml-8 lg:ml-16 xl:ml-28">
           <div className="w-full">
             <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
@@ -1085,38 +966,5 @@ export const AGENT_STYLE = [
   {
     label: '⭐️ Custom',
     value: 'Custom',
-  },
-];
-
-const MOCK_AGENTS = [
-  {
-    img: AgentImg,
-    name: 'Jordan’s Investor Coach',
-    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
-  },
-  {
-    img: AgentImg,
-    name: 'Max',
-    address: '2RExGFDFexUfHmog3cAb8VqWM6rcbNeGcFSnYim3Wgpt',
-  },
-  {
-    img: AgentImg,
-    name: 'Max2',
-    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
-  },
-  {
-    img: AgentImg,
-    name: 'Max2',
-    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
-  },
-  {
-    img: AgentImg,
-    name: 'Max2',
-    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
-  },
-  {
-    img: AgentImg,
-    name: 'Max2',
-    address: '0x9DF2912059AC0d8Ddbf345B96EF4C4f59902E38b',
   },
 ];

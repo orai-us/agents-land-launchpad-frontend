@@ -5,8 +5,14 @@ import defaultUserImg from '@/assets/images/userAgentDefault.svg';
 import { Chatting } from '@/components/trading/Chatting';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradingChart } from '@/components/TVChart/TradingChart';
-import { ALL_CONFIGS, PROGRAM_ID, SOL_DECIMAL } from '@/config';
+import {
+  ALL_CONFIGS,
+  BLACK_LIST_ADDRESS,
+  PROGRAM_ID,
+  SOL_DECIMAL,
+} from '@/config';
 import UserContext from '@/context/UserContext';
+import useWindowSize from '@/hooks/useWindowSize';
 import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
 import { ResultType } from '@/program/logListeners/types';
 import {
@@ -21,7 +27,12 @@ import {
 } from '@/utils/format';
 import { coinInfo } from '@/utils/types';
 import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
+import {
+  useCoinActions,
+  useGetCoinInfoState,
+} from '@/zustand-store/coin/selector';
 import { BN } from '@coral-xyz/anchor';
+import { toPublicKey } from '@metaplex-foundation/js';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
@@ -31,12 +42,12 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import { useContext, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Link, useLocation } from 'wouter';
+import LaunchingLock from '../launchingLock';
+import { errorAlert } from '../others/ToastGroup';
 import TokenDistribution from '../others/TokenDistribution';
 import { DexToolsChart } from '../TVChart/DexToolsChart';
 import useListenEventSwapChart from './hooks/useListenEventSwapChart';
 import NotForSale from './NotForSale';
-import useWindowSize from '@/hooks/useWindowSize';
-import { errorAlert } from '../others/ToastGroup';
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -78,6 +89,12 @@ export default function TradingPage() {
   const [simulatePrice, setSimulatePrice] = useState<string>('');
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
+  const [fromRpc, setFromRpc] = useState(false);
+  const { handleSetCurveInfo, handleSetCoinInfo } = useCoinActions();
+  const curveInfo = useGetCoinInfoState('curveInfo');
+  const stakerInfo = useGetCoinInfoState('stakeInfo');
+  const hasStaked =
+    stakerInfo && toBN(stakerInfo['stakeAmount'] || 0).isGreaterThan(0);
 
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
@@ -89,13 +106,21 @@ export default function TradingPage() {
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
-  const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
-  const isNotForSale = isUnlock && !isOnSaleCountdown;
+  const partyStart = curveInfo?.partyStart?.toNumber();
+  const publicStart = curveInfo?.publicStart?.toNumber();
+  // const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
+  const isLock =
+    !partyStart ||
+    (partyStart &&
+      new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS).getTime() >
+        Date.now());
+  const isNotForSale = isLock && !isOnSaleCountdown;
+  console.log('curveInfo', curveInfo, partyStart, isLock, isNotForSale);
 
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
 
-    if (!data) {
+    if (!data?.token) {
       let retry = 1;
       while (retry < 3 && !data) {
         console.log('Retry LoadToken', retry);
@@ -105,11 +130,26 @@ export default function TradingPage() {
       }
     }
 
-    const maxCurve = await web3Solana.getMaxBondingCurveLimit(
-      new PublicKey(data.token),
-      wallet
-    );
-    setCurveLimit(maxCurve || 0);
+    if (!data?.token) {
+      // data =
+      data = (await web3Solana.getTokenDetailFromContract(
+        wallet,
+        toPublicKey(parameter)
+      )) as any;
+
+      if (data) {
+        setFromRpc(true);
+      }
+    }
+
+    const { curveAccount, maxSolSwapIncludeFee } =
+      await web3Solana.getMaxBondingCurveLimit(
+        new PublicKey(data.token),
+        wallet
+      );
+
+    setCurveLimit(maxSolSwapIncludeFee || 0);
+    handleSetCurveInfo(curveAccount);
 
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString()
@@ -131,6 +171,7 @@ export default function TradingPage() {
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
     setCoin(data);
+    handleSetCoinInfo(data);
   };
 
   useEffect(() => {
@@ -141,18 +182,38 @@ export default function TradingPage() {
       setParam(parameter);
       setCoinId(parameter);
 
+      const isBlackList = BLACK_LIST_ADDRESS.includes(parameter);
+
+      if (isBlackList) {
+        setLocation('/');
+        errorAlert('Token not created with agent!');
+      }
+
       await fetchDataCoin(parameter);
     };
     fetchData();
   }, [pathname, wallet.publicKey]);
 
   useEffect(() => {
-    if (coin._id) {
-      console.log('data fullfil :>>', coin);
+    if (coin.token) {
+      const isBlackList = BLACK_LIST_ADDRESS.includes(coin.token);
+      const dateNeedToFilter =
+        coin.tradingTime &&
+        new Date(coin.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
 
       if (!coin.metadata?.agentAddress) {
         setLocation('/');
         errorAlert('Token not created with agent!');
+      }
+
+      if (isBlackList) {
+        setLocation('/');
+        errorAlert('Token not valid!');
+      }
+
+      if (!dateNeedToFilter) {
+        setLocation('/');
+        errorAlert('Token not valid!');
       }
     }
   }, [coin]);
@@ -233,6 +294,7 @@ export default function TradingPage() {
     .multipliedBy(solPrice)
     .toFixed(6);
 
+  const isCanBuyOnRaydium = fromRpc && coin.listed;
   const isRaydiumListed = coin['raydiumPoolAddr'];
   const isOraidexListed = coin['oraidexPoolAddr'];
   const isListed = coin['listed'];
@@ -259,7 +321,7 @@ export default function TradingPage() {
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
           <div className="flex">
-            {isListed && isRaydiumListed && (
+            {isListed && (isRaydiumListed || isCanBuyOnRaydium) && (
               <a
                 // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
                 href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
@@ -277,7 +339,7 @@ export default function TradingPage() {
               </a>
             )}
 
-            {isListed && isOraidexListed && (
+            {isListed && (isOraidexListed || isCanBuyOnRaydium) && (
               <a
                 href={`https://app.oraidex.io/pools/v2/${encodeURIComponent(
                   `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`
@@ -301,13 +363,21 @@ export default function TradingPage() {
           <div className="w-full">
             <div
               className={twMerge(
-                'bg-[#1A1C28] rounded-t p-6',
+                'relative bg-[#1A1C28] rounded-t p-6',
                 isNotForSale && 'rounded'
               )}
             >
+              {hasStaked && (
+                <div className="bottom-full absolute flex items-center text-[#9FF4CF] md:py-2 md:px-4 py-1 px-2 text-[10px] bg-[rgba(159,244,207,0.16)] md:text-[13px] rounded-t-lg">
+                  <CongratulationIcon />
+                  <span className="ml-2">
+                    Congratulations! You have been whitelisted to buy the token
+                  </span>
+                </div>
+              )}
               <div
                 className={twMerge(
-                  'mb-4 flex justify-between items-start flex-wrap gap-4',
+                  'relative mb-4 flex justify-between items-start flex-wrap gap-4',
                   isNotForSale && 'mb-0'
                 )}
               >
@@ -346,31 +416,6 @@ export default function TradingPage() {
                     </p>
                   </div>
                 </div>
-                {/* <div className="flex gap-2 flex-wrap justify-between items-center w-full md:w-fit">
-                  <div className="block md:hidden">
-                    <p className="text-[#E8E9EE] text-[14px] md:text-[24px] font-medium flex items-center gap-1">
-                      {!loadingEst ? (
-                        numberWithCommas(
-                          isNaN(Number(tokenPrice)) ? 0 : Number(tokenPrice),
-                          undefined,
-                          {
-                            maximumFractionDigits: 9,
-                          }
-                        )
-                      ) : (
-                        <img src={LoadingImg} />
-                      )}{" "}
-                      SOL
-                    </p>
-                    <p
-                      className={twMerge(
-                        "mt-1 font-medium text-[14px] text-[#84869A]"
-                      )}
-                    >
-                      ≈ ${isNaN(Number(priceUsd)) ? "--" : priceUsd}
-                    </p>
-                  </div>
-                </div> */}
 
                 <div className="w-full md:w-fit flex md:flex-col justify-between md:items-end items-start h-full">
                   <div className="text-[10px] md:text-[12px] text-[#84869A] font-medium">
@@ -379,7 +424,11 @@ export default function TradingPage() {
                       className="text-[10px] md:text-[12px] text-[#E4775D] underline cursor-pointer normal-case"
                       href={`/profile/${coin.creator?.['wallet']}`}
                     >
-                      {reduceString(coin.creator?.['wallet'] || '', 4, 4)}
+                      {reduceString(
+                        coin.creator?.['wallet'] || coin.creator || '',
+                        4,
+                        4
+                      )}
                     </Link>
                   </div>
                   <div className="flex gap-3 md:mt-4">
@@ -523,6 +572,7 @@ export default function TradingPage() {
                   coin={coin}
                   progress={progress}
                   curveLimit={curveLimit}
+                  isFromRpc={fromRpc}
                 ></TradeForm>
               </div>
             )}
@@ -598,7 +648,12 @@ export default function TradingPage() {
           </div>
         </div>
         {isNotForSale ? (
-          <NotForSale coin={coin} onEnd={() => setIsOnSaleCountdown(true)} />
+          <NotForSale
+            coin={coin}
+            onEnd={() => setIsOnSaleCountdown(true)}
+            partyStart={partyStart}
+            publicStart={publicStart}
+          />
         ) : (
           <div className="w-full md:max-w-[384px]">
             <div className="hidden md:flex">
@@ -606,6 +661,7 @@ export default function TradingPage() {
                 coin={coin}
                 progress={progress}
                 curveLimit={curveLimit}
+                isFromRpc={fromRpc}
               ></TradeForm>
             </div>
             <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
@@ -662,6 +718,7 @@ export default function TradingPage() {
               )}
             </div>
             <TokenDistribution data={coin} />
+            {/* <LaunchingLock /> */}
           </div>
         )}
 
@@ -675,3 +732,86 @@ export default function TradingPage() {
     </div>
   );
 }
+
+export const CongratulationIcon = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+    >
+      <g clipPath="url(#clip0_1289_13029)">
+        <path
+          d="M3.86732 7.5332L1.33398 14.6665L8.46732 12.1399"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M2.66602 2H2.67268"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.666 5.33398H14.6727"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M10 1.33398H10.0067"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.666 13.334H14.6727"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.6673 1.33398L13.174 1.83398C12.7489 1.97558 12.3862 2.26041 12.1479 2.6398C11.9095 3.01919 11.8104 3.46958 11.8673 3.91398C11.934 4.48732 11.4873 5.00065 10.9007 5.00065H10.6473C10.074 5.00065 9.58065 5.40065 9.47398 5.96065L9.33398 6.66732"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M14.6673 8.6663L14.1207 8.4463C13.5473 8.21963 12.9073 8.57963 12.8007 9.18629C12.7273 9.65296 12.3207 9.99963 11.8473 9.99963H11.334"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7.33333 1.33398L7.55333 1.88065C7.78 2.45398 7.42 3.09398 6.81333 3.20065C6.34667 3.26732 6 3.68065 6 4.15398V4.66732"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M7.33334 8.66635C8.62001 9.95302 9.22001 11.4464 8.66668 11.9997C8.11334 12.553 6.62001 11.953 5.33334 10.6664C4.04668 9.37969 3.44668 7.88635 4.00001 7.33302C4.55334 6.77969 6.04668 7.37969 7.33334 8.66635Z"
+          stroke="#9FF4CF"
+          strokeWidth="1.33333"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_1289_13029">
+          <rect width="16" height="16" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+};

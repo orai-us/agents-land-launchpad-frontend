@@ -3,25 +3,8 @@ import type {
   LibrarySymbolInfo,
   ResolutionString,
   SubscribeBarsCallback,
-} from "@/charting_library";
-import { SOL_PRICE_KEY, SPL_DECIMAL } from "@/config";
-import { AgentsLandEventListener } from "@/program/logListeners/AgentsLandEventListener";
-import { ResultType } from "@/program/logListeners/types";
-import { commitmentLevel, endpoint } from "@/program/web3";
-import { CandlePrice } from "@/utils/types";
-import { calculateTokenPrice } from "@/utils/util";
-import { Connection } from "@solana/web3.js";
-import { io, Socket } from "socket.io-client";
-import { queryClient } from "../../provider/providers";
-import { RawChart } from "./../../utils/types";
-
-let socket: Socket | undefined = undefined;
-let initialTimeStamp: number = new Date().getTime();
-let lastUpdated = 0;
-
-if (typeof window !== "undefined") {
-  socket = io(import.meta.env.VITE_BACKEND_URL!);
-}
+} from '@/charting_library';
+import { CandlePrice } from '@/utils/types';
 
 type SubscriptionItem = {
   subscriberUID: string;
@@ -35,15 +18,6 @@ type SubscriptionItem = {
 };
 
 export const channelToSubscription = new Map<string, SubscriptionItem>();
-
-const connection = new Connection(endpoint, {
-  commitment: commitmentLevel,
-  wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-});
-
-const listener = new AgentsLandEventListener(connection);
-
-const solPrice = localStorage.getItem(SOL_PRICE_KEY);
 
 // barTime is millisec, resolution is mins
 function getNextBarTime(barTime: number, resolution: number) {
@@ -82,7 +56,7 @@ export function subscribeOnStream(
   channelToSubscription.set(pairIndex, subscriptionItem);
 
   console.log(
-    "[subscribeBars]: Subscribe to streaming. Channel:",
+    '[subscribeBars]: Subscribe to streaming. Channel:',
     pairIndex,
     subscriptionItem
   );
@@ -102,16 +76,13 @@ export function unsubscribeFromStream(subscriberUID: string) {
     );
 
     if (handlerIndex !== -1) {
-      // Remove from handlers
       subscriptionItem.handlers.splice(handlerIndex, 1);
 
       if (subscriptionItem.handlers.length === 0) {
-        // Unsubscribe from the channel if it was the last handler
         console.log(
-          "[unsubscribeBars]: Unsubscribe from streaming. Channel:",
+          '[unsubscribeBars]: Unsubscribe from streaming. Channel:',
           pairIndex
         );
-        // socket.emit("SubRemove", { subs: [channelString] });
         channelToSubscription.delete(pairIndex);
         break;
       }

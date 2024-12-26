@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pumpfun.json`.
  */
 export type Pumpfun = {
-  address: '69dh5zQEhCMYYpnTvy8tBxZG5PFGsZTBU9ntLxd965Po';
+  address: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM';
   metadata: {
     name: 'pumpfun';
     version: '0.1.0';
@@ -36,6 +36,652 @@ export type Pumpfun = {
         }
       ];
       args: [];
+    },
+    {
+      name: 'buyParty';
+      discriminator: [180, 83, 103, 56, 18, 11, 78, 3];
+      accounts: [
+        {
+          name: 'globalConfig';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'stakingProgram';
+          address: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u';
+        },
+        {
+          name: 'teamWallet';
+          writable: true;
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'partyStatus';
+          docs: ['Status of the claim.'];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 108, 97, 105, 109, 95, 115, 116, 97, 116, 117, 115];
+              },
+              {
+                kind: 'account';
+                path: 'bondingCurve';
+              },
+              {
+                kind: 'account';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'globalVault';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              }
+            ];
+          };
+        },
+        {
+          name: 'tokenMint';
+        },
+        {
+          name: 'globalAta';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'globalVault';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ];
+            };
+          };
+        },
+        {
+          name: 'userAta';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ];
+            };
+          };
+        },
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        }
+      ];
+      args: [
+        {
+          name: 'amount';
+          type: 'u64';
+        },
+        {
+          name: 'minimumReceiveAmount';
+          type: 'u64';
+        }
+      ];
+      returns: 'u64';
+    },
+    {
+      name: 'claim';
+      discriminator: [62, 198, 214, 193, 213, 159, 108, 210];
+      accounts: [
+        {
+          name: 'globalConfig';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'teamWallet';
+          writable: true;
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'distributor';
+          docs: ['The [MerkleDistributor].'];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  109,
+                  101,
+                  114,
+                  107,
+                  108,
+                  101,
+                  95,
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'bondingCurve';
+              }
+            ];
+          };
+        },
+        {
+          name: 'claimStatus';
+          docs: ['Status of the claim.'];
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 108, 97, 105, 109, 95, 115, 116, 97, 116, 117, 115];
+              },
+              {
+                kind: 'account';
+                path: 'bondingCurve';
+              },
+              {
+                kind: 'arg';
+                path: 'index';
+              }
+            ];
+          };
+        },
+        {
+          name: 'globalVault';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [103, 108, 111, 98, 97, 108];
+              }
+            ];
+          };
+        },
+        {
+          name: 'tokenMint';
+        },
+        {
+          name: 'globalAta';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'globalVault';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ];
+            };
+          };
+        },
+        {
+          name: 'userAta';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'account';
+                path: 'user';
+              },
+              {
+                kind: 'const';
+                value: [
+                  6,
+                  221,
+                  246,
+                  225,
+                  215,
+                  101,
+                  161,
+                  147,
+                  217,
+                  203,
+                  225,
+                  70,
+                  206,
+                  235,
+                  121,
+                  172,
+                  28,
+                  180,
+                  133,
+                  237,
+                  95,
+                  91,
+                  55,
+                  145,
+                  58,
+                  140,
+                  245,
+                  133,
+                  126,
+                  255,
+                  0,
+                  169
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+            program: {
+              kind: 'const';
+              value: [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ];
+            };
+          };
+        },
+        {
+          name: 'user';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        },
+        {
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
+        }
+      ];
+      args: [
+        {
+          name: 'index';
+          type: 'u64';
+        },
+        {
+          name: 'swapAmount';
+          type: 'u64';
+        },
+        {
+          name: 'minimumReceiveAmount';
+          type: 'u64';
+        },
+        {
+          name: 'maxReceiveAmount';
+          type: 'u64';
+        },
+        {
+          name: 'proof';
+          type: {
+            vec: {
+              array: ['u8', 32];
+            };
+          };
+        }
+      ];
+      returns: 'u64';
     },
     {
       name: 'configure';
@@ -515,6 +1161,119 @@ export type Pumpfun = {
       ];
     },
     {
+      name: 'registerWhitelist';
+      discriminator: [188, 210, 164, 38, 220, 170, 155, 148];
+      accounts: [
+        {
+          name: 'relayer';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'globalConfig';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'distributor';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  109,
+                  101,
+                  114,
+                  107,
+                  108,
+                  101,
+                  95,
+                  100,
+                  105,
+                  115,
+                  116,
+                  114,
+                  105,
+                  98,
+                  117,
+                  116,
+                  111,
+                  114
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'bondingCurve';
+              }
+            ];
+          };
+        },
+        {
+          name: 'tokenMint';
+          docs: ['The mint to distribute.'];
+        },
+        {
+          name: 'systemProgram';
+          docs: ['The [System] program.'];
+          address: '11111111111111111111111111111111';
+        }
+      ];
+      args: [
+        {
+          name: 'root';
+          type: {
+            array: ['u8', 32];
+          };
+        },
+        {
+          name: 'maxTotalClaim';
+          type: 'u64';
+        },
+        {
+          name: 'maxNumNodes';
+          type: 'u64';
+        }
+      ];
+    },
+    {
       name: 'simulateSwap';
       discriminator: [91, 71, 52, 125, 156, 83, 182, 136];
       accounts: [
@@ -592,96 +1351,6 @@ export type Pumpfun = {
         {
           name: 'teamWallet';
           writable: true;
-        },
-        {
-          name: 'teamWalletAta';
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: 'account';
-                path: 'teamWallet';
-              },
-              {
-                kind: 'const';
-                value: [
-                  6,
-                  221,
-                  246,
-                  225,
-                  215,
-                  101,
-                  161,
-                  147,
-                  217,
-                  203,
-                  225,
-                  70,
-                  206,
-                  235,
-                  121,
-                  172,
-                  28,
-                  180,
-                  133,
-                  237,
-                  95,
-                  91,
-                  55,
-                  145,
-                  58,
-                  140,
-                  245,
-                  133,
-                  126,
-                  255,
-                  0,
-                  169
-                ];
-              },
-              {
-                kind: 'account';
-                path: 'tokenMint';
-              }
-            ];
-            program: {
-              kind: 'const';
-              value: [
-                140,
-                151,
-                37,
-                143,
-                78,
-                36,
-                137,
-                241,
-                187,
-                61,
-                16,
-                41,
-                20,
-                142,
-                13,
-                131,
-                11,
-                90,
-                19,
-                153,
-                218,
-                255,
-                16,
-                132,
-                4,
-                142,
-                123,
-                216,
-                219,
-                233,
-                248,
-                89
-              ];
-            };
-          };
         },
         {
           name: 'bondingCurve';
@@ -941,6 +1610,63 @@ export type Pumpfun = {
         }
       ];
       returns: 'u64';
+    },
+    {
+      name: 'triggerLaunch';
+      discriminator: [70, 248, 90, 27, 138, 176, 70, 13];
+      accounts: [
+        {
+          name: 'migrator';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'globalConfig';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              }
+            ];
+          };
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'tokenMint';
+        }
+      ];
+      args: [];
     },
     {
       name: 'withdraw';
@@ -1210,8 +1936,20 @@ export type Pumpfun = {
       discriminator: [23, 183, 248, 55, 96, 216, 172, 96];
     },
     {
+      name: 'claimStatus';
+      discriminator: [22, 183, 249, 157, 247, 95, 150, 96];
+    },
+    {
       name: 'config';
       discriminator: [155, 12, 170, 224, 30, 250, 204, 130];
+    },
+    {
+      name: 'merkleDistributor';
+      discriminator: [77, 119, 139, 70, 84, 247, 12, 26];
+    },
+    {
+      name: 'partyStatus';
+      discriminator: [132, 54, 20, 62, 213, 204, 35, 22];
     }
   ];
   events: [
@@ -1285,23 +2023,58 @@ export type Pumpfun = {
     },
     {
       code: 6010;
+      name: 'alreadyBoughtAtPartyRound';
+      msg: 'alreadyBoughtAtPartyRound';
+    },
+    {
+      code: 6011;
       name: 'poolNotOpen';
       msg: 'The pool is not open.';
     },
     {
-      code: 6011;
+      code: 6012;
+      name: 'poolOpening';
+      msg: 'The pool is opening.';
+    },
+    {
+      code: 6013;
       name: 'mintAuthorityEnabled';
       msg: 'Mint authority should be revoked';
     },
     {
-      code: 6012;
+      code: 6014;
       name: 'freezeAuthorityEnabled';
       msg: 'Freeze authority should be revoked';
     },
     {
-      code: 6013;
+      code: 6015;
       name: 'returnAmountTooSmall';
       msg: 'Return amount is too small compared to the minimum received amount';
+    },
+    {
+      code: 6016;
+      name: 'dropAlreadyClaimed';
+      msg: 'Drop already claimed.';
+    },
+    {
+      code: 6017;
+      name: 'invalidProof';
+      msg: 'Invalid Merkle proof.';
+    },
+    {
+      code: 6018;
+      name: 'returnAmountTooLarge';
+      msg: 'Return amount is too larger compared to the maximum received amount';
+    },
+    {
+      code: 6019;
+      name: 'swapAmountTooLarge';
+      msg: 'Swap amount is too large';
+    },
+    {
+      code: 6020;
+      name: 'invalidStakingToken';
+      msg: 'Invalid staking token';
     }
   ];
   types: [
@@ -1317,10 +2090,6 @@ export type Pumpfun = {
           {
             name: 'creator';
             type: 'pubkey';
-          },
-          {
-            name: 'tradingTime';
-            type: 'u64';
           },
           {
             name: 'initLamport';
@@ -1341,6 +2110,47 @@ export type Pumpfun = {
           {
             name: 'isCompleted';
             type: 'bool';
+          },
+          {
+            name: 'partyStart';
+            type: 'u64';
+          },
+          {
+            name: 'publicStart';
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'claimStatus';
+      docs: [
+        'Holds whether or not a claimant has claimed tokens.',
+        '',
+        'TODO: this is probably better stored as the node that was verified.'
+      ];
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'isClaimed';
+            docs: ['If true, the tokens have been claimed.'];
+            type: 'bool';
+          },
+          {
+            name: 'claimant';
+            docs: ['Authority that claimed the tokens.'];
+            type: 'pubkey';
+          },
+          {
+            name: 'claimedAt';
+            docs: ['When the tokens were claimed.'];
+            type: 'i64';
+          },
+          {
+            name: 'amount';
+            docs: ['Amount of tokens claimed.'];
+            type: 'u64';
           }
         ];
       };
@@ -1427,6 +2237,10 @@ export type Pumpfun = {
             type: 'u8';
           },
           {
+            name: 'whitelistRoundPeriod';
+            type: 'u64';
+          },
+          {
             name: 'waitingPeriod';
             type: 'u64';
           },
@@ -1445,6 +2259,22 @@ export type Pumpfun = {
           {
             name: 'stakingFee';
             type: 'f64';
+          },
+          {
+            name: 'stakingProgram';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakingToken';
+            type: 'pubkey';
+          },
+          {
+            name: 'maxTokenBuyInParty';
+            type: 'u64';
+          },
+          {
+            name: 'maxSolBuyInPublic';
+            type: 'u64';
           }
         ];
       };
@@ -1484,6 +2314,64 @@ export type Pumpfun = {
           },
           {
             name: 'reserveToken';
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'merkleDistributor';
+      docs: ['State for the account which distributes tokens.'];
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            docs: ['Bump seed.'];
+            type: 'u8';
+          },
+          {
+            name: 'root';
+            docs: ['The 256-bit merkle root.'];
+            type: {
+              array: ['u8', 32];
+            };
+          },
+          {
+            name: 'maxTotalClaim';
+            docs: [
+              'Maximum number of tokens that can ever be claimed from this [MerkleDistributor].'
+            ];
+            type: 'u64';
+          },
+          {
+            name: 'maxNumNodes';
+            docs: [
+              'Maximum number of nodes that can ever be claimed from this [MerkleDistributor].'
+            ];
+            type: 'u64';
+          },
+          {
+            name: 'totalAmountClaimed';
+            docs: ['Total amount of tokens that have been claimed.'];
+            type: 'u64';
+          },
+          {
+            name: 'numNodesClaimed';
+            docs: ['Number of nodes that have been claimed.'];
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'partyStatus';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'totalAmount';
+            docs: ['Amount of tokens claimed.'];
             type: 'u64';
           }
         ];

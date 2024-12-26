@@ -1,19 +1,18 @@
-import UserImg from "@/assets/images/userAgentDefault.svg";
-import UserContext from "@/context/UserContext";
-import { userInfo } from "@/utils/types";
-import { reduceString, updateUser } from "@/utils/util";
-import React, { ChangeEvent, useContext, useRef, useState } from "react";
-import { errorAlert, successAlert } from "../others/ToastGroup";
-import { uploadImage } from "@/utils/fileUpload";
-import { useSocket } from "@/contexts/SocketContext";
-import { Spinner } from "../loadings/Spinner";
+import UserImg from '@/assets/images/userAgentDefault.svg';
+import UserContext from '@/context/UserContext';
+import { uploadImage } from '@/utils/fileUpload';
+import { userInfo } from '@/utils/types';
+import { reduceString, updateUser } from '@/utils/util';
+import React, { ChangeEvent, useContext, useRef, useState } from 'react';
+import { Spinner } from '../loadings/Spinner';
+import { errorAlert, successAlert } from '../others/ToastGroup';
 
 interface ModalProps {
   data: userInfo;
 }
 
 const Modal: React.FC<ModalProps> = ({ data }) => {
-  const { isLoading, setIsLoading } = useSocket();
+  const [isLoading, setIsLoading] = useState(false);
   const { setProfileEditModal, setImageUrl, setUser, user } =
     useContext(UserContext);
   const [index, setIndex] = useState<userInfo>(data);
@@ -33,12 +32,12 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file.");
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
         return;
       }
       const url = URL.createObjectURL(file);
-      setFileName(file.name || ""); // Ensure it's always a string
+      setFileName(file.name || ''); // Ensure it's always a string
       setImagePreview(url); // URL.createObjectURL always returns a string
     }
   };
@@ -46,20 +45,20 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
   const sendUpdate = async () => {
     try {
       setIsLoading(true);
-      let uploadedUrl: string = index.avatar || ""; // Ensure it starts as a string
+      let uploadedUrl: string = index.avatar || ''; // Ensure it starts as a string
 
       if (imagePreview && imagePreview !== index.avatar) {
         const uploadedImageUrl = await uploadImage(imagePreview);
 
         if (!uploadedImageUrl) {
           setIsLoading(false);
-          errorAlert("Image upload failed.");
+          errorAlert('Image upload failed.');
           return;
         }
-        uploadedUrl = uploadedImageUrl || ""; // If uploadImage returns false, fallback to an empty string
+        uploadedUrl = uploadedImageUrl || ''; // If uploadImage returns false, fallback to an empty string
       }
 
-      console.log("data: ", data);
+      console.log('data: ', data);
       const { name, wallet, isLedger, signature } = index;
 
       const updatedUser = {
@@ -73,25 +72,25 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
       const result = await updateUser(index._id, updatedUser);
 
       if (result.error) {
-        errorAlert("Failed to save the data.");
+        errorAlert('Failed to save the data.');
       } else {
-        successAlert("Successfully updated.");
+        successAlert('Successfully updated.');
         setUser({ ...index, ...updatedUser });
         setProfileEditModal(false);
       }
       setIsLoading(false);
     } catch (error) {
       setIsLoading(false);
-      errorAlert("An error occurred while updating your profile.");
+      errorAlert('An error occurred while updating your profile.');
     }
   };
 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      successAlert("Copied to clipboard!");
+      successAlert('Copied to clipboard!');
     } catch (err) {
-      errorAlert("Failed to copy!");
+      errorAlert('Failed to copy!');
     }
   };
 
@@ -142,7 +141,7 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
               )}
               <div className="flex items-center ml-2">
                 <p className="mr-2 text-[14px] text-[#9192A0]">
-                  {reduceString(index?.wallet || "", 4, 4)}
+                  {reduceString(index?.wallet || '', 4, 4)}
                 </p>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -199,7 +198,7 @@ const Modal: React.FC<ModalProps> = ({ data }) => {
               className="w-full px-4 h-12 rounded-lg outline-none bg-transparent border-[1px] border-[#585A6B]"
               type="text"
               id="name"
-              value={index.name || ""}
+              value={index.name || ''}
               onChange={handleChange}
             />
           </div>

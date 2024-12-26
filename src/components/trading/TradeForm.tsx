@@ -19,6 +19,7 @@ interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
   curveLimit: number;
+  isFromRpc: boolean;
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
@@ -27,6 +28,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   coin,
   progress,
   curveLimit,
+  isFromRpc,
 }) => {
   const [openSlippage, setOpenSlippage] = useState<boolean>(false);
   const [slippage, setSlippage] = useState<string>('0.3');
@@ -45,7 +47,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     { id: '0.5', price: '0.5 SOL' },
     { id: '1', price: '1 SOL' },
   ];
-  const isListedOnRay = !!coin.raydiumPoolAddr; // Number(progress) >= 100 &&
+  const isCanBuyOnRaydium = isFromRpc && coin.listed;
+  const isListedOnRay = !!coin.raydiumPoolAddr || isCanBuyOnRaydium; // Number(progress) >= 100 && ||
   const isDisableSwapOnAgent =
     Number(progress) >= 100 &&
     !coin.raydiumPoolAddr &&
@@ -79,7 +82,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   useEffect(() => {
     const isSimulateWhenExceedCurve =
       isBuy === 0 && toBN(sol).isGreaterThanOrEqualTo(fmtCurve);
-    if (sol && !isNegativeAmount) {
+    if (sol && !isNegativeAmount && coin.token) {
       (async () => {
         try {
           setLoadingEst(true);
@@ -130,7 +133,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     } else {
       setSimulateReceive(() => '');
     }
-  }, [sol]); // curveLimit
+  }, [sol, coin]); // curveLimit
 
   const getBalance = async () => {
     if (!wallet.publicKey) {
@@ -160,7 +163,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   useEffect(() => {
     getBalance();
-  }, [coin?._id, wallet.publicKey]);
+  }, [coin?.token, wallet.publicKey]);
 
   const handlTrade = async () => {
     try {
