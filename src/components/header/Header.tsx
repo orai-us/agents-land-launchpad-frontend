@@ -1,17 +1,17 @@
-import LogoFullIcon from '@/assets/icons/logo.svg';
-import UserContext from '@/context/UserContext';
-import { getSolPriceInUSD } from '@/utils/util';
-import { FC, useContext, useEffect, useState } from 'react';
-import { Link, useLocation } from 'wouter';
-import { ConnectButton } from '../buttons/ConnectButton';
-import HowItWorkModal from '../modals/HowItWork';
-import Banner from './Banner';
-import MarqueeToken from './MarqueeToken';
-import { ALL_CONFIGS, SOL_PRICE_KEY } from '@/config';
-import { Web3SolanaProgramInteraction } from '@/program/web3';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useConfigActions } from '@/zustand-store/config/selector';
-import { web3FungibleStake } from '@/program/web3FungStake';
+import LogoFullIcon from "@/assets/icons/logo.svg";
+import UserContext from "@/context/UserContext";
+import { getSolPriceInUSD } from "@/utils/util";
+import { FC, useContext, useEffect, useState } from "react";
+import { Link, useLocation } from "wouter";
+import { ConnectButton } from "../buttons/ConnectButton";
+import HowItWorkModal from "../modals/HowItWork";
+import Banner from "./Banner";
+import MarqueeToken from "./MarqueeToken";
+import { ALL_CONFIGS, SOL_PRICE_KEY } from "@/config";
+import { Web3SolanaProgramInteraction } from "@/program/web3";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useConfigActions } from "@/zustand-store/config/selector";
+import { web3FungibleStake } from "@/program/web3FungStake";
 
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
@@ -21,7 +21,7 @@ const Header: FC = () => {
   const { handleSetBondingCurveConfig, handleSetStakeConfig } =
     useConfigActions();
   const [pathname] = useLocation();
-  const { solPrice, setSolPrice } = useContext(UserContext);
+  const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
 
@@ -29,11 +29,12 @@ const Header: FC = () => {
     (async () => {
       const config = await web3Solana.getConfigCurve(wallet);
       if (config) {
-        console.log('config', config);
+        console.log("config", config);
         handleSetBondingCurveConfig(config);
       }
-
+      setTimeout(() => setRpcUrl("1111"), 1000);
       const configStake = await web3FungStake.getStakeConfig(wallet);
+
       if (configStake) {
         handleSetStakeConfig(configStake);
       }
@@ -47,7 +48,7 @@ const Header: FC = () => {
         setSolPrice(price);
         localStorage.setItem(SOL_PRICE_KEY, price);
       } catch (error) {
-        console.log('error sol price', error);
+        console.log("error sol price", error);
       }
     };
 
@@ -62,22 +63,22 @@ const Header: FC = () => {
 
   const menu = [
     {
-      text: 'Launch',
-      link: '/create-coin',
+      text: "Launch",
+      link: "/create-coin",
     },
     {
-      text: 'How it works?',
+      text: "How it works?",
       onClick: () => setShowStepWork(true),
     },
     {
-      text: 'Strongbox Vaults',
-      link: '/vaults',
+      text: "Strongbox Vaults",
+      link: "/vaults",
     },
     {
       onClick: () => {
-        window.open('https://docs.agents.land');
+        window.open("https://docs.agents.land");
       },
-      text: 'Docs',
+      text: "Docs",
     },
   ];
 
@@ -149,8 +150,8 @@ const Header: FC = () => {
 
       <div
         className={
-          'fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5' +
-          ` ${isOpenMobileMenu ? '' : 'translate-x-[-100%]'}`
+          "fixed inset-0 z-50 flex flex-col bg-[#13141D] transition-all w-screen pb-5" +
+          ` ${isOpenMobileMenu ? "" : "translate-x-[-100%]"}`
         }
       >
         <div className="flex h-[72px] items-center justify-between border-b border-[#1A1C28] px-2">
@@ -203,7 +204,7 @@ const Header: FC = () => {
           <ConnectButton />
         </div>
       </div>
-      {pathname === '/' && <Banner />}
+      {pathname === "/" && <Banner />}
     </>
   );
 };
