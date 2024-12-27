@@ -8,6 +8,7 @@ import { FC, useContext, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'wouter';
 import FilterListToken, { SORT_LIST } from './FilterListToken';
 import ListToken, { KeyByStatus, STATUS_TOKEN, TokenTab } from './ListToken';
+import { useGetConfigState } from '@/zustand-store/config/selector';
 
 const TAB_QUERY = 'tab';
 const SEARCH_QUERY = 'keyword';
@@ -17,6 +18,7 @@ const HomePage: FC = () => {
   const wallet = useWallet();
   const { isLoading, setIsLoading, isCreated, solPrice, setSolPrice } =
     useContext(UserContext);
+  const configSnapshot = useGetConfigState('configSnapshot');
   const [changeTabLoading, setChangeTabLoading] = useState(false);
   const [fromRpc, setFromRpc] = useState(false);
   const [token, setToken] = useState('');
@@ -78,7 +80,7 @@ const HomePage: FC = () => {
       });
 
       if (isError) {
-        const res = await web3Solana.getListTokenFromContract(wallet);
+        const res = await web3Solana.getListTokenFromContract();
 
         coins = res.coins || [];
         total = res.total;

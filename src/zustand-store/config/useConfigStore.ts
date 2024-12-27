@@ -27,6 +27,10 @@ export type ConfigState = {
     maxTokenBuyInParty: BN;
     maxSolBuyInPublic: BN;
   };
+  configSnapshot: {
+    token: string;
+    metadata: any;
+  }[];
   listAllowAddress: string[];
   stakeConfig: {
     bump: number[];
@@ -48,6 +52,7 @@ export type ConfigStateAction = {
     bondingCurveConfig: ConfigState['bondingCurveConfig']
   ) => void;
   handleSetStakeConfig: (stakeConfig: ConfigState['stakeConfig']) => void;
+  handleSetSnapshotConfig: (stakeConfig: ConfigState['configSnapshot']) => void;
   resetState: () => void;
 };
 
@@ -55,6 +60,7 @@ const initialState: ConfigState = {
   bondingCurveConfig: null,
   listAllowAddress: [],
   stakeConfig: null,
+  configSnapshot: [],
 };
 
 export type DepositStoreType = ConfigState & { actions: ConfigStateAction };
@@ -65,6 +71,7 @@ const useDetectionStore = create<DepositStoreType>()((set) => ({
 
   //Actions
   actions: {
+    handleSetSnapshotConfig: (configSnapshot) => set({ configSnapshot }),
     handleSetStakeConfig: (stakeConfig) => set({ stakeConfig }),
     handleSetListAllowAddress: (listAllowAddress) => set({ listAllowAddress }),
     handleSetBondingCurveConfig: (bondingCurveConfig) =>

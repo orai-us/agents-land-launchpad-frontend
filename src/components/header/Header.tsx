@@ -18,10 +18,12 @@ import { web3FungibleStake } from '@/program/web3FungStake';
 import { PublicKey } from '@solana/web3.js';
 import { getProvider } from '@coral-xyz/anchor';
 import SettingModal from '../modals/Setting';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 import {
   useCoinActions,
   useGetCoinInfoState,
 } from '@/zustand-store/coin/selector';
+import { SimpleSnapshotContractQueryClient as AgentsLandSnapshotContractQueryClient } from '@/sdk/oraiAgentSdk';
 
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
@@ -36,8 +38,11 @@ const getProviderApp = () => {
 };
 
 const Header: FC = () => {
-  const { handleSetBondingCurveConfig, handleSetStakeConfig } =
-    useConfigActions();
+  const {
+    handleSetBondingCurveConfig,
+    handleSetStakeConfig,
+    handleSetSnapshotConfig,
+  } = useConfigActions();
   const { handleSetStakeConfig: handleStrongboxConfig } = useCoinActions();
   const bondingCurveConfig = useGetConfigState('bondingCurveConfig');
   const stakeConfig = useGetConfigState('stakeConfig');
@@ -47,6 +52,39 @@ const Header: FC = () => {
   const [showStepWork, setShowStepWork] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
   const provider = getProviderApp();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const oraiEndpoint = 'https://rpc.orai.io';
+        const whitelistContractAddress =
+          'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
+        const cwClient = await CosmWasmClient.connect(oraiEndpoint);
+        const contract = new AgentsLandSnapshotContractQueryClient(
+          cwClient,
+          whitelistContractAddress
+        );
+
+        // query list token metadata
+        /// return:
+        /// - token: token addr
+        /// - metadata: base64 encode of token metadata
+        const dataSnap = await contract.tokensMetadata();
+
+        const res = (dataSnap || []).map((e) => {
+          return {
+            ...e,
+            metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+          };
+        });
+        console.log('res', res);
+
+        handleSetSnapshotConfig(res);
+      } catch (error) {
+        console.log('error get snapshot', error);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {

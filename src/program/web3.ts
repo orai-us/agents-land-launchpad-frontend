@@ -1,3 +1,4 @@
+import { SimpleSnapshotContractQueryClient as AgentsLandSnapshotContractQueryClient } from '@/sdk/oraiAgentSdk';
 import { errorAlert } from '@/components/others/ToastGroup';
 import {
   FUNGIBLE_STAKE_CONFIG_SEED,
@@ -44,6 +45,8 @@ import { Pumpfun } from './pumpfun';
 import idl from './pumpfun.json';
 import { SEED_BONDING_CURVE, SEED_CONFIG } from './seed';
 import { handleTransaction } from './utils';
+import { ConfigState } from '@/zustand-store/config/useConfigStore';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 export const commitmentLevel = 'confirmed';
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -858,8 +861,42 @@ export class Web3SolanaProgramInteraction {
     }
   };
 
-  getListTokenFromContract = async (wallet) => {
+  getSnapShotAgent = async () => {
     try {
+      const oraiEndpoint = 'https://rpc.orai.io';
+      const whitelistContractAddress =
+        'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
+      const cwClient = await CosmWasmClient.connect(oraiEndpoint);
+      const contract = new AgentsLandSnapshotContractQueryClient(
+        cwClient,
+        whitelistContractAddress
+      );
+
+      // query list token metadata
+      /// return:
+      /// - token: token addr
+      /// - metadata: base64 encode of token metadata
+      const dataSnap = await contract.tokensMetadata();
+
+      const res = (dataSnap || []).map((e) => {
+        return {
+          ...e,
+          metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+        };
+      });
+
+      return res || [];
+    } catch (error) {
+      console.log('error get snapshot', error);
+      return [];
+    }
+  };
+
+  // allowedAddresses: ConfigState['configSnapshot']
+  getListTokenFromContract = async () => {
+    try {
+      const allowedAddresses = await this.getSnapShotAgent();
+
       if (!this.connection) {
         console.log('Warning: Connection not connected');
         return;
@@ -893,6 +930,15 @@ export class Web3SolanaProgramInteraction {
           const detail = program.coder.accounts.decode<
             anchor.IdlAccounts<Pumpfun>['bondingCurve']
           >('bondingCurve', item.account.data as Buffer);
+
+          if (
+            allowedAddresses.length > 0 &&
+            !allowedAddresses
+              .map((e) => e.token)
+              .includes(detail.tokenMint.toBase58())
+          ) {
+            return;
+          }
 
           const metadata = await metaplex
             .nfts()
