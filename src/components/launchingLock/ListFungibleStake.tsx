@@ -6,11 +6,12 @@ import useGetStakedByUser from './hooks/useGetStakeByUser';
 import { toBN, toPublicKey } from '@/utils/util';
 import LockingItem from './LockingItem';
 import { formatNumberKMB } from '@/utils/format';
-import { SPL_DECIMAL } from '@/config';
+import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import {
   useCoinActions,
   useGetCoinInfoState,
 } from '@/zustand-store/coin/selector';
+import { BN } from '@coral-xyz/anchor';
 
 const ListFungibleStake: FC<{}> = () => {
   const coin = useGetCoinInfoState('coin');
@@ -20,10 +21,14 @@ const ListFungibleStake: FC<{}> = () => {
     loading: loadingList,
     stakeInfo,
     totalLocked,
-  } = useGetStakedByUser(coin.token, refreshCheck);
+  } = useGetStakedByUser(
+    ALL_CONFIGS.STAKE_CURRENCY_MINT,
+    coin.token,
+    refreshCheck
+  );
 
   const isShowLocked =
-    stakeInfo && toBN(stakeInfo['stakeAmount'] || 0).isGreaterThan(0);
+    stakeInfo && (stakeInfo['stakeAmount'] || new BN(0)).gtn(0);
 
   const Loading = () => (
     <div className="flex h-[120px] items-start justify-center bg-tizz-background">

@@ -80,6 +80,8 @@ export interface coinInfo {
   raydiumPoolAddr?: string;
   bondingCurve?: boolean;
   tradingTime?: Date;
+  partyTradingTime?: Date;
+  publicTradingTime?: Date;
 }
 export interface createCoinInfo {
   name: string;
@@ -177,4 +179,8 @@ export interface Data {
   solBalance: number | null;
   tokenBuyTx: string | null;
   tokenSellTx: string | null;
+}
+
+export interface StakeInfo {
+  
 }

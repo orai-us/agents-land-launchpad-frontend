@@ -1,5 +1,5 @@
 {
-  "address": "69dh5zQEhCMYYpnTvy8tBxZG5PFGsZTBU9ntLxd965Po",
+  "address": "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
   "metadata": {
     "name": "pumpfun",
     "version": "0.1.0",
@@ -47,6 +47,17 @@
           }
         },
         {
+          "name": "pause",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 97, 117, 115, 101]
+              }
+            ]
+          }
+        },
+        {
           "name": "staking_program",
           "address": "CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u"
         },
@@ -81,7 +92,7 @@
               {
                 "kind": "const",
                 "value": [
-                  99, 108, 97, 105, 109, 95, 115, 116, 97, 116, 117, 115
+                  112, 97, 114, 116, 121, 95, 115, 116, 97, 116, 117, 115
                 ]
               },
               {
@@ -431,6 +442,18 @@
           }
         },
         {
+          "name": "pause",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 97, 117, 115, 101]
+              }
+            ]
+          }
+        },
+        {
           "name": "global_vault",
           "writable": true,
           "pda": {
@@ -701,6 +724,46 @@
       ]
     },
     {
+      "name": "pause_contract",
+      "discriminator": [210, 36, 5, 85, 177, 65, 35, 89],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [99, 111, 110, 102, 105, 103]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pause",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 97, 117, 115, 101]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "status",
+          "type": "bool"
+        }
+      ]
+    },
+    {
       "name": "register_whitelist",
       "discriminator": [188, 210, 164, 38, 220, 170, 155, 148],
       "accounts": [
@@ -717,6 +780,17 @@
               {
                 "kind": "const",
                 "value": [99, 111, 110, 102, 105, 103]
+              }
+            ]
+          }
+        },
+        {
+          "name": "pause",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 97, 117, 115, 101]
               }
             ]
           }
@@ -849,6 +923,17 @@
           }
         },
         {
+          "name": "pause",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [112, 97, 117, 115, 101]
+              }
+            ]
+          }
+        },
+        {
           "name": "team_wallet",
           "writable": true
         },
@@ -947,6 +1032,26 @@
                 219, 233, 248, 89
               ]
             }
+          }
+        },
+        {
+          "name": "user_info",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [117, 115, 101, 114, 95, 105, 110, 102, 111]
+              },
+              {
+                "kind": "account",
+                "path": "bonding_curve"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
           }
         },
         {
@@ -1182,6 +1287,14 @@
     {
       "name": "PartyStatus",
       "discriminator": [132, 54, 20, 62, 213, 204, 35, 22]
+    },
+    {
+      "name": "Pause",
+      "discriminator": [168, 183, 252, 225, 28, 17, 138, 174]
+    },
+    {
+      "name": "UserInfo",
+      "discriminator": [83, 134, 200, 56, 144, 56, 10, 62]
     }
   ],
   "events": [
@@ -1196,6 +1309,10 @@
     {
       "name": "SwapEvent",
       "discriminator": [64, 198, 205, 232, 38, 8, 113, 226]
+    },
+    {
+      "name": "TriggerLaunchEvent",
+      "discriminator": [149, 6, 64, 217, 221, 50, 68, 145]
     },
     {
       "name": "WithdrawEvent",
@@ -1302,6 +1419,21 @@
       "code": 6019,
       "name": "SwapAmountTooLarge",
       "msg": "Swap amount is too large"
+    },
+    {
+      "code": 6020,
+      "name": "CannotBuy",
+      "msg": "Cannot buy"
+    },
+    {
+      "code": 6021,
+      "name": "InvalidStakingToken",
+      "msg": "Invalid staking token"
+    },
+    {
+      "code": 6022,
+      "name": "Paused",
+      "msg": "Paused"
     }
   ],
   "types": [
@@ -1345,6 +1477,10 @@
           {
             "name": "public_start",
             "type": "u64"
+          },
+          {
+            "name": "curve_creation_date",
+            "type": "i64"
           }
         ]
       }
@@ -1492,12 +1628,20 @@
             "type": "pubkey"
           },
           {
+            "name": "staking_token",
+            "type": "pubkey"
+          },
+          {
             "name": "max_token_buy_in_party",
             "type": "u64"
           },
           {
             "name": "max_sol_buy_in_public",
             "type": "u64"
+          },
+          {
+            "name": "tx_buy_limit",
+            "type": "u16"
           }
         ]
       }
@@ -1601,6 +1745,18 @@
       }
     },
     {
+      "name": "Pause",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "paused",
+            "type": "bool"
+          }
+        ]
+      }
+    },
+    {
       "name": "SwapEvent",
       "type": {
         "kind": "struct",
@@ -1639,6 +1795,39 @@
           },
           {
             "name": "reserve_token",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TriggerLaunchEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "party_start",
+            "type": "u64"
+          },
+          {
+            "name": "public_start",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "UserInfo",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "last_buy",
+            "docs": ["last buy"],
             "type": "u64"
           }
         ]

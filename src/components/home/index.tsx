@@ -223,12 +223,10 @@ const HomePage: FC = () => {
 
             let dateNeedToFilter = true;
             if (fromRpc) {
-              console.log('fromRpc', fromRpc);
-              dateNeedToFilter =
-                e.tradingTime &&
-                new Date(e.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
+              // dateNeedToFilter =
+              //   e.tradingTime &&
+              //   new Date(e.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
             }
-
             return (
               !!e.metadata?.agentAddress && dateNeedToFilter && !isBlackList
             );

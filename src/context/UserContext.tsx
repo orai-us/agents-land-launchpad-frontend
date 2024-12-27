@@ -29,8 +29,7 @@ export const UserContext = createContext<UserContextValue | undefined>({
   setProfileEditModal: (value: boolean) => {},
   postReplyModal: false,
   setPostReplyModal: (value: boolean) => {},
-  rpcUrl:
-    "https://mainnet.helius-rpc.com/?api-key=3b28a0fc-0ef6-48ef-b55c-c55ae74cb6a6",
+  rpcUrl: import.meta.env.VITE_SOLANA_RPC,
   setRpcUrl: (value: string) => {},
 });
 

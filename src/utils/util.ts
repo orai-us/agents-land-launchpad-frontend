@@ -482,3 +482,24 @@ export const calculateMarketCap = (
   const tokenReservesNum = fromBig(tokenReserves, decimals);
   return tokenReservesNum * tokenPrice;
 };
+
+export function formatTimePeriod(seconds: number) {
+  const units = [
+      { label: "second", value: 1 },
+      { label: "minute", value: 60 },
+      { label: "hour", value: 3600 },
+      { label: "day", value: 86400 },
+      { label: "week", value: 604800 },
+      { label: "month", value: 2629800 }, // Approximate (30.44 days)
+      { label: "year", value: 31557600 }  // Approximate (365.25 days)
+  ];
+
+  for (let i = units.length - 1; i >= 0; i--) {
+      const unit = units[i];
+      if (seconds >= unit.value) {
+          const count = Math.floor(seconds / unit.value);
+          return `${count} ${unit.label}${count > 1 ? "s" : ""}`;
+      }
+  }
+  return "just now";
+}

@@ -3,23 +3,16 @@ import { ALL_CONFIGS } from '@/config';
 import dayjs from 'dayjs';
 import LaunchingLock from '../launchingLock';
 import Countdown from './Countdown';
+import { toBN } from '@/utils/util';
 
 const NotForSale = ({ coin, onEnd, partyStart, publicStart }) => {
   const startTime = Math.ceil(new Date(coin.date || Date.now()).getTime());
-  const endTime = publicStart * ALL_CONFIGS.TIMER.MILLISECOND;
-
-  console.log(
-    'endtime',
-    endTime,
-    new Date(endTime || Date.now()).toISOString()
-  );
-
-  // const show
+  const endTime = toBN(partyStart).toNumber();
 
   return (
     <div className="flex flex-col w-full md:max-w-[384px] md:mb-10">
-      {(!partyStart || !publicStart) && (
-        <div className="relative w-full md:max-w-[384px] bg-[#13141D] rounded-xl p-6 h-fit">
+      {(!!partyStart || !!publicStart) && (
+        <div className="relative w-full md:max-w-[384px] bg-[#13141D] rounded-xl p-6 h-fit mb-4">
           <img
             src={islandLunch}
             alt="islandLunch"
@@ -33,18 +26,21 @@ const NotForSale = ({ coin, onEnd, partyStart, publicStart }) => {
           </div>
           <Countdown
             onEnd={() => {
-              // onEnd()
+              onEnd();
             }}
             coin={coin}
+            endTime={endTime}
           />
           {coin.date && (
             <div className="text-[14px] font-medium text-[#585A6B] mt-4">
-              {dayjs(endTime).format('DD-MM-YYYY HH:mm Z')}
+              {dayjs(endTime * ALL_CONFIGS.TIMER.MILLISECONDS).format(
+                'DD-MM-YYYY HH:mm Z'
+              )}
             </div>
           )}
         </div>
       )}
-      <div className="mt-4">
+      <div className="">
         <LaunchingLock />
       </div>
     </div>
