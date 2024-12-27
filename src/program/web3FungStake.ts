@@ -258,7 +258,7 @@ export class web3FungibleStake {
         provider
       ) as Program<Fungstake>;
 
-      console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
+      // console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
       let [configPda] = PublicKey.findProgramAddressSync(
         [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
         program.programId

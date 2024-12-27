@@ -192,9 +192,11 @@ export default function LaunchingLock() {
         <div className="mt-2 mb-4 md:mt-3 md:mb-6 flex justify-between items-center">
           <div className="text-[#84869A]">Unlock on</div>
           <div>
-            {dayjs(Date.now() + ALL_CONFIGS.LOCK_FUNGIBLE_STAKE * 1000).format(
-              'MMM DD YYYY HH:mm'
-            )}
+            {dayjs(
+              Date.now() +
+                (stakeConfig?.lockPeriod || ALL_CONFIGS.LOCK_FUNGIBLE_STAKE) *
+                  1000
+            ).format('MMM DD YYYY HH:mm')}
           </div>
         </div>
 
@@ -210,7 +212,7 @@ export default function LaunchingLock() {
             console.log('Stake!!');
             try {
               setIsLoading(true);
-              console.log("coin decimals: ", coin.decimals)
+              console.log('coin decimals: ', coin.decimals);
               const duration =
                 selectedLockTime.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
               const amount = toBN(
