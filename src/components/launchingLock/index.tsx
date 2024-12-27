@@ -4,7 +4,7 @@ import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { numberWithCommas } from '@/utils/format';
-import { toBN, toPublicKey } from '@/utils/util';
+import { formatTimePeriod, toBN, toPublicKey } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
@@ -32,6 +32,7 @@ const web3Stake = new web3FungibleStake();
 
 export default function LaunchingLock() {
   const coin = useGetCoinInfoState('coin');
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
   const stakeEndTime = useGetCoinInfoState('stakeEndTime');
   const refreshCheck = useGetCoinInfoState('refreshStakeCheck');
   const { handleSetRefreshCheck, handleSetStakeMintBalance } = useCoinActions();
@@ -185,7 +186,7 @@ export default function LaunchingLock() {
         <div className="mt-4 md:mt-6 flex justify-between items-center">
           <div className="text-[#84869A]">Locking duration</div>
           <div className="text-right">
-            {ALL_CONFIGS.LOCK_FUNGIBLE_STAKE / 86400} Days
+            {formatTimePeriod(stakeConfig.lockPeriod)}
           </div>
         </div>
         <div className="mt-2 mb-4 md:mt-3 md:mb-6 flex justify-between items-center">

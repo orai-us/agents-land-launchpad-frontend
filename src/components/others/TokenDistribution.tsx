@@ -138,7 +138,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                   String(data.metadata?.agentAddress).toLowerCase();
                 const isVaults =
                   String(item.owner).toLowerCase() ===
-                  String(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID).toLowerCase();
+                  String(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID).toLowerCase();
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
                   String(

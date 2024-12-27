@@ -180,3 +180,7 @@ export interface Data {
   tokenBuyTx: string | null;
   tokenSellTx: string | null;
 }
+
+export interface StakeInfo {
+  
+}

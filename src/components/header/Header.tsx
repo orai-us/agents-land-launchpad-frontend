@@ -14,7 +14,6 @@ import { useConfigActions } from '@/zustand-store/config/selector';
 import { web3FungibleStake } from '@/program/web3FungStake';
 
 const web3Solana = new Web3SolanaProgramInteraction();
-const web3FungStake = new web3FungibleStake();
 
 const Header: FC = () => {
   const wallet = useWallet();
@@ -27,15 +26,10 @@ const Header: FC = () => {
 
   useEffect(() => {
     (async () => {
-      const config = await web3Solana.getConfigCurve(wallet);
+      const config = await web3Solana.getConfigCurve();
       if (config) {
         console.log('config', config);
         handleSetBondingCurveConfig(config);
-      }
-
-      const configStake = await web3FungStake.getStakeConfig(wallet);
-      if (configStake) {
-        handleSetStakeConfig(configStake);
       }
     })();
   }, []);

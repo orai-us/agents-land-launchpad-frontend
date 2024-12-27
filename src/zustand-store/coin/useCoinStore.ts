@@ -1,7 +1,8 @@
 import { coinInfo } from '@/utils/types';
 import { PublicKey } from '@solana/web3.js';
 import { create } from 'zustand';
-import { BN } from '@coral-xyz/anchor';
+import { BN, IdlAccounts } from '@coral-xyz/anchor';
+import { Fungstake } from '@/program/fungstake/fungstake';
 
 export type CoinInfoState = {
   coin: Partial<coinInfo>;
@@ -10,7 +11,8 @@ export type CoinInfoState = {
   balanceStakeMint: string;
   totalVault: number;
   stakeEndTime: number;
-  stakeInfo: any;
+  stakeConfig: IdlAccounts<Fungstake>['stakeConfig'];
+  stakeInfo: IdlAccounts<Fungstake>['stakeInfo'];
   curveInfo: Partial<{
     tokenMint: PublicKey;
     creator: PublicKey;
@@ -26,6 +28,7 @@ export type CoinInfoState = {
 
 export type CoinStateAction = {
   handleSetStakeInfo: (stakeInfo: CoinInfoState['stakeInfo']) => void;
+  handleSetStakeConfig: (stakeConfig: CoinInfoState['stakeConfig']) => void;
   handleSetTotalVault: (totalVault: CoinInfoState['totalVault']) => void;
   handleSetStakeEndTime: (stakeEndTime: CoinInfoState['stakeEndTime']) => void;
   handleSetCurveInfo: (coin: CoinInfoState['curveInfo']) => void;
@@ -51,6 +54,7 @@ const initialState: CoinInfoState = {
   stakeInfo: null,
   totalVault: 0,
   stakeEndTime: 0,
+  stakeConfig: null,
 };
 
 export type DepositStoreType = CoinInfoState & { actions: CoinStateAction };
@@ -67,6 +71,7 @@ const useDetectionStore = create<DepositStoreType>()((set) => ({
     handleSetTokenAddress: (tokenAddress) => set({ tokenAddress }),
     handleSetRefreshCheck: (refreshStakeCheck) => set({ refreshStakeCheck }),
     handleSetStakeInfo: (stakeInfo) => set({ stakeInfo }),
+    handleSetStakeConfig: (stakeConfig) => set({ stakeConfig }),
     handleSetTotalVault: (totalVault) => set({ totalVault }),
     handleSetStakeEndTime: (stakeEndTime) => set({ stakeEndTime }),
 
@@ -77,6 +82,7 @@ const useDetectionStore = create<DepositStoreType>()((set) => ({
         state.tokenAddress = initialState.tokenAddress;
         state.balanceStakeMint = initialState.balanceStakeMint;
         state.stakeInfo = initialState.stakeInfo;
+        state.stakeConfig = initialState.stakeConfig;
 
         return state;
       }),

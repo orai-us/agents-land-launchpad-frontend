@@ -1,5 +1,5 @@
 import { errorAlert } from "@/components/others/ToastGroup";
-import { BLACK_LIST_ADDRESS, SEED_GLOBAL, SPL_DECIMAL } from "@/config";
+import { BLACK_LIST_ADDRESS, SEED_GLOBAL, SPL_DECIMAL, STAKER_INFO_SEED } from "@/config";
 import {
   rayBuyTx,
   raySellTx,
@@ -114,7 +114,7 @@ export class Web3SolanaProgramInteraction {
       );
 
       const stakingTokenAccount = this.getAssociatedTokenAccount(
-        new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+        new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
         mintKp.publicKey
       );
 
@@ -137,7 +137,7 @@ export class Web3SolanaProgramInteraction {
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
           aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
-          stakingWallet: new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+          stakingWallet: new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
         })
         .remainingAccounts([
           {
@@ -438,10 +438,10 @@ export class Web3SolanaProgramInteraction {
       if (isParty && type === 0) {
         let [stakeConfigPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from("staking_config"),
+            Buffer.from(STAKER_INFO_SEED),
             new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
 
         let [vaultPda] = PublicKey.findProgramAddressSync(
@@ -450,7 +450,7 @@ export class Web3SolanaProgramInteraction {
             stakeConfigPda.toBytes(),
             mint.toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
         let [userStakePda] = PublicKey.findProgramAddressSync(
           [
@@ -458,7 +458,7 @@ export class Web3SolanaProgramInteraction {
             vaultPda.toBytes(),
             wallet.publicKey.toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
 
         swapIx = await program.methods
@@ -1074,13 +1074,13 @@ export class Web3SolanaProgramInteraction {
     }
   };
 
-  getConfigCurve = async (wallet: WalletContextState) => {
+  getConfigCurve = async () => {
     try {
       if (!this.connection) {
         console.log("Warning: Connection not connected");
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      const provider = new anchor.AnchorProvider(this.connection, undefined, {
         preflightCommitment: "confirmed",
       });
       anchor.setProvider(provider);

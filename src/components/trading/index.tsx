@@ -99,7 +99,7 @@ export default function TradingPage() {
   const stakerInfo = useGetCoinInfoState('stakeInfo');
   const totalVault = useGetCoinInfoState('totalVault');
   const hasStaked =
-    stakerInfo && toBN(stakerInfo['stakeAmount'] || 0).isGreaterThan(0);
+    stakerInfo && (stakerInfo['stakeAmount'] || new BN(0)).gtn(0);
 
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
@@ -203,7 +203,6 @@ export default function TradingPage() {
       //   coin.tradingTime &&
       //   new Date(coin.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
 
-      console.log("coin: ", coin)
       if (!coin.metadata?.agentAddress) {
         setLocation('/');
         errorAlert('Token not created with agent!');

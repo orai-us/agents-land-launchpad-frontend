@@ -19,6 +19,7 @@ import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 import CountdownPublic from './CountdownPublic';
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { useGetConfigState } from '@/zustand-store/config/selector';
+import { BN } from '@coral-xyz/anchor';
 interface TradingFormProps {
   coin: coinInfo;
   progress: Number;
@@ -66,7 +67,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
     !coin.listed;
 
   const isShowLocked =
-    stakeInfo && toBN(stakeInfo['stakeAmount'] || 0).isGreaterThan(0);
+    stakeInfo && (stakeInfo['stakeAmount'] || new BN(0)).gtn(0);
   const partyStart = curveInfo?.partyStart?.toNumber();
   const publicStart = curveInfo?.publicStart?.toNumber();
   const isPartyStart =
