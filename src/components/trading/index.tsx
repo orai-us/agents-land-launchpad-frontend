@@ -48,6 +48,7 @@ import TokenDistribution from '../others/TokenDistribution';
 import { DexToolsChart } from '../TVChart/DexToolsChart';
 import useListenEventSwapChart from './hooks/useListenEventSwapChart';
 import NotForSale from './NotForSale';
+import { web3FungibleStake } from '@/program/web3FungStake';
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -74,6 +75,7 @@ dayjs.updateLocale('en', {
 const SLEEP_TIMEOUT = 1500;
 
 const web3Solana = new Web3SolanaProgramInteraction();
+const web3Stake = new web3FungibleStake();
 export default function TradingPage() {
   const { isMobileMode } = useWindowSize();
   const [showOptional, setShowOptional] = useState<boolean>(true);
@@ -89,12 +91,15 @@ export default function TradingPage() {
   const [simulatePrice, setSimulatePrice] = useState<string>('');
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
+  const [isPublicCountdownStart, setIsPublicCountdownStart] =
+    useState<Boolean>(false);
   const [fromRpc, setFromRpc] = useState(false);
   const { handleSetCurveInfo, handleSetCoinInfo } = useCoinActions();
   const curveInfo = useGetCoinInfoState('curveInfo');
   const stakerInfo = useGetCoinInfoState('stakeInfo');
+  const totalVault = useGetCoinInfoState('totalVault');
   const hasStaked =
-    stakerInfo && toBN(stakerInfo['stakeAmount'] || 0).isGreaterThan(0);
+    stakerInfo && (stakerInfo['stakeAmount'] || new BN(0)).gtn(0);
 
   const bondingCurveValue = new BigNumber(
     (coin.lamportReserves || 0).toString()
@@ -108,14 +113,10 @@ export default function TradingPage() {
 
   const partyStart = curveInfo?.partyStart?.toNumber();
   const publicStart = curveInfo?.publicStart?.toNumber();
-  // const isUnlock = new Date(coin.tradingTime).getTime() > Date.now();
-  const isLock =
-    !partyStart ||
-    (partyStart &&
-      new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS).getTime() >
-        Date.now());
-  const isNotForSale = isLock && !isOnSaleCountdown;
-  console.log('curveInfo', curveInfo, partyStart, isLock, isNotForSale);
+  const isCountdownPartyStart =
+    partyStart && partyStart * ALL_CONFIGS.TIMER.MILLISECONDS <= Date.now();
+
+  const isNotForSale = !isCountdownPartyStart && !isOnSaleCountdown; // not start
 
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
@@ -175,6 +176,7 @@ export default function TradingPage() {
   };
 
   useEffect(() => {
+    console.log('reload Coin');
     const fetchData = async () => {
       // Split the pathname and extract the last segment
       const segments = pathname.split('/');
@@ -192,14 +194,14 @@ export default function TradingPage() {
       await fetchDataCoin(parameter);
     };
     fetchData();
-  }, [pathname, wallet.publicKey]);
+  }, [pathname, wallet.publicKey, totalVault]);
 
   useEffect(() => {
     if (coin.token) {
       const isBlackList = BLACK_LIST_ADDRESS.includes(coin.token);
-      const dateNeedToFilter =
-        coin.tradingTime &&
-        new Date(coin.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
+      // const dateNeedToFilter =
+      //   coin.tradingTime &&
+      //   new Date(coin.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
 
       if (!coin.metadata?.agentAddress) {
         setLocation('/');
@@ -211,10 +213,11 @@ export default function TradingPage() {
         errorAlert('Token not valid!');
       }
 
-      if (!dateNeedToFilter) {
-        setLocation('/');
-        errorAlert('Token not valid!');
-      }
+      // TODO:
+      // if (!dateNeedToFilter) {
+      //   setLocation('/');
+      //   errorAlert('Token not valid!');
+      // }
     }
   }, [coin]);
 

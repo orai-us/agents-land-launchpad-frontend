@@ -4,7 +4,7 @@ import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { numberWithCommas } from '@/utils/format';
-import { toBN, toPublicKey } from '@/utils/util';
+import { formatTimePeriod, toBN, toPublicKey } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
@@ -32,6 +32,8 @@ const web3Stake = new web3FungibleStake();
 
 export default function LaunchingLock() {
   const coin = useGetCoinInfoState('coin');
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
+  const stakeEndTime = useGetCoinInfoState('stakeEndTime');
   const refreshCheck = useGetCoinInfoState('refreshStakeCheck');
   const { handleSetRefreshCheck, handleSetStakeMintBalance } = useCoinActions();
   const [isLoading, setIsLoading] = useState(false);
@@ -63,6 +65,10 @@ export default function LaunchingLock() {
 
   const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
   const isNegative = toBN(stakeAmount || 0).isLessThanOrEqualTo(0);
+  const isEndStake =
+    stakeEndTime && stakeEndTime * ALL_CONFIGS.TIMER.MILLISECONDS < Date.now();
+
+  // console.log('stakeEndTime', stakeEndTime);
 
   const genMsgTextBtn = () => {
     if (!stakeAmount || !Number(stakeAmount)) {
@@ -88,6 +94,7 @@ export default function LaunchingLock() {
         ),
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
+
       setTokenBal(tokenBal ? tokenBal : 0);
       // setSolBalance(solBal ? solBal : 0);
     } catch (error) {
@@ -107,8 +114,12 @@ export default function LaunchingLock() {
     }
   };
 
+  if (isEndStake) {
+    return;
+  }
+
   return (
-    <div className="w-full m-auto mt-4">
+    <div className="w-full m-auto">
       <div className="w-full flex flex-col border border-[#1A1C28] bg-[#13141D] rounded-lg p-3 md:p-6 mt-4 md:mt-0">
         <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
           Launching Vault
@@ -175,7 +186,7 @@ export default function LaunchingLock() {
         <div className="mt-4 md:mt-6 flex justify-between items-center">
           <div className="text-[#84869A]">Locking duration</div>
           <div className="text-right">
-            {ALL_CONFIGS.LOCK_FUNGIBLE_STAKE / 86400} Days
+            {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
           </div>
         </div>
         <div className="mt-2 mb-4 md:mt-3 md:mb-6 flex justify-between items-center">

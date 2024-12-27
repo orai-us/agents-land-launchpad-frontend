@@ -1,5 +1,5 @@
-import { ALL_CONFIGS } from "@/config";
-import { useEffect, useRef, useState } from "react";
+import { ALL_CONFIGS } from '@/config';
+import { useEffect, useRef, useState } from 'react';
 
 export type CountDownType = {
   startTime: number;
@@ -38,10 +38,10 @@ export const formatCountdownTime = (milliseconds: number) => {
   const remainingSeconds = seconds % ALL_CONFIGS.TIMER.SECOND;
 
   return {
-    days: String(days).padStart(2, "0"),
-    hours: String(remainingHours).padStart(2, "0"),
-    minutes: String(remainingMinutes).padStart(2, "0"),
-    seconds: String(remainingSeconds).padStart(2, "0"),
+    days: String(days).padStart(2, '0'),
+    hours: String(remainingHours).padStart(2, '0'),
+    minutes: String(remainingMinutes).padStart(2, '0'),
+    seconds: String(remainingSeconds).padStart(2, '0'),
   };
 };
 
@@ -112,7 +112,7 @@ export const useCountdown = ({
 
     return () => {
       if (countdownRef.current) {
-        console.log("Clean =>> countdown");
+        // console.log("Clean =>> countdown");
         clearInterval(countdownRef.current);
       }
     };
