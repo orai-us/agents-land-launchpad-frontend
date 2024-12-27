@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { LOCK_TIME_OPTIONS } from "../constants";
 import { ALL_CONFIGS } from "@/config";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { toBN } from "@/utils/util";
+import { formatTimePeriod, toBN } from "@/utils/util";
 
 const web3Locking = new Web3SolanaLockingToken();
 
@@ -24,13 +24,18 @@ const useGetListLockedByUser = (refreshCheck) => {
         await Promise.all(
           LOCK_TIME_OPTIONS.map(async (item) => {
             const period = item.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
-            const { listLockedItems, vaultInfo } =
+            let { listLockedItems, vaultInfo } =
               await web3Locking.getListLockedOfUser(period, wallet);
 
             totalVault = toBN(totalVault)
               .plus(vaultInfo.totalStaked?.toString() || 0)
               .toNumber();
-            list.push(...listLockedItems);
+            list.push(
+              ...listLockedItems.map((item) => ({
+                ...item,
+                lockPeriod: formatTimePeriod(item.lockPeriod),
+              }))
+            );
             return listLockedItems;
           })
         );

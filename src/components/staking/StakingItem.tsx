@@ -1,35 +1,36 @@
 import LoadingImg from "@/assets/icons/loading-button.svg";
 import MAXImg from "@/assets/images/richoldman.png";
 import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
-import { Web3SolanaLockingToken } from "@/program/web3Locking";
 import { numberWithCommas } from "@/utils/format";
-import { toBN } from "@/utils/util";
+import { formatTimePeriod } from "@/utils/util";
 import { useWallet } from "@solana/wallet-adapter-react";
 import dayjs from "dayjs";
 import { FC, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { successAlert } from "../others/ToastGroup";
-import { LOCK_TIME_OPTIONS } from "./constants";
-const web3Locking = new Web3SolanaLockingToken();
+import { IdlAccounts } from "@coral-xyz/anchor";
+import { Fungstake } from "@/program/fungstake/fungstake";
+import { web3FungibleStake } from "@/program/web3FungStake";
+import { useGetCoinInfoState } from "@/zustand-store/coin/selector";
+const web3Staking = new web3FungibleStake();
 
-const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
+const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number; onSuccess: () => void }> = ({
   item,
   keyId,
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { id, stakeAmount, unstakedAtTime, lockPeriod } = item || {};
+  const { stakeAmount, unstakedAtTime, } = item || {};
   const wallet = useWallet();
-  const claimable = !toBN(unstakedAtTime).isGreaterThan(
+  const claimable = !unstakedAtTime.gtn(
     Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS)
   );
-  const period = LOCK_TIME_OPTIONS.find(
-    (e) => e.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS === lockPeriod
-  );
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
+  const coin = useGetCoinInfoState('coin');
 
   return (
     <tr
-      key={`tr-locking-item-id-${String(id)}-${keyId}`}
+      key={`tr-locking-item-id-${String(item.vault.toBase58())}-${keyId}`}
       className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE] py-4 h-[72px]"
     >
       <td className="text-[14px] font-semibold">
@@ -43,8 +44,8 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
           />
           <span className="ml-2">
             {numberWithCommas(
-              toBN(stakeAmount || 0)
-                .div(10 ** SPL_DECIMAL)
+              stakeAmount
+                .divn(10 ** SPL_DECIMAL)
                 .toNumber(),
               undefined,
               { maximumFractionDigits: SPL_DECIMAL }
@@ -93,12 +94,12 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
-        {period.label}
+        {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(
-          toBN(unstakedAtTime)
-            .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+          unstakedAtTime
+            .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber() || Date.now()
         ).format("MMM DD YYYY HH:mm")}
       </td>
@@ -109,10 +110,10 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
             try {
               setIsLoading(true);
 
-              const res = await web3Locking.unStake(
-                lockPeriod,
-                toBN(id).toNumber(),
-                stakeAmount,
+              const res = await web3Staking.unStake(
+                stakeConfig.stakeCurrencyMint.toBase58(),
+                coin.metadata?.agentAddress,
+                stakeAmount.toNumber(),
                 wallet
               );
 
@@ -139,4 +140,4 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
   );
 };
 
-export default LockingItem;
+export default StakingItem;

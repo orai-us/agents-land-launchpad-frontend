@@ -93,7 +93,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         : wallet.publicKey.toBase58() ===
           (coin.creator['wallet'] || coin.creator);
       const boughtTokenAmount = toBN(tokenBal).minus(isCreator ? 10 ** 7 : 0);
-      const rw = await web3Stake.getReward(wallet, coin.token);
+      const rw = await web3Stake.getReward(wallet, ALL_CONFIGS.STAKE_CURRENCY_MINT, coin.token);
       const rwNumber = toBN(rw || 0)
         .div(10 ** coin.decimals || SPL_DECIMAL)
         .toNumber();

@@ -21,10 +21,14 @@ const ListFungibleStake: FC<{}> = () => {
     loading: loadingList,
     stakeInfo,
     totalLocked,
-  } = useGetStakedByUser(ALL_CONFIGS.STAKE_CURRENCY_MINT, coin.token, refreshCheck);
+  } = useGetStakedByUser(
+    ALL_CONFIGS.STAKE_CURRENCY_MINT,
+    coin.token,
+    refreshCheck
+  );
 
   const isShowLocked =
-    stakeInfo && stakeInfo['stakeAmount'] || new BN(0).gtn(0);
+    stakeInfo && (stakeInfo['stakeAmount'] || new BN(0)).gtn(0);
 
   const Loading = () => (
     <div className="flex h-[120px] items-start justify-center bg-tizz-background">

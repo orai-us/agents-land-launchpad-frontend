@@ -22,8 +22,6 @@ import { commitmentLevel, endpoint } from './web3';
 export const stakeProgramId = new PublicKey(idl.address);
 export const stakeInterface = JSON.parse(JSON.stringify(idl));
 
-const stakeCurrencyMint = ALL_CONFIGS.STAKE_CURRENCY_MINT;
-
 export class web3FungibleStake {
   constructor(
     private readonly connection = new Connection(endpoint, {
@@ -33,7 +31,8 @@ export class web3FungibleStake {
   ) {}
 
   async stake(
-    rewardCurrencyMint: PublicKey,
+    stakeCurrencyMint: string,
+    rewardCurrencyMint: string,
     amount: number,
     wallet: WalletContextState
   ) {
@@ -110,7 +109,8 @@ export class web3FungibleStake {
   }
 
   async unStake(
-    rewardCurrencyMint: PublicKey,
+    stakeCurrencyMint: string,
+    rewardCurrencyMint: string,
     amount: number,
     wallet: WalletContextState
   ) {
@@ -287,7 +287,7 @@ export class web3FungibleStake {
     }
   }
 
-  async getReward(wallet: WalletContextState, token: string) {
+  async getReward(wallet: WalletContextState, stakeCurrencyMint: string, rewardCurrencyMint: string) {
     try {
       if (!this.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
@@ -307,7 +307,7 @@ export class web3FungibleStake {
         .accounts({
           user: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(token),
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .view();
 
