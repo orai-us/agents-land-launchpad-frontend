@@ -12,7 +12,7 @@ import { successAlert } from "../others/ToastGroup";
 import { LOCK_TIME_OPTIONS } from "./constants";
 const web3Locking = new Web3SolanaLockingToken();
 
-const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
+const StakingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
   item,
   keyId,
   onSuccess,
@@ -93,7 +93,7 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
-        {period.label}
+        {lockPeriod}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(
@@ -139,4 +139,4 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
   );
 };
 
-export default LockingItem;
+export default StakingItem;

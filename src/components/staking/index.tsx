@@ -5,7 +5,7 @@ import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { Web3SolanaLockingToken } from '@/program/web3Locking';
 import { formatNumberKMB, numberWithCommas } from '@/utils/format';
-import { toBN } from '@/utils/util';
+import { formatTimePeriod, toBN } from '@/utils/util';
 import { useWallet } from '@solana/wallet-adapter-react';
 import dayjs from 'dayjs';
 import tz from 'dayjs/plugin/timezone';
@@ -17,8 +17,9 @@ import { Link, useLocation } from 'wouter';
 import { errorAlert, successAlert } from '../others/ToastGroup';
 import { LOCK_TIME_OPTIONS } from './constants';
 import useGetListLockedByUser from './hooks/useGetListLockedByUser';
-import LockingItem from './LockingItem';
+import StakingItem from './StakingItem';
 import NumberFormat from 'react-number-format';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -41,6 +42,7 @@ export default function Staking() {
   const [tokenBal, setTokenBal] = useState<number>(0);
   const [solBalance, setSolBalance] = useState<number>(0);
   const [stakeAmount, setStakeAmount] = useState<string>('');
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
   const wallet = useWallet();
   const {
     loading: loadingList,
@@ -198,14 +200,14 @@ export default function Staking() {
                       )
                       .map((item, index) => {
                         return (
-                          <LockingItem
+                          <StakingItem
                             keyId={index}
                             item={item}
                             onSuccess={() => {
                               setIsRefreshList(!isRefreshList);
                               getBalance();
                             }}
-                          ></LockingItem>
+                          ></StakingItem>
                         );
                       })}
                   </tbody>
@@ -296,21 +298,7 @@ export default function Staking() {
                 locking duration
               </label>
               <div className="flex justify-between gap-3 mt-3">
-                {LOCK_TIME_OPTIONS.map((item, idx) => {
-                  return (
-                    <div
-                      className={twMerge(
-                        'cursor-pointer flex flex-1 items-center justify-center h-10 bg-[#080A14] border border-[#30344A] rounded hover:brightness-125 text-[#9192A0] text-[12px] md:text-[14px] font-medium',
-                        selectedLockTime.label === item.label &&
-                          'border-[#E8E9EE] text-[#E8E9EE] rounded-lg '
-                      )}
-                      key={`key-lock-time-${idx}---`}
-                      onClick={() => setSelectedLockTime(item)}
-                    >
-                      {item.label}
-                    </div>
-                  );
-                })}
+                {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
               </div>
             </div>
             <div className="my-4 md:my-6 flex justify-between items-center">
