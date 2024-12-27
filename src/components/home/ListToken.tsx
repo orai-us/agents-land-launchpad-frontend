@@ -333,7 +333,7 @@ export const ListLaunchToken = ({
                     </p>
                     <p className="text-[12px] text-[#84869A]">
                       {/* Waiting for countdown time */}
-                      Lock MAX to get early access to the buy token
+                      Lock $MAX for whitelist access to buy the token
                     </p>
                   </div>
                 )

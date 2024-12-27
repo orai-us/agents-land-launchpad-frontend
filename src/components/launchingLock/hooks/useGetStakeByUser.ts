@@ -1,12 +1,12 @@
-import { web3FungibleStake } from "@/program/web3FungStake";
-import { toBN, toPublicKey } from "@/utils/util";
+import { web3FungibleStake } from '@/program/web3FungStake';
+import { toBN, toPublicKey } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
-} from "@/zustand-store/coin/selector";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import { useEffect, useState } from "react";
+} from '@/zustand-store/coin/selector';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
+import { useEffect, useState } from 'react';
 
 const web3Locking = new web3FungibleStake();
 
@@ -15,10 +15,10 @@ const useGetStakedByUser = (
   rewardCurrencyMint: string,
   refreshCheck
 ) => {
-  const stakeEndTime = useGetCoinInfoState("stakeEndTime");
-  const stakeInfo = useGetCoinInfoState("stakeInfo");
-  let stakeConfig = useGetCoinInfoState("stakeConfig");
-  const totalLocked = useGetCoinInfoState("totalVault");
+  const stakeEndTime = useGetCoinInfoState('stakeEndTime');
+  const stakeInfo = useGetCoinInfoState('stakeInfo');
+  let stakeConfig = useGetCoinInfoState('stakeConfig');
+  const totalLocked = useGetCoinInfoState('totalVault');
   const {
     handleSetStakeInfo,
     handleSetTotalVault,
@@ -48,20 +48,24 @@ const useGetStakedByUser = (
           .toNumber();
 
         // only fetch and update stake config if the stake currency changes
-        if (!stakeConfig || stakeConfig.stakeCurrencyMint.toBase58() !== stakeCurrencyMint) {
+        if (
+          !stakeConfig ||
+          stakeConfig.stakeCurrencyMint.toBase58() !== stakeCurrencyMint
+        ) {
           stakeConfig = await web3Locking.getStakeConfig(
             toPublicKey(stakeCurrencyMint)
           );
           handleSetStakeConfig(stakeConfig);
         }
 
+        console.log('totalVault', totalVault);
         // setStakeInfo(stakerInfo);
         // setTotalLocked(totalVault);
         handleSetStakeEndTime(vaultInfo.stakeEndTime.toNumber());
         handleSetStakeInfo(stakerInfo);
         handleSetTotalVault(totalVault);
       } catch (error) {
-        console.log("get list locking items error", error);
+        console.log('get list locking items error', error);
       } finally {
         setLoading(false);
       }

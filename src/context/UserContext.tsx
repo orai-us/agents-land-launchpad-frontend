@@ -1,3 +1,4 @@
+import { Spinner } from '@/components/loadings/Spinner';
 import { errorAlert, successAlert } from '@/components/others/ToastGroup';
 import { RPC_MAPS } from '@/config';
 import { msgInfo, userInfo } from '@/utils/types';
@@ -85,7 +86,7 @@ export function UserProvider({
             preflightCommitment: 'confirmed',
           });
           setProvider(provider);
-          console.log('UserProvider', provider);
+          setProviderApp(provider);
           if (value.rpcUrl !== RPC_MAPS.Agents) {
             successAlert('Switch RPC successfully');
           }
@@ -96,6 +97,7 @@ export function UserProvider({
             preflightCommitment: 'confirmed',
           });
           setProvider(provider);
+          setProviderApp(provider);
         }
       } catch (e) {
         errorAlert('Failed to connect to the network');
@@ -104,6 +106,11 @@ export function UserProvider({
 
     setAnchorProvider();
   }, [rpcUrl, wallet]);
+
+  if (!providerApp) {
+    return <Spinner />;
+  }
+
   return (
     <UserContext.Provider value={value}> {children} </UserContext.Provider>
   );

@@ -197,7 +197,7 @@
           }
         },
         {
-          "name": "staker_info",
+          "name": "staker_info_pda",
           "writable": true,
           "pda": {
             "seeds": [
@@ -217,7 +217,7 @@
           }
         },
         {
-          "name": "stake_detail",
+          "name": "stake_detail_pda",
           "writable": true,
           "pda": {
             "seeds": [
@@ -229,7 +229,7 @@
               },
               {
                 "kind": "account",
-                "path": "staker_info"
+                "path": "staker_info_pda"
               },
               {
                 "kind": "arg",
@@ -453,7 +453,7 @@
           "writable": true
         },
         {
-          "name": "user_token_account",
+          "name": "staker_token_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -530,6 +530,20 @@
       "discriminator": [211, 8, 232, 43, 2, 152, 117, 119]
     }
   ],
+  "events": [
+    {
+      "name": "EventNewVault",
+      "discriminator": [62, 85, 178, 155, 210, 80, 16, 125]
+    },
+    {
+      "name": "EventStake",
+      "discriminator": [193, 220, 225, 33, 201, 27, 61, 43]
+    },
+    {
+      "name": "EventUnstake",
+      "discriminator": [7, 14, 248, 129, 43, 55, 41, 104]
+    }
+  ],
   "errors": [
     {
       "code": 6000,
@@ -594,6 +608,174 @@
   ],
   "types": [
     {
+      "name": "EventNewVault",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_config",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "lock_period",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventStake",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stake_config_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_config",
+            "type": {
+              "defined": {
+                "name": "StakeConfig"
+              }
+            }
+          },
+          {
+            "name": "staker_info_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_info",
+            "type": {
+              "defined": {
+                "name": "StakerInfo"
+              }
+            }
+          },
+          {
+            "name": "stake_detail_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_detail",
+            "type": {
+              "defined": {
+                "name": "StakeDetail"
+              }
+            }
+          },
+          {
+            "name": "vault_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": {
+              "defined": {
+                "name": "Vault"
+              }
+            }
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_staking_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventUnstake",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stake_config_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_config",
+            "type": {
+              "defined": {
+                "name": "StakeConfig"
+              }
+            }
+          },
+          {
+            "name": "staker_info_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_info",
+            "type": {
+              "defined": {
+                "name": "StakerInfo"
+              }
+            }
+          },
+          {
+            "name": "stake_detail_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_detail",
+            "type": {
+              "defined": {
+                "name": "StakeDetail"
+              }
+            }
+          },
+          {
+            "name": "vault_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": {
+              "defined": {
+                "name": "Vault"
+              }
+            }
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_staking_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
       "name": "StakeConfig",
       "type": {
         "kind": "struct",
@@ -649,6 +831,10 @@
           {
             "name": "unstaked_at_time",
             "type": "i64"
+          },
+          {
+            "name": "staker",
+            "type": "pubkey"
           }
         ]
       }

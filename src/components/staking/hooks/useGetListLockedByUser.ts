@@ -1,9 +1,9 @@
-import { Web3SolanaLockingToken } from "@/program/web3Locking";
-import React, { useEffect, useState } from "react";
-import { LOCK_TIME_OPTIONS } from "../constants";
-import { ALL_CONFIGS } from "@/config";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { formatTimePeriod, toBN } from "@/utils/util";
+import { Web3SolanaLockingToken } from '@/program/web3Locking';
+import React, { useEffect, useState } from 'react';
+import { LOCK_TIME_OPTIONS } from '../constants';
+import { ALL_CONFIGS } from '@/config';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { formatTimePeriod, toBN } from '@/utils/util';
 
 const web3Locking = new Web3SolanaLockingToken();
 
@@ -33,7 +33,7 @@ const useGetListLockedByUser = (refreshCheck) => {
             list.push(
               ...listLockedItems.map((item) => ({
                 ...item,
-                lockPeriod: formatTimePeriod(item.lockPeriod),
+                lockPeriodFormat: formatTimePeriod(item.lockPeriod),
               }))
             );
             return listLockedItems;
@@ -43,7 +43,7 @@ const useGetListLockedByUser = (refreshCheck) => {
         setLockingList(list);
         setTotalLocked(totalVault);
       } catch (error) {
-        console.log("get list locking items error", error);
+        console.log('get list locking items error', error);
       } finally {
         setLoading(false);
       }

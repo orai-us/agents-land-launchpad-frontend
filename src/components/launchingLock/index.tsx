@@ -124,7 +124,7 @@ export default function LaunchingLock() {
         <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
           Launching Vault
           <p className="text-[12px] md:text-[14px] text-[#9192A0]">
-            Lock MAX to get early access to the buy token
+            Lock $MAX for whitelist access to buy the token
           </p>
         </div>
         <div className="w-full">

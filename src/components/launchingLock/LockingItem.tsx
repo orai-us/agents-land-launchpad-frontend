@@ -27,9 +27,6 @@ const LockingItem: FC<{ item: any; onSuccess: () => void }> = ({
   const claimable = !toBN(unstakedAtTime).isGreaterThan(
     Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS)
   );
-  const period = LOCK_TIME_OPTIONS.find(
-    (e) => e.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS === lockPeriod
-  );
 
   return (
     <tr

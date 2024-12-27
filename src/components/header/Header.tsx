@@ -18,7 +18,10 @@ import { web3FungibleStake } from '@/program/web3FungStake';
 import { PublicKey } from '@solana/web3.js';
 import { getProvider } from '@coral-xyz/anchor';
 import SettingModal from '../modals/Setting';
-import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
+import {
+  useCoinActions,
+  useGetCoinInfoState,
+} from '@/zustand-store/coin/selector';
 
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
@@ -35,6 +38,7 @@ const getProviderApp = () => {
 const Header: FC = () => {
   const { handleSetBondingCurveConfig, handleSetStakeConfig } =
     useConfigActions();
+  const { handleSetStakeConfig: handleStrongboxConfig } = useCoinActions();
   const bondingCurveConfig = useGetConfigState('bondingCurveConfig');
   const stakeConfig = useGetConfigState('stakeConfig');
   const [pathname] = useLocation();

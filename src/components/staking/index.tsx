@@ -5,21 +5,21 @@ import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { Web3SolanaLockingToken } from '@/program/web3Locking';
 import { formatNumberKMB, numberWithCommas } from '@/utils/format';
-import { formatTimePeriod, toBN } from '@/utils/util';
+import { toBN } from '@/utils/util';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 import { useWallet } from '@solana/wallet-adapter-react';
 import dayjs from 'dayjs';
 import tz from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import { ChangeEvent, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import ReactLoading from 'react-loading';
+import NumberFormat from 'react-number-format';
 import { twMerge } from 'tailwind-merge';
-import { Link, useLocation } from 'wouter';
+import { Link } from 'wouter';
 import { errorAlert, successAlert } from '../others/ToastGroup';
 import { LOCK_TIME_OPTIONS } from './constants';
 import useGetListLockedByUser from './hooks/useGetListLockedByUser';
 import StakingItem from './StakingItem';
-import NumberFormat from 'react-number-format';
-import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
 dayjs.extend(utc);
 dayjs.extend(tz);
@@ -298,7 +298,21 @@ export default function Staking() {
                 locking duration
               </label>
               <div className="flex justify-between gap-3 mt-3">
-                {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
+                {LOCK_TIME_OPTIONS.map((item, idx) => {
+                  return (
+                    <div
+                      className={twMerge(
+                        'cursor-pointer flex flex-1 items-center justify-center h-10 bg-[#080A14] border border-[#30344A] rounded hover:brightness-125 text-[#9192A0] text-[12px] md:text-[14px] font-medium',
+                        selectedLockTime.label === item.label &&
+                          'border-[#E8E9EE] text-[#E8E9EE] rounded-lg '
+                      )}
+                      key={`key-lock-time-${idx}---`}
+                      onClick={() => setSelectedLockTime(item)}
+                    >
+                      {item.label}
+                    </div>
+                  );
+                })}
               </div>
             </div>
             <div className="my-4 md:my-6 flex justify-between items-center">
@@ -307,9 +321,6 @@ export default function Staking() {
                 {dayjs(
                   Date.now() + selectedLockTime.value * 30 * 24 * 60 * 60 * 1000
                 ).format('MMM DD YYYY HH:mm')}
-                {/* {dayjs()
-                  .add(selectedLockTime.value, selectedLockTime.type)
-                  .format("MMM DD YYYY HH:mm")} */}
               </div>
             </div>
 

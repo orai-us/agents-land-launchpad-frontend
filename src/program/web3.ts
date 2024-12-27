@@ -712,7 +712,7 @@ export class Web3SolanaProgramInteraction {
       const actualAmountOut = new BN(tx).toString();
       return actualAmountOut;
     } catch (error) {
-      console.log('Error in swap transaction', error, error.error);
+      console.log('Error in simulate swap transaction', error, error.error);
     }
   };
 

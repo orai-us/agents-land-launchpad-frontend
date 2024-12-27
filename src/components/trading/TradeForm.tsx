@@ -9,7 +9,7 @@ import { numberWithCommas } from '@/utils/format';
 import solIcon from '@/assets/icons/sol_ic.svg';
 import LoadingImg from '@/assets/icons/loading-button.svg';
 
-import { debounce } from 'lodash';
+import { debounce, toNumber } from 'lodash';
 import BigNumber from 'bignumber.js';
 import { ALL_CONFIGS, SOL_DECIMAL, SPL_DECIMAL } from '@/config';
 import Slippage from '../modals/Slippage';
@@ -51,6 +51,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const { user } = useContext(UserContext);
   const [showCountdown, setShowCountdown] = useState<Boolean>(true);
   const [rewardAmt, setRewardAmt] = useState(0);
+  const [solAmtBuy, setSolAmtBuy] = useState(0);
   const wallet = useWallet();
   const SolList = [
     { id: '', price: 'Reset' },
@@ -83,6 +84,23 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   const disableBuyOnParty = isBuy === 0 && isOnParty && !isShowLocked;
   const disableSellOnParty = isBuy === 1 && isOnParty;
+
+  const simulateOut = (coin, maxAmount, fee = 0.01) => {
+    if (!coin) return 0;
+    return toBN(
+      toBN(maxAmount).multipliedBy(
+        toBN(coin.lamportReserves).div(10 ** SOL_DECIMAL)
+      )
+    )
+      .div(
+        toBN(
+          toBN(coin.tokenReserves).div(10 ** (coin.decimals || SPL_DECIMAL))
+        ).minus(maxAmount)
+      )
+      .div(1 - fee)
+      .multipliedBy(10 ** SOL_DECIMAL)
+      .toNumber();
+  };
 
   const fetchMaxBuy = async () => {
     if (!isOnParty) {
@@ -131,7 +149,13 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         )
         .toNumber();
 
+      const simulateSol = simulateOut(coin, rwAmount);
+      const fmtSimulateSol = toBN(simulateSol || 0)
+        .div(10 ** SOL_DECIMAL)
+        .toNumber();
+
       setRewardAmt(rwAmount);
+      setSolAmtBuy(fmtSimulateSol);
     }
   };
 
@@ -153,6 +177,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const isNegativeAmount = new BigNumber(sol || 0).isLessThanOrEqualTo(0);
   const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(fmtCurve);
   const canSimulate = (isBuy === 0 && !isExceedCurveLimit) || isBuy !== 0;
+  const isDisableWhenExceedBuy =
+    isBuy === 0 && isPublicStart && toBN(sol).isGreaterThan(0.5);
 
   const handleInputChange = (value: number) => {
     if (value || value === 0) {
@@ -546,13 +572,24 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           {!isBuy ? coin.ticker : 'SOL'}
         </div>
         {isBuy === 0 && isShowLocked && !isPublicStart && (
-          <div className="mt-2 flex items-center gap-1">
-            Max buy amounts: {numberWithCommas(rewardAmt)} {coin.ticker}
+          <div
+            className="mt-2 flex items-center gap-1 text-[12px] cursor-pointer text-[#9ff4cf] hover:underline"
+            onClick={() => {
+              setSol(Number(solAmtBuy).toFixed(3));
+            }}
+          >
+            Remaining to buy: {numberWithCommas(rewardAmt)} {coin.ticker} ≈{' '}
+            {numberWithCommas(solAmtBuy)} SOL
           </div>
         )}
         {isBuy === 1 && disableSellOnParty && (
-          <div className="mt-2 flex items-center gap-1 text-[12px]">
-            * You are not allow to sell token in party round
+          <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
+            * You are not allowed to sell token in party round
+          </div>
+        )}
+        {isBuy === 0 && isPublicStart && (
+          <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
+            * You are limited to buy maximum 0.5 SOL per transaction
           </div>
         )}
 
@@ -565,7 +602,8 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             isDisableSwapOnAgent ||
             isNegativeAmount ||
             disableBuyOnParty ||
-            disableSellOnParty
+            disableSellOnParty ||
+            isDisableWhenExceedBuy
           }
           onClick={handlTrade}
           className="disabled:cursor-not-allowed mt-4 disabled:opacity-75 uppercase p-1 rounded border-[2px] border-solid border-[rgba(255,255,255,0.25)] cursor-pointer hover:border-[rgba(255,255,255)] transition-all ease-in duration-150"

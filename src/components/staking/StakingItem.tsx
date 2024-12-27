@@ -1,36 +1,36 @@
-import LoadingImg from "@/assets/icons/loading-button.svg";
-import MAXImg from "@/assets/images/richoldman.png";
-import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
-import { numberWithCommas } from "@/utils/format";
-import { formatTimePeriod } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import dayjs from "dayjs";
-import { FC, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { successAlert } from "../others/ToastGroup";
-import { IdlAccounts } from "@coral-xyz/anchor";
-import { Fungstake } from "@/program/fungstake/fungstake";
-import { web3FungibleStake } from "@/program/web3FungStake";
-import { useGetCoinInfoState } from "@/zustand-store/coin/selector";
-const web3Staking = new web3FungibleStake();
+import LoadingImg from '@/assets/icons/loading-button.svg';
+import MAXImg from '@/assets/images/richoldman.png';
+import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
+import { Vault } from '@/program/locking/locking';
+import { Web3SolanaLockingToken } from '@/program/web3Locking';
+import { numberWithCommas } from '@/utils/format';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
+import { IdlAccounts } from '@coral-xyz/anchor';
+import { useWallet } from '@solana/wallet-adapter-react';
+import dayjs from 'dayjs';
+import { FC, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { successAlert } from '../others/ToastGroup';
+const web3Locking = new Web3SolanaLockingToken();
 
-const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number; onSuccess: () => void }> = ({
-  item,
-  keyId,
-  onSuccess,
-}) => {
+const StakingItem: FC<{
+  item: IdlAccounts<Vault>['stakeDetail'];
+  keyId: number;
+  onSuccess: () => void;
+}> = ({ item, keyId, onSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { stakeAmount, unstakedAtTime, } = item || {};
+  const { stakeAmount, unstakedAtTime, lockPeriod, lockPeriodFormat } = (item ||
+    {}) as any;
   const wallet = useWallet();
-  const claimable = !unstakedAtTime.gtn(
-    Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS)
-  );
+  const claimable =
+    unstakedAtTime.toNumber() <=
+    Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS);
   const stakeConfig = useGetCoinInfoState('stakeConfig');
   const coin = useGetCoinInfoState('coin');
 
   return (
     <tr
-      key={`tr-locking-item-id-${String(item.vault.toBase58())}-${keyId}`}
+      key={`tr-locking-item-id-${item.id?.toString()}-${keyId}`}
       className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE] py-4 h-[72px]"
     >
       <td className="text-[14px] font-semibold">
@@ -44,9 +44,7 @@ const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number
           />
           <span className="ml-2">
             {numberWithCommas(
-              stakeAmount
-                .divn(10 ** SPL_DECIMAL)
-                .toNumber(),
+              stakeAmount.divn(10 ** SPL_DECIMAL).toNumber(),
               undefined,
               { maximumFractionDigits: SPL_DECIMAL }
             )}
@@ -55,8 +53,8 @@ const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number
       </td>
       <td
         className={twMerge(
-          "text-[10px] break-keep md:text-[12px] text-center py-2 text-[#9FF4CF]",
-          !claimable && "text-[#F79009]"
+          'text-[10px] break-keep md:text-[12px] text-center py-2 text-[#9FF4CF]',
+          !claimable && 'text-[#F79009]'
         )}
       >
         <div className="flex items-center">
@@ -90,18 +88,18 @@ const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number
               />
             </svg>
           )}
-          <span className="ml-1">{!claimable ? "Locked" : "Complete"}</span>
+          <span className="ml-1">{!claimable ? 'Locked' : 'Complete'}</span>
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
-        {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
+        {/* {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)} */}
+        {lockPeriodFormat}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(
-          unstakedAtTime
-            .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
-            .toNumber() || Date.now()
-        ).format("MMM DD YYYY HH:mm")}
+          unstakedAtTime.muln(ALL_CONFIGS.TIMER.MILLISECONDS).toNumber() ||
+            Date.now()
+        ).format('MMM DD YYYY HH:mm')}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         <button
@@ -110,26 +108,26 @@ const StakingItem: FC<{ item: IdlAccounts<Fungstake>['stakeInfo']; keyId: number
             try {
               setIsLoading(true);
 
-              const res = await web3Staking.unStake(
-                stakeConfig.stakeCurrencyMint.toBase58(),
-                coin.metadata?.agentAddress,
+              const res = await web3Locking.unStake(
+                lockPeriod,
+                item.id.toNumber(),
                 stakeAmount.toNumber(),
                 wallet
               );
 
               if (res) {
-                successAlert("Claim successfully!");
+                successAlert('Claim successfully!');
                 onSuccess();
               }
             } catch (error) {
-              console.log("claim error", error);
+              console.log('claim error', error);
             } finally {
               setIsLoading(false);
             }
           }}
           className={twMerge(
-            "rounded-lg bg-[#FCFCFC] h-6 px-2 flex items-center justify-center hover:brightness-150 disabled:brightness-75 disabled:cursor-not-allowed uppercase text-[#080A14] font-medium",
-            !claimable && "text-[#30344A] rounded bg-[#13141D]"
+            'rounded-lg bg-[#FCFCFC] h-6 px-2 flex items-center justify-center hover:brightness-150 disabled:brightness-75 disabled:cursor-not-allowed uppercase text-[#080A14] font-medium',
+            !claimable && 'text-[#30344A] rounded bg-[#13141D]'
           )}
         >
           {isLoading && <img width={18} height={18} src={LoadingImg} />}

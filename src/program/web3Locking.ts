@@ -224,6 +224,12 @@ export class Web3SolanaLockingToken {
     amount: number,
     wallet: WalletContextState
   ) {
+    console.log('first', {
+      lockPeriod,
+      id,
+      amount,
+      wallet,
+    });
     try {
       if (!this.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');

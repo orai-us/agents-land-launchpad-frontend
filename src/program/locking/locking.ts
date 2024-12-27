@@ -5,29 +5,29 @@
  * IDL can be found at `target/idl/vault.json`.
  */
 export type Vault = {
-  address: "9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy";
+  address: '9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy';
   metadata: {
-    name: "vault";
-    version: "0.1.0";
-    spec: "0.1.0";
-    description: "Created with Anchor";
+    name: 'vault';
+    version: '0.1.0';
+    spec: '0.1.0';
+    description: 'Created with Anchor';
   };
   instructions: [
     {
-      name: "createVault";
+      name: 'createVault';
       discriminator: [29, 237, 247, 208, 193, 82, 54, 135];
       accounts: [
         {
-          name: "authority";
+          name: 'authority';
           writable: true;
           signer: true;
         },
         {
-          name: "stakeConfig";
+          name: 'stakeConfig';
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -46,22 +46,22 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
           };
         },
         {
-          name: "stakeCurrencyMint";
+          name: 'stakeCurrencyMint';
         },
         {
-          name: "vault";
+          name: 'vault';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -79,27 +79,27 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeConfig";
+                kind: 'account';
+                path: 'stakeConfig';
               },
               {
-                kind: "arg";
-                path: "lockPeriod";
+                kind: 'arg';
+                path: 'lockPeriod';
               }
             ];
           };
         },
         {
-          name: "vaultTokenAccount";
+          name: 'vaultTokenAccount';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "account";
-                path: "vault";
+                kind: 'account';
+                path: 'vault';
               },
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   6,
                   221,
@@ -136,12 +136,12 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
             program: {
-              kind: "const";
+              kind: 'const';
               value: [
                 140,
                 151,
@@ -180,44 +180,44 @@ export type Vault = {
           };
         },
         {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
         },
         {
-          name: "rent";
-          address: "SysvarRent111111111111111111111111111111111";
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
         },
         {
-          name: "tokenProgram";
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         },
         {
-          name: "associatedTokenProgram";
-          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
         }
       ];
       args: [
         {
-          name: "lockPeriod";
-          type: "u64";
+          name: 'lockPeriod';
+          type: 'u64';
         }
       ];
     },
     {
-      name: "destake";
+      name: 'destake';
       discriminator: [70, 3, 73, 97, 22, 50, 116, 1];
       accounts: [
         {
-          name: "signer";
+          name: 'signer';
           writable: true;
           signer: true;
         },
         {
-          name: "stakeConfig";
+          name: 'stakeConfig';
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -236,19 +236,19 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
           };
         },
         {
-          name: "vault";
+          name: 'vault';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -266,27 +266,27 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeConfig";
+                kind: 'account';
+                path: 'stakeConfig';
               },
               {
-                kind: "arg";
-                path: "lockPeriod";
+                kind: 'arg';
+                path: 'lockPeriod';
               }
             ];
           };
         },
         {
-          name: "vaultTokenAccount";
+          name: 'vaultTokenAccount';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "account";
-                path: "vault";
+                kind: 'account';
+                path: 'vault';
               },
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   6,
                   221,
@@ -323,12 +323,12 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
             program: {
-              kind: "const";
+              kind: 'const';
               value: [
                 140,
                 151,
@@ -367,32 +367,32 @@ export type Vault = {
           };
         },
         {
-          name: "stakerInfo";
+          name: 'stakerInfoPda';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111];
               },
               {
-                kind: "account";
-                path: "vault";
+                kind: 'account';
+                path: 'vault';
               },
               {
-                kind: "account";
-                path: "signer";
+                kind: 'account';
+                path: 'signer';
               }
             ];
           };
         },
         {
-          name: "stakeDetail";
+          name: 'stakeDetailPda';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -409,27 +409,27 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakerInfo";
+                kind: 'account';
+                path: 'stakerInfoPda';
               },
               {
-                kind: "arg";
-                path: "id";
+                kind: 'arg';
+                path: 'id';
               }
             ];
           };
         },
         {
-          name: "stakerTokenAccount";
+          name: 'stakerTokenAccount';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "account";
-                path: "signer";
+                kind: 'account';
+                path: 'signer';
               },
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   6,
                   221,
@@ -466,12 +466,12 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
             program: {
-              kind: "const";
+              kind: 'const';
               value: [
                 140,
                 151,
@@ -510,52 +510,52 @@ export type Vault = {
           };
         },
         {
-          name: "stakeCurrencyMint";
+          name: 'stakeCurrencyMint';
         },
         {
-          name: "associatedTokenProgram";
-          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
         },
         {
-          name: "tokenProgram";
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         },
         {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
         }
       ];
       args: [
         {
-          name: "id";
-          type: "u64";
+          name: 'id';
+          type: 'u64';
         },
         {
-          name: "lockPeriod";
-          type: "u64";
+          name: 'lockPeriod';
+          type: 'u64';
         },
         {
-          name: "amount";
-          type: "u64";
+          name: 'amount';
+          type: 'u64';
         }
       ];
     },
     {
-      name: "initialize";
+      name: 'initialize';
       discriminator: [175, 175, 109, 31, 13, 152, 155, 237];
       accounts: [
         {
-          name: "signer";
+          name: 'signer';
           writable: true;
           signer: true;
         },
         {
-          name: "stakeConfig";
+          name: 'stakeConfig';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -574,45 +574,45 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
           };
         },
         {
-          name: "stakeCurrencyMint";
+          name: 'stakeCurrencyMint';
         },
         {
-          name: "tokenProgram";
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         },
         {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
         },
         {
-          name: "rent";
-          address: "SysvarRent111111111111111111111111111111111";
+          name: 'rent';
+          address: 'SysvarRent111111111111111111111111111111111';
         }
       ];
       args: [];
     },
     {
-      name: "stake";
+      name: 'stake';
       discriminator: [206, 176, 202, 18, 200, 209, 179, 108];
       accounts: [
         {
-          name: "signer";
+          name: 'signer';
           writable: true;
           signer: true;
         },
         {
-          name: "stakeConfig";
+          name: 'stakeConfig';
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -631,19 +631,19 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
           };
         },
         {
-          name: "vault";
+          name: 'vault';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   115,
                   116,
@@ -661,27 +661,27 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeConfig";
+                kind: 'account';
+                path: 'stakeConfig';
               },
               {
-                kind: "arg";
-                path: "lockPeriod";
+                kind: 'arg';
+                path: 'lockPeriod';
               }
             ];
           };
         },
         {
-          name: "vaultTokenAccount";
+          name: 'vaultTokenAccount';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "account";
-                path: "vault";
+                kind: 'account';
+                path: 'vault';
               },
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   6,
                   221,
@@ -718,12 +718,12 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
             program: {
-              kind: "const";
+              kind: 'const';
               value: [
                 140,
                 151,
@@ -762,40 +762,40 @@ export type Vault = {
           };
         },
         {
-          name: "stakerInfoPda";
+          name: 'stakerInfoPda';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "const";
+                kind: 'const';
                 value: [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111];
               },
               {
-                kind: "account";
-                path: "vault";
+                kind: 'account';
+                path: 'vault';
               },
               {
-                kind: "account";
-                path: "signer";
+                kind: 'account';
+                path: 'signer';
               }
             ];
           };
         },
         {
-          name: "stakeDetailPda";
+          name: 'stakeDetailPda';
           writable: true;
         },
         {
-          name: "userTokenAccount";
+          name: 'stakerTokenAccount';
           writable: true;
           pda: {
             seeds: [
               {
-                kind: "account";
-                path: "signer";
+                kind: 'account';
+                path: 'signer';
               },
               {
-                kind: "const";
+                kind: 'const';
                 value: [
                   6,
                   221,
@@ -832,12 +832,12 @@ export type Vault = {
                 ];
               },
               {
-                kind: "account";
-                path: "stakeCurrencyMint";
+                kind: 'account';
+                path: 'stakeCurrencyMint';
               }
             ];
             program: {
-              kind: "const";
+              kind: 'const';
               value: [
                 140,
                 151,
@@ -876,229 +876,415 @@ export type Vault = {
           };
         },
         {
-          name: "stakeCurrencyMint";
+          name: 'stakeCurrencyMint';
         },
         {
-          name: "tokenProgram";
-          address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
         },
         {
-          name: "systemProgram";
-          address: "11111111111111111111111111111111";
+          name: 'systemProgram';
+          address: '11111111111111111111111111111111';
         },
         {
-          name: "associatedTokenProgram";
-          address: "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL";
+          name: 'associatedTokenProgram';
+          address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
         }
       ];
       args: [
         {
-          name: "lockPeriod";
-          type: "u64";
+          name: 'lockPeriod';
+          type: 'u64';
         },
         {
-          name: "amount";
-          type: "u64";
+          name: 'amount';
+          type: 'u64';
         }
       ];
     }
   ];
   accounts: [
     {
-      name: "stakeConfig";
+      name: 'stakeConfig';
       discriminator: [238, 151, 43, 3, 11, 151, 63, 176];
     },
     {
-      name: "stakeDetail";
+      name: 'stakeDetail';
       discriminator: [50, 187, 176, 236, 173, 1, 166, 111];
     },
     {
-      name: "stakerInfo";
+      name: 'stakerInfo';
       discriminator: [241, 238, 149, 141, 241, 59, 35, 107];
     },
     {
-      name: "vault";
+      name: 'vault';
       discriminator: [211, 8, 232, 43, 2, 152, 117, 119];
+    }
+  ];
+  events: [
+    {
+      name: 'eventNewVault';
+      discriminator: [62, 85, 178, 155, 210, 80, 16, 125];
+    },
+    {
+      name: 'eventStake';
+      discriminator: [193, 220, 225, 33, 201, 27, 61, 43];
+    },
+    {
+      name: 'eventUnstake';
+      discriminator: [7, 14, 248, 129, 43, 55, 41, 104];
     }
   ];
   errors: [
     {
       code: 6000;
-      name: "isStaked";
-      msg: "Tokens are already staked";
+      name: 'isStaked';
+      msg: 'Tokens are already staked';
     },
     {
       code: 6001;
-      name: "notStaked";
-      msg: "Tokens not staked";
+      name: 'notStaked';
+      msg: 'Tokens not staked';
     },
     {
       code: 6002;
-      name: "noTokens";
-      msg: "No Tokens to stake";
+      name: 'noTokens';
+      msg: 'No Tokens to stake';
     },
     {
       code: 6003;
-      name: "vaultEnded";
-      msg: "Vault has been ended";
+      name: 'vaultEnded';
+      msg: 'Vault has been ended';
     },
     {
       code: 6004;
-      name: "vaultNotStarted";
-      msg: "Vault not started";
+      name: 'vaultNotStarted';
+      msg: 'Vault not started';
     },
     {
       code: 6005;
-      name: "unbondingTimeNotOverYet";
-      msg: "The unbonding time is not over yet";
+      name: 'unbondingTimeNotOverYet';
+      msg: 'The unbonding time is not over yet';
     },
     {
       code: 6006;
-      name: "tgeNotYetReached";
-      msg: "Soft cap reached, but need to wait til TGE. Cannot unstake!";
+      name: 'tgeNotYetReached';
+      msg: 'Soft cap reached, but need to wait til TGE. Cannot unstake!';
     },
     {
       code: 6007;
-      name: "overflowError";
-      msg: "overflow";
+      name: 'overflowError';
+      msg: 'overflow';
     },
     {
       code: 6008;
-      name: "alreadyClaimed";
-      msg: "Already claimed";
+      name: 'alreadyClaimed';
+      msg: 'Already claimed';
     },
     {
       code: 6009;
-      name: "incorrectAuthority";
-      msg: "incorrectAuthority";
+      name: 'incorrectAuthority';
+      msg: 'incorrectAuthority';
     },
     {
       code: 6010;
-      name: "incorrectStakeDetailId";
-      msg: "Incorrect Stake detail ID. It must be current stake info id";
+      name: 'incorrectStakeDetailId';
+      msg: 'Incorrect Stake detail ID. It must be current stake info id';
     },
     {
       code: 6011;
-      name: "incorrectLockPeriod";
-      msg: "Incorrect Lock Period";
+      name: 'incorrectLockPeriod';
+      msg: 'Incorrect Lock Period';
     }
   ];
   types: [
     {
-      name: "stakeConfig";
+      name: 'eventNewVault';
       type: {
-        kind: "struct";
+        kind: 'struct';
         fields: [
           {
-            name: "bump";
-            docs: [
-              "Bump seed used to generate the program address / authority"
-            ];
-            type: {
-              array: ["u8", 1];
-            };
+            name: 'vault';
+            type: 'pubkey';
           },
           {
-            name: "version";
-            type: "u8";
+            name: 'stakeConfig';
+            type: 'pubkey';
           },
           {
-            name: "authority";
-            docs: ["Owner of the configuration"];
-            type: "pubkey";
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
           },
           {
-            name: "stakeCurrencyMint";
-            docs: ["currency mint of token to stake"];
-            type: "pubkey";
+            name: 'lockPeriod';
+            type: 'u64';
           }
         ];
       };
     },
     {
-      name: "stakeDetail";
+      name: 'eventStake';
       type: {
-        kind: "struct";
+        kind: 'struct';
         fields: [
           {
-            name: "bump";
-            docs: [
-              "Bump seed used to generate the program address / authority"
-            ];
+            name: 'stakeConfigPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakeConfig';
             type: {
-              array: ["u8", 1];
+              defined: {
+                name: 'stakeConfig';
+              };
             };
           },
           {
-            name: "id";
-            type: "u64";
+            name: 'stakerInfoPub';
+            type: 'pubkey';
           },
           {
-            name: "stakeAmount";
-            type: "u64";
+            name: 'stakerInfo';
+            type: {
+              defined: {
+                name: 'stakerInfo';
+              };
+            };
           },
           {
-            name: "unstakedAtTime";
-            type: "i64";
+            name: 'stakeDetailPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakeDetail';
+            type: {
+              defined: {
+                name: 'stakeDetail';
+              };
+            };
+          },
+          {
+            name: 'vaultPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'vault';
+            type: {
+              defined: {
+                name: 'vault';
+              };
+            };
+          },
+          {
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'vaultStakingTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakerTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'amount';
+            type: 'u64';
           }
         ];
       };
     },
     {
-      name: "stakerInfo";
+      name: 'eventUnstake';
       type: {
-        kind: "struct";
+        kind: 'struct';
         fields: [
           {
-            name: "bump";
-            docs: [
-              "Bump seed used to generate the program address / authority"
-            ];
+            name: 'stakeConfigPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakeConfig';
             type: {
-              array: ["u8", 1];
+              defined: {
+                name: 'stakeConfig';
+              };
             };
           },
           {
-            name: "totalStake";
-            type: "u64";
+            name: 'stakerInfoPub';
+            type: 'pubkey';
           },
           {
-            name: "currentId";
-            type: "u64";
+            name: 'stakerInfo';
+            type: {
+              defined: {
+                name: 'stakerInfo';
+              };
+            };
+          },
+          {
+            name: 'stakeDetailPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakeDetail';
+            type: {
+              defined: {
+                name: 'stakeDetail';
+              };
+            };
+          },
+          {
+            name: 'vaultPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'vault';
+            type: {
+              defined: {
+                name: 'vault';
+              };
+            };
+          },
+          {
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'vaultStakingTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakerTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'amount';
+            type: 'u64';
           }
         ];
       };
     },
     {
-      name: "vault";
+      name: 'stakeConfig';
       type: {
-        kind: "struct";
+        kind: 'struct';
         fields: [
           {
-            name: "bump";
+            name: 'bump';
             docs: [
-              "Bump seed used to generate the program address / authority"
+              'Bump seed used to generate the program address / authority'
             ];
             type: {
-              array: ["u8", 1];
+              array: ['u8', 1];
             };
           },
           {
-            name: "version";
-            type: "u8";
+            name: 'version';
+            type: 'u8';
           },
           {
-            name: "vaultConfig";
-            type: "pubkey";
+            name: 'authority';
+            docs: ['Owner of the configuration'];
+            type: 'pubkey';
           },
           {
-            name: "totalStaked";
-            docs: ["total staked"];
-            type: "u64";
+            name: 'stakeCurrencyMint';
+            docs: ['currency mint of token to stake'];
+            type: 'pubkey';
+          }
+        ];
+      };
+    },
+    {
+      name: 'stakeDetail';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            docs: [
+              'Bump seed used to generate the program address / authority'
+            ];
+            type: {
+              array: ['u8', 1];
+            };
           },
           {
-            name: "lockPeriod";
-            type: "u64";
+            name: 'id';
+            type: 'u64';
+          },
+          {
+            name: 'stakeAmount';
+            type: 'u64';
+          },
+          {
+            name: 'unstakedAtTime';
+            type: 'i64';
+          },
+          {
+            name: 'staker';
+            type: 'pubkey';
+          }
+        ];
+      };
+    },
+    {
+      name: 'stakerInfo';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            docs: [
+              'Bump seed used to generate the program address / authority'
+            ];
+            type: {
+              array: ['u8', 1];
+            };
+          },
+          {
+            name: 'totalStake';
+            type: 'u64';
+          },
+          {
+            name: 'currentId';
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'vault';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            docs: [
+              'Bump seed used to generate the program address / authority'
+            ];
+            type: {
+              array: ['u8', 1];
+            };
+          },
+          {
+            name: 'version';
+            type: 'u8';
+          },
+          {
+            name: 'vaultConfig';
+            type: 'pubkey';
+          },
+          {
+            name: 'totalStaked';
+            docs: ['total staked'];
+            type: 'u64';
+          },
+          {
+            name: 'lockPeriod';
+            type: 'u64';
           }
         ];
       };

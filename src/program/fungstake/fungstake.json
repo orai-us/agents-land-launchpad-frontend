@@ -568,6 +568,61 @@
           "type": "u64"
         }
       ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [29, 158, 252, 191, 10, 83, 219, 99],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stake_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115, 116, 97, 107, 105, 110, 103, 95, 99, 111, 110, 102, 105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_currency_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_currency_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
+          "name": "lock_period",
+          "type": "u32"
+        },
+        {
+          "name": "lock_extend_time",
+          "type": "u32"
+        },
+        {
+          "name": "soft_cap",
+          "type": "u64"
+        },
+        {
+          "name": "total_reward",
+          "type": "u64"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -592,6 +647,10 @@
     {
       "name": "EventNewVault",
       "discriminator": [62, 85, 178, 155, 210, 80, 16, 125]
+    },
+    {
+      "name": "EventReachSoftCap",
+      "discriminator": [116, 189, 253, 5, 46, 107, 123, 32]
     },
     {
       "name": "EventStake",
@@ -748,6 +807,30 @@
           {
             "name": "total_reward",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventReachSoftCap",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": {
+              "defined": {
+                "name": "Vault"
+              }
+            }
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_currency_mint",
+            "type": "pubkey"
           }
         ]
       }

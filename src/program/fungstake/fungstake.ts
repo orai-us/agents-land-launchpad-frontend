@@ -972,6 +972,73 @@ export type Fungstake = {
           type: 'u64';
         }
       ];
+    },
+    {
+      name: 'updateConfig';
+      discriminator: [29, 158, 252, 191, 10, 83, 219, 99];
+      accounts: [
+        {
+          name: 'signer';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'stakeConfig';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'stakeCurrencyMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'stakeCurrencyMint';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        }
+      ];
+      args: [
+        {
+          name: 'lockPeriod';
+          type: 'u32';
+        },
+        {
+          name: 'lockExtendTime';
+          type: 'u32';
+        },
+        {
+          name: 'softCap';
+          type: 'u64';
+        },
+        {
+          name: 'totalReward';
+          type: 'u64';
+        }
+      ];
     }
   ];
   accounts: [
@@ -996,6 +1063,10 @@ export type Fungstake = {
     {
       name: 'eventNewVault';
       discriminator: [62, 85, 178, 155, 210, 80, 16, 125];
+    },
+    {
+      name: 'eventReachSoftCap';
+      discriminator: [116, 189, 253, 5, 46, 107, 123, 32];
     },
     {
       name: 'eventStake';
@@ -1152,6 +1223,30 @@ export type Fungstake = {
           {
             name: 'totalReward';
             type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'eventReachSoftCap';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'vault';
+            type: {
+              defined: {
+                name: 'vault';
+              };
+            };
+          },
+          {
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'rewardCurrencyMint';
+            type: 'pubkey';
           }
         ];
       };
