@@ -16,7 +16,9 @@ export type ConnectButtonProps = {
   setSettingModal: (isOpen: boolean) => void;
 };
 
-export const ConnectButton: FC = ({ setSettingModal }: ConnectButtonProps) => {
+export const ConnectButton: FC<ConnectButtonProps> = ({
+  setSettingModal,
+}: ConnectButtonProps) => {
   const [, setLocation] = useLocation();
 
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
