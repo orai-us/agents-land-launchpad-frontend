@@ -12,6 +12,7 @@ import { Web3SolanaProgramInteraction } from "@/program/web3";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useConfigActions } from "@/zustand-store/config/selector";
 import { web3FungibleStake } from "@/program/web3FungStake";
+import SettingModal from "../modals/Setting";
 
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
@@ -24,6 +25,7 @@ const Header: FC = () => {
   const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
+  const [isOpenSetting, setIsOpenSetting] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -32,7 +34,7 @@ const Header: FC = () => {
         console.log("config", config);
         handleSetBondingCurveConfig(config);
       }
-      setTimeout(() => setRpcUrl("1111"), 1000);
+
       const configStake = await web3FungStake.getStakeConfig(wallet);
 
       if (configStake) {
@@ -84,6 +86,10 @@ const Header: FC = () => {
 
   return (
     <>
+      <SettingModal
+        isOpen={isOpenSetting}
+        closeModal={() => setIsOpenSetting(false)}
+      />
       <HowItWorkModal
         isOpen={showStepWork}
         closeModal={() => setShowStepWork(false)}

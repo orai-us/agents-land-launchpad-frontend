@@ -1,9 +1,10 @@
 "use client";
+import { errorAlert, successAlert } from "@/components/others/ToastGroup";
 import { msgInfo, userInfo } from "@/utils/types";
 import { AnchorProvider, setProvider } from "@coral-xyz/anchor";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { Connection } from "@solana/web3.js";
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import { createContext, ReactNode, useEffect } from "react";
 
 export const UserContext = createContext<UserContextValue | undefined>({
   user: {} as userInfo,
@@ -70,13 +71,22 @@ export function UserProvider({
   const { rpcUrl } = value;
   const wallet = useWallet();
   useEffect(() => {
-    const connection = new Connection(value.rpcUrl, "confirmed");
-    const provider = new AnchorProvider(connection, wallet, {
-      commitment: "confirmed",
-      preflightCommitment: "confirmed",
-    });
-    setProvider(provider);
-  }, [rpcUrl, wallet]);
+    const setAnchorProvider = async () => {
+      try {
+        const connection = new Connection(value.rpcUrl, "confirmed");
+        await connection.getEpochInfo();
+        const provider = new AnchorProvider(connection, wallet, {
+          commitment: "confirmed",
+          preflightCommitment: "confirmed",
+        });
+        setProvider(provider);
+        successAlert("Switch RPC successfully");
+      } catch (e) {
+        errorAlert("Failed to connect to the network");
+      }
+    };
+    setAnchorProvider();
+  }, [rpcUrl]);
   return (
     <UserContext.Provider value={value}> {children} </UserContext.Provider>
   );
