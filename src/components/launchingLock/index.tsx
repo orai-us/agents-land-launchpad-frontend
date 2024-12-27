@@ -186,7 +186,7 @@ export default function LaunchingLock() {
         <div className="mt-4 md:mt-6 flex justify-between items-center">
           <div className="text-[#84869A]">Locking duration</div>
           <div className="text-right">
-            {formatTimePeriod(stakeConfig.lockPeriod)}
+            {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
           </div>
         </div>
         <div className="mt-2 mb-4 md:mt-3 md:mb-6 flex justify-between items-center">
