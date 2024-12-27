@@ -8,11 +8,17 @@ import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import base58 from 'bs58';
 import { FC, useContext, useEffect, useMemo } from 'react';
 import { RiExchangeDollarLine } from 'react-icons/ri';
-import { VscDebugDisconnect } from 'react-icons/vsc';
+import { VscDebugDisconnect, VscSettings } from 'react-icons/vsc';
 
 import { Link, useLocation } from 'wouter';
 
-export const ConnectButton: FC = () => {
+export type ConnectButtonProps = {
+  setSettingModal: (isOpen: boolean) => void;
+};
+
+export const ConnectButton: FC<ConnectButtonProps> = ({
+  setSettingModal,
+}: ConnectButtonProps) => {
   const [, setLocation] = useLocation();
 
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
@@ -101,15 +107,6 @@ export const ConnectButton: FC = () => {
         {login && publicKey ? (
           <>
             <div className="flex mr-0 md:mr-3 items-center justify-center text-[16px] lg:text-md">
-              {/* {user.avatar !== undefined && (
-                <img
-                  src={user.avatar}
-                  alt="Token IMG"
-                  className="rounded p-1"
-                  width={35}
-                  height={35}
-                />
-              )} */}
               {icon && (
                 <img
                   src={icon}
@@ -137,6 +134,15 @@ export const ConnectButton: FC = () => {
                     </Link>
                   </li>
                 )}
+                <li>
+                  <div
+                    className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+                    onClick={() => setSettingModal(true)}
+                  >
+                    <VscSettings />
+                    Settings
+                  </div>
+                </li>
                 <li>
                   <div
                     className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"

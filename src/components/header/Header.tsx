@@ -17,6 +17,7 @@ import {
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { PublicKey } from '@solana/web3.js';
 import { getProvider } from '@coral-xyz/anchor';
+import SettingModal from '../modals/Setting';
 import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
 const web3Solana = new Web3SolanaProgramInteraction();
@@ -40,6 +41,7 @@ const Header: FC = () => {
   const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
+  const [isOpenSetting, setIsOpenSetting] = useState(false);
   const provider = getProviderApp();
 
   useEffect(() => {
@@ -110,6 +112,10 @@ const Header: FC = () => {
 
   return (
     <>
+      <SettingModal
+        isOpen={isOpenSetting}
+        closeModal={() => setIsOpenSetting(false)}
+      />
       <HowItWorkModal
         isOpen={showStepWork}
         closeModal={() => setShowStepWork(false)}
@@ -144,7 +150,7 @@ const Header: FC = () => {
             </div>
           </div>
           <div className="hidden md:block">
-            <ConnectButton />
+            <ConnectButton setSettingModal={setIsOpenSetting} />
           </div>
           <div
             className="block md:hidden cursor-pointer"
@@ -227,7 +233,7 @@ const Header: FC = () => {
           )}
         </div>
         <div className="w-full">
-          <ConnectButton />
+          <ConnectButton setSettingModal={setIsOpenSetting} />
         </div>
       </div>
       {pathname === '/' && <Banner />}
