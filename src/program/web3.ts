@@ -684,12 +684,18 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Wallet not connected');
       return;
     }
-    // const provider = anchor.getProvider();
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+    const connection = new Connection(
+      'https://devnet.helius-rpc.com/?api-key=3b28a0fc-0ef6-48ef-b55c-c55ae74cb6a6',
+      'confirmed'
+    );
+
+    const providerOnFunction = new anchor.AnchorProvider(connection, wallet, {
       commitment: 'confirmed',
       preflightCommitment: 'confirmed',
     });
-    console.log('provider', provider);
+    console.log('providerOnFunction', providerOnFunction);
+    const provider = anchor.getProvider();
+    console.log('simulateSwapTx', provider);
     const program = new Program(
       pumpProgramInterface,
       provider

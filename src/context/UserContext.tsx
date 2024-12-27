@@ -2,8 +2,9 @@ import { errorAlert, successAlert } from '@/components/others/ToastGroup';
 import { RPC_MAPS } from '@/config';
 import { msgInfo, userInfo } from '@/utils/types';
 import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
+import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection } from '@solana/web3.js';
+import { Connection, Keypair } from '@solana/web3.js';
 import { createContext, ReactNode, useEffect, useState } from 'react';
 import Loading from 'react-loading';
 
@@ -77,15 +78,24 @@ export function UserProvider({
       try {
         const connection = new Connection(value.rpcUrl, 'confirmed');
         await connection.getEpochInfo();
-        const provider = new AnchorProvider(connection, wallet, {
-          commitment: 'confirmed',
-          preflightCommitment: 'confirmed',
-        });
-        setProvider(provider);
-        // setProviderApp(provider);
 
-        if (value.rpcUrl !== RPC_MAPS.Agents) {
-          successAlert('Switch RPC successfully');
+        if (wallet.publicKey) {
+          const provider = new AnchorProvider(connection, wallet, {
+            commitment: 'confirmed',
+            preflightCommitment: 'confirmed',
+          });
+          setProvider(provider);
+          console.log('UserProvider', provider);
+          if (value.rpcUrl !== RPC_MAPS.Agents) {
+            successAlert('Switch RPC successfully');
+          }
+        } else {
+          const wallet = new NodeWallet(Keypair.generate());
+          const provider = new AnchorProvider(connection, wallet, {
+            commitment: 'confirmed',
+            preflightCommitment: 'confirmed',
+          });
+          setProvider(provider);
         }
       } catch (e) {
         errorAlert('Failed to connect to the network');
@@ -93,14 +103,7 @@ export function UserProvider({
     };
 
     setAnchorProvider();
-  }, [rpcUrl]); // wallet
-
-  // console.log('first', providerApp);
-
-  // if (!providerApp) {
-  //   return <Loading />;
-  // }
-
+  }, [rpcUrl, wallet]);
   return (
     <UserContext.Provider value={value}> {children} </UserContext.Provider>
   );
