@@ -1,12 +1,12 @@
-import { coinInfo, userInfo } from '@/utils/types';
-import { fromBig } from '@/utils/util';
-import { FC, useContext, useEffect, useState } from 'react';
-import UserContext from '@/context/UserContext';
-import { HiOutlinePuzzle } from 'react-icons/hi';
-import { TbWorld } from 'react-icons/tb';
-import { FaXTwitter } from 'react-icons/fa6';
-import { FaTelegramPlane } from 'react-icons/fa';
-import { Link, useLocation } from 'wouter';
+import { coinInfo, userInfo } from "@/utils/types";
+import { fromBig } from "@/utils/util";
+import { FC, useContext, useEffect, useState } from "react";
+import UserContext from "@/context/UserContext";
+import { HiOutlinePuzzle } from "react-icons/hi";
+import { TbWorld } from "react-icons/tb";
+import { FaXTwitter } from "react-icons/fa6";
+import { FaTelegramPlane } from "react-icons/fa";
+import { Link, useLocation } from "wouter";
 
 interface CoinBlogProps {
   coin: coinInfo;
@@ -65,7 +65,7 @@ export const CoinBlog: React.FC<CoinBlogProps> = ({ coin, componentKey }) => {
             {coin?.name} [ticker: {coin?.ticker}]
           </div>
 
-          {componentKey === 'coin' ? (
+          {componentKey === "coin" ? (
             coin?.description && <div>{coin?.description}</div>
           ) : (
             <></>

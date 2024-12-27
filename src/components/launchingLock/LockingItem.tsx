@@ -3,7 +3,7 @@ import MAXImg from '@/assets/images/richoldman.png';
 import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
 import { Web3SolanaLockingToken } from '@/program/web3Locking';
 import { numberWithCommas } from '@/utils/format';
-import { toBN, toPublicKey } from '@/utils/util';
+import { formatTimePeriod, toBN, toPublicKey } from '@/utils/util';
 import { useWallet } from '@solana/wallet-adapter-react';
 import dayjs from 'dayjs';
 import { FC, useState } from 'react';
@@ -19,6 +19,7 @@ const LockingItem: FC<{ item: any; onSuccess: () => void }> = ({
   item,
   onSuccess,
 }) => {
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
   const coin = useGetCoinInfoState('coin');
   const [isLoading, setIsLoading] = useState(false);
   const { id, stakeAmount, unstakedAtTime, lockPeriod } = item || {};
@@ -97,7 +98,8 @@ const LockingItem: FC<{ item: any; onSuccess: () => void }> = ({
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {/* {period.label} */}
-        {ALL_CONFIGS.LOCK_FUNGIBLE_STAKE / 86400} days
+        {/* {ALL_CONFIGS.LOCK_FUNGIBLE_STAKE / 86400} days */}
+        {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(

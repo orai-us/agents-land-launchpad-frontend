@@ -12,27 +12,38 @@ import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useConfigActions } from '@/zustand-store/config/selector';
 import { web3FungibleStake } from '@/program/web3FungStake';
+import { PublicKey } from '@solana/web3.js';
 
 const web3Solana = new Web3SolanaProgramInteraction();
+const web3FungStake = new web3FungibleStake();
 
 const Header: FC = () => {
   const wallet = useWallet();
   const { handleSetBondingCurveConfig, handleSetStakeConfig } =
     useConfigActions();
   const [pathname] = useLocation();
-  const { solPrice, setSolPrice } = useContext(UserContext);
+  const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const config = await web3Solana.getConfigCurve();
-      if (config) {
-        console.log('config', config);
-        handleSetBondingCurveConfig(config);
+      if (rpcUrl) {
+        const config = await web3Solana.getConfigCurve();
+        if (config) {
+          console.log('config', config);
+          handleSetBondingCurveConfig(config);
+        }
+        const configStake = await web3FungStake.getStakeConfig(
+          new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
+        );
+
+        if (configStake) {
+          handleSetStakeConfig(configStake);
+        }
       }
     })();
-  }, []);
+  }, [rpcUrl]);
 
   useEffect(() => {
     const fetchData = async () => {

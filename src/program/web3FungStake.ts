@@ -41,10 +41,7 @@ export class web3FungibleStake {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
         provider
@@ -119,10 +116,7 @@ export class web3FungibleStake {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
         provider
@@ -197,10 +191,7 @@ export class web3FungibleStake {
         console.log('Warning: connection not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
         provider
@@ -261,21 +252,15 @@ export class web3FungibleStake {
         console.log('Warning: connection not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, undefined, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
         provider
       ) as Program<Fungstake>;
 
-      console.log("stake currency mint: ", stakeCurrencyMint.toBase58())
+      console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
       let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(STAKE_CONFIG_SEED),
-          stakeCurrencyMint.toBytes(),
-        ],
+        [Buffer.from(STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
         program.programId
       );
       const config = await program.account.stakeConfig.fetch(configPda);
@@ -287,16 +272,17 @@ export class web3FungibleStake {
     }
   }
 
-  async getReward(wallet: WalletContextState, stakeCurrencyMint: string, rewardCurrencyMint: string) {
+  async getReward(
+    wallet: WalletContextState,
+    stakeCurrencyMint: string,
+    rewardCurrencyMint: string
+  ) {
     try {
       if (!this.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
         provider
