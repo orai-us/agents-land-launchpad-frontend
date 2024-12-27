@@ -4,7 +4,8 @@ import { msgInfo, userInfo } from '@/utils/types';
 import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
-import { createContext, ReactNode, useEffect } from 'react';
+import { createContext, ReactNode, useEffect, useState } from 'react';
+import Loading from 'react-loading';
 
 export const UserContext = createContext<UserContextValue | undefined>({
   user: {} as userInfo,
@@ -67,6 +68,8 @@ export function UserProvider({
   children: ReactNode;
   value: UserContextValue;
 }) {
+  const [providerApp, setProviderApp] = useState(null);
+
   const { rpcUrl } = value;
   const wallet = useWallet();
   useEffect(() => {
@@ -79,6 +82,7 @@ export function UserProvider({
           preflightCommitment: 'confirmed',
         });
         setProvider(provider);
+        // setProviderApp(provider);
 
         if (value.rpcUrl !== RPC_MAPS.Agents) {
           successAlert('Switch RPC successfully');
@@ -87,8 +91,16 @@ export function UserProvider({
         errorAlert('Failed to connect to the network');
       }
     };
+
     setAnchorProvider();
-  }, [rpcUrl]);
+  }, [rpcUrl]); // wallet
+
+  // console.log('first', providerApp);
+
+  // if (!providerApp) {
+  //   return <Loading />;
+  // }
+
   return (
     <UserContext.Provider value={value}> {children} </UserContext.Provider>
   );

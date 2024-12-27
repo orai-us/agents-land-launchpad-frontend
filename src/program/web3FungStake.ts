@@ -282,7 +282,11 @@ export class web3FungibleStake {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
+      // const provider = anchor.getProvider();
+      const provider = new anchor.AnchorProvider(this.connection, wallet, {
+        commitment: 'confirmed',
+        preflightCommitment: 'confirmed',
+      });
       const program = new Program(
         stakeInterface,
         provider

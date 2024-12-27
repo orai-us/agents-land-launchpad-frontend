@@ -684,7 +684,12 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Wallet not connected');
       return;
     }
-    const provider = anchor.getProvider();
+    // const provider = anchor.getProvider();
+    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+      commitment: 'confirmed',
+      preflightCommitment: 'confirmed',
+    });
+    console.log('provider', provider);
     const program = new Program(
       pumpProgramInterface,
       provider
