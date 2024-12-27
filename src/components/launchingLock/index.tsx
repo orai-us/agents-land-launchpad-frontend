@@ -210,15 +210,17 @@ export default function LaunchingLock() {
             console.log('Stake!!');
             try {
               setIsLoading(true);
+              console.log("coin decimals: ", coin.decimals)
               const duration =
                 selectedLockTime.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS;
               const amount = toBN(
                 toBN(stakeAmount || 0)
-                  .multipliedBy(10 ** SPL_DECIMAL)
+                  .multipliedBy(10 ** coin.decimals || SPL_DECIMAL)
                   .toFixed(0, 1)
               ).toNumber();
               const res = await web3Stake.stake(
-                toPublicKey(coin.token),
+                ALL_CONFIGS.STAKE_CURRENCY_MINT,
+                coin.token,
                 amount,
                 wallet
               );

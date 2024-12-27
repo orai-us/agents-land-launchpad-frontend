@@ -114,7 +114,8 @@ const LockingItem: FC<{ item: any; onSuccess: () => void }> = ({
               setIsLoading(true);
 
               const res = await web3Stake.unStake(
-                toPublicKey(coin.token),
+                ALL_CONFIGS.STAKE_CURRENCY_MINT,
+                coin.token,
                 stakeAmount,
                 wallet
               );

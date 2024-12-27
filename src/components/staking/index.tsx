@@ -350,7 +350,7 @@ export default function Staking() {
                     getBalance();
                     setIsRefreshList(!isRefreshList);
                   } else {
-                    errorAlert('Lock failed!');
+                    errorAlert('Lock staking failed!');
                   }
                 } catch (error) {
                   console.log('error lock', error);
