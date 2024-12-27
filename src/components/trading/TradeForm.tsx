@@ -118,7 +118,13 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         rwNumber < maxTokenBuyInParty ? rwNumber : maxTokenBuyInParty;
 
       const rwAmount = toBN(initRw)
-        .minus(new BN(boughtTokenAmount).lt(new BN(0)) ? 0 : boughtTokenAmount)
+        .minus(
+          new BN(boughtTokenAmount).lt(new BN(0))
+            ? 0
+            : new BN(boughtTokenAmount)
+                .div(new BN(10 ** (coin.decimals || SPL_DECIMAL)))
+                .toString()
+        )
         .toNumber();
 
       setRewardAmt(rwAmount);

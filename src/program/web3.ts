@@ -1086,7 +1086,6 @@ export class Web3SolanaProgramInteraction {
         return;
       }
       const provider = anchor.getProvider();
-      console.log('provider', provider);
       if (!provider) {
         return;
       }
