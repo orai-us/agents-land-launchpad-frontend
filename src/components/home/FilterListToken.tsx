@@ -131,16 +131,16 @@ export default FilterListToken;
 
 export const SORT_LIST = [
   {
+    label: 'Creation time',
+    value: 'date',
+  },
+  {
     label: 'Featured',
     value: 'totalTrades',
   },
   {
     label: 'Last trade',
     value: 'lastTraded',
-  },
-  {
-    label: 'Creation time',
-    value: 'date',
   },
   {
     label: 'Market cap',
