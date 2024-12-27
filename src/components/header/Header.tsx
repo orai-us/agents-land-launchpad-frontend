@@ -124,7 +124,7 @@ const Header: FC = () => {
             </div>
           </div>
           <div className="hidden md:block">
-            <ConnectButton />
+            <ConnectButton setSettingModal={setIsOpenSetting} />
           </div>
           <div
             className="block md:hidden cursor-pointer"
@@ -207,7 +207,7 @@ const Header: FC = () => {
           )}
         </div>
         <div className="w-full">
-          <ConnectButton />
+          <ConnectButton setSettingModal={setIsOpenSetting} />
         </div>
       </div>
       {pathname === "/" && <Banner />}
