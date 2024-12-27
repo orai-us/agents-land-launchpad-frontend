@@ -1,9 +1,10 @@
 import { errorAlert } from '@/components/others/ToastGroup';
 import {
-  BLACK_LIST_ADDRESS,
+  FUNGIBLE_STAKE_CONFIG_SEED,
+  FUNGIBLE_VAULT_SEED,
+  PARRY_STATUS,
   SEED_GLOBAL,
   SPL_DECIMAL,
-  STAKER_INFO_SEED,
 } from '@/config';
 import {
   rayBuyTx,
@@ -11,8 +12,15 @@ import {
   simulateSwapOnRaydium,
 } from '@/utils/raydiumSwap/raydiumSwap';
 import { launchDataInfo, metadataInfo } from '@/utils/types';
+import {
+  calculateMarketCap,
+  calculateTokenPrice,
+  genTokenKeypair,
+  toBN,
+} from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
+import { Metaplex } from '@metaplex-foundation/js';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -27,22 +35,15 @@ import {
   Transaction,
 } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
+import base58 from 'bs58';
 import { ALL_CONFIGS } from './../config';
-import { Pumpfun } from './pumpfun';
-import idl from './pumpfun.json';
 import { Fungstake } from './fungstake/fungstake';
 import idlStake from './fungstake/fungstake.json';
+import { fetchJSONDataFromUrl } from './logListeners/utils';
+import { Pumpfun } from './pumpfun';
+import idl from './pumpfun.json';
 import { SEED_BONDING_CURVE, SEED_CONFIG } from './seed';
 import { handleTransaction } from './utils';
-import {
-  calculateMarketCap,
-  calculateTokenPrice,
-  genTokenKeypair,
-  toBN,
-} from '@/utils/util';
-import base58 from 'bs58';
-import { Metaplex } from '@metaplex-foundation/js';
-import { fetchJSONDataFromUrl } from './logListeners/utils';
 
 export const commitmentLevel = 'confirmed';
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -427,7 +428,7 @@ export class Web3SolanaProgramInteraction {
       if (isParty && type === 0) {
         let [stakeConfigPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from(STAKER_INFO_SEED),
+            Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
             new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
           ],
           new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
@@ -435,7 +436,7 @@ export class Web3SolanaProgramInteraction {
 
         let [vaultPda] = PublicKey.findProgramAddressSync(
           [
-            Buffer.from('staking_vault'),
+            Buffer.from(FUNGIBLE_VAULT_SEED),
             stakeConfigPda.toBytes(),
             mint.toBytes(),
           ],
@@ -1054,7 +1055,6 @@ export class Web3SolanaProgramInteraction {
         return;
       }
       const provider = anchor.getProvider();
-      console.log('provider', provider);
       if (!provider) {
         return;
       }
@@ -1073,6 +1073,51 @@ export class Web3SolanaProgramInteraction {
     } catch (error) {
       console.log('getTokenDetailFromContract error', error);
       return;
+    }
+  };
+
+  getAmountBoughtByUser = async (
+    token: PublicKey,
+    wallet: WalletContextState
+  ) => {
+    try {
+      if (!this.connection || !wallet.publicKey) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      const provider = anchor.getProvider();
+      console.log('provider', provider);
+      if (!provider) {
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), token.toBytes()],
+        program.programId
+      );
+
+      const [userPartyPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(PARRY_STATUS),
+          bondingCurvePda.toBytes(),
+          wallet.publicKey.toBytes(),
+        ],
+        program.programId
+      );
+
+      const userPartyInfo = await program.account.partyStatus.fetch(
+        userPartyPda
+      );
+
+      const amount = (userPartyInfo.totalAmount || '0').toString();
+
+      return amount;
+    } catch (error) {
+      console.log('getTokenDetailFromContract error', error);
+      return '0';
     }
   };
 }

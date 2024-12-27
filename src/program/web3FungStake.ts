@@ -1,8 +1,8 @@
 import {
   ALL_CONFIGS,
-  STAKE_CONFIG_SEED,
+  FUNGIBLE_STAKE_CONFIG_SEED,
   STAKE_FUNGIBLE_INFO_SEED,
-  VAULT_SEED,
+  FUNGIBLE_VAULT_SEED,
 } from '@/config';
 import { toPublicKey } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
@@ -199,14 +199,14 @@ export class web3FungibleStake {
 
       let [configPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(STAKE_CONFIG_SEED),
+          Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
           toPublicKey(stakeCurrencyMint).toBytes(),
         ],
         program.programId
       );
       let [vaultPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(VAULT_SEED),
+          Buffer.from(FUNGIBLE_VAULT_SEED),
           configPda.toBytes(),
           new PublicKey(rewardCurrencyMint).toBytes(),
         ],
@@ -260,7 +260,7 @@ export class web3FungibleStake {
 
       console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
       let [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
+        [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
         program.programId
       );
       const config = await program.account.stakeConfig.fetch(configPda);

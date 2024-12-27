@@ -13,15 +13,21 @@ export const SEED_GLOBAL = 'global';
 export const TX_FEE = 0.25;
 
 /**
- * LOCKING VAULTS
+ * STRONGBOX VAULTS
  */
-export const VAULT_SEED = 'staking_vault';
-export const STAKE_CONFIG_SEED = 'staking_config';
+export const STRONG_BOX_VAULT_SEED = 'staking_vault';
+export const STRONG_BOX_STAKE_CONFIG_SEED = 'staking_config';
 export const STAKER_INFO_SEED = 'staker_info';
-export const STAKE_FUNGIBLE_INFO_SEED = 'stake_info';
-export const STAKE_INFO_SEED = 'stake_info';
 export const STAKE_DETAIL_SEED = 'stake_detail';
 
+/**
+ * FUNGIBLE LOCK
+ */
+export const FUNGIBLE_VAULT_SEED = 'staking_vault';
+export const FUNGIBLE_STAKE_CONFIG_SEED = 'staking_config';
+export const STAKE_FUNGIBLE_INFO_SEED = 'stake_info';
+
+export const PARRY_STATUS = 'party_status';
 export const BLACK_LIST_ADDRESS = [
   'oraigyiRnYoCgFiaLnpiaPvJjZbs5zzmWHp4sxBgZq3', // BlackRack
   'Au2AaBHBJ2b5E9eERrff58Byspu4Esg7CxJYrkNBeZa6', // TSM
@@ -86,8 +92,8 @@ export const CONFIGS: Record<
       'CyokHgfzAWYaaFR2P37hfHz3H3RRF6u9A6RNhWraSyoN',
     STAKE_CURRENCY_MINT: '3Ff7yUkQsbMzViXu7aAxAYsgpy31wY8R8TteE39FDuw4',
     STRONGBOX_VAULT_PROGRAM_ID: '9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy',
-    BONDING_CURVE_LIMIT: 85 * LAMPORTS_PER_SOL,
-    INIT_SOL_BONDING_CURVE: 3 * LAMPORTS_PER_SOL,
+    BONDING_CURVE_LIMIT: 150 * LAMPORTS_PER_SOL,
+    INIT_SOL_BONDING_CURVE: 30 * LAMPORTS_PER_SOL,
     TIMER: {
       MILLISECONDS: 1000,
       MONTH_TO_SECONDS: 60,

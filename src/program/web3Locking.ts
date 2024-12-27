@@ -1,23 +1,23 @@
 import {
   ALL_CONFIGS,
-  STAKE_CONFIG_SEED,
+  STRONG_BOX_STAKE_CONFIG_SEED,
   STAKE_DETAIL_SEED,
   STAKER_INFO_SEED,
-  VAULT_SEED,
-} from "@/config";
-import * as anchor from "@coral-xyz/anchor";
-import { BN, Program } from "@coral-xyz/anchor";
-import { WalletContextState } from "@solana/wallet-adapter-react";
+  STRONG_BOX_VAULT_SEED,
+} from '@/config';
+import * as anchor from '@coral-xyz/anchor';
+import { BN, Program } from '@coral-xyz/anchor';
+import { WalletContextState } from '@solana/wallet-adapter-react';
 import {
   ComputeBudgetProgram,
   Connection,
   PublicKey,
   Transaction,
-} from "@solana/web3.js";
-import { Vault } from "./locking/locking";
-import idl from "./locking/locking.json";
-import { handleTransaction } from "./utils";
-import { commitmentLevel, endpoint } from "./web3";
+} from '@solana/web3.js';
+import { Vault } from './locking/locking';
+import idl from './locking/locking.json';
+import { handleTransaction } from './utils';
+import { commitmentLevel, endpoint } from './web3';
 
 export const vaultProgramId = new PublicKey(idl.address);
 export const vaultInterface = JSON.parse(JSON.stringify(idl));
@@ -35,7 +35,7 @@ export class Web3SolanaLockingToken {
   async stake(lockPeriod: number, amount: number, wallet: WalletContextState) {
     try {
       if (!this.connection || !wallet.publicKey) {
-        console.log("Warning: Wallet not connected");
+        console.log('Warning: Wallet not connected');
         return;
       }
       const provider = anchor.getProvider();
@@ -43,16 +43,16 @@ export class Web3SolanaLockingToken {
 
       let [configPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(STAKE_CONFIG_SEED),
+          Buffer.from(STRONG_BOX_STAKE_CONFIG_SEED),
           new PublicKey(stakeCurrencyMint).toBytes(),
         ],
         program.programId
       );
       let [vaultPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(VAULT_SEED),
+          Buffer.from(STRONG_BOX_VAULT_SEED),
           configPda.toBytes(),
-          new BN(lockPeriod).toBuffer("le", 8),
+          new BN(lockPeriod).toBuffer('le', 8),
         ],
         program.programId
       );
@@ -69,14 +69,14 @@ export class Web3SolanaLockingToken {
         let stakerInfo = await program.account.stakerInfo.fetch(stakerInfoPda);
         currentId = stakerInfo.currentId.toNumber();
       } catch (error) {
-        console.log("get number of locked items error", error);
+        console.log('get number of locked items error', error);
       }
 
       let [userStakeDetailPda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from(STAKE_DETAIL_SEED),
           stakerInfoPda.toBytes(),
-          new BN(currentId + 1).toBuffer("le", 8),
+          new BN(currentId + 1).toBuffer('le', 8),
         ],
         program.programId
       );
@@ -107,7 +107,7 @@ export class Web3SolanaLockingToken {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
         const signature = await this.connection.sendRawTransaction(sTx, {
-          preflightCommitment: "confirmed",
+          preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
         const blockhash = await this.connection.getLatestBlockhash();
@@ -118,32 +118,32 @@ export class Web3SolanaLockingToken {
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          "confirmed" // FIXME: trick lord confirmed / finalized;
+          'confirmed' // FIXME: trick lord confirmed / finalized;
         );
 
-        console.log("Successfully locking token.\n Signature: ", signature);
+        console.log('Successfully locking token.\n Signature: ', signature);
         return res;
       }
     } catch (error) {
-      console.log("Error in locking token transaction", error, error.error);
-      const { transaction = "", result } =
+      console.log('Error in locking token transaction', error, error.error);
+      const { transaction = '', result } =
         (await handleTransaction({
           error,
           connection: this.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
-        console.log("----confirm----", { transaction, result });
+        console.log('----confirm----', { transaction, result });
         return { transaction, result };
       }
     }
   }
 
   async getListLockedOfUser(lockPeriod: number, wallet: WalletContextState) {
-    let vaultInfo = { totalStaked: new BN("0") };
+    let vaultInfo = { totalStaked: new BN('0') };
     try {
       if (!this.connection) {
-        console.log("Warning: Wallet not connected");
+        console.log('Warning: Wallet not connected');
         return;
       }
       const provider = anchor.getProvider();
@@ -151,22 +151,22 @@ export class Web3SolanaLockingToken {
 
       let [configPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(STAKE_CONFIG_SEED),
+          Buffer.from(STRONG_BOX_STAKE_CONFIG_SEED),
           new PublicKey(stakeCurrencyMint).toBytes(),
         ],
         program.programId
       );
       const [vaultPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(VAULT_SEED),
+          Buffer.from(STRONG_BOX_VAULT_SEED),
           configPda.toBytes(),
-          new BN(lockPeriod).toBuffer("le", 8),
+          new BN(lockPeriod).toBuffer('le', 8),
         ],
         program.programId
       );
 
       vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
-        totalStaked: new BN("0"),
+        totalStaked: new BN('0'),
       };
 
       if (!wallet.publicKey) {
@@ -195,7 +195,7 @@ export class Web3SolanaLockingToken {
               [
                 Buffer.from(STAKE_DETAIL_SEED),
                 stakerInfoPda.toBytes(),
-                new BN(key + 1).toBuffer("le", 8),
+                new BN(key + 1).toBuffer('le', 8),
               ],
               program.programId
             );
@@ -213,7 +213,7 @@ export class Web3SolanaLockingToken {
         throw error;
       }
     } catch (error) {
-      console.log("get list error", error);
+      console.log('get list error', error);
       return { listLockedItems: [], vaultInfo };
     }
   }
@@ -226,7 +226,7 @@ export class Web3SolanaLockingToken {
   ) {
     try {
       if (!this.connection || !wallet.publicKey) {
-        console.log("Warning: Wallet not connected");
+        console.log('Warning: Wallet not connected');
         return;
       }
       const provider = anchor.getProvider();
@@ -234,7 +234,7 @@ export class Web3SolanaLockingToken {
 
       let [configPda] = PublicKey.findProgramAddressSync(
         [
-          Buffer.from(STAKE_CONFIG_SEED),
+          Buffer.from(STRONG_BOX_STAKE_CONFIG_SEED),
           new PublicKey(stakeCurrencyMint).toBytes(),
         ],
         program.programId
@@ -265,7 +265,7 @@ export class Web3SolanaLockingToken {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
         const signature = await this.connection.sendRawTransaction(sTx, {
-          preflightCommitment: "confirmed",
+          preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
         const blockhash = await this.connection.getLatestBlockhash();
@@ -276,22 +276,22 @@ export class Web3SolanaLockingToken {
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          "confirmed" // FIXME: trick lord confirmed / finalized;
+          'confirmed' // FIXME: trick lord confirmed / finalized;
         );
 
-        console.log("Successfully unlocking token.\n Signature: ", signature);
+        console.log('Successfully unlocking token.\n Signature: ', signature);
         return res;
       }
     } catch (error) {
-      console.log("Error in locking token transaction", error, error.error);
-      const { transaction = "", result } =
+      console.log('Error in locking token transaction', error, error.error);
+      const { transaction = '', result } =
         (await handleTransaction({
           error,
           connection: this.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
-        console.log("----confirm----", { transaction, result });
+        console.log('----confirm----', { transaction, result });
         return { transaction, result };
       }
     }

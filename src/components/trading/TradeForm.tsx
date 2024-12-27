@@ -13,7 +13,7 @@ import { debounce } from 'lodash';
 import BigNumber from 'bignumber.js';
 import { ALL_CONFIGS, SOL_DECIMAL, SPL_DECIMAL } from '@/config';
 import Slippage from '../modals/Slippage';
-import { toBN } from '@/utils/util';
+import { toBN, toPublicKey } from '@/utils/util';
 import NumberFormat from 'react-number-format';
 import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 import CountdownPublic from './CountdownPublic';
@@ -85,6 +85,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const disableSellOnParty = isBuy === 1 && isOnParty;
 
   const fetchMaxBuy = async () => {
+    if (!wallet.publicKey) {
+      setRewardAmt(0);
+    }
+
     if (coin.token) {
       console.log('=== Update Limit Buy ===');
 
@@ -92,8 +96,16 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         ? false
         : wallet.publicKey.toBase58() ===
           (coin.creator['wallet'] || coin.creator);
-      const boughtTokenAmount = toBN(tokenBal).minus(isCreator ? 10 ** 7 : 0);
-      const rw = await web3Stake.getReward(wallet, ALL_CONFIGS.STAKE_CURRENCY_MINT, coin.token);
+      // const boughtTokenAmount = toBN(tokenBal).minus(isCreator ? 10 ** 7 : 0);
+      const boughtTokenAmount = await web3Solana.getAmountBoughtByUser(
+        toPublicKey(coin.token),
+        wallet
+      );
+      const rw = await web3Stake.getReward(
+        wallet,
+        ALL_CONFIGS.STAKE_CURRENCY_MINT,
+        coin.token
+      );
       const rwNumber = toBN(rw || 0)
         .div(10 ** coin.decimals || SPL_DECIMAL)
         .toNumber();
@@ -106,7 +118,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         rwNumber < maxTokenBuyInParty ? rwNumber : maxTokenBuyInParty;
 
       const rwAmount = toBN(initRw)
-        .minus(boughtTokenAmount.isLessThan(0) ? 0 : boughtTokenAmount)
+        .minus(new BN(boughtTokenAmount).lt(new BN(0)) ? 0 : boughtTokenAmount)
         .toNumber();
 
       setRewardAmt(rwAmount);

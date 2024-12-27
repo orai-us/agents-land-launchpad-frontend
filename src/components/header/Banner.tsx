@@ -21,9 +21,13 @@ const Banner = () => {
     fetchData();
   }, []);
 
-  const bondingCurvePercentOrg = new BigNumber(
-    (kothCoin?.lamportReserves || 0).toString() || 0
+  const bondingCurveValue = new BigNumber(
+    (kothCoin?.lamportReserves || 0).toString()
   )
+    .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+    .toNumber();
+
+  const bondingCurvePercentOrg = new BigNumber(bondingCurveValue)
     .multipliedBy(100)
     .div(ALL_CONFIGS.BONDING_CURVE_LIMIT);
 
