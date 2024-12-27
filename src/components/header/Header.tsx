@@ -10,11 +10,15 @@ import MarqueeToken from './MarqueeToken';
 import { ALL_CONFIGS, SOL_PRICE_KEY } from '@/config';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { useConfigActions } from '@/zustand-store/config/selector';
+import {
+  useConfigActions,
+  useGetConfigState,
+} from '@/zustand-store/config/selector';
 import { web3FungibleStake } from '@/program/web3FungStake';
 import { PublicKey } from '@solana/web3.js';
 import { getProvider } from '@coral-xyz/anchor';
 import SettingModal from '../modals/Setting';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
@@ -29,9 +33,10 @@ const getProviderApp = () => {
 };
 
 const Header: FC = () => {
-  const wallet = useWallet();
   const { handleSetBondingCurveConfig, handleSetStakeConfig } =
     useConfigActions();
+  const bondingCurveConfig = useGetConfigState('bondingCurveConfig');
+  const stakeConfig = useGetConfigState('stakeConfig');
   const [pathname] = useLocation();
   const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
@@ -44,17 +49,22 @@ const Header: FC = () => {
       if (!provider) {
         return;
       }
-      const config = await web3Solana.getConfigCurve();
-      if (config) {
-        console.log('config', config);
-        handleSetBondingCurveConfig(config);
-      }
-      const configStake = await web3FungStake.getStakeConfig(
-        new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
-      );
 
-      if (configStake) {
-        handleSetStakeConfig(configStake);
+      if (!bondingCurveConfig) {
+        const config = await web3Solana.getConfigCurve();
+        if (config) {
+          console.log('config', config);
+          handleSetBondingCurveConfig(config);
+        }
+      }
+      if (!stakeConfig) {
+        const configStake = await web3FungStake.getStakeConfig(
+          new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
+        );
+
+        if (configStake) {
+          handleSetStakeConfig(configStake);
+        }
       }
     })();
   }, [provider]);

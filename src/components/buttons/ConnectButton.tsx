@@ -1,16 +1,16 @@
-"use client";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
-import { userInfo } from "@/utils/types";
-import { confirmWallet, walletConnect } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import base58 from "bs58";
-import { FC, useContext, useEffect, useMemo } from "react";
-import { RiExchangeDollarLine } from "react-icons/ri";
-import { VscDebugDisconnect, VscSettings } from "react-icons/vsc";
+'use client';
+import { errorAlert, successAlert } from '@/components/others/ToastGroup';
+import UserContext from '@/context/UserContext';
+import { userInfo } from '@/utils/types';
+import { confirmWallet, walletConnect } from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import base58 from 'bs58';
+import { FC, useContext, useEffect, useMemo } from 'react';
+import { RiExchangeDollarLine } from 'react-icons/ri';
+import { VscDebugDisconnect, VscSettings } from 'react-icons/vsc';
 
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from 'wouter';
 
 export type ConnectButtonProps = {
   setSettingModal: (isOpen: boolean) => void;
@@ -79,15 +79,15 @@ export const ConnectButton: FC = ({ setSettingModal }: ConnectButtonProps) => {
         setLogin(true);
         setIsLoading(false);
       }
-      successAlert("Message signed.");
+      successAlert('Message signed.');
     } catch (error) {
       // errorAlert("Sign-in failed.");
-      console.log("error", error);
+      console.log('error', error);
     }
   };
 
   const logOut = async () => {
-    if (typeof disconnect === "function") {
+    if (typeof disconnect === 'function') {
       await disconnect();
       // setLocation("/");
     }
@@ -97,7 +97,7 @@ export const ConnectButton: FC = ({ setSettingModal }: ConnectButtonProps) => {
     localStorage.clear();
   };
 
-  const { adapter: { icon = "", name = "" } = {} } = wallet || {};
+  const { adapter: { icon = '', name = '' } = {} } = wallet || {};
 
   return (
     <div className="px-5 md:px-0">
