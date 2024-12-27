@@ -74,8 +74,8 @@ const ListToken: FC<{
   type: string;
   data: coinInfo[];
   handleLoadMore;
-  totalData;
-  isDataFromRpc;
+  totalData: number;
+  isDataFromRpc: boolean;
 }> = ({ type, data, handleLoadMore, totalData, isDataFromRpc }) => {
   if (isDataFromRpc) {
     return <ListTokenFromRpc data={data} />;

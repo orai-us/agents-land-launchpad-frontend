@@ -227,7 +227,6 @@ const HomePage: FC = () => {
               //   e.tradingTime &&
               //   new Date(e.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
             }
-
             return (
               !!e.metadata?.agentAddress && dateNeedToFilter && !isBlackList
             );

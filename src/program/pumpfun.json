@@ -1311,6 +1311,10 @@
       "discriminator": [64, 198, 205, 232, 38, 8, 113, 226]
     },
     {
+      "name": "TriggerLaunchEvent",
+      "discriminator": [149, 6, 64, 217, 221, 50, 68, 145]
+    },
+    {
       "name": "WithdrawEvent",
       "discriminator": [22, 9, 133, 26, 160, 44, 71, 192]
     }
@@ -1473,6 +1477,10 @@
           {
             "name": "public_start",
             "type": "u64"
+          },
+          {
+            "name": "curve_creation_date",
+            "type": "i64"
           }
         ]
       }
@@ -1787,6 +1795,26 @@
           },
           {
             "name": "reserve_token",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TriggerLaunchEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "party_start",
+            "type": "u64"
+          },
+          {
+            "name": "public_start",
             "type": "u64"
           }
         ]

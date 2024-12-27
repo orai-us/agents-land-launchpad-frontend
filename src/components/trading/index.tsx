@@ -203,6 +203,7 @@ export default function TradingPage() {
       //   coin.tradingTime &&
       //   new Date(coin.tradingTime).getTime() > ALL_CONFIGS.OFFICIAL_TIME;
 
+      console.log("coin: ", coin)
       if (!coin.metadata?.agentAddress) {
         setLocation('/');
         errorAlert('Token not created with agent!');
