@@ -1,5 +1,11 @@
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
+export const RPC_MAPS = {
+  Agents: import.meta.env.VITE_SOLANA_RPC,
+  Helius: import.meta.env.VITE_SOLANA_RPC_HELIOUS,
+  Custom: 'https://',
+};
+
 export const SOL_PRICE_KEY = 'SOL_PRICE_KEY';
 
 export const SOLANA_ENV =

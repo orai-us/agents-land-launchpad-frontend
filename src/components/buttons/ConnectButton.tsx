@@ -165,10 +165,10 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
         )}
       </button>
       {login && tempUser.wallet && (
-        <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
+        <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28] p-1">
           {user?.wallet && (
             <Link
-              className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+              className="p-2  border-r border-[#4d4f58] text-[12px] flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
               href={`/profile/${tempUser.wallet}`}
             >
               <RiExchangeDollarLine />
@@ -176,7 +176,16 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
             </Link>
           )}
           <div
-            className="p-2 flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
+            className="p-2 border-r flex-1  justify-center border-[#4d4f58] text-[12px] flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+            onClick={() => {
+              setSettingModal(true);
+            }}
+          >
+            <VscSettings />
+            Settings
+          </div>
+          <div
+            className="p-2 text-[12px] flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
             onClick={logOut}
           >
             <VscDebugDisconnect />

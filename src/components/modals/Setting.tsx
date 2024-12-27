@@ -1,24 +1,19 @@
-import UserContext from "@/context/UserContext";
-import React, { ChangeEvent, useContext, useState } from "react";
-import { errorAlert, successAlert } from "../others/ToastGroup";
+import UserContext from '@/context/UserContext';
+import React, { ChangeEvent, useContext, useState } from 'react';
 
-import { twMerge } from "tailwind-merge";
+import { RPC_MAPS } from '@/config';
+import { twMerge } from 'tailwind-merge';
 
 interface ModalProps {
   isOpen: boolean;
   closeModal: () => void;
 }
 
-const RPC_MAPS = {
-  Agents: import.meta.env.VITE_SOLANA_RPC,
-  Helious: import.meta.env.VITE_SOLANA_RPC_HELIOUS,
-  Custom: "https://",
-};
-
 const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const { rpcUrl, setRpcUrl } = useContext(UserContext);
-  const [inputRpcType, setInputRpcType] = useState<string>("Agents");
-  const [customUrl, setCustomUrl] = useState<string>(RPC_MAPS["Custom"]);
+  const [inputRpcType, setInputRpcType] = useState<string>('Agents');
+  const [customUrl, setCustomUrl] = useState<string>(RPC_MAPS['Custom']);
+  const [tab, setTab] = useState<string>(RPC_MAPS.Agents);
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -26,8 +21,9 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   };
 
   const handleSetRpcType = (rpcType: string) => {
+    setTab(RPC_MAPS[rpcType]);
     setInputRpcType(rpcType);
-    if (rpcType !== "Custom") {
+    if (rpcType !== 'Custom') {
       setRpcUrl(RPC_MAPS[rpcType]);
     }
   };
@@ -35,8 +31,8 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   return (
     <div
       className={twMerge(
-        "fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md",
-        !isOpen && "hidden"
+        'fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md',
+        !isOpen && 'hidden'
       )}
     >
       <div className="flex w-full max-w-[480px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
@@ -60,27 +56,32 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
             </svg>
           </button>
           <div className="mt-4 mb-8 text-[14px] text-[#9192A0]">RPC URL</div>
-          <div className="w-full flex justify-start space-x-2 items-center bg-[#080A14] border border-[#1A1C28] rounded-lg">
-            {Object.keys(RPC_MAPS).map((rpcType, i) => {
-              return (
-                <div id={rpcType} key={i}>
-                  <button
-                    className="rounded-full bg-white px-4 py-1  text-[#080A14] hover:bg-gray-400 hover:text-[#000000] transition duration-300"
-                    onClick={() => handleSetRpcType(rpcType)}
-                  >
-                    {rpcType}
-                  </button>
-                </div>
-              );
-            })}
+          <div className="w-full flex justify-start space-x-2 items-center rounded-lg">
+            {Object.entries(RPC_MAPS)
+              .filter(([k, v]) => !!v)
+              .map(([rpcType, rpcUrl], i) => {
+                return (
+                  <div id={rpcType} key={i}>
+                    <button
+                      className={twMerge(
+                        'uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
+                        tab === rpcUrl && 'bg-[#585A6B] text-[#E8E9EE]'
+                      )}
+                      onClick={() => handleSetRpcType(rpcType)}
+                    >
+                      {rpcType}
+                    </button>
+                  </div>
+                );
+              })}
           </div>
           <input
             autoComplete="off"
-            disabled={inputRpcType !== "Custom"}
+            disabled={inputRpcType !== 'Custom'}
             id="ticker"
             type="text"
             value={
-              inputRpcType === "Custom" ? customUrl : RPC_MAPS[inputRpcType]
+              inputRpcType === 'Custom' ? customUrl : RPC_MAPS[inputRpcType]
             }
             onChange={handleChange}
             onBlur={() => {
@@ -88,7 +89,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
             }}
             className={twMerge(
               `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`,
-              inputRpcType !== "Custom" && "opacity-50"
+              inputRpcType !== 'Custom' && 'opacity-50'
             )}
           />
         </div>

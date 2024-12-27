@@ -233,7 +233,12 @@ const Header: FC = () => {
           )}
         </div>
         <div className="w-full">
-          <ConnectButton setSettingModal={setIsOpenSetting} />
+          <ConnectButton
+            setSettingModal={(val) => {
+              setIsOpenSetting(val);
+              setOpenMobileMenu(false);
+            }}
+          />
         </div>
       </div>
       {pathname === '/' && <Banner />}

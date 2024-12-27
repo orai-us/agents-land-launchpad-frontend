@@ -85,6 +85,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const disableSellOnParty = isBuy === 1 && isOnParty;
 
   const fetchMaxBuy = async () => {
+    if (!isOnParty) {
+      return;
+    }
+
     if (!wallet.publicKey) {
       setRewardAmt(0);
     }

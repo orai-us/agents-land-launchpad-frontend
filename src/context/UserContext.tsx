@@ -1,10 +1,10 @@
-"use client";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import { msgInfo, userInfo } from "@/utils/types";
-import { AnchorProvider, setProvider } from "@coral-xyz/anchor";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { Connection } from "@solana/web3.js";
-import { createContext, ReactNode, useEffect } from "react";
+import { errorAlert, successAlert } from '@/components/others/ToastGroup';
+import { RPC_MAPS } from '@/config';
+import { msgInfo, userInfo } from '@/utils/types';
+import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { Connection } from '@solana/web3.js';
+import { createContext, ReactNode, useEffect } from 'react';
 
 export const UserContext = createContext<UserContextValue | undefined>({
   user: {} as userInfo,
@@ -13,13 +13,13 @@ export const UserContext = createContext<UserContextValue | undefined>({
   setLogin: (value: boolean) => {},
   isLoading: false,
   setIsLoading: (value: boolean) => {},
-  imageUrl: "/*.png",
+  imageUrl: '/*.png',
   setImageUrl: (value: string) => {},
   isCreated: false,
   setIsCreated: (value: boolean) => {},
   messages: [] as msgInfo[],
   setMessages: (value: msgInfo[]) => {},
-  coinId: "",
+  coinId: '',
   setCoinId: (value: string) => {},
   newMsg: {} as msgInfo,
   setNewMsg: (value: msgInfo) => {},
@@ -72,16 +72,19 @@ export function UserProvider({
   useEffect(() => {
     const setAnchorProvider = async () => {
       try {
-        const connection = new Connection(value.rpcUrl, "confirmed");
+        const connection = new Connection(value.rpcUrl, 'confirmed');
         await connection.getEpochInfo();
         const provider = new AnchorProvider(connection, wallet, {
-          commitment: "confirmed",
-          preflightCommitment: "confirmed",
+          commitment: 'confirmed',
+          preflightCommitment: 'confirmed',
         });
         setProvider(provider);
-        successAlert("Switch RPC successfully");
+
+        if (value.rpcUrl !== RPC_MAPS.Agents) {
+          successAlert('Switch RPC successfully');
+        }
       } catch (e) {
-        errorAlert("Failed to connect to the network");
+        errorAlert('Failed to connect to the network');
       }
     };
     setAnchorProvider();
