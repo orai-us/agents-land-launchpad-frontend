@@ -57,7 +57,7 @@ const Header: FC = () => {
       if (!bondingCurveConfig) {
         const config = await web3Solana.getConfigCurve();
         if (config) {
-          console.log('config', config);
+          console.log('config', config, config.curveLimit.toNumber());
           handleSetBondingCurveConfig(config);
         }
       }

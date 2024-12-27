@@ -1,17 +1,18 @@
-import UserContext from "@/context/UserContext";
-import { coinInfo, replyInfo, tradeInfo, userInfo } from "@/utils/types";
-import { postReply } from "@/utils/util";
+import UserContext from '@/context/UserContext';
+import { coinInfo, replyInfo, tradeInfo, userInfo } from '@/utils/types';
+import { postReply, toBN } from '@/utils/util';
 import React, {
   ChangeEvent,
   useContext,
   useMemo,
   useRef,
   useState,
-} from "react";
-import { errorAlert, successAlert } from "../others/ToastGroup";
+} from 'react';
+import { errorAlert, successAlert } from '../others/ToastGroup';
 
-import { uploadImage } from "@/utils/fileUpload";
-import { twMerge } from "tailwind-merge";
+import { uploadImage } from '@/utils/fileUpload';
+import { twMerge } from 'tailwind-merge';
+import { ALL_CONFIGS, SOL_DECIMAL } from '@/config';
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,8 +25,8 @@ const HowItWorkModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   return (
     <div
       className={twMerge(
-        "fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md",
-        !isOpen && "hidden"
+        'fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md',
+        !isOpen && 'hidden'
       )}
     >
       <div className="flex w-full max-w-[480px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
@@ -120,12 +121,16 @@ const HowItWorkModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
 export default HowItWorkModal;
 
 const STEP_WORK = [
-  "Create & customize your agent at Mesh",
-  "Bind Telegram and Twitter",
-  "Publish your agent",
-  "Initialize token for your agent",
-  "Wait for bonding curve when it reaches ~150 SOL market cap",
-  "List graduated token at Raydium and OraiDEX",
-  "Change the agent owner to token holders",
-  "Govern the agent through DAO",
+  'Create & customize your agent at Mesh',
+  'Bind Telegram and Twitter',
+  'Publish your agent',
+  'Initialize token for your agent',
+  `Wait for bonding curve when it reaches ~${toBN(
+    ALL_CONFIGS.BONDING_CURVE_LIMIT - ALL_CONFIGS.INIT_SOL_BONDING_CURVE
+  )
+    .div(10 ** SOL_DECIMAL)
+    .toNumber()} SOL market cap`,
+  'List graduated token at Raydium and OraiDEX',
+  'Change the agent owner to token holders',
+  'Govern the agent through DAO',
 ];

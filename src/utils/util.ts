@@ -12,6 +12,7 @@ import {
   tradeInfo,
   userInfo,
 } from './types';
+import { fetchJSONDataFromUrl } from '@/program/logListeners/utils';
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const DISTILL_BE_URL =
@@ -182,10 +183,18 @@ export const genTokenKeypair = async (): Promise<string> => {
 export const getCoinInfo = async (data: string): Promise<coinInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/coin/${data}`, config);
+
+    let metadata = response.data?.metadata;
+    if (!metadata && response.data.url) {
+      metadata = await fetchJSONDataFromUrl(response.data.url);
+    }
+
     return {
       ...response.data,
       tokenReserves: new BN(response.data.tokenReserves),
       lamportReserves: new BN(response.data.lamportReserves),
+      metadata,
+      description: metadata?.description,
     };
   } catch (err) {
     console.log('err get coin info: ', err);
@@ -485,21 +494,21 @@ export const calculateMarketCap = (
 
 export function formatTimePeriod(seconds: number) {
   const units = [
-      { label: "second", value: 1 },
-      { label: "minute", value: 60 },
-      { label: "hour", value: 3600 },
-      { label: "day", value: 86400 },
-      { label: "week", value: 604800 },
-      { label: "month", value: 2629800 }, // Approximate (30.44 days)
-      { label: "year", value: 31557600 }  // Approximate (365.25 days)
+    { label: 'second', value: 1 },
+    { label: 'minute', value: 60 },
+    { label: 'hour', value: 3600 },
+    { label: 'day', value: 86400 },
+    { label: 'week', value: 604800 },
+    { label: 'month', value: 2629800 }, // Approximate (30.44 days)
+    { label: 'year', value: 31557600 }, // Approximate (365.25 days)
   ];
 
   for (let i = units.length - 1; i >= 0; i--) {
-      const unit = units[i];
-      if (seconds >= unit.value) {
-          const count = Math.floor(seconds / unit.value);
-          return `${count} ${unit.label}${count > 1 ? "s" : ""}`;
-      }
+    const unit = units[i];
+    if (seconds >= unit.value) {
+      const count = Math.floor(seconds / unit.value);
+      return `${count} ${unit.label}${count > 1 ? 's' : ''}`;
+    }
   }
-  return "just now";
+  return 'just now';
 }
