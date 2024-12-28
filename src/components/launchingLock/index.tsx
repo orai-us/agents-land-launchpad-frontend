@@ -122,7 +122,7 @@ export default function LaunchingLock() {
     <div className="w-full m-auto">
       <div className="w-full flex flex-col border border-[#1A1C28] bg-[#13141D] rounded-lg p-3 md:p-6 mt-4 md:mt-0">
         <div className="text-[18px] text-[#E8E9EE] font-medium mb-4 md:mb-6">
-          Launching Vault
+          Subscription Vault
           <p className="text-[12px] md:text-[14px] text-[#9192A0]">
             Lock $MAX for whitelist access to buy the token
           </p>

@@ -305,7 +305,7 @@ export const findHolders = async (mint: string) => {
         id: 'helius-test',
         params: {
           page: page,
-          limit: 30,
+          limit: 20,
           displayOptions: {},
           //mint address for the token we are interested in
           mint: mint,

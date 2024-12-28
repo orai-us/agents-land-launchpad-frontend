@@ -329,7 +329,7 @@ export const ListLaunchToken = ({
                 ) : (
                   <div className="flex flex-col">
                     <p className="text-[14px] md:text-[16px] mb-1 font-medium text-[#E8E9EE]">
-                      In Launching Vault
+                      In Subscription Vault
                     </p>
                     <p className="text-[12px] text-[#84869A]">
                       {/* Waiting for countdown time */}

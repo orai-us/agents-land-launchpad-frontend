@@ -135,7 +135,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
               isTrades === CHAT_TAB.LOCK && 'bg-[#585A6B] text-[#E8E9EE]'
             )}
           >
-            {coin.ticker} Launching Vaults
+            {coin.ticker} Subscription Vaults
           </div>
           <div
             onClick={() => setIsTrades(CHAT_TAB.TRADE)}
