@@ -272,7 +272,6 @@ export const postReply = async (data: replyInfo) => {
 // ================== Get Holders ===========================
 export const findHolders = async (mint: string) => {
   // Pagination logic
-  let page = 1;
   // allOwners will store all the addresses that hold the token
   let allOwners: holderInfo[] = [];
 
@@ -280,7 +279,8 @@ export const findHolders = async (mint: string) => {
   const HELIUS_RPC =
     import.meta.env.VITE_SOLANA_RPC ||
     "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd";
-  while (true) {
+  // query top 20 holders
+  try {
     const response = await fetch(
       // import.meta.env.VITE_SOLANA_RPC ||
       HELIUS_RPC,
@@ -294,8 +294,8 @@ export const findHolders = async (mint: string) => {
           method: "getTokenAccounts",
           id: "helius-test",
           params: {
-            page: page,
-            limit: 30,
+            page: 1,
+            limit: 20,
             displayOptions: {},
             //mint address for the token we are interested in
             mint: mint,
@@ -304,10 +304,8 @@ export const findHolders = async (mint: string) => {
       }
     );
     const data = await response.json();
-    // Pagination logic.
-    if (!data.result || data.result.token_accounts.length === 0) {
-      break;
-    }
+    // error when querying -> return empty holder
+    if (!data?.result?.token_accounts) return [];
 
     // Adding unique owners to a list of token owners.
     data.result.token_accounts.forEach((account) => {
@@ -317,10 +315,12 @@ export const findHolders = async (mint: string) => {
         amount: account.amount,
       });
     });
-    page++;
-  }
 
-  return allOwners;
+    return allOwners;
+  } catch (error) {
+    console.log("Error finding token holders: ", error);
+    return [];
+  }
 };
 
 export const getSolPriceInUSD = async () => {
