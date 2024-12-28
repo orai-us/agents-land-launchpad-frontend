@@ -398,7 +398,7 @@ const CountdownItem = ({ coin }) => {
           />
         </svg>
         <span className="text-[#9192A0] text-[12px] ml-1">
-          Party round start at
+          Party round starts at
         </span>
       </div>
 
