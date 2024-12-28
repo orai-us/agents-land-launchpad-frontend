@@ -104,6 +104,7 @@ const HomePage: FC = () => {
             coins.map(async (coin) => {
               const { partyTradingTime, token } = coin || {};
               if (!partyTradingTime) {
+                // TODO: remove later, user when BE not work trigger update party time
                 console.log('===== Query party Time =====', coin.ticker);
                 const { curveAccount } =
                   await web3Solana.getMaxBondingCurveLimit(
@@ -113,9 +114,9 @@ const HomePage: FC = () => {
 
                 const partyStart = curveAccount?.partyStart?.toNumber();
 
-                coin['partyTradingTime'] = new Date(
-                  partyStart * ALL_CONFIGS.TIMER.MILLISECONDS
-                );
+                coin['partyTradingTime'] = !partyStart
+                  ? undefined
+                  : new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS);
                 return partyStart;
               }
             })
