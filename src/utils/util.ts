@@ -1,6 +1,9 @@
-import axios, { AxiosRequestConfig } from "axios";
+import { ALL_CONFIGS } from '@/config';
+import { BN } from '@coral-xyz/anchor';
+import { PublicKey, PublicKeyInitData } from '@solana/web3.js';
+import axios, { AxiosRequestConfig } from 'axios';
+import BigNumber from 'bignumber.js';
 import {
-  ChartTable,
   coinInfo,
   holderInfo,
   msgInfo,
@@ -8,19 +11,16 @@ import {
   replyInfo,
   tradeInfo,
   userInfo,
-} from "./types";
-import { BN } from "@coral-xyz/anchor";
-import { ALL_CONFIGS } from "@/config";
-import BigNumber from "bignumber.js";
-import { PublicKey, PublicKeyInitData } from "@solana/web3.js";
+} from './types';
+import { fetchJSONDataFromUrl } from '@/program/logListeners/utils';
 
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 export const DISTILL_BE_URL =
   import.meta.env.VITE_DISTILL_BACKEND_URL ||
-  "https://api-dev.distilled.ai/distill";
+  'https://api-dev.distilled.ai/distill';
 
 const headers: Record<string, string> = {
-  "ngrok-skip-browser-warning": "true",
+  'ngrok-skip-browser-warning': 'true',
 };
 
 const config: AxiosRequestConfig = {
@@ -43,7 +43,7 @@ export const getUser = async ({
     // console.log("response:", response.data);
     return response.data;
   } catch (err) {
-    console.log("err getting user: ", err);
+    console.log('err getting user: ', err);
     throw new Error(err);
   }
 };
@@ -61,7 +61,7 @@ export const getUserByWalletAddress = async ({
     // console.log("response:", response.data);
     return response.data;
   } catch (err) {
-    console.log("err getting user: ", err);
+    console.log('err getting user: ', err);
     throw new Error(err);
   }
 };
@@ -76,7 +76,7 @@ export const updateUser = async (id: string, data: userInfo): Promise<any> => {
     );
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    return { error: 'error setting up the request' };
   }
 };
 
@@ -89,7 +89,7 @@ export const walletConnect = async ({
     const response = await axios.post(`${BACKEND_URL}/user/`, data);
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    return { error: 'error setting up the request' };
   }
 };
 
@@ -106,20 +106,25 @@ export const confirmWallet = async ({
     );
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    return { error: 'error setting up the request' };
   }
 };
 
 export const getCoinsInfo = async (
   params
-): Promise<{ coins: coinInfo[]; total: number }> => {
+): Promise<{ coins: coinInfo[]; total: number; isError?: boolean }> => {
   try {
-    const res = await axios.get(`${BACKEND_URL}/coin`, { ...config, params });
+    const res = await axios.get(`${BACKEND_URL}/coin`, {
+      ...config,
+      params,
+    });
     return res.data;
   } catch (error) {
+    console.log('Get List token from BE failed', error);
     return {
       coins: [],
       total: 0,
+      isError: true,
     };
   }
 };
@@ -129,7 +134,7 @@ export const getAgentsData = async (params): Promise<coinInfo[]> => {
     ...config,
     params: {
       filter: JSON.stringify({
-        username: "",
+        username: '',
         status: 1,
         role: 4,
         publish: 1,
@@ -178,13 +183,21 @@ export const genTokenKeypair = async (): Promise<string> => {
 export const getCoinInfo = async (data: string): Promise<coinInfo> => {
   try {
     const response = await axios.get(`${BACKEND_URL}/coin/${data}`, config);
+
+    let metadata = response.data?.metadata;
+    if (!metadata && response.data.url) {
+      metadata = await fetchJSONDataFromUrl(response.data.url);
+    }
+
     return {
       ...response.data,
       tokenReserves: new BN(response.data.tokenReserves),
       lamportReserves: new BN(response.data.lamportReserves),
+      metadata,
+      description: metadata?.description,
     };
   } catch (err) {
-    console.log("err get coin info: ", err);
+    console.log('err get coin info: ', err);
     // throw new Error(err);
   }
 };
@@ -223,7 +236,7 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
     );
     return response.data;
   } catch (err) {
-    console.log("err get message by coin: ", err);
+    console.log('err get message by coin: ', err);
   }
 };
 
@@ -233,7 +246,7 @@ export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
       `${BACKEND_URL}/cointrade/${data}`,
       config
     );
-    console.log("trade response::", response);
+    console.log('trade response::', response);
     return {
       ...response.data,
       record: response.data.record.map((r: recordInfo) => ({
@@ -243,7 +256,7 @@ export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
       })),
     };
   } catch (err) {
-    console.log("err get coin trade: ", err);
+    console.log('err get coin trade: ', err);
     // throw new Error(err);
   }
 };
@@ -255,7 +268,7 @@ export const getKoth = async (): Promise<coinInfo> => {
       ...response.data,
     };
   } catch (err) {
-    console.log("err get coin king: ", err);
+    console.log('err get coin king: ', err);
     // throw new Error(err);
   }
 };
@@ -265,7 +278,7 @@ export const postReply = async (data: replyInfo) => {
     const response = await axios.post(`${BACKEND_URL}/feedback/`, data, config);
     return response.data;
   } catch (err) {
-    return { error: "error setting up the request" };
+    return { error: 'error setting up the request' };
   }
 };
 
@@ -278,21 +291,21 @@ export const findHolders = async (mint: string) => {
   // TODO: FIXME: need to use helius rpc here: https://docs.helius.dev/compression-and-das-api/digital-asset-standard-das-api/get-token-accounts
   const HELIUS_RPC =
     import.meta.env.VITE_SOLANA_RPC ||
-    "https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd";
+    'https://devnet.helius-rpc.com/?api-key=44b7171f-7de7-4e68-9d08-eff1ef7529bd';
   // query top 20 holders
   try {
     const response = await fetch(
       // import.meta.env.VITE_SOLANA_RPC ||
       HELIUS_RPC,
       {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "getTokenAccounts",
-          id: "helius-test",
+          jsonrpc: '2.0',
+          method: 'getTokenAccounts',
+          id: 'helius-test',
           params: {
             page: 1,
             limit: 20,
@@ -318,7 +331,7 @@ export const findHolders = async (mint: string) => {
 
     return allOwners;
   } catch (error) {
-    console.log("Error finding token holders: ", error);
+    console.log('Error finding token holders: ', error);
     return [];
   }
 };
@@ -328,12 +341,12 @@ export const getSolPriceInUSD = async () => {
     // Fetch the price data from CoinGecko
     const response = await axios.get(
       // "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
-      "https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd"
+      'https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd'
     );
     const solPriceInUSD = response.data.solana.usd;
     return solPriceInUSD;
   } catch (error) {
-    console.error("Error fetching SOL price:", error);
+    console.error('Error fetching SOL price:', error);
     throw error;
   }
 };
@@ -344,9 +357,9 @@ const JWT = import.meta.env.VITE_PINATA_PRIVATE_KEY;
 export const pinFileToIPFS = async (blob: File) => {
   try {
     const data = new FormData();
-    data.append("file", blob);
-    const res = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
-      method: "POST",
+    data.append('file', blob);
+    const res = await fetch('https://api.pinata.cloud/pinning/pinFileToIPFS', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${JWT}`,
       },
@@ -363,10 +376,10 @@ export const uploadImagePinata = async (url: string) => {
   console.log(res.blob);
   const blob = await res.blob();
 
-  const imageFile = new File([blob], "image.png", { type: "image/png" });
+  const imageFile = new File([blob], 'image.png', { type: 'image/png' });
   console.log(imageFile);
   const resData = await pinFileToIPFS(imageFile);
-  console.log(resData, "RESDATA>>>>");
+  console.log(resData, 'RESDATA>>>>');
   if (resData) {
     return `https://gateway.pinata.cloud/ipfs/${resData.IpfsHash}`;
   } else {
@@ -383,12 +396,12 @@ export const uploadImagePinata = async (url: string) => {
  */
 export const reduceString = (str: string, from: number, end: number) => {
   if (!str) {
-    return "-";
+    return '-';
   }
 
-  return str && typeof str.substring === "function"
-    ? str.substring(0, from) + "..." + str.substring(str.length - end)
-    : "-";
+  return str && typeof str.substring === 'function'
+    ? str.substring(0, from) + '...' + str.substring(str.length - end)
+    : '-';
 };
 
 export const toBig = (value: number, decimals: number): BN => {
@@ -404,8 +417,8 @@ export const fromBig = (value: BN, decimals: number = 6): number => {
   const divmodResult = value.divmod(new BN(10 ** decimals));
   const result =
     divmodResult.div.toString() +
-    "." +
-    divmodResult.mod.toString().padStart(decimals, "0");
+    '.' +
+    divmodResult.mod.toString().padStart(decimals, '0');
   return parseFloat(result);
 };
 
@@ -455,7 +468,7 @@ export function calculateKotHProgress(
 export const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 export const retrieveEnvVariable = (variableName: string) => {
-  const variable = process.env[variableName] || "";
+  const variable = process.env[variableName] || '';
   if (!variable) {
     console.log(`${variableName} is not set`);
     // process.exit(1);
@@ -470,3 +483,36 @@ export const toBN = (val: BigNumber.Value) => {
 export const toPublicKey = (val: PublicKeyInitData) => {
   return new PublicKey(val);
 };
+
+export const calculateMarketCap = (
+  tokenReserves: BN,
+  decimals: number,
+  tokenPrice: number
+): number => {
+  if (!(tokenReserves instanceof BN)) {
+    tokenReserves = new BN(tokenReserves);
+  }
+  const tokenReservesNum = fromBig(tokenReserves, decimals);
+  return tokenReservesNum * tokenPrice;
+};
+
+export function formatTimePeriod(seconds: number) {
+  const units = [
+    { label: 'second', value: 1 },
+    { label: 'minute', value: 60 },
+    { label: 'hour', value: 3600 },
+    { label: 'day', value: 86400 },
+    { label: 'week', value: 604800 },
+    { label: 'month', value: 2629800 }, // Approximate (30.44 days)
+    { label: 'year', value: 31557600 }, // Approximate (365.25 days)
+  ];
+
+  for (let i = units.length - 1; i >= 0; i--) {
+    const unit = units[i];
+    if (seconds >= unit.value) {
+      const count = Math.floor(seconds / unit.value);
+      return `${count} ${unit.label}${count > 1 ? 's' : ''}`;
+    }
+  }
+  return 'just now';
+}

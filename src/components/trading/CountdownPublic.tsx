@@ -1,10 +1,7 @@
-import { ALL_CONFIGS } from '@/config';
 import { formatCountdownTime, useCountdown } from './hooks/useCountdown';
 
-const Countdown = ({ onEnd, coin, endTime }) => {
-  const startTime = Math.ceil(
-    new Date(coin.date || Date.now()).getTime() / ALL_CONFIGS.TIMER.MILLISECOND
-  );
+const CountdownPublic = ({ onEnd, endTime }) => {
+  const startTime = Date.now();
   // const endTime = Math.floor(
   //   new Date(coin.tradingTime || Date.now()).getTime() /
   //     ALL_CONFIGS.TIMER.MILLISECOND
@@ -39,7 +36,9 @@ const Countdown = ({ onEnd, coin, endTime }) => {
             fill="#9192A0"
           />
         </svg>
-        <span className="text-[#9192A0] text-[12px] ml-1">Phase start at</span>
+        <span className="text-[#9192A0] text-[11px] ml-1">
+          Party round is running! Public round will be started at
+        </span>
       </div>
 
       <div className="flex mt-3">
@@ -55,4 +54,4 @@ const Countdown = ({ onEnd, coin, endTime }) => {
   );
 };
 
-export default Countdown;
+export default CountdownPublic;

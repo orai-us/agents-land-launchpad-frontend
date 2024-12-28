@@ -1,18 +1,24 @@
-"use client";
-import { errorAlert, successAlert } from "@/components/others/ToastGroup";
-import UserContext from "@/context/UserContext";
-import { userInfo } from "@/utils/types";
-import { confirmWallet, walletConnect } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { useWalletModal } from "@solana/wallet-adapter-react-ui";
-import base58 from "bs58";
-import { FC, useContext, useEffect, useMemo } from "react";
-import { RiExchangeDollarLine } from "react-icons/ri";
-import { VscDebugDisconnect } from "react-icons/vsc";
+'use client';
+import { errorAlert, successAlert } from '@/components/others/ToastGroup';
+import UserContext from '@/context/UserContext';
+import { userInfo } from '@/utils/types';
+import { confirmWallet, walletConnect } from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useWalletModal } from '@solana/wallet-adapter-react-ui';
+import base58 from 'bs58';
+import { FC, useContext, useEffect, useMemo } from 'react';
+import { RiExchangeDollarLine } from 'react-icons/ri';
+import { VscDebugDisconnect, VscSettings } from 'react-icons/vsc';
 
-import { Link, useLocation } from "wouter";
+import { Link, useLocation } from 'wouter';
 
-export const ConnectButton: FC = () => {
+export type ConnectButtonProps = {
+  setSettingModal: (isOpen: boolean) => void;
+};
+
+export const ConnectButton: FC<ConnectButtonProps> = ({
+  setSettingModal,
+}: ConnectButtonProps) => {
   const [, setLocation] = useLocation();
 
   const { user, setUser, login, setLogin, isLoading, setIsLoading } =
@@ -70,21 +76,20 @@ export const ConnectButton: FC = () => {
       const signedWallet = { ...connection, signature: res };
       const confirm = await confirmWallet({ data: signedWallet });
 
-      console.log("confirm", confirm);
-
       if (confirm) {
         setUser(confirm);
         setLogin(true);
         setIsLoading(false);
       }
-      successAlert("Message signed.");
+      successAlert('Message signed.');
     } catch (error) {
-      errorAlert("Sign-in failed.");
+      // errorAlert("Sign-in failed.");
+      console.log('error', error);
     }
   };
 
   const logOut = async () => {
-    if (typeof disconnect === "function") {
+    if (typeof disconnect === 'function') {
       await disconnect();
       // setLocation("/");
     }
@@ -94,11 +99,7 @@ export const ConnectButton: FC = () => {
     localStorage.clear();
   };
 
-  const { adapter: { icon = "", name = "" } = {} } = wallet || {};
-
-  const handleToProfile = (id: string) => {
-    setLocation(id);
-  };
+  const { adapter: { icon = '', name = '' } = {} } = wallet || {};
 
   return (
     <div className="px-5 md:px-0">
@@ -106,15 +107,6 @@ export const ConnectButton: FC = () => {
         {login && publicKey ? (
           <>
             <div className="flex mr-0 md:mr-3 items-center justify-center text-[16px] lg:text-md">
-              {/* {user.avatar !== undefined && (
-                <img
-                  src={user.avatar}
-                  alt="Token IMG"
-                  className="rounded p-1"
-                  width={35}
-                  height={35}
-                />
-              )} */}
               {icon && (
                 <img
                   src={icon}
@@ -144,6 +136,15 @@ export const ConnectButton: FC = () => {
                 )}
                 <li>
                   <div
+                    className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+                    onClick={() => setSettingModal(true)}
+                  >
+                    <VscSettings />
+                    Settings
+                  </div>
+                </li>
+                <li>
+                  <div
                     className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
                     onClick={logOut}
                   >
@@ -164,10 +165,10 @@ export const ConnectButton: FC = () => {
         )}
       </button>
       {login && tempUser.wallet && (
-        <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28]">
+        <div className="flex md:hidden justify-between items-center rounded bg-[#1A1C28] p-1">
           {user?.wallet && (
             <Link
-              className="p-2 flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+              className="p-2  border-r border-[#4d4f58] text-[12px] flex-1 flex gap-2 items-center justify-center mb-1 text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
               href={`/profile/${tempUser.wallet}`}
             >
               <RiExchangeDollarLine />
@@ -175,7 +176,16 @@ export const ConnectButton: FC = () => {
             </Link>
           )}
           <div
-            className="p-2 flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
+            className="p-2 border-r flex-1  justify-center border-[#4d4f58] text-[12px] flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
+            onClick={() => {
+              setSettingModal(true);
+            }}
+          >
+            <VscSettings />
+            Settings
+          </div>
+          <div
+            className="p-2 text-[12px] flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
             onClick={logOut}
           >
             <VscDebugDisconnect />

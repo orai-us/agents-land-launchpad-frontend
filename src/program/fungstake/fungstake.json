@@ -1,7 +1,7 @@
 {
-  "address": "9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy",
+  "address": "CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u",
   "metadata": {
-    "name": "vault",
+    "name": "fungstake",
     "version": "0.1.0",
     "spec": "0.1.0",
     "description": "Created with Anchor"
@@ -12,7 +12,7 @@
       "discriminator": [29, 237, 247, 208, 193, 82, 54, 135],
       "accounts": [
         {
-          "name": "authority",
+          "name": "signer",
           "writable": true,
           "signer": true
         },
@@ -35,6 +35,9 @@
           }
         },
         {
+          "name": "reward_currency_mint"
+        },
+        {
           "name": "stake_currency_mint"
         },
         {
@@ -53,8 +56,8 @@
                 "path": "stake_config"
               },
               {
-                "kind": "arg",
-                "path": "lock_period"
+                "kind": "account",
+                "path": "reward_currency_mint"
               }
             ]
           }
@@ -108,12 +111,7 @@
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         }
       ],
-      "args": [
-        {
-          "name": "lock_period",
-          "type": "u64"
-        }
-      ]
+      "args": []
     },
     {
       "name": "destake",
@@ -158,8 +156,8 @@
                 "path": "stake_config"
               },
               {
-                "kind": "arg",
-                "path": "lock_period"
+                "kind": "account",
+                "path": "reward_currency_mint"
               }
             ]
           }
@@ -197,13 +195,13 @@
           }
         },
         {
-          "name": "staker_info_pda",
+          "name": "staker_info",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111]
+                "value": [115, 116, 97, 107, 101, 95, 105, 110, 102, 111]
               },
               {
                 "kind": "account",
@@ -212,28 +210,6 @@
               {
                 "kind": "account",
                 "path": "signer"
-              }
-            ]
-          }
-        },
-        {
-          "name": "stake_detail_pda",
-          "writable": true,
-          "pda": {
-            "seeds": [
-              {
-                "kind": "const",
-                "value": [
-                  115, 116, 97, 107, 101, 95, 100, 101, 116, 97, 105, 108
-                ]
-              },
-              {
-                "kind": "account",
-                "path": "staker_info_pda"
-              },
-              {
-                "kind": "arg",
-                "path": "id"
               }
             ]
           }
@@ -274,6 +250,9 @@
           "name": "stake_currency_mint"
         },
         {
+          "name": "reward_currency_mint"
+        },
+        {
           "name": "associated_token_program",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
@@ -287,14 +266,6 @@
         }
       ],
       "args": [
-        {
-          "name": "id",
-          "type": "u64"
-        },
-        {
-          "name": "lock_period",
-          "type": "u64"
-        },
         {
           "name": "amount",
           "type": "u64"
@@ -345,7 +316,99 @@
           "address": "SysvarRent111111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "lock_period",
+          "type": "u32"
+        },
+        {
+          "name": "lock_extend_time",
+          "type": "u32"
+        },
+        {
+          "name": "soft_cap",
+          "type": "u64"
+        },
+        {
+          "name": "total_reward",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "query_reward",
+      "discriminator": [203, 88, 17, 158, 226, 27, 156, 159],
+      "accounts": [
+        {
+          "name": "user"
+        },
+        {
+          "name": "stake_config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115, 116, 97, 107, 105, 110, 103, 95, 99, 111, 110, 102, 105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_currency_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_currency_mint"
+        },
+        {
+          "name": "stake_currency_mint"
+        },
+        {
+          "name": "vault",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115, 116, 97, 107, 105, 110, 103, 95, 118, 97, 117, 108, 116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_config"
+              },
+              {
+                "kind": "account",
+                "path": "reward_currency_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "user_stake_info_pda",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [115, 116, 97, 107, 101, 95, 105, 110, 102, 111]
+              },
+              {
+                "kind": "account",
+                "path": "vault"
+              },
+              {
+                "kind": "account",
+                "path": "user"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [],
+      "returns": "u64"
     },
     {
       "name": "stake",
@@ -390,14 +453,14 @@
                 "path": "stake_config"
               },
               {
-                "kind": "arg",
-                "path": "lock_period"
+                "kind": "account",
+                "path": "reward_currency_mint"
               }
             ]
           }
         },
         {
-          "name": "vault_token_account",
+          "name": "vault_staking_token_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -429,13 +492,13 @@
           }
         },
         {
-          "name": "staker_info_pda",
+          "name": "user_stake_info_pda",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "const",
-                "value": [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111]
+                "value": [115, 116, 97, 107, 101, 95, 105, 110, 102, 111]
               },
               {
                 "kind": "account",
@@ -447,10 +510,6 @@
               }
             ]
           }
-        },
-        {
-          "name": "stake_detail_pda",
-          "writable": true
         },
         {
           "name": "staker_token_account",
@@ -485,6 +544,9 @@
           }
         },
         {
+          "name": "reward_currency_mint"
+        },
+        {
           "name": "stake_currency_mint"
         },
         {
@@ -502,11 +564,62 @@
       ],
       "args": [
         {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "update_config",
+      "discriminator": [29, 158, 252, 191, 10, 83, 219, 99],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "stake_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115, 116, 97, 107, 105, 110, 103, 95, 99, 111, 110, 102, 105,
+                  103
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_currency_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_currency_mint"
+        },
+        {
+          "name": "token_program",
+          "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ],
+      "args": [
+        {
           "name": "lock_period",
+          "type": "u32"
+        },
+        {
+          "name": "lock_extend_time",
+          "type": "u32"
+        },
+        {
+          "name": "soft_cap",
           "type": "u64"
         },
         {
-          "name": "amount",
+          "name": "total_reward",
           "type": "u64"
         }
       ]
@@ -518,12 +631,8 @@
       "discriminator": [238, 151, 43, 3, 11, 151, 63, 176]
     },
     {
-      "name": "StakeDetail",
-      "discriminator": [50, 187, 176, 236, 173, 1, 166, 111]
-    },
-    {
-      "name": "StakerInfo",
-      "discriminator": [241, 238, 149, 141, 241, 59, 35, 107]
+      "name": "StakeInfo",
+      "discriminator": [66, 62, 68, 70, 108, 179, 183, 235]
     },
     {
       "name": "Vault",
@@ -532,8 +641,16 @@
   ],
   "events": [
     {
+      "name": "EventClaimReward",
+      "discriminator": [111, 102, 234, 80, 28, 201, 32, 89]
+    },
+    {
       "name": "EventNewVault",
       "discriminator": [62, 85, 178, 155, 210, 80, 16, 125]
+    },
+    {
+      "name": "EventReachSoftCap",
+      "discriminator": [116, 189, 253, 5, 46, 107, 123, 32]
     },
     {
       "name": "EventStake",
@@ -582,31 +699,90 @@
     },
     {
       "code": 6007,
+      "name": "PartyRoundEnded",
+      "msg": "PartyRoundEnded"
+    },
+    {
+      "code": 6008,
       "name": "OverflowError",
       "msg": "Overflow"
     },
     {
-      "code": 6008,
+      "code": 6009,
       "name": "AlreadyClaimed",
       "msg": "Already claimed"
     },
     {
-      "code": 6009,
+      "code": 6010,
       "name": "IncorrectAuthority",
       "msg": "IncorrectAuthority"
-    },
-    {
-      "code": 6010,
-      "name": "IncorrectStakeDetailId",
-      "msg": "Incorrect Stake detail ID. It must be current stake info id"
-    },
-    {
-      "code": 6011,
-      "name": "IncorrectLockPeriod",
-      "msg": "Incorrect Lock Period"
     }
   ],
   "types": [
+    {
+      "name": "EventClaimReward",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "stake_config_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_config",
+            "type": {
+              "defined": {
+                "name": "StakeConfig"
+              }
+            }
+          },
+          {
+            "name": "staker_info_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "staker_info",
+            "type": {
+              "defined": {
+                "name": "StakeInfo"
+              }
+            }
+          },
+          {
+            "name": "vault_pub",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": {
+              "defined": {
+                "name": "Vault"
+              }
+            }
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault_reward_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "user_reward_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "earned_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
     {
       "name": "EventNewVault",
       "type": {
@@ -617,7 +793,7 @@
             "type": "pubkey"
           },
           {
-            "name": "stake_config",
+            "name": "reward_currency_mint",
             "type": "pubkey"
           },
           {
@@ -625,8 +801,36 @@
             "type": "pubkey"
           },
           {
-            "name": "lock_period",
+            "name": "vault_token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_reward",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "EventReachSoftCap",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vault",
+            "type": {
+              "defined": {
+                "name": "Vault"
+              }
+            }
+          },
+          {
+            "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_currency_mint",
+            "type": "pubkey"
           }
         ]
       }
@@ -656,19 +860,7 @@
             "name": "staker_info",
             "type": {
               "defined": {
-                "name": "StakerInfo"
-              }
-            }
-          },
-          {
-            "name": "stake_detail_pub",
-            "type": "pubkey"
-          },
-          {
-            "name": "stake_detail",
-            "type": {
-              "defined": {
-                "name": "StakeDetail"
+                "name": "StakeInfo"
               }
             }
           },
@@ -686,6 +878,10 @@
           },
           {
             "name": "stake_currency_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_currency_mint",
             "type": "pubkey"
           },
           {
@@ -728,19 +924,7 @@
             "name": "staker_info",
             "type": {
               "defined": {
-                "name": "StakerInfo"
-              }
-            }
-          },
-          {
-            "name": "stake_detail_pub",
-            "type": "pubkey"
-          },
-          {
-            "name": "stake_detail",
-            "type": {
-              "defined": {
-                "name": "StakeDetail"
+                "name": "StakeInfo"
               }
             }
           },
@@ -761,11 +945,15 @@
             "type": "pubkey"
           },
           {
+            "name": "reward_currency_mint",
+            "type": "pubkey"
+          },
+          {
             "name": "vault_staking_token_account",
             "type": "pubkey"
           },
           {
-            "name": "staker_token_account",
+            "name": "user_token_account",
             "type": "pubkey"
           },
           {
@@ -802,12 +990,30 @@
             "name": "stake_currency_mint",
             "docs": ["currency mint of token to stake"],
             "type": "pubkey"
+          },
+          {
+            "name": "lock_period",
+            "docs": ["Can claim staking reward after lock_period"],
+            "type": "u32"
+          },
+          {
+            "name": "lock_extend_time",
+            "type": "u32"
+          },
+          {
+            "name": "soft_cap",
+            "docs": ["soft cap for token launch"],
+            "type": "u64"
+          },
+          {
+            "name": "total_reward",
+            "type": "u64"
           }
         ]
       }
     },
     {
-      "name": "StakeDetail",
+      "name": "StakeInfo",
       "type": {
         "kind": "struct",
         "fields": [
@@ -819,47 +1025,32 @@
             "type": {
               "array": ["u8", 1]
             }
-          },
-          {
-            "name": "id",
-            "type": "u64"
-          },
-          {
-            "name": "stake_amount",
-            "type": "u64"
           },
           {
             "name": "unstaked_at_time",
             "type": "i64"
           },
           {
+            "name": "stake_amount",
+            "type": "u64"
+          },
+          {
+            "name": "snapshot_amount",
+            "type": "u64"
+          },
+          {
+            "name": "has_claimed",
+            "docs": ["check if user has claimed the rewards"],
+            "type": "bool"
+          },
+          {
+            "name": "vault",
+            "docs": ["add vault & staker for filtering"],
+            "type": "pubkey"
+          },
+          {
             "name": "staker",
             "type": "pubkey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "StakerInfo",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "bump",
-            "docs": [
-              "Bump seed used to generate the program address / authority"
-            ],
-            "type": {
-              "array": ["u8", 1]
-            }
-          },
-          {
-            "name": "total_stake",
-            "type": "u64"
-          },
-          {
-            "name": "current_id",
-            "type": "u64"
           }
         ]
       }
@@ -883,7 +1074,10 @@
             "type": "u8"
           },
           {
-            "name": "vault_config",
+            "name": "reward_currency_mint",
+            "docs": [
+              "SPL token mint or native mint for claiming reward. This is not MAX!"
+            ],
             "type": "pubkey"
           },
           {
@@ -892,7 +1086,21 @@
             "type": "u64"
           },
           {
-            "name": "lock_period",
+            "name": "stake_end_time",
+            "type": "i64"
+          },
+          {
+            "name": "reach_soft_cap",
+            "type": "bool"
+          },
+          {
+            "name": "total_reward",
+            "docs": ["total reward"],
+            "type": "u64"
+          },
+          {
+            "name": "max_reward_per_wallet",
+            "docs": ["maximum reward one can receive"],
             "type": "u64"
           }
         ]

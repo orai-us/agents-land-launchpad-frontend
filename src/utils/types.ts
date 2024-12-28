@@ -1,5 +1,5 @@
-import { BN } from "@coral-xyz/anchor";
-import { PublicKey } from "@solana/web3.js";
+import { BN } from '@coral-xyz/anchor';
+import { PublicKey } from '@solana/web3.js';
 
 export type ChartTable = {
   table: CandlePrice[];
@@ -50,6 +50,8 @@ export interface metadataInfo {
   discord?: string;
   agentId: number;
   agentAddress: string;
+  creatorAddress: string;
+  createdAt: number;
 }
 
 export interface coinInfo {
@@ -78,6 +80,8 @@ export interface coinInfo {
   raydiumPoolAddr?: string;
   bondingCurve?: boolean;
   tradingTime?: Date;
+  partyTradingTime?: Date;
+  publicTradingTime?: Date;
 }
 export interface createCoinInfo {
   name: string;
@@ -163,7 +167,7 @@ export interface PeriodParamsInfo {
 export type SwapInfo = {
   creator: string;
   solAmountInLamports: BN;
-  direction: "Bought" | "Sold";
+  direction: 'Bought' | 'Sold';
   mintAddress: string;
   mintName: string;
   mintSymbol: string;
@@ -175,4 +179,8 @@ export interface Data {
   solBalance: number | null;
   tokenBuyTx: string | null;
   tokenSellTx: string | null;
+}
+
+export interface StakeInfo {
+  
 }

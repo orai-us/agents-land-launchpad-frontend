@@ -1,13 +1,27 @@
+import { SimpleSnapshotContractQueryClient as AgentsLandSnapshotContractQueryClient } from '@/sdk/oraiAgentSdk';
 import { errorAlert } from '@/components/others/ToastGroup';
-import { SEED_GLOBAL } from '@/config';
+import {
+  FUNGIBLE_STAKE_CONFIG_SEED,
+  FUNGIBLE_VAULT_SEED,
+  PARRY_STATUS,
+  SEED_GLOBAL,
+  SPL_DECIMAL,
+} from '@/config';
 import {
   rayBuyTx,
   raySellTx,
   simulateSwapOnRaydium,
 } from '@/utils/raydiumSwap/raydiumSwap';
-import { launchDataInfo } from '@/utils/types';
+import { launchDataInfo, metadataInfo } from '@/utils/types';
+import {
+  calculateMarketCap,
+  calculateTokenPrice,
+  genTokenKeypair,
+  toBN,
+} from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
+import { Metaplex } from '@metaplex-foundation/js';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
@@ -22,13 +36,17 @@ import {
   Transaction,
 } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
+import base58 from 'bs58';
 import { ALL_CONFIGS } from './../config';
+import { Fungstake } from './fungstake/fungstake';
+import idlStake from './fungstake/fungstake.json';
+import { fetchJSONDataFromUrl } from './logListeners/utils';
 import { Pumpfun } from './pumpfun';
 import idl from './pumpfun.json';
 import { SEED_BONDING_CURVE, SEED_CONFIG } from './seed';
 import { handleTransaction } from './utils';
-import { genTokenKeypair, toBN } from '@/utils/util';
-import base58 from 'bs58';
+import { ConfigState } from '@/zustand-store/config/useConfigStore';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
 
 export const commitmentLevel = 'confirmed';
 export const TOKEN_RESERVES = 1_000_000_000_000_000;
@@ -37,7 +55,9 @@ export const FAKE_AGENT = 'oCQLttxhiCGMbTYQjiYNRcpu5M3LXX8RxURBP6xB9Zk';
 
 export const endpoint = import.meta.env.VITE_SOLANA_RPC;
 export const pumpProgramId = new PublicKey(idl.address);
+export const stakeProgramId = new PublicKey(idlStake.address);
 export const pumpProgramInterface = JSON.parse(JSON.stringify(idl));
+export const stakeProgramInterface = JSON.parse(JSON.stringify(idlStake));
 
 export class Web3SolanaProgramInteraction {
   constructor(
@@ -52,15 +72,16 @@ export class Web3SolanaProgramInteraction {
     wallet: WalletContextState,
     coinData: launchDataInfo
   ) => {
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      commitment: commitmentLevel,
-      preflightCommitment: 'confirmed',
-    });
-    anchor.setProvider(provider);
+    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface as Pumpfun,
       provider
     ) as Program<Pumpfun>;
+
+    const programStake = new Program(
+      stakeProgramInterface as Fungstake,
+      provider
+    ) as Program<Fungstake>;
 
     console.log('========Fee Pay==============');
 
@@ -98,7 +119,7 @@ export class Web3SolanaProgramInteraction {
       );
 
       const stakingTokenAccount = this.getAssociatedTokenAccount(
-        new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+        new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
         mintKp.publicKey
       );
 
@@ -107,15 +128,12 @@ export class Web3SolanaProgramInteraction {
         mintKp.publicKey
       );
 
-      // console.log("aiAgentTokenAccount", aiAgentTokenAccount);
-      // console.log("creatorTokenAccount", creatorTokenAccount);
-
       const transaction = new Transaction();
       const updateCpIx = ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1_000_000,
       });
       const updateCuIx = ComputeBudgetProgram.setComputeUnitLimit({
-        units: 300_000,
+        units: 500_000,
       });
       const createIx = await program.methods
         .launch(coinData.name, coinData.symbol, coinData.uri)
@@ -124,7 +142,7 @@ export class Web3SolanaProgramInteraction {
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
           aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
-          stakingWallet: new PublicKey(ALL_CONFIGS.STAKE_POOL_PROGRAM_ID),
+          stakingWallet: new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
         })
         .remainingAccounts([
           {
@@ -169,6 +187,17 @@ export class Web3SolanaProgramInteraction {
           .instruction();
         transaction.add(swapIx);
       }
+
+      const ixInstructions = await programStake.methods
+        .createVault()
+        .accounts({
+          signer: wallet.publicKey,
+          stakeCurrencyMint: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
+          rewardCurrencyMint: mintKp.publicKey,
+        })
+        .instruction();
+
+      transaction.add(ixInstructions);
 
       transaction.feePayer = wallet.publicKey;
       const blockhash = await this.connection.getLatestBlockhash();
@@ -219,10 +248,7 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: connection not connected');
       return;
     }
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: 'confirmed',
-    });
-    anchor.setProvider(provider);
+    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
       provider
@@ -244,6 +270,7 @@ export class Web3SolanaProgramInteraction {
       const curveAccount = await program.account.bondingCurve.fetch(
         bondingCurvePda
       );
+
       const solReserve = curveAccount.reserveLamport.toNumber();
       const maxSolSwap = curveLimit - solReserve;
 
@@ -252,14 +279,43 @@ export class Web3SolanaProgramInteraction {
         .div(100)
         .toNumber();
 
-      // console.log("=== maxSolSwapIncludeFee ===", {
-      //   origin: maxSolSwap,
-      //   includeFee: maxSolSwapIncludeFee,
-      // });
-      return maxSolSwapIncludeFee;
+      return { curveAccount, maxSolSwapIncludeFee };
     } catch (error) {
       console.log('Error in get config curve limit', error);
-      return 0;
+      return { curveAccount: {}, maxSolSwapIncludeFee: 0 };
+    }
+  };
+
+  getBondingCurveOfToken = async (
+    mint: PublicKey,
+    wallet: WalletContextState
+  ): Promise<any> => {
+    // check the connection
+    if (!this.connection) {
+      console.log('Warning: connection not connected');
+      return;
+    }
+    const provider = anchor.getProvider();
+    const program = new Program(
+      pumpProgramInterface,
+      provider
+    ) as Program<Pumpfun>;
+
+    try {
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
+        program.programId
+      );
+      const curveInfo = await program.account.bondingCurve.fetch(
+        bondingCurvePda
+      );
+
+      console.log('curveInfo', curveInfo);
+
+      return curveInfo;
+    } catch (error) {
+      console.log('Error in get config curve limit', error);
+      return;
     }
   };
 
@@ -269,10 +325,7 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: connection not connected');
       return;
     }
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: 'confirmed',
-    });
-    anchor.setProvider(provider);
+    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
       provider
@@ -300,7 +353,8 @@ export class Web3SolanaProgramInteraction {
     amount: string,
     type: number,
     simulateReceive: string,
-    slippage: string
+    slippage: string,
+    isParty?: boolean
   ): Promise<any> => {
     console.log('==============trade swap==============');
 
@@ -309,10 +363,7 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Wallet not connected');
       return;
     }
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: 'confirmed',
-    });
-    anchor.setProvider(provider);
+    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
       provider
@@ -368,7 +419,7 @@ export class Web3SolanaProgramInteraction {
         .multipliedBy(toBN(1).minus(Number(addFee) / 100))
         .toNumber();
 
-      const swapIx = await program.methods
+      let swapIx = await program.methods
         .swap(fmtAmount, type, new anchor.BN(minAmount || 0))
         .accounts({
           teamWallet: configAccount.teamWallet,
@@ -376,6 +427,65 @@ export class Web3SolanaProgramInteraction {
           tokenMint: mint,
         })
         .instruction();
+
+      if (isParty && type === 0) {
+        let [stakeConfigPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
+            new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+        );
+
+        let [vaultPda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from(FUNGIBLE_VAULT_SEED),
+            stakeConfigPda.toBytes(),
+            mint.toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+        );
+        let [userStakePda] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from('stake_info'),
+            vaultPda.toBytes(),
+            wallet.publicKey.toBytes(),
+          ],
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+        );
+
+        swapIx = await program.methods
+          .buyParty(fmtAmount, new anchor.BN(minAmount || 0))
+          .accounts({
+            teamWallet: configAccount.teamWallet,
+            user: wallet.publicKey,
+            tokenMint: mint,
+          })
+          .remainingAccounts([
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: stakeConfigPda,
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: vaultPda,
+            },
+            {
+              isWritable: true,
+              isSigner: false,
+              pubkey: userStakePda,
+            },
+          ])
+          .instruction();
+      }
+
       transaction.add(swapIx);
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
@@ -386,10 +496,6 @@ export class Web3SolanaProgramInteraction {
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        // console.log(
-        //   "----",
-        //   await this.connection.simulateTransaction(signedTx)
-        // );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
@@ -581,10 +687,18 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Wallet not connected');
       return;
     }
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
+    const connection = new Connection(
+      'https://devnet.helius-rpc.com/?api-key=3b28a0fc-0ef6-48ef-b55c-c55ae74cb6a6',
+      'confirmed'
+    );
+
+    const providerOnFunction = new anchor.AnchorProvider(connection, wallet, {
+      commitment: 'confirmed',
       preflightCommitment: 'confirmed',
     });
-    anchor.setProvider(provider);
+    console.log('providerOnFunction', providerOnFunction);
+    const provider = anchor.getProvider();
+    console.log('simulateSwapTx', provider);
     const program = new Program(
       pumpProgramInterface,
       provider
@@ -601,7 +715,7 @@ export class Web3SolanaProgramInteraction {
       const actualAmountOut = new BN(tx).toString();
       return actualAmountOut;
     } catch (error) {
-      console.log('Error in swap transaction', error, error.error);
+      console.log('Error in simulate swap transaction', error, error.error);
     }
   };
 
@@ -702,10 +816,7 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Connection not connected');
       return;
     }
-    const provider = new anchor.AnchorProvider(this.connection, wallet, {
-      preflightCommitment: 'confirmed',
-    });
-    anchor.setProvider(provider);
+    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
       provider
@@ -732,10 +843,7 @@ export class Web3SolanaProgramInteraction {
         console.log('Warning: Connection not connected');
         return;
       }
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        preflightCommitment: 'confirmed',
-      });
-      anchor.setProvider(provider);
+      const provider = anchor.getProvider();
       const program = new Program(
         pumpProgramInterface,
         provider
@@ -750,6 +858,339 @@ export class Web3SolanaProgramInteraction {
     } catch (error) {
       console.log('error', error);
       return '';
+    }
+  };
+
+  getSnapShotAgent = async () => {
+    try {
+      const oraiEndpoint = 'https://rpc.orai.io';
+      const whitelistContractAddress =
+        'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
+      const cwClient = await CosmWasmClient.connect(oraiEndpoint);
+      const contract = new AgentsLandSnapshotContractQueryClient(
+        cwClient,
+        whitelistContractAddress
+      );
+
+      // query list token metadata
+      /// return:
+      /// - token: token addr
+      /// - metadata: base64 encode of token metadata
+      const dataSnap = await contract.tokensMetadata();
+
+      const res = (dataSnap || []).map((e) => {
+        return {
+          ...e,
+          metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+        };
+      });
+
+      return res || [];
+    } catch (error) {
+      console.log('error get snapshot', error);
+      return [];
+    }
+  };
+
+  // allowedAddresses: ConfigState['configSnapshot']
+  getListTokenFromContract = async () => {
+    try {
+      const allowedAddresses = await this.getSnapShotAgent();
+
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const metaplex = Metaplex.make(this.connection);
+      const provider = anchor.getProvider();
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const tokens = await this.connection.getParsedProgramAccounts(
+        program.programId,
+        {
+          commitment: 'confirmed',
+          filters: [
+            {
+              dataSize: 136,
+            },
+          ],
+        }
+      );
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+      const configAccount = await program.account.config.fetch(configPda);
+
+      const list = await Promise.all(
+        tokens.map(async (item) => {
+          const detail = program.coder.accounts.decode<
+            anchor.IdlAccounts<Pumpfun>['bondingCurve']
+          >('bondingCurve', item.account.data as Buffer);
+
+          if (
+            allowedAddresses.length > 0 &&
+            !allowedAddresses
+              .map((e) => e.token)
+              .includes(detail.tokenMint.toBase58())
+          ) {
+            return;
+          }
+
+          const metadata = await metaplex
+            .nfts()
+            .findByMint(
+              { mintAddress: detail.tokenMint },
+              { commitment: 'confirmed' }
+            );
+
+          let metadataJson: metadataInfo = {} as any;
+          if (metadata.uri) {
+            const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
+            metadataJson = dataJson;
+          }
+
+          const solPrice = Number(localStorage.getItem('solPrice'));
+          const newPrice = calculateTokenPrice(
+            detail.reserveToken,
+            detail.reserveLamport,
+            configAccount.tokenDecimalsConfig || SPL_DECIMAL,
+            solPrice
+          );
+          const marketcap = calculateMarketCap(
+            detail.reserveToken,
+            configAccount.tokenDecimalsConfig || SPL_DECIMAL,
+            newPrice
+          );
+
+          const tokenDetail = {
+            creator: detail.creator.toBase58(),
+            decimals: configAccount.tokenDecimalsConfig || SPL_DECIMAL,
+            name: metadata.name,
+            ticker: metadata.symbol,
+            description: metadataJson.description,
+            token: detail.tokenMint.toBase58(),
+            url: metadataJson.image,
+            tokenReserves: detail.reserveToken,
+            lamportReserves: detail.reserveLamport,
+            marketcap,
+            bondingCurveLimit:
+              configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
+            metadata: {
+              ...metadata,
+              ...metadataJson,
+              agentAddress: metadata.address.toBase58(),
+            } as metadataInfo,
+            listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
+            tradingTime: new Date(
+              detail.partyStart.muln(ALL_CONFIGS.TIMER.MILLISECONDS).toNumber()
+            ),
+            date: new Date(
+              detail.curveCreationDate
+                .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
+                .toNumber()
+            ),
+          };
+
+          return { ...detail, ...tokenDetail };
+        })
+      );
+
+      const listFmt = list.filter(Boolean);
+      return {
+        coins: listFmt,
+        total: listFmt.length,
+        fromRpc: true,
+      };
+    } catch (error) {
+      console.log('getListTokenFromContract error', error);
+      return {
+        coins: [],
+        total: 0,
+      };
+    }
+  };
+
+  getTokenDetailFromContract = async (
+    wallet: WalletContextState,
+    tokenMint: PublicKey
+  ) => {
+    try {
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const allowedAddresses = await this.getSnapShotAgent();
+      const currentTokenData = allowedAddresses.find(
+        (e) => e.token === tokenMint.toBase58()
+      );
+      const raydiumPoolAddr =
+        currentTokenData.metadata?.['raydiumPoolAddr'] || '';
+      const oraidexPoolAddr =
+        currentTokenData.metadata?.['oraidexPoolAddr'] || '';
+
+      const metaplex = Metaplex.make(this.connection);
+      const provider = anchor.getProvider();
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const metadata = await metaplex
+        .nfts()
+        .findByMint({ mintAddress: tokenMint }, { commitment: 'confirmed' });
+
+      let metadataJson: metadataInfo = {} as any;
+      if (metadata.uri) {
+        const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
+        metadataJson = dataJson;
+      }
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+      const [bondingCurvePda, _] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), tokenMint.toBytes()],
+        program.programId
+      );
+
+      const [configAccount, bondingCurve] = await Promise.all([
+        program.account.config.fetch(configPda),
+        program.account.bondingCurve.fetch(bondingCurvePda),
+      ]);
+
+      const solPrice = Number(localStorage.getItem('solPrice'));
+      const newPrice = calculateTokenPrice(
+        bondingCurve.reserveToken,
+        bondingCurve.reserveLamport,
+        SPL_DECIMAL,
+        solPrice
+      );
+      const marketcap = calculateMarketCap(
+        bondingCurve.reserveToken,
+        SPL_DECIMAL,
+        newPrice
+      );
+
+      const tokenDetail = {
+        creator: bondingCurve.creator.toBase58(),
+        decimals: SPL_DECIMAL,
+        name: metadata.name,
+        ticker: metadata.symbol,
+        description: metadataJson.description,
+        token: tokenMint.toBase58(),
+        url: metadataJson.image,
+        tokenReserves: bondingCurve.reserveToken.toNumber(),
+        lamportReserves: bondingCurve.reserveLamport.toNumber(),
+        raydiumPoolAddr,
+        oraidexPoolAddr,
+        bondingCurveLimit:
+          configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
+        metadata: {
+          ...metadata,
+          ...metadataJson,
+          agentAddress: metadata.address.toBase58(),
+        } as metadataInfo,
+        listed: raydiumPoolAddr || oraidexPoolAddr,
+        tradingTime: new Date(
+          toBN(bondingCurve.partyStart.toNumber())
+            .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
+            .toNumber()
+        ),
+        marketcap,
+        date: new Date(
+          bondingCurve.curveCreationDate
+            .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
+            .toNumber()
+        ),
+      };
+
+      return tokenDetail;
+    } catch (error) {
+      console.log('getTokenDetailFromContract error', error);
+      return;
+    }
+  };
+
+  getConfigCurve = async () => {
+    try {
+      if (!this.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const provider = anchor.getProvider();
+      if (!provider) {
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId
+      );
+
+      const configAccount = await program.account.config.fetch(configPda);
+
+      return configAccount;
+    } catch (error) {
+      console.log('getConfigCurve error', error);
+
+      errorAlert(
+        'RPC call limit reached. Please wait or switch networks to continue!'
+      );
+
+      return;
+    }
+  };
+
+  getAmountBoughtByUser = async (
+    token: PublicKey,
+    wallet: WalletContextState
+  ) => {
+    try {
+      if (!this.connection || !wallet.publicKey) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      const provider = anchor.getProvider();
+      if (!provider) {
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider
+      ) as Program<Pumpfun>;
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), token.toBytes()],
+        program.programId
+      );
+
+      const [userPartyPda] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from(PARRY_STATUS),
+          bondingCurvePda.toBytes(),
+          wallet.publicKey.toBytes(),
+        ],
+        program.programId
+      );
+
+      const userPartyInfo = await program.account.partyStatus.fetch(
+        userPartyPda
+      );
+
+      const amount = (userPartyInfo.totalAmount || '0').toString();
+
+      return amount;
+    } catch (error) {
+      console.log('getTokenDetailFromContract error', error);
+      return '0';
     }
   };
 }

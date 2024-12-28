@@ -1,35 +1,36 @@
-import LoadingImg from "@/assets/icons/loading-button.svg";
-import MAXImg from "@/assets/images/richoldman.png";
-import { ALL_CONFIGS, SPL_DECIMAL } from "@/config";
-import { Web3SolanaLockingToken } from "@/program/web3Locking";
-import { numberWithCommas } from "@/utils/format";
-import { toBN } from "@/utils/util";
-import { useWallet } from "@solana/wallet-adapter-react";
-import dayjs from "dayjs";
-import { FC, useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { successAlert } from "../others/ToastGroup";
-import { LOCK_TIME_OPTIONS } from "./constants";
-const web3Locking = new Web3SolanaLockingToken();
+import LoadingImg from '@/assets/icons/loading-button.svg';
+import MAXImg from '@/assets/images/richoldman.png';
+import { ALL_CONFIGS, SPL_DECIMAL } from '@/config';
+import { Web3SolanaLockingToken } from '@/program/web3Locking';
+import { numberWithCommas } from '@/utils/format';
+import { formatTimePeriod, toBN, toPublicKey } from '@/utils/util';
+import { useWallet } from '@solana/wallet-adapter-react';
+import dayjs from 'dayjs';
+import { FC, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { successAlert } from '../others/ToastGroup';
+import { LOCK_TIME_OPTIONS } from './constants';
+import { web3FungibleStake } from '@/program/web3FungStake';
+import { useGetCoinInfoState } from '@/zustand-store/coin/selector';
 
-const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
+const web3Stake = new web3FungibleStake();
+
+const LockingItem: FC<{ item: any; onSuccess: () => void }> = ({
   item,
-  keyId,
   onSuccess,
 }) => {
+  const stakeConfig = useGetCoinInfoState('stakeConfig');
+  const coin = useGetCoinInfoState('coin');
   const [isLoading, setIsLoading] = useState(false);
   const { id, stakeAmount, unstakedAtTime, lockPeriod } = item || {};
   const wallet = useWallet();
   const claimable = !toBN(unstakedAtTime).isGreaterThan(
     Math.floor(Date.now() / ALL_CONFIGS.TIMER.MILLISECONDS)
   );
-  const period = LOCK_TIME_OPTIONS.find(
-    (e) => e.value * ALL_CONFIGS.TIMER.MONTH_TO_SECONDS === lockPeriod
-  );
 
   return (
     <tr
-      key={`tr-locking-item-id-${String(id)}-${keyId}`}
+      key={`tr-locking-item-id-${String(id)}}`}
       className="w-full border-b-[1px] border-b-[#1A1C28] text-[#E8E9EE] py-4 h-[72px]"
     >
       <td className="text-[14px] font-semibold">
@@ -54,8 +55,8 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
       </td>
       <td
         className={twMerge(
-          "text-[10px] break-keep md:text-[12px] text-center py-2 text-[#9FF4CF]",
-          !claimable && "text-[#F79009]"
+          'text-[10px] break-keep md:text-[12px] text-center py-2 text-[#9FF4CF]',
+          !claimable && 'text-[#F79009]'
         )}
       >
         <div className="flex items-center">
@@ -89,18 +90,20 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
               />
             </svg>
           )}
-          <span className="ml-1">{!claimable ? "Locked" : "Complete"}</span>
+          <span className="ml-1">{!claimable ? 'Locked' : 'Complete'}</span>
         </div>
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
-        {period.label}
+        {/* {period.label} */}
+        {/* {ALL_CONFIGS.LOCK_FUNGIBLE_STAKE / 86400} days */}
+        {stakeConfig && formatTimePeriod(stakeConfig.lockPeriod)}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         {dayjs(
           toBN(unstakedAtTime)
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber() || Date.now()
-        ).format("MMM DD YYYY HH:mm")}
+        ).format('MMM DD YYYY HH:mm')}
       </td>
       <td className="text-[10px] break-keep md:text-[12px] py-2">
         <button
@@ -109,30 +112,30 @@ const LockingItem: FC<{ item: any; keyId: number; onSuccess: () => void }> = ({
             try {
               setIsLoading(true);
 
-              const res = await web3Locking.unStake(
-                lockPeriod,
-                toBN(id).toNumber(),
+              const res = await web3Stake.unStake(
+                ALL_CONFIGS.STAKE_CURRENCY_MINT,
+                coin.token,
                 stakeAmount,
                 wallet
               );
 
               if (res) {
-                successAlert("Claim successfully!");
+                successAlert('Claim successfully!');
                 onSuccess();
               }
             } catch (error) {
-              console.log("claim error", error);
+              console.log('claim error', error);
             } finally {
               setIsLoading(false);
             }
           }}
           className={twMerge(
-            "rounded-lg bg-[#FCFCFC] h-6 px-2 flex items-center justify-center hover:brightness-150 disabled:brightness-75 disabled:cursor-not-allowed uppercase text-[#080A14] font-medium",
-            !claimable && "text-[#30344A] rounded bg-[#13141D]"
+            'rounded-lg bg-[#FCFCFC] h-6 px-2 flex items-center justify-center hover:brightness-150 disabled:brightness-75 disabled:cursor-not-allowed uppercase text-[#080A14] font-medium',
+            !claimable && 'text-[#30344A] rounded bg-[#13141D]'
           )}
         >
           {isLoading && <img width={18} height={18} src={LoadingImg} />}
-          &nbsp;Claim
+          &nbsp;Unlock
         </button>
       </td>
     </tr>

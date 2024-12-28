@@ -1,20 +1,17 @@
-import React, { ReactNode, useState } from 'react';
+import UserContext, { UserProvider } from '@/context/UserContext';
+import { ModalProvider } from '@/contexts/ModalProvider';
 import { PageProvider } from '@/contexts/PageContext';
 import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { ToastContainer } from 'react-toastify';
-import { ModalProvider } from '@/contexts/ModalProvider';
-import UserContext from '@/context/UserContext';
 import { msgInfo, userInfo } from '@/utils/types';
-import 'dotenv/config.js';
-import LoginContext from '@/context/CoinContex';
 import { useWallet } from '@solana/wallet-adapter-react';
-import SocketProvider from '@/contexts/SocketContext';
+import 'dotenv/config.js';
+import { ReactNode, useEffect, useState } from 'react';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { ToastContainer } from 'react-toastify';
 
 export const queryClient = new QueryClient();
 
 export default function Providers({ children }: { children: ReactNode }) {
-  const wallet = useWallet();
   const [user, setUser] = useState<userInfo>({} as userInfo);
   const [login, setLogin] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -26,13 +23,16 @@ export default function Providers({ children }: { children: ReactNode }) {
   const [solPrice, setSolPrice] = useState<number>(0);
   const [profileEditModal, setProfileEditModal] = useState<boolean>(false);
   const [postReplyModal, setPostReplyModal] = useState<boolean>(false);
-
+  const [rpcUrl, setRpcUrl] = useState<string>(import.meta.env.VITE_SOLANA_RPC);
+  useEffect(() => {
+    console.log('Providers::rpcUrl', rpcUrl);
+  }, [rpcUrl]);
   return (
     <SolanaWalletProvider>
       <QueryClientProvider client={queryClient}>
         <ModalProvider>
           <PageProvider>
-            <UserContext.Provider
+            <UserProvider
               value={{
                 solPrice,
                 setSolPrice,
@@ -55,12 +55,14 @@ export default function Providers({ children }: { children: ReactNode }) {
                 profileEditModal,
                 setProfileEditModal,
                 postReplyModal,
-                setPostReplyModal
+                setPostReplyModal,
+                rpcUrl,
+                setRpcUrl,
               }}
             >
-              <SocketProvider>{children}</SocketProvider>
+              {children}
               <ToastContainer pauseOnFocusLoss={false} theme="colored" />
-            </UserContext.Provider>
+            </UserProvider>
           </PageProvider>
         </ModalProvider>
       </QueryClientProvider>

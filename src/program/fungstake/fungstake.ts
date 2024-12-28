@@ -2,12 +2,12 @@
  * Program IDL in camelCase format in order to be used in JS/TS.
  *
  * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/vault.json`.
+ * IDL can be found at `target/idl/fungstake.json`.
  */
-export type Vault = {
-  address: '9grg8RG2prncny136yjDMy5BZcwhB4NvqGMGDFs7QtKy';
+export type Fungstake = {
+  address: 'CmM3iSUBXGnURkHiG6DneSp8fkvkxy5L9oqfTUhMxV7u';
   metadata: {
-    name: 'vault';
+    name: 'fungstake';
     version: '0.1.0';
     spec: '0.1.0';
     description: 'Created with Anchor';
@@ -18,7 +18,7 @@ export type Vault = {
       discriminator: [29, 237, 247, 208, 193, 82, 54, 135];
       accounts: [
         {
-          name: 'authority';
+          name: 'signer';
           writable: true;
           signer: true;
         },
@@ -53,6 +53,9 @@ export type Vault = {
           };
         },
         {
+          name: 'rewardCurrencyMint';
+        },
+        {
           name: 'stakeCurrencyMint';
         },
         {
@@ -83,8 +86,8 @@ export type Vault = {
                 path: 'stakeConfig';
               },
               {
-                kind: 'arg';
-                path: 'lockPeriod';
+                kind: 'account';
+                path: 'rewardCurrencyMint';
               }
             ];
           };
@@ -196,12 +199,7 @@ export type Vault = {
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
         }
       ];
-      args: [
-        {
-          name: 'lockPeriod';
-          type: 'u64';
-        }
-      ];
+      args: [];
     },
     {
       name: 'destake';
@@ -270,8 +268,8 @@ export type Vault = {
                 path: 'stakeConfig';
               },
               {
-                kind: 'arg';
-                path: 'lockPeriod';
+                kind: 'account';
+                path: 'rewardCurrencyMint';
               }
             ];
           };
@@ -367,13 +365,13 @@ export type Vault = {
           };
         },
         {
-          name: 'stakerInfoPda';
+          name: 'stakerInfo';
           writable: true;
           pda: {
             seeds: [
               {
                 kind: 'const';
-                value: [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111];
+                value: [115, 116, 97, 107, 101, 95, 105, 110, 102, 111];
               },
               {
                 kind: 'account';
@@ -382,39 +380,6 @@ export type Vault = {
               {
                 kind: 'account';
                 path: 'signer';
-              }
-            ];
-          };
-        },
-        {
-          name: 'stakeDetailPda';
-          writable: true;
-          pda: {
-            seeds: [
-              {
-                kind: 'const';
-                value: [
-                  115,
-                  116,
-                  97,
-                  107,
-                  101,
-                  95,
-                  100,
-                  101,
-                  116,
-                  97,
-                  105,
-                  108
-                ];
-              },
-              {
-                kind: 'account';
-                path: 'stakerInfoPda';
-              },
-              {
-                kind: 'arg';
-                path: 'id';
               }
             ];
           };
@@ -513,6 +478,9 @@ export type Vault = {
           name: 'stakeCurrencyMint';
         },
         {
+          name: 'rewardCurrencyMint';
+        },
+        {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
         },
@@ -526,14 +494,6 @@ export type Vault = {
         }
       ];
       args: [
-        {
-          name: 'id';
-          type: 'u64';
-        },
-        {
-          name: 'lockPeriod';
-          type: 'u64';
-        },
         {
           name: 'amount';
           type: 'u64';
@@ -596,7 +556,123 @@ export type Vault = {
           address: 'SysvarRent111111111111111111111111111111111';
         }
       ];
+      args: [
+        {
+          name: 'lockPeriod';
+          type: 'u32';
+        },
+        {
+          name: 'lockExtendTime';
+          type: 'u32';
+        },
+        {
+          name: 'softCap';
+          type: 'u64';
+        },
+        {
+          name: 'totalReward';
+          type: 'u64';
+        }
+      ];
+    },
+    {
+      name: 'queryReward';
+      discriminator: [203, 88, 17, 158, 226, 27, 156, 159];
+      accounts: [
+        {
+          name: 'user';
+        },
+        {
+          name: 'stakeConfig';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'stakeCurrencyMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'rewardCurrencyMint';
+        },
+        {
+          name: 'stakeCurrencyMint';
+        },
+        {
+          name: 'vault';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'stakeConfig';
+              },
+              {
+                kind: 'account';
+                path: 'rewardCurrencyMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'userStakeInfoPda';
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [115, 116, 97, 107, 101, 95, 105, 110, 102, 111];
+              },
+              {
+                kind: 'account';
+                path: 'vault';
+              },
+              {
+                kind: 'account';
+                path: 'user';
+              }
+            ];
+          };
+        }
+      ];
       args: [];
+      returns: 'u64';
     },
     {
       name: 'stake';
@@ -665,14 +741,14 @@ export type Vault = {
                 path: 'stakeConfig';
               },
               {
-                kind: 'arg';
-                path: 'lockPeriod';
+                kind: 'account';
+                path: 'rewardCurrencyMint';
               }
             ];
           };
         },
         {
-          name: 'vaultTokenAccount';
+          name: 'vaultStakingTokenAccount';
           writable: true;
           pda: {
             seeds: [
@@ -762,13 +838,13 @@ export type Vault = {
           };
         },
         {
-          name: 'stakerInfoPda';
+          name: 'userStakeInfoPda';
           writable: true;
           pda: {
             seeds: [
               {
                 kind: 'const';
-                value: [115, 116, 97, 107, 101, 114, 95, 105, 110, 102, 111];
+                value: [115, 116, 97, 107, 101, 95, 105, 110, 102, 111];
               },
               {
                 kind: 'account';
@@ -780,10 +856,6 @@ export type Vault = {
               }
             ];
           };
-        },
-        {
-          name: 'stakeDetailPda';
-          writable: true;
         },
         {
           name: 'stakerTokenAccount';
@@ -876,6 +948,9 @@ export type Vault = {
           };
         },
         {
+          name: 'rewardCurrencyMint';
+        },
+        {
           name: 'stakeCurrencyMint';
         },
         {
@@ -893,11 +968,74 @@ export type Vault = {
       ];
       args: [
         {
+          name: 'amount';
+          type: 'u64';
+        }
+      ];
+    },
+    {
+      name: 'updateConfig';
+      discriminator: [29, 158, 252, 191, 10, 83, 219, 99];
+      accounts: [
+        {
+          name: 'signer';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'stakeConfig';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  115,
+                  116,
+                  97,
+                  107,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'stakeCurrencyMint';
+              }
+            ];
+          };
+        },
+        {
+          name: 'stakeCurrencyMint';
+        },
+        {
+          name: 'tokenProgram';
+          address: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA';
+        }
+      ];
+      args: [
+        {
           name: 'lockPeriod';
+          type: 'u32';
+        },
+        {
+          name: 'lockExtendTime';
+          type: 'u32';
+        },
+        {
+          name: 'softCap';
           type: 'u64';
         },
         {
-          name: 'amount';
+          name: 'totalReward';
           type: 'u64';
         }
       ];
@@ -909,12 +1047,8 @@ export type Vault = {
       discriminator: [238, 151, 43, 3, 11, 151, 63, 176];
     },
     {
-      name: 'stakeDetail';
-      discriminator: [50, 187, 176, 236, 173, 1, 166, 111];
-    },
-    {
-      name: 'stakerInfo';
-      discriminator: [241, 238, 149, 141, 241, 59, 35, 107];
+      name: 'stakeInfo';
+      discriminator: [66, 62, 68, 70, 108, 179, 183, 235];
     },
     {
       name: 'vault';
@@ -923,8 +1057,16 @@ export type Vault = {
   ];
   events: [
     {
+      name: 'eventClaimReward';
+      discriminator: [111, 102, 234, 80, 28, 201, 32, 89];
+    },
+    {
       name: 'eventNewVault';
       discriminator: [62, 85, 178, 155, 210, 80, 16, 125];
+    },
+    {
+      name: 'eventReachSoftCap';
+      discriminator: [116, 189, 253, 5, 46, 107, 123, 32];
     },
     {
       name: 'eventStake';
@@ -973,31 +1115,90 @@ export type Vault = {
     },
     {
       code: 6007;
+      name: 'partyRoundEnded';
+      msg: 'partyRoundEnded';
+    },
+    {
+      code: 6008;
       name: 'overflowError';
       msg: 'overflow';
     },
     {
-      code: 6008;
+      code: 6009;
       name: 'alreadyClaimed';
       msg: 'Already claimed';
     },
     {
-      code: 6009;
+      code: 6010;
       name: 'incorrectAuthority';
       msg: 'incorrectAuthority';
-    },
-    {
-      code: 6010;
-      name: 'incorrectStakeDetailId';
-      msg: 'Incorrect Stake detail ID. It must be current stake info id';
-    },
-    {
-      code: 6011;
-      name: 'incorrectLockPeriod';
-      msg: 'Incorrect Lock Period';
     }
   ];
   types: [
+    {
+      name: 'eventClaimReward';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'stakeConfigPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakeConfig';
+            type: {
+              defined: {
+                name: 'stakeConfig';
+              };
+            };
+          },
+          {
+            name: 'stakerInfoPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'stakerInfo';
+            type: {
+              defined: {
+                name: 'stakeInfo';
+              };
+            };
+          },
+          {
+            name: 'vaultPub';
+            type: 'pubkey';
+          },
+          {
+            name: 'vault';
+            type: {
+              defined: {
+                name: 'vault';
+              };
+            };
+          },
+          {
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'rewardCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'vaultRewardTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'userRewardTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'earnedAmount';
+            type: 'u64';
+          }
+        ];
+      };
+    },
     {
       name: 'eventNewVault';
       type: {
@@ -1008,7 +1209,7 @@ export type Vault = {
             type: 'pubkey';
           },
           {
-            name: 'stakeConfig';
+            name: 'rewardCurrencyMint';
             type: 'pubkey';
           },
           {
@@ -1016,8 +1217,36 @@ export type Vault = {
             type: 'pubkey';
           },
           {
-            name: 'lockPeriod';
+            name: 'vaultTokenAccount';
+            type: 'pubkey';
+          },
+          {
+            name: 'totalReward';
             type: 'u64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'eventReachSoftCap';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'vault';
+            type: {
+              defined: {
+                name: 'vault';
+              };
+            };
+          },
+          {
+            name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'rewardCurrencyMint';
+            type: 'pubkey';
           }
         ];
       };
@@ -1047,19 +1276,7 @@ export type Vault = {
             name: 'stakerInfo';
             type: {
               defined: {
-                name: 'stakerInfo';
-              };
-            };
-          },
-          {
-            name: 'stakeDetailPub';
-            type: 'pubkey';
-          },
-          {
-            name: 'stakeDetail';
-            type: {
-              defined: {
-                name: 'stakeDetail';
+                name: 'stakeInfo';
               };
             };
           },
@@ -1077,6 +1294,10 @@ export type Vault = {
           },
           {
             name: 'stakeCurrencyMint';
+            type: 'pubkey';
+          },
+          {
+            name: 'rewardCurrencyMint';
             type: 'pubkey';
           },
           {
@@ -1119,19 +1340,7 @@ export type Vault = {
             name: 'stakerInfo';
             type: {
               defined: {
-                name: 'stakerInfo';
-              };
-            };
-          },
-          {
-            name: 'stakeDetailPub';
-            type: 'pubkey';
-          },
-          {
-            name: 'stakeDetail';
-            type: {
-              defined: {
-                name: 'stakeDetail';
+                name: 'stakeInfo';
               };
             };
           },
@@ -1152,11 +1361,15 @@ export type Vault = {
             type: 'pubkey';
           },
           {
+            name: 'rewardCurrencyMint';
+            type: 'pubkey';
+          },
+          {
             name: 'vaultStakingTokenAccount';
             type: 'pubkey';
           },
           {
-            name: 'stakerTokenAccount';
+            name: 'userTokenAccount';
             type: 'pubkey';
           },
           {
@@ -1193,12 +1406,30 @@ export type Vault = {
             name: 'stakeCurrencyMint';
             docs: ['currency mint of token to stake'];
             type: 'pubkey';
+          },
+          {
+            name: 'lockPeriod';
+            docs: ['Can claim staking reward after lock_period'];
+            type: 'u32';
+          },
+          {
+            name: 'lockExtendTime';
+            type: 'u32';
+          },
+          {
+            name: 'softCap';
+            docs: ['soft cap for token launch'];
+            type: 'u64';
+          },
+          {
+            name: 'totalReward';
+            type: 'u64';
           }
         ];
       };
     },
     {
-      name: 'stakeDetail';
+      name: 'stakeInfo';
       type: {
         kind: 'struct';
         fields: [
@@ -1210,47 +1441,32 @@ export type Vault = {
             type: {
               array: ['u8', 1];
             };
-          },
-          {
-            name: 'id';
-            type: 'u64';
-          },
-          {
-            name: 'stakeAmount';
-            type: 'u64';
           },
           {
             name: 'unstakedAtTime';
             type: 'i64';
           },
           {
+            name: 'stakeAmount';
+            type: 'u64';
+          },
+          {
+            name: 'snapshotAmount';
+            type: 'u64';
+          },
+          {
+            name: 'hasClaimed';
+            docs: ['check if user has claimed the rewards'];
+            type: 'bool';
+          },
+          {
+            name: 'vault';
+            docs: ['add vault & staker for filtering'];
+            type: 'pubkey';
+          },
+          {
             name: 'staker';
             type: 'pubkey';
-          }
-        ];
-      };
-    },
-    {
-      name: 'stakerInfo';
-      type: {
-        kind: 'struct';
-        fields: [
-          {
-            name: 'bump';
-            docs: [
-              'Bump seed used to generate the program address / authority'
-            ];
-            type: {
-              array: ['u8', 1];
-            };
-          },
-          {
-            name: 'totalStake';
-            type: 'u64';
-          },
-          {
-            name: 'currentId';
-            type: 'u64';
           }
         ];
       };
@@ -1274,7 +1490,10 @@ export type Vault = {
             type: 'u8';
           },
           {
-            name: 'vaultConfig';
+            name: 'rewardCurrencyMint';
+            docs: [
+              'SPL token mint or native mint for claiming reward. This is not MAX!'
+            ];
             type: 'pubkey';
           },
           {
@@ -1283,7 +1502,21 @@ export type Vault = {
             type: 'u64';
           },
           {
-            name: 'lockPeriod';
+            name: 'stakeEndTime';
+            type: 'i64';
+          },
+          {
+            name: 'reachSoftCap';
+            type: 'bool';
+          },
+          {
+            name: 'totalReward';
+            docs: ['total reward'];
+            type: 'u64';
+          },
+          {
+            name: 'maxRewardPerWallet';
+            docs: ['maximum reward one can receive'];
             type: 'u64';
           }
         ];

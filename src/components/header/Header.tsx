@@ -1,19 +1,114 @@
 import LogoFullIcon from '@/assets/icons/logo.svg';
+import { ALL_CONFIGS, SOL_PRICE_KEY } from '@/config';
 import UserContext from '@/context/UserContext';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { web3FungibleStake } from '@/program/web3FungStake';
+import { SimpleSnapshotContractQueryClient as AgentsLandSnapshotContractQueryClient } from '@/sdk/oraiAgentSdk';
 import { getSolPriceInUSD } from '@/utils/util';
+import { useCoinActions } from '@/zustand-store/coin/selector';
+import {
+  useConfigActions,
+  useGetConfigState,
+} from '@/zustand-store/config/selector';
+import { getProvider } from '@coral-xyz/anchor';
+import { CosmWasmClient } from '@cosmjs/cosmwasm-stargate';
+import { PublicKey } from '@solana/web3.js';
 import { FC, useContext, useEffect, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { ConnectButton } from '../buttons/ConnectButton';
 import HowItWorkModal from '../modals/HowItWork';
+import SettingModal from '../modals/Setting';
 import Banner from './Banner';
 import MarqueeToken from './MarqueeToken';
-import { SOL_PRICE_KEY } from '@/config';
+
+const web3Solana = new Web3SolanaProgramInteraction();
+const web3FungStake = new web3FungibleStake();
+
+const getProviderApp = () => {
+  try {
+    return getProvider();
+  } catch (e) {
+    console.log('init provider failed', e);
+    return;
+  }
+};
 
 const Header: FC = () => {
+  const {
+    handleSetBondingCurveConfig,
+    handleSetStakeConfig,
+    handleSetSnapshotConfig,
+  } = useConfigActions();
+  const { handleSetStakeConfig: handleStrongboxConfig } = useCoinActions();
+  const bondingCurveConfig = useGetConfigState('bondingCurveConfig');
+  const stakeConfig = useGetConfigState('stakeConfig');
   const [pathname] = useLocation();
-  const { solPrice, setSolPrice } = useContext(UserContext);
+  const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
+  const [isOpenSetting, setIsOpenSetting] = useState(false);
+  const provider = getProviderApp();
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const oraiEndpoint = 'https://rpc.orai.io';
+        const whitelistContractAddress =
+          'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
+        const cwClient = await CosmWasmClient.connect(oraiEndpoint);
+        const contract = new AgentsLandSnapshotContractQueryClient(
+          cwClient,
+          whitelistContractAddress
+        );
+
+        // query list token metadata
+        /// return:
+        /// - token: token addr
+        /// - metadata: base64 encode of token metadata
+        const dataSnap = await contract.tokensMetadata();
+
+        const res = (dataSnap || []).map((e) => {
+          return {
+            ...e,
+            metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+          };
+        });
+        // console.log('res', res);
+
+        handleSetSnapshotConfig(res);
+      } catch (error) {
+        console.log('error get snapshot', error);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (!provider) {
+        return;
+      }
+
+      if (!bondingCurveConfig) {
+        const config = await web3Solana.getConfigCurve();
+        if (config) {
+          console.log('config', {
+            config,
+            curveLimit: config.curveLimit.toNumber(),
+          });
+          handleSetBondingCurveConfig(config);
+        }
+      }
+      if (!stakeConfig) {
+        const configStake = await web3FungStake.getStakeConfig(
+          new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
+        );
+
+        if (configStake) {
+          handleSetStakeConfig(configStake);
+        }
+      }
+    })();
+  }, [provider]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -58,11 +153,15 @@ const Header: FC = () => {
 
   return (
     <>
+      <SettingModal
+        isOpen={isOpenSetting}
+        closeModal={() => setIsOpenSetting(false)}
+      />
       <HowItWorkModal
         isOpen={showStepWork}
         closeModal={() => setShowStepWork(false)}
       />
-      {/* <MarqueeToken /> */}
+      <MarqueeToken />
       <header className="relative z-10 w-full h-[72px] md:h-[96px] bg-[#13141D] m-auto flex justify-center items-center border-b border-solid border-[rgba(88,90,107,0.24)]">
         <div className="py-6 px-2 flex justify-between items-center max-w-[1216px] w-full h-full">
           <div className="flex gap-2 items-center">
@@ -92,7 +191,7 @@ const Header: FC = () => {
             </div>
           </div>
           <div className="hidden md:block">
-            <ConnectButton />
+            <ConnectButton setSettingModal={setIsOpenSetting} />
           </div>
           <div
             className="block md:hidden cursor-pointer"
@@ -175,7 +274,12 @@ const Header: FC = () => {
           )}
         </div>
         <div className="w-full">
-          <ConnectButton />
+          <ConnectButton
+            setSettingModal={(val) => {
+              setIsOpenSetting(val);
+              setOpenMobileMenu(false);
+            }}
+          />
         </div>
       </div>
       {pathname === '/' && <Banner />}
