@@ -1023,6 +1023,15 @@ export class Web3SolanaProgramInteraction {
         console.log('Warning: Connection not connected');
         return;
       }
+      const allowedAddresses = await this.getSnapShotAgent();
+      const currentTokenData = allowedAddresses.find(
+        (e) => e.token === tokenMint.toBase58()
+      );
+      const raydiumPoolAddr =
+        currentTokenData.metadata?.['raydiumPoolAddr'] || '';
+      const oraidexPoolAddr =
+        currentTokenData.metadata?.['oraidexPoolAddr'] || '';
+
       const metaplex = Metaplex.make(this.connection);
       const provider = anchor.getProvider();
       const program = new Program(
@@ -1077,6 +1086,8 @@ export class Web3SolanaProgramInteraction {
         url: metadataJson.image,
         tokenReserves: bondingCurve.reserveToken.toNumber(),
         lamportReserves: bondingCurve.reserveLamport.toNumber(),
+        raydiumPoolAddr,
+        oraidexPoolAddr,
         bondingCurveLimit:
           configAccount?.curveLimit || ALL_CONFIGS.BONDING_CURVE_LIMIT,
         metadata: {
@@ -1084,7 +1095,7 @@ export class Web3SolanaProgramInteraction {
           ...metadataJson,
           agentAddress: metadata.address.toBase58(),
         } as metadataInfo,
-        listed: bondingCurve.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
+        listed: raydiumPoolAddr || oraidexPoolAddr,
         tradingTime: new Date(
           toBN(bondingCurve.partyStart.toNumber())
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
