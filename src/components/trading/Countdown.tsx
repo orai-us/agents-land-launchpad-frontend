@@ -39,7 +39,7 @@ const Countdown = ({ onEnd, coin, endTime }) => {
             fill="#9192A0"
           />
         </svg>
-        <span className="text-[#9192A0] text-[12px] ml-1">Phase start at</span>
+        <span className="text-[#9192A0] text-[12px] ml-1">Phase starts at</span>
       </div>
 
       <div className="flex mt-3">
