@@ -1126,9 +1126,15 @@ export class Web3SolanaProgramInteraction {
       );
 
       const configAccount = await program.account.config.fetch(configPda);
+
       return configAccount;
     } catch (error) {
-      console.log('getTokenDetailFromContract error', error);
+      console.log('getConfigCurve error', error);
+
+      errorAlert(
+        'RPC call limit reached. Please wait or switch networks to continue!'
+      );
+
       return;
     }
   };
