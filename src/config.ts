@@ -37,6 +37,28 @@ export const PARRY_STATUS = 'party_status';
 export const BLACK_LIST_ADDRESS = [
   'oraigyiRnYoCgFiaLnpiaPvJjZbs5zzmWHp4sxBgZq3', // BlackRack
   'Au2AaBHBJ2b5E9eERrff58Byspu4Esg7CxJYrkNBeZa6', // TSM
+  // gen test
+
+  'BRqRVPwtyndv2vaWNFjDSv8fH7Rccnfeo8uw5RxSbjUt',
+  '7XKfaPix942j4iuJcB57yNb9eUCJEk8arLzReBy8Wq83',
+  'APwbeogTeENbdLZM4xsFZuwEGWn8zVRLVzuPziQfEMoS',
+  '4YAUi3ZnjeHmNx1LUxsavxxAHvFExX8ep72hJtDNKkU2',
+  'DbKiFv3JkZSCtmcMWnTo3NzCApUKaXkKaWq2441JNETi',
+  '88FR4czxf7syvNsrEQZ9cLP2AFnxodFfGmXNsbdJQCBn',
+  'HgZWwzuUwRKScwvdncp2aG5kkQKnWEQKQHsagRf8qCkn',
+  'GvF2U3ZQmsVagRP4FrgD7ETjwTutBeSdCVQM9CzTG8XD',
+  '6ypXJsniSKVrynxwLqtJkBdVhZj6m3yE4A6fNJbrRoa',
+  '9UTMesxqi2cv7cXXkswrksnsFff65dB41B7ve6EWppJU',
+  '3NdUk319N7aKSyVt8LsJvupeeuYn8ojhC9uwyJqmoeTe',
+  '2s72rmFpx8B48jDzw2pDrdUgGra3YmFH6bWnubhgvkuU',
+  'DzvehmQYSzd4bAmwkge9GoLSN6abxP8Xvie6YTbnu7EQ',
+  'AR9hpPi7jn4QwZVUUDm1kC9GSpmL1pqV5ofpwzbpWaEH',
+  '5u4BdDHAPKTgw2aaQxVYsojmJGsEUNWxsT9xJChBpcaL',
+  'MNg5gaa36GXZTgbAemn2aMiRoDct54TkrfDX8Kz6UpC',
+  '7exZSwq17Kg3aC4Q1QtQYVrvj6nu5XivcKEDnjtU3mVB',
+  'FLbuiaNtsmhm28Aq5Pg2RYvZof7pFp9aYFF1mr6PJGs6',
+  'HrVAhZEeVaJiBoDVQELDiugiavjJFXMfsEqTjievSccE',
+  'Bxn23vGQzhG12Bk3xMPvRx8PdgFgggb4fs2CGsfkZrQd',
 ];
 // export const OFFICIAL_TIME = 1735059600000; // time go live 0h00 - 25/12/2024
 // export const OFFICIAL_TIME = 1735059600; // time go live
