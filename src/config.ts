@@ -188,6 +188,6 @@ export const CONFIGS: Record<
   },
 };
 
-export const ALL_CONFIGS = CONFIGS[SOLANA_ENV] || CONFIGS['mainnet-beta-test'];
+export const ALL_CONFIGS = CONFIGS[SOLANA_ENV] || CONFIGS['mainnet-beta'];
 
 export const PROGRAM_ID = ALL_CONFIGS.PROGRAM_ID ?? '';
