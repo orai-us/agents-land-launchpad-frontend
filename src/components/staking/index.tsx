@@ -26,7 +26,7 @@ dayjs.extend(tz);
 
 export enum STEP_TOKEN {
   INFO,
-  BEHAVIOR,
+  BEHAVIOR
 }
 
 const web3Solana = new Web3SolanaProgramInteraction();
@@ -47,25 +47,25 @@ export default function Staking() {
   const {
     loading: loadingList,
     lockingList,
-    totalLocked,
+    totalLocked
   } = useGetListLockedByUser(isRefreshList);
   const AMOUNT_LIST = [
     {
       label: '25%',
-      value: tokenBal / 4,
+      value: tokenBal / 4
     },
     {
       label: '50%',
-      value: tokenBal / 2,
+      value: tokenBal / 2
     },
     {
       label: '75%',
-      value: (tokenBal / 4) * 3,
+      value: (tokenBal / 4) * 3
     },
     {
       label: '100%',
-      value: tokenBal,
-    },
+      value: tokenBal
+    }
   ];
 
   const isInsufficient = toBN(stakeAmount).isGreaterThan(tokenBal);
@@ -92,7 +92,7 @@ export default function Staking() {
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
           ALL_CONFIGS.STAKE_CURRENCY_MINT
-        ),
+        )
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
       setTokenBal(tokenBal ? tokenBal : 0);
@@ -143,8 +143,17 @@ export default function Staking() {
         </Link>
       </div>
       <div className="w-full text-[14px] text-[#9192A0] mb-3 md:mb-12 mt-4">
-        Lock your $MAX today to gain advantages of coming projects and so much
-        more!
+        Earn infinite airdrops by locking $MAX in Strongbox Vaults. <br />
+        Stakers will share in 2% allocation of all assets launched on the
+        platform. <br />
+        For more details visit:{' '}
+        <a
+          href="https://docs.agents.land/tokenomics"
+          target="_blank"
+          className="text-[#ff9035]"
+        >
+          https://docs.agents.land/tokenomics
+        </a>
       </div>
       <div className="flex justify-between items-start flex-col-reverse md:flex-row">
         <div className="w-full flex flex-col">
@@ -261,7 +270,7 @@ export default function Staking() {
                   <span className="text-[10px] text-[#E8E9EE] font-medium">
                     Balance:{' '}
                     {numberWithCommas(Number(tokenBal), undefined, {
-                      maximumFractionDigits: SPL_DECIMAL,
+                      maximumFractionDigits: SPL_DECIMAL
                     })}{' '}
                     MAX
                   </span>
@@ -395,30 +404,30 @@ export default function Staking() {
 export const LIST_LOCKING_ITEMS = [
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 1,
+    status: 1
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
+    status: 0
   },
   {
     id: 1,
-    status: 0,
-  },
+    status: 0
+  }
 ];
