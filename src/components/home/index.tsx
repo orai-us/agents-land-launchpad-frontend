@@ -99,25 +99,30 @@ const HomePage: FC = () => {
       }
 
       if (coins !== null) {
-        await Promise.all(
-          coins.map(async (coin) => {
-            const { partyTradingTime, token } = coin || {};
-            if (!partyTradingTime) {
-              console.log('===== Query party Time=====');
-              const { curveAccount } = await web3Solana.getMaxBondingCurveLimit(
-                new PublicKey(token),
-                wallet
-              );
+        try {
+          await Promise.all(
+            coins.map(async (coin) => {
+              const { partyTradingTime, token } = coin || {};
+              if (!partyTradingTime) {
+                console.log('===== Query party Time =====', coin.ticker);
+                const { curveAccount } =
+                  await web3Solana.getMaxBondingCurveLimit(
+                    new PublicKey(token),
+                    wallet
+                  );
 
-              const partyStart = curveAccount?.partyStart?.toNumber();
+                const partyStart = curveAccount?.partyStart?.toNumber();
 
-              coin['partyTradingTime'] = new Date(
-                partyStart * ALL_CONFIGS.TIMER.MILLISECONDS
-              );
-              return partyStart;
-            }
-          })
-        );
+                coin['partyTradingTime'] = new Date(
+                  partyStart * ALL_CONFIGS.TIMER.MILLISECONDS
+                );
+                return partyStart;
+              }
+            })
+          );
+        } catch (error) {
+          console.log('Query party Time', error);
+        }
 
         setTotalData(total);
         setData((data) => {
