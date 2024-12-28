@@ -9,6 +9,7 @@ import { useLocation } from 'wouter';
 import FilterListToken, { SORT_LIST } from './FilterListToken';
 import ListToken, { KeyByStatus, STATUS_TOKEN, TokenTab } from './ListToken';
 import { useGetConfigState } from '@/zustand-store/config/selector';
+import { PublicKey } from '@solana/web3.js';
 
 const TAB_QUERY = 'tab';
 const SEARCH_QUERY = 'keyword';
@@ -98,6 +99,26 @@ const HomePage: FC = () => {
       }
 
       if (coins !== null) {
+        await Promise.all(
+          coins.map(async (coin) => {
+            const { partyTradingTime, token } = coin || {};
+            if (!partyTradingTime) {
+              console.log('===== Query party Time=====');
+              const { curveAccount } = await web3Solana.getMaxBondingCurveLimit(
+                new PublicKey(token),
+                wallet
+              );
+
+              const partyStart = curveAccount?.partyStart?.toNumber();
+
+              coin['partyTradingTime'] = new Date(
+                partyStart * ALL_CONFIGS.TIMER.MILLISECONDS
+              );
+              return partyStart;
+            }
+          })
+        );
+
         setTotalData(total);
         setData((data) => {
           if (page) {
