@@ -222,37 +222,37 @@ export default function TradingPage() {
   }, [coin]);
 
   // realtime bonding curve
-  useEffect(() => {
-    if (!coinId || !wallet.publicKey) return;
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
-    const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback(
-      'swapEvent',
-      async (result: ResultType) => {
-        const segments = pathname.split('/');
-        const parameter = segments[segments.length - 1];
+  // useEffect(() => {
+  //   if (!coinId || !wallet.publicKey) return;
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  //   });
+  //   const listener = new AgentsLandEventListener(connection);
+  //   listener.setProgramEventCallback(
+  //     'swapEvent',
+  //     async (result: ResultType) => {
+  //       const segments = pathname.split('/');
+  //       const parameter = segments[segments.length - 1];
 
-        if (result.mint === parameter) {
-          console.log('==== UPDATE BONDING CURVE ====');
-          await fetchDataCoin(parameter);
-        }
-      },
-      []
-    );
+  //       if (result.mint === parameter) {
+  //         console.log('==== UPDATE BONDING CURVE ====');
+  //         await fetchDataCoin(parameter);
+  //       }
+  //     },
+  //     []
+  //   );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const { program, listenerIds } = listener.listenProgramEvents(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      if (!program) return;
-      console.log('bonding-curve----ready to remove listeners');
-      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-    };
-  }, [coinId, wallet.publicKey]);
+  //   return () => {
+  //     if (!program) return;
+  //     console.log('bonding-curve----ready to remove listeners');
+  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+  //   };
+  // }, [coinId, wallet.publicKey]);
 
   useEffect(() => {
     if (coin.token && coin.raydiumPoolAddr) {

@@ -1,22 +1,22 @@
-import coinImg from "@/assets/images/richoldman.png";
-import { PROGRAM_ID } from "@/config";
-import { AgentsLandListener } from "@/program/logListeners/AgentsLandListener";
-import { commitmentLevel, endpoint } from "@/program/web3";
-import { numberWithCommas } from "@/utils/format";
-import { coinInfo, SwapInfo } from "@/utils/types";
-import { reduceString } from "@/utils/util";
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
-import BigNumber from "bignumber.js";
-import { BN } from "bn.js";
-import dayjs from "dayjs";
-import { FC, useEffect, useState } from "react";
-import Marquee from "react-fast-marquee";
-import { twMerge } from "tailwind-merge";
+import coinImg from '@/assets/images/richoldman.png';
+import { PROGRAM_ID } from '@/config';
+import { AgentsLandListener } from '@/program/logListeners/AgentsLandListener';
+import { commitmentLevel, endpoint } from '@/program/web3';
+import { numberWithCommas } from '@/utils/format';
+import { coinInfo, SwapInfo } from '@/utils/types';
+import { reduceString } from '@/utils/util';
+import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import BigNumber from 'bignumber.js';
+import { BN } from 'bn.js';
+import dayjs from 'dayjs';
+import { FC, useEffect, useState } from 'react';
+import Marquee from 'react-fast-marquee';
+import { twMerge } from 'tailwind-merge';
 
 export enum ACTION_TYPE {
-  Bought = "Bought",
-  Sold = "Sold",
-  Created = "Created",
+  Bought = 'Bought',
+  Sold = 'Sold',
+  Created = 'Created',
 }
 
 export type RecentTokenAction = {
@@ -56,15 +56,15 @@ const RecentToken: FC<Partial<RecentTokenAction>> = ({
 };
 
 const RecentTokenCreated: FC<
-  Pick<RecentTokenAction, "address" | "type" | "time" | "token">
+  Pick<RecentTokenAction, 'address' | 'type' | 'time' | 'token'>
 > = ({ address, type, token, time }) => {
   return (
     <div className="flex items-center px-6 border-r border-[rgba(252,_252,_252,_0.24)] text-[#FCFCFC] text-nowrap">
       <span className="text-[#FCFCFC]">{address}</span>&nbsp;
-      <span className={twMerge("text-[#AEE67F]")}>{type}</span>
+      <span className={twMerge('text-[#AEE67F]')}>{type}</span>
       &nbsp;
       {token.name}
-      {typeof token.img === "string" ? (
+      {typeof token.img === 'string' ? (
         <img
           src={token.img}
           alt="tokenIMG"
@@ -78,28 +78,28 @@ const RecentTokenCreated: FC<
         />
       )}
       &nbsp;on&nbsp;
-      <span className="mr-4">{dayjs(time).format("DD/MM/YYYY")}</span>
+      <span className="mr-4">{dayjs(time).format('DD/MM/YYYY')}</span>
     </div>
   );
 };
 
 const RecentTokenSwap: FC<
-  Pick<RecentTokenAction, "address" | "type" | "amount" | "token">
+  Pick<RecentTokenAction, 'address' | 'type' | 'amount' | 'token'>
 > = ({ address, type, amount, token }) => {
   return (
     <div className="flex px-6 border-r border-[rgba(252,_252,_252,_0.24)] text-[#FCFCFC] text-nowrap">
       <span className="text-[#FCFCFC]">{address}</span>&nbsp;
       <span
         className={twMerge(
-          "text-[#9FF4CF]",
-          type === ACTION_TYPE.Sold && "text-[#E75787]"
+          'text-[#9FF4CF]',
+          type === ACTION_TYPE.Sold && 'text-[#E75787]'
         )}
       >
         {type}
-      </span>{" "}
+      </span>{' '}
       &nbsp;
       {numberWithCommas(new BigNumber(amount).toNumber())} SOL of {token.name}
-      {typeof token.img === "string" ? (
+      {typeof token.img === 'string' ? (
         <img
           src={token.img}
           alt="tokenIMG"
@@ -122,83 +122,83 @@ const MarqueeToken = () => {
   //   useState<coinInfo>(undefined);
   // const [latestSwapInfo, setLatestSwapInfo] = useState<SwapInfo>(undefined);
 
-  useEffect(() => {
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
+  // useEffect(() => {
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  //   });
 
-    const listener = new AgentsLandListener(connection);
-    listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
-      console.log("basicTokenInfo", basicTokenInfo);
-      const newCoinInfo: coinInfo = {
-        creator: basicTokenInfo.creator,
-        name: basicTokenInfo.metadata?.name,
-        url:
-          basicTokenInfo.metadata?.image ||
-          basicTokenInfo.metadata?.json?.image ||
-          basicTokenInfo.metadata?.uri,
-        ticker: basicTokenInfo.metadata?.symbol,
-        tokenReserves: new BN(0),
-        lamportReserves: new BN(0),
-        token: basicTokenInfo.mintAddress,
-        commit: "",
-        decimals: 6,
-        bondingCurveLimit: new BN(0),
-        listed: false,
-      };
-      console.log("new coin info: ", newCoinInfo);
-      // setLatestCreatedToken(newCoinInfo);
-      setListNotifications((prevList) => {
-        const newItem = {
-          tokenAddress: newCoinInfo.token,
-          address:
-            newCoinInfo.creator["name"] ||
-            reduceString(new PublicKey(newCoinInfo.creator).toString(), 4, 4),
-          type: ACTION_TYPE.Created,
-          token: {
-            name: newCoinInfo.ticker,
-            img: newCoinInfo.url,
-          },
-        } as any;
-        if (prevList.length >= 4) {
-          return [newItem, ...prevList.slice(0, -1)];
-        }
+  //   const listener = new AgentsLandListener(connection);
+  //   listener.setProgramLogsCallback("Launch", (basicTokenInfo: any) => {
+  //     console.log("basicTokenInfo", basicTokenInfo);
+  //     const newCoinInfo: coinInfo = {
+  //       creator: basicTokenInfo.creator,
+  //       name: basicTokenInfo.metadata?.name,
+  //       url:
+  //         basicTokenInfo.metadata?.image ||
+  //         basicTokenInfo.metadata?.json?.image ||
+  //         basicTokenInfo.metadata?.uri,
+  //       ticker: basicTokenInfo.metadata?.symbol,
+  //       tokenReserves: new BN(0),
+  //       lamportReserves: new BN(0),
+  //       token: basicTokenInfo.mintAddress,
+  //       commit: "",
+  //       decimals: 6,
+  //       bondingCurveLimit: new BN(0),
+  //       listed: false,
+  //     };
+  //     console.log("new coin info: ", newCoinInfo);
+  //     // setLatestCreatedToken(newCoinInfo);
+  //     setListNotifications((prevList) => {
+  //       const newItem = {
+  //         tokenAddress: newCoinInfo.token,
+  //         address:
+  //           newCoinInfo.creator["name"] ||
+  //           reduceString(new PublicKey(newCoinInfo.creator).toString(), 4, 4),
+  //         type: ACTION_TYPE.Created,
+  //         token: {
+  //           name: newCoinInfo.ticker,
+  //           img: newCoinInfo.url,
+  //         },
+  //       } as any;
+  //       if (prevList.length >= 4) {
+  //         return [newItem, ...prevList.slice(0, -1)];
+  //       }
 
-        return [newItem, ...prevList];
-      });
-    });
-    listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
-      setListNotifications((prevList) => {
-        const newItem = {
-          tokenAddress: swapInfo.mintAddress,
-          address: reduceString(swapInfo.creator, 4, 4),
-          type: swapInfo.direction,
-          amount: (
-            (swapInfo.solAmountInLamports || new BN(0)).toNumber() /
-            LAMPORTS_PER_SOL
-          ).toFixed(9),
-          token: {
-            name: swapInfo.mintSymbol,
-            img: swapInfo.mintUri,
-          },
-        } as any;
-        if (prevList.length >= 4) {
-          return [newItem, ...prevList.slice(0, -1)];
-        }
-        return [newItem, ...prevList];
-      });
-    });
+  //       return [newItem, ...prevList];
+  //     });
+  //   });
+  //   listener.setProgramLogsCallback("Swap", (swapInfo: SwapInfo) => {
+  //     setListNotifications((prevList) => {
+  //       const newItem = {
+  //         tokenAddress: swapInfo.mintAddress,
+  //         address: reduceString(swapInfo.creator, 4, 4),
+  //         type: swapInfo.direction,
+  //         amount: (
+  //           (swapInfo.solAmountInLamports || new BN(0)).toNumber() /
+  //           LAMPORTS_PER_SOL
+  //         ).toFixed(9),
+  //         token: {
+  //           name: swapInfo.mintSymbol,
+  //           img: swapInfo.mintUri,
+  //         },
+  //       } as any;
+  //       if (prevList.length >= 4) {
+  //         return [newItem, ...prevList.slice(0, -1)];
+  //       }
+  //       return [newItem, ...prevList];
+  //     });
+  //   });
 
-    const subId = listener.subscribeProgramLogs(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const subId = listener.subscribeProgramLogs(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      console.log("Notifications----ready to remove listeners");
-      connection.removeOnLogsListener(subId);
-    };
-  }, []);
+  //   return () => {
+  //     console.log("Notifications----ready to remove listeners");
+  //     connection.removeOnLogsListener(subId);
+  //   };
+  // }, []);
 
   if (!notificationList?.length) return null;
 
@@ -251,39 +251,39 @@ export default MarqueeToken;
 
 const MOCK_DATA = [
   {
-    address: "THZu...HKcR",
+    address: 'THZu...HKcR',
     type: ACTION_TYPE.Bought,
-    amount: "0.4",
+    amount: '0.4',
     token: {
-      name: "RIC",
+      name: 'RIC',
       img: coinImg,
     },
   },
   {
-    address: "THZu...HKcR",
+    address: 'THZu...HKcR',
     type: ACTION_TYPE.Created,
-    amount: "0.01",
+    amount: '0.01',
     token: {
-      name: "MAX",
+      name: 'MAX',
       img: coinImg,
     },
     time: Date.now(),
   },
   {
-    address: "THZu...HKcR",
+    address: 'THZu...HKcR',
     type: ACTION_TYPE.Sold,
-    amount: "0.34",
+    amount: '0.34',
     token: {
-      name: "MAX",
+      name: 'MAX',
       img: coinImg,
     },
   },
   {
-    address: "THZu...HKcR",
+    address: 'THZu...HKcR',
     type: ACTION_TYPE.Sold,
-    amount: "0.22",
+    amount: '0.22',
     token: {
-      name: "MAX",
+      name: 'MAX',
       img: coinImg,
     },
   },

@@ -1,3 +1,4 @@
+import { RPC_MAPS } from '@/config';
 import UserContext, { UserProvider } from '@/context/UserContext';
 import { ModalProvider } from '@/contexts/ModalProvider';
 import { PageProvider } from '@/contexts/PageContext';
@@ -23,10 +24,12 @@ export default function Providers({ children }: { children: ReactNode }) {
   const [solPrice, setSolPrice] = useState<number>(0);
   const [profileEditModal, setProfileEditModal] = useState<boolean>(false);
   const [postReplyModal, setPostReplyModal] = useState<boolean>(false);
-  const [rpcUrl, setRpcUrl] = useState<string>(import.meta.env.VITE_SOLANA_RPC);
+  // const [rpcUrl, setRpcUrl] = useState<string>(import.meta.env.VITE_SOLANA_RPC);
+  const [rpcUrl, setRpcUrl] = useState<string>(RPC_MAPS.Agents);
   useEffect(() => {
     console.log('Providers::rpcUrl', rpcUrl);
   }, [rpcUrl]);
+
   return (
     <SolanaWalletProvider>
       <QueryClientProvider client={queryClient}>
