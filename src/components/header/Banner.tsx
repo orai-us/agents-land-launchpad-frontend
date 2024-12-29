@@ -40,7 +40,7 @@ const Banner = () => {
     new Date(kothCoin.date).getTime() >
       ALL_CONFIGS.OFFICIAL_TIME - ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
 
-  const isListedOnRay = !!kothCoin.raydiumPoolAddr;
+  const isListedOnRay = !!kothCoin?.raydiumPoolAddr;
 
   return (
     <>
