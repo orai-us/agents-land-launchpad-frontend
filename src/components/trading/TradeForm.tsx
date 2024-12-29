@@ -82,7 +82,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
 
   const isOnParty = !isPublicStart && isPartyStart;
 
-  const disableBuyOnParty = isBuy === 0 && isOnParty && !isShowLocked;
+  // const disableBuyOnParty = isBuy === 0 && isOnParty && !isShowLocked;
   const disableSellOnParty = isBuy === 1 && isOnParty;
 
   const simulateOut = (coin, maxAmount, fee = 0.01) => {
@@ -601,7 +601,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             isInsufficientFund ||
             isDisableSwapOnAgent ||
             isNegativeAmount ||
-            disableBuyOnParty ||
+            // disableBuyOnParty ||
             disableSellOnParty ||
             isDisableWhenExceedBuy
           }

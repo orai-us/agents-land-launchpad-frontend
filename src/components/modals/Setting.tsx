@@ -35,7 +35,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
         !isOpen && 'hidden'
       )}
     >
-      <div className="flex w-full max-w-[480px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
+      <div className="flex w-full max-w-[580px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
         <div className="">
           <h2 className="text-[18px] font-medium">Settings</h2>
           <button
@@ -56,7 +56,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
             </svg>
           </button>
           <div className="mt-4 mb-8 text-[14px] text-[#9192A0]">RPC URL</div>
-          <div className="w-full flex justify-start space-x-2 items-center rounded-lg">
+          <div className="w-full flex justify-start flex-wrap gap-2 items-center rounded-lg">
             {Object.entries(RPC_MAPS)
               .filter(([k, v]) => !!v)
               .map(([rpcType, rpcUrl], i) => {
