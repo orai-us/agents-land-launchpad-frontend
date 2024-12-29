@@ -669,12 +669,12 @@ export default function TradingPage() {
             <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
               <div className="w-full flex flex-col gap-2">
                 <p className="text-[#E8E9EE] text-[16px] uppercase">
-                  Bonding curve ({progress.toFixed(2)}%)
+                  Bonding curve ({isListedOnRay ? 100 : progress.toFixed(2)}%)
                 </p>
                 <div className="w-full mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
                   <div
                     className="rounded-[999px] h-2 bg-barrie"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${isListedOnRay ? 100 : progress}%` }}
                   ></div>
                 </div>
               </div>
