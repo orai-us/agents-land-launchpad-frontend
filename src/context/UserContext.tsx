@@ -78,12 +78,13 @@ export function UserProvider({
     const setAnchorProvider = async () => {
       try {
         const connection = new Connection(value.rpcUrl, 'confirmed');
-        await connection.getEpochInfo();
+        // await connection.getEpochInfo();
 
         if (wallet.publicKey) {
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
             preflightCommitment: 'confirmed',
+            // maxRetries: 1,
           });
           setProvider(provider);
           setProviderApp(provider);
