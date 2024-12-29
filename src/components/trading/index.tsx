@@ -627,7 +627,7 @@ export default function TradingPage() {
                       </div>
                     )}
 
-                    {/* {isAgentChart ? (
+                    {isAgentChart ? (
                       <div className="bg-[#101827] pb-6 rounded-b">
                         <TradingChart param={coin}></TradingChart>
                       </div>
@@ -635,7 +635,7 @@ export default function TradingPage() {
                       <div className="bg-[#111114] rounded-b">
                         <DexToolsChart param={coin}></DexToolsChart>
                       </div>
-                    )} */}
+                    )}
                   </div>
                 )}
               </div>
