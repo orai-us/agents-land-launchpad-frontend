@@ -178,7 +178,10 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const isExceedCurveLimit = new BigNumber(sol).isGreaterThan(fmtCurve);
   const canSimulate = (isBuy === 0 && !isExceedCurveLimit) || isBuy !== 0;
   const isDisableWhenExceedBuy =
-    isBuy === 0 && isPublicStart && toBN(sol).isGreaterThan(0.5);
+    isBuy === 0 &&
+    isPublicStart &&
+    !isListedOnRay &&
+    toBN(sol).isGreaterThan(0.5);
 
   const handleInputChange = (value: number) => {
     if (value || value === 0) {
@@ -587,7 +590,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             * You are not allowed to sell token in party round
           </div>
         )}
-        {isBuy === 0 && isPublicStart && (
+        {isBuy === 0 && isPublicStart && !isListedOnRay && (
           <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
             * You are limited to buy maximum 0.5 SOL per transaction
           </div>

@@ -323,11 +323,11 @@ export default function TradingPage() {
 
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
-          <div className="flex">
+          <div className="flex mb-4">
             {isListed && (isRaydiumListed || isCanBuyOnRaydium) && (
               <a
                 // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
-                href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
+                href={`https://raydium.io/swap/?inputMint=sol&outputMint=${coin.token}`}
                 target="_blank"
                 className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
               >
