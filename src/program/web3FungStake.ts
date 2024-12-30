@@ -2,18 +2,13 @@ import {
   ALL_CONFIGS,
   FUNGIBLE_STAKE_CONFIG_SEED,
   STAKE_FUNGIBLE_INFO_SEED,
-  FUNGIBLE_VAULT_SEED,
+  FUNGIBLE_VAULT_SEED
 } from '@/config';
 import { toPublicKey } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
 import { WalletContextState } from '@solana/wallet-adapter-react';
-import {
-  ComputeBudgetProgram,
-  Connection,
-  PublicKey,
-  Transaction,
-} from '@solana/web3.js';
+import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js';
 import { Fungstake } from './fungstake/fungstake';
 import idl from './fungstake/fungstake.json';
 import { handleTransaction } from './utils';
@@ -23,12 +18,7 @@ export const stakeProgramId = new PublicKey(idl.address);
 export const stakeInterface = JSON.parse(JSON.stringify(idl));
 
 export class web3FungibleStake {
-  constructor(
-    private readonly connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    })
-  ) {}
+  constructor() {}
 
   async stake(
     stakeCurrencyMint: string,
@@ -50,7 +40,7 @@ export class web3FungibleStake {
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000,
+        microLamports: 1_000_000
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
@@ -59,7 +49,7 @@ export class web3FungibleStake {
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
         })
         .instruction();
 
@@ -75,7 +65,7 @@ export class web3FungibleStake {
         const sTx = signedTx.serialize();
         const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false,
+          skipPreflight: false
         });
         const blockhash = await provider.connection.getLatestBlockhash();
 
@@ -83,7 +73,7 @@ export class web3FungibleStake {
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
           },
           'confirmed' // FIXME: trick lord confirmed / finalized;
         );
@@ -100,7 +90,7 @@ export class web3FungibleStake {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: provider.connection,
+          connection: provider.connection
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -130,7 +120,7 @@ export class web3FungibleStake {
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000,
+        microLamports: 1_000_000
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
@@ -139,7 +129,7 @@ export class web3FungibleStake {
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
         })
         .instruction();
 
@@ -155,7 +145,7 @@ export class web3FungibleStake {
         const sTx = signedTx.serialize();
         const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false,
+          skipPreflight: false
         });
         const blockhash = await provider.connection.getLatestBlockhash();
 
@@ -163,7 +153,7 @@ export class web3FungibleStake {
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
           },
           'confirmed' // FIXME: trick lord confirmed / finalized;
         );
@@ -180,7 +170,7 @@ export class web3FungibleStake {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: provider.connection,
+          connection: provider.connection
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -210,7 +200,7 @@ export class web3FungibleStake {
       let [configPda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
-          toPublicKey(stakeCurrencyMint).toBytes(),
+          toPublicKey(stakeCurrencyMint).toBytes()
         ],
         program.programId
       );
@@ -218,14 +208,14 @@ export class web3FungibleStake {
         [
           Buffer.from(FUNGIBLE_VAULT_SEED),
           configPda.toBytes(),
-          new PublicKey(rewardCurrencyMint).toBytes(),
+          new PublicKey(rewardCurrencyMint).toBytes()
         ],
         program.programId
       );
 
       vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
         totalStaked: new BN('0'),
-        stakeEndTime: new BN('0'),
+        stakeEndTime: new BN('0')
       };
 
       if (!wallet.publicKey) {
@@ -236,7 +226,7 @@ export class web3FungibleStake {
         [
           Buffer.from(STAKE_FUNGIBLE_INFO_SEED),
           vaultPda.toBytes(),
-          wallet.publicKey.toBytes(),
+          wallet.publicKey.toBytes()
         ],
         program.programId
       );
@@ -244,14 +234,14 @@ export class web3FungibleStake {
 
       return {
         stakerInfo,
-        vaultInfo,
+        vaultInfo
       };
     } catch (error) {
       console.log('Error in get stake token transaction', error, error.error);
 
       return {
         stakerInfo: null,
-        vaultInfo,
+        vaultInfo
       };
     }
   }
@@ -303,7 +293,7 @@ export class web3FungibleStake {
         .accounts({
           user: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
         })
         .view();
 
