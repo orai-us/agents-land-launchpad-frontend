@@ -25,20 +25,18 @@ export const vaultInterface = JSON.parse(JSON.stringify(idl));
 const stakeCurrencyMint = ALL_CONFIGS.STAKE_CURRENCY_MINT;
 
 export class Web3SolanaLockingToken {
-  constructor(
-    private readonly connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    })
-  ) {}
+  constructor() //   wsEndpoint: import.meta.env.VITE_SOLANA_WS, //   commitment: commitmentLevel, // new Connection(endpoint, {
+  // })
+  {}
 
   async stake(lockPeriod: number, amount: number, wallet: WalletContextState) {
+    let provider;
     try {
-      if (!this.connection || !wallet.publicKey) {
+      provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(vaultInterface, provider) as Program<Vault>;
 
       let [configPda] = PublicKey.findProgramAddressSync(
@@ -100,19 +98,19 @@ export class Web3SolanaLockingToken {
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
+        const blockhash = await provider.connection.getLatestBlockhash();
 
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
@@ -126,10 +124,13 @@ export class Web3SolanaLockingToken {
       }
     } catch (error) {
       console.log('Error in locking token transaction', error, error.error);
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -142,11 +143,11 @@ export class Web3SolanaLockingToken {
   async getListLockedOfUser(lockPeriod: number, wallet: WalletContextState) {
     let vaultInfo = { totalStaked: new BN('0') };
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(vaultInterface, provider) as Program<Vault>;
 
       let [configPda] = PublicKey.findProgramAddressSync(
@@ -230,12 +231,13 @@ export class Web3SolanaLockingToken {
       amount,
       wallet,
     });
+    let provider;
     try {
-      if (!this.connection || !wallet.publicKey) {
+      provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(vaultInterface, provider) as Program<Vault>;
 
       let [configPda] = PublicKey.findProgramAddressSync(
@@ -264,19 +266,19 @@ export class Web3SolanaLockingToken {
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
+        const blockhash = await provider.connection.getLatestBlockhash();
 
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
@@ -290,10 +292,14 @@ export class Web3SolanaLockingToken {
       }
     } catch (error) {
       console.log('Error in locking token transaction', error, error.error);
+
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
