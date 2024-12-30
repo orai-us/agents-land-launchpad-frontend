@@ -222,37 +222,37 @@ export default function TradingPage() {
   }, [coin]);
 
   // realtime bonding curve
-  useEffect(() => {
-    if (!coinId || !wallet.publicKey) return;
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
-    const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback(
-      'swapEvent',
-      async (result: ResultType) => {
-        const segments = pathname.split('/');
-        const parameter = segments[segments.length - 1];
+  // useEffect(() => {
+  //   if (!coinId || !wallet.publicKey) return;
+  //   const connection = new Connection(endpoint, {
+  //     commitment: commitmentLevel,
+  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  //   });
+  //   const listener = new AgentsLandEventListener(connection);
+  //   listener.setProgramEventCallback(
+  //     'swapEvent',
+  //     async (result: ResultType) => {
+  //       const segments = pathname.split('/');
+  //       const parameter = segments[segments.length - 1];
 
-        if (result.mint === parameter) {
-          console.log('==== UPDATE BONDING CURVE ====');
-          await fetchDataCoin(parameter);
-        }
-      },
-      []
-    );
+  //       if (result.mint === parameter) {
+  //         console.log('==== UPDATE BONDING CURVE ====');
+  //         await fetchDataCoin(parameter);
+  //       }
+  //     },
+  //     []
+  //   );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const { program, listenerIds } = listener.listenProgramEvents(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      if (!program) return;
-      console.log('bonding-curve----ready to remove listeners');
-      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-    };
-  }, [coinId, wallet.publicKey]);
+  //   return () => {
+  //     if (!program) return;
+  //     console.log('bonding-curve----ready to remove listeners');
+  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+  //   };
+  // }, [coinId, wallet.publicKey]);
 
   useEffect(() => {
     if (coin.token && coin.raydiumPoolAddr) {
@@ -323,11 +323,11 @@ export default function TradingPage() {
 
       <div className="w-full flex flex-col gap-4 md:flex-row md:gap-10">
         <div className="flex-1">
-          <div className="flex">
+          <div className="flex mb-4">
             {isListed && (isRaydiumListed || isCanBuyOnRaydium) && (
               <a
                 // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
-                href={`https://raydium.io/swap/?inputMint=${coin.token}&outputMint=sol`}
+                href={`https://raydium.io/swap/?inputMint=sol&outputMint=${coin.token}`}
                 target="_blank"
                 className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"
               >
@@ -633,7 +633,6 @@ export default function TradingPage() {
                       </div>
                     ) : (
                       <div className="bg-[#111114] rounded-b">
-                        {/* <CoinGeckoChart param={coin}></CoinGeckoChart> */}
                         <DexToolsChart param={coin}></DexToolsChart>
                       </div>
                     )}
@@ -670,12 +669,12 @@ export default function TradingPage() {
             <div className="flex flex-col gap-3 border border-[#1A1C28] rounded-lg p-6 mt-4">
               <div className="w-full flex flex-col gap-2">
                 <p className="text-[#E8E9EE] text-[16px] uppercase">
-                  Bonding curve ({progress.toFixed(2)}%)
+                  Bonding curve ({isListedOnRay ? 100 : progress.toFixed(2)}%)
                 </p>
                 <div className="w-full mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
                   <div
                     className="rounded-[999px] h-2 bg-barrie"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: `${isListedOnRay ? 100 : progress}%` }}
                   ></div>
                 </div>
               </div>

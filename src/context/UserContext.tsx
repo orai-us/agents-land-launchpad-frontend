@@ -33,7 +33,7 @@ export const UserContext = createContext<UserContextValue | undefined>({
   postReplyModal: false,
   setPostReplyModal: (value: boolean) => {},
   rpcUrl: import.meta.env.VITE_SOLANA_RPC,
-  setRpcUrl: (value: string) => {}
+  setRpcUrl: (value: string) => {},
 });
 
 export interface UserContextValue {
@@ -65,28 +65,31 @@ export interface UserContextValue {
 
 export function UserProvider({
   children,
-  value
+  value,
 }: {
   children: ReactNode;
   value: UserContextValue;
 }) {
   const [providerApp, setProviderApp] = useState(null);
+  // const [connection, setConnection] = useState(null);
 
   const { rpcUrl } = value;
   const wallet = useWallet();
   useEffect(() => {
     const setAnchorProvider = async () => {
       try {
+        const wsUrl = rpcUrl.replace(/^https:/, 'wss:');
         const connection = new Connection(value.rpcUrl, {
           commitment: 'confirmed',
-          disableRetryOnRateLimit: true
+          disableRetryOnRateLimit: true,
+          wsEndpoint: wsUrl,
         });
-        await connection.getEpochInfo();
+        // setConnection(connection);
 
         if (wallet.publicKey) {
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
-            preflightCommitment: 'confirmed'
+            preflightCommitment: 'confirmed',
           });
           setProvider(provider);
           setProviderApp(provider);
@@ -97,7 +100,7 @@ export function UserProvider({
           const wallet = new NodeWallet(Keypair.generate());
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
-            preflightCommitment: 'confirmed'
+            preflightCommitment: 'confirmed',
           });
           setProvider(provider);
           setProviderApp(provider);

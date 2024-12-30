@@ -53,53 +53,53 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   // const isNotForSale = tradingTime > Date.now();
 
   // subscribe to real-time swap txs on trade
-  useEffect(() => {
-    if (_.isEmpty(trades) || _.isEmpty(coin)) return;
-    const connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    });
-    const listener = new AgentsLandEventListener(connection);
-    listener.setProgramEventCallback(
-      'swapEvent',
-      async (result: ResultType) => {
-        const tx = await connection.getTransaction(result.tx, {
-          commitment: 'confirmed',
-          maxSupportedTransactionVersion: 0,
-        });
-        const newRecordInfo: recordInfo = {
-          holder: { wallet: result.user } as any,
-          lamportAmount: result.lamportAmount,
-          tokenAmount: result.tokenAmount,
-          time: new Date(tx.blockTime * ALL_CONFIGS.TIMER.MILLISECONDS),
-          tx: result.tx,
-          price: calculateTokenPrice(
-            result.tokenReserves,
-            result.lamportReserves,
-            coin.decimals,
-            solPrice
-          ),
-          swapDirection: result.swapDirection as any,
-        };
+  // // useEffect(() => {
+  // //   if (_.isEmpty(trades) || _.isEmpty(coin)) return;
+  // //   const connection = new Connection(endpoint, {
+  // //     commitment: commitmentLevel,
+  // //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+  // //   });
+  // //   const listener = new AgentsLandEventListener(connection);
+  // //   listener.setProgramEventCallback(
+  // //     'swapEvent',
+  // //     async (result: ResultType) => {
+  // //       const tx = await connection.getTransaction(result.tx, {
+  // //         commitment: 'confirmed',
+  // //         maxSupportedTransactionVersion: 0,
+  // //       });
+  // //       const newRecordInfo: recordInfo = {
+  // //         holder: { wallet: result.user } as any,
+  // //         lamportAmount: result.lamportAmount,
+  // //         tokenAmount: result.tokenAmount,
+  // //         time: new Date(tx.blockTime * ALL_CONFIGS.TIMER.MILLISECONDS),
+  // //         tx: result.tx,
+  // //         price: calculateTokenPrice(
+  // //           result.tokenReserves,
+  // //           result.lamportReserves,
+  // //           coin.decimals,
+  // //           solPrice
+  // //         ),
+  // //         swapDirection: result.swapDirection as any,
+  // //       };
 
-        setTrades((trades) => {
-          const newTradeRecords = [newRecordInfo, ...trades.record];
-          return { ...trades, record: newTradeRecords };
-        });
-      },
-      []
-    );
+  // //       setTrades((trades) => {
+  // //         const newTradeRecords = [newRecordInfo, ...trades.record];
+  // //         return { ...trades, record: newTradeRecords };
+  // //       });
+  // //     },
+  // //     []
+  // //   );
 
-    const { program, listenerIds } = listener.listenProgramEvents(
-      new PublicKey(PROGRAM_ID).toBase58()
-    );
+  //   const { program, listenerIds } = listener.listenProgramEvents(
+  //     new PublicKey(PROGRAM_ID).toBase58()
+  //   );
 
-    return () => {
-      if (!program) return;
-      console.log('Trading---ready to remove listeners');
-      Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-    };
-  }, [coin?._id, loaded]);
+  //   return () => {
+  //     if (!program) return;
+  //     console.log('Trading---ready to remove listeners');
+  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
+  //   };
+  // }, [coin?._id, loaded]);
 
   useEffect(() => {
     const fetchData = async () => {

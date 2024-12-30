@@ -40,6 +40,8 @@ const Banner = () => {
     new Date(kothCoin.date).getTime() >
       ALL_CONFIGS.OFFICIAL_TIME - ALL_CONFIGS.TIMER.DAY_TO_SECONDS;
 
+  const isListedOnRay = !!kothCoin?.raydiumPoolAddr;
+
   return (
     <>
       <div className="w-full h-[263px] md:h-[450px] relative bg-banner flex items-center justify-center">
@@ -116,13 +118,17 @@ const Banner = () => {
                       Marketcap&nbsp;&nbsp;
                       <span className="text-[#E8E9EE]">
                         {formatNumberKMB(Number(kothCoin.marketcap || 0))}(
-                        {bondingCurvePercent}%)
+                        {isListedOnRay ? 100 : bondingCurvePercent}%)
                       </span>
                     </div>
                     <div className="w-full max-w-[235px] mt-2 px-[2px] py-[1px] rounded-[28px] bg-[#1A1C28] border border-solid border-[#30344A]">
                       <div
                         className="rounded-[999px] h-2 bg-barrie"
-                        style={{ width: `${bondingCurvePercent}%` }}
+                        style={{
+                          width: `${
+                            isListedOnRay ? 100 : bondingCurvePercent
+                          }%`,
+                        }}
                       ></div>
                     </div>
                   </div>
