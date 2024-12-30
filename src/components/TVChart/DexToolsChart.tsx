@@ -1,15 +1,13 @@
-"use client";
-
-import LoadingImg from "@/assets/icons/loading-button.svg";
-import { coinInfo } from "@/utils/types";
-import { useEffect, useState } from "react";
+import LoadingImg from '@/assets/icons/loading-button.svg';
+import { coinInfo } from '@/utils/types';
+import { useEffect, useState } from 'react';
 
 interface TradingChartProps {
   param: coinInfo;
 }
 
 export const DexToolsChart: React.FC<TradingChartProps> = ({ param }) => {
-  const [poolId, setPoolId] = useState<string>("");
+  const [poolId, setPoolId] = useState<string>('');
 
   const [srcIndex, setSrcIndex] = useState(0);
   const [hasError, setHasError] = useState(false);
@@ -17,7 +15,7 @@ export const DexToolsChart: React.FC<TradingChartProps> = ({ param }) => {
 
   const iframeUrls = [
     `https://www.dextools.io/widget-chart/en/solana/pe-light/${poolId}?chartResolution=1&drawingToolbars=false&chartInUsd=true&chainId=solana`,
-    `https://www.geckoterminal.com/solana/pools/${poolId}?embed=1&info=0&swaps=0&grayscale=1&light_chart=0`,
+    `https://www.geckoterminal.com/solana/pools/${poolId}?embed=1&info=0&swaps=0&grayscale=1&light_chart=0`
   ];
 
   // useEffect(() => {
@@ -52,10 +50,10 @@ export const DexToolsChart: React.FC<TradingChartProps> = ({ param }) => {
     try {
       setPoolId(param.raydiumPoolAddr);
       // setPoolId("B4Jag7SokpCb5MwVZEVck7WqWSqwbB7GibV5F1NMsMgM");
-      console.log("poolId--->", param.raydiumPoolAddr);
+      console.log('poolId--->', param.raydiumPoolAddr);
     } catch (error) {
-      console.log("error: Not found poolId");
-      setPoolId("");
+      console.log('error: Not found poolId');
+      setPoolId('');
     }
   };
 

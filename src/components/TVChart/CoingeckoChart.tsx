@@ -1,8 +1,5 @@
-'use client';
-
-import { commitmentLevel, endpoint } from '@/program/web3';
 import { coinInfo } from '@/utils/types';
-import { Connection } from '@solana/web3.js';
+
 import { useEffect, useState } from 'react';
 
 interface TradingChartProps {
@@ -11,10 +8,7 @@ interface TradingChartProps {
 
 export const CoinGeckoChart: React.FC<TradingChartProps> = ({ param }) => {
   const [poolId, setPoolId] = useState<string>('');
-  const connection = new Connection(endpoint, {
-    commitment: commitmentLevel,
-    wsEndpoint: process.env.NEXT_PUBLIC_SOLANA_WS
-  });
+
   useEffect(() => {
     getInfo();
     console.log('Coin parameters have changed:', param);

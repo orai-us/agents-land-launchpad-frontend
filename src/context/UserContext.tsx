@@ -33,7 +33,7 @@ export const UserContext = createContext<UserContextValue | undefined>({
   postReplyModal: false,
   setPostReplyModal: (value: boolean) => {},
   rpcUrl: import.meta.env.VITE_SOLANA_RPC,
-  setRpcUrl: (value: string) => {},
+  setRpcUrl: (value: string) => {}
 });
 
 export interface UserContextValue {
@@ -65,7 +65,7 @@ export interface UserContextValue {
 
 export function UserProvider({
   children,
-  value,
+  value
 }: {
   children: ReactNode;
   value: UserContextValue;
@@ -77,13 +77,16 @@ export function UserProvider({
   useEffect(() => {
     const setAnchorProvider = async () => {
       try {
-        const connection = new Connection(value.rpcUrl, 'confirmed');
+        const connection = new Connection(value.rpcUrl, {
+          commitment: 'confirmed',
+          disableRetryOnRateLimit: true
+        });
         await connection.getEpochInfo();
 
         if (wallet.publicKey) {
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
-            preflightCommitment: 'confirmed',
+            preflightCommitment: 'confirmed'
           });
           setProvider(provider);
           setProviderApp(provider);
@@ -94,7 +97,7 @@ export function UserProvider({
           const wallet = new NodeWallet(Keypair.generate());
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
-            preflightCommitment: 'confirmed',
+            preflightCommitment: 'confirmed'
           });
           setProvider(provider);
           setProviderApp(provider);

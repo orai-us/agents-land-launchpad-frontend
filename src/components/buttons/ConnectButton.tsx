@@ -1,4 +1,3 @@
-'use client';
 import { errorAlert, successAlert } from '@/components/others/ToastGroup';
 import UserContext from '@/context/UserContext';
 import { userInfo } from '@/utils/types';
@@ -17,7 +16,7 @@ export type ConnectButtonProps = {
 };
 
 export const ConnectButton: FC<ConnectButtonProps> = ({
-  setSettingModal,
+  setSettingModal
 }: ConnectButtonProps) => {
   const [, setLocation] = useLocation();
 
@@ -31,7 +30,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
     connecting,
     wallet,
     wallets,
-    select,
+    select
   } = useWallet();
   const { visible, setVisible } = useWalletModal();
 
@@ -43,7 +42,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
         const updatedUser: userInfo = {
           name: publicKey.toBase58().slice(0, 6),
           wallet: publicKey.toBase58(),
-          isLedger: false,
+          isLedger: false
         };
         await sign(updatedUser);
       }
@@ -60,7 +59,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
           name: connection.name,
           wallet: connection.wallet,
           _id: connection._id,
-          avatar: connection.avatar,
+          avatar: connection.avatar
         };
         setUser(newUser as userInfo);
         setLogin(true);
