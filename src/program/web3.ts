@@ -5,26 +5,26 @@ import {
   FUNGIBLE_VAULT_SEED,
   PARRY_STATUS,
   SEED_GLOBAL,
-  SPL_DECIMAL,
+  SPL_DECIMAL
 } from '@/config';
 import {
   rayBuyTx,
   raySellTx,
-  simulateSwapOnRaydium,
+  simulateSwapOnRaydium
 } from '@/utils/raydiumSwap/raydiumSwap';
 import { launchDataInfo, metadataInfo } from '@/utils/types';
 import {
   calculateMarketCap,
   calculateTokenPrice,
   genTokenKeypair,
-  toBN,
+  toBN
 } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
 import { Metaplex } from '@metaplex-foundation/js';
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID
 } from '@solana/spl-token';
 import { WalletContextState } from '@solana/wallet-adapter-react';
 import {
@@ -33,7 +33,7 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
-  Transaction,
+  Transaction
 } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
 import base58 from 'bs58';
@@ -63,7 +63,7 @@ export class Web3SolanaProgramInteraction {
   constructor(
     private readonly connection = new Connection(endpoint, {
       commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
+      wsEndpoint: import.meta.env.VITE_SOLANA_WS
     })
   ) {}
 
@@ -130,10 +130,10 @@ export class Web3SolanaProgramInteraction {
 
       const transaction = new Transaction();
       const updateCpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000,
+        microLamports: 1_000_000
       });
       const updateCuIx = ComputeBudgetProgram.setComputeUnitLimit({
-        units: 500_000,
+        units: 500_000
       });
       const createIx = await program.methods
         .launch(coinData.name, coinData.symbol, coinData.uri)
@@ -142,29 +142,29 @@ export class Web3SolanaProgramInteraction {
           token: mintKp.publicKey,
           communityPoolWallet: configAccount.communityPoolWallet,
           aiAgentWallet: new PublicKey(coinData.metadata.agentAddress), // user // agent address from data coin // FIXME:
-          stakingWallet: new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
+          stakingWallet: new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID)
         })
         .remainingAccounts([
           {
             isWritable: true,
             isSigner: false,
-            pubkey: aiAgentTokenAccount,
+            pubkey: aiAgentTokenAccount
           },
           {
             isWritable: true,
             isSigner: false,
-            pubkey: creatorTokenAccount,
+            pubkey: creatorTokenAccount
           },
           {
             isWritable: true,
             isSigner: false,
-            pubkey: stakingTokenAccount,
+            pubkey: stakingTokenAccount
           },
           {
             isWritable: true,
             isSigner: false,
-            pubkey: communityPoolTokenAccount,
-          },
+            pubkey: communityPoolTokenAccount
+          }
         ])
         .instruction();
 
@@ -182,7 +182,7 @@ export class Web3SolanaProgramInteraction {
           .accounts({
             teamWallet: configAccount.teamWallet,
             user: wallet.publicKey,
-            tokenMint: mintKp.publicKey,
+            tokenMint: mintKp.publicKey
           })
           .instruction();
         transaction.add(swapIx);
@@ -193,7 +193,7 @@ export class Web3SolanaProgramInteraction {
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
-          rewardCurrencyMint: mintKp.publicKey,
+          rewardCurrencyMint: mintKp.publicKey
         })
         .instruction();
 
@@ -216,13 +216,13 @@ export class Web3SolanaProgramInteraction {
         );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false,
+          skipPreflight: false
         });
         const res = await this.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
           },
           'finalized'
         );
@@ -230,7 +230,7 @@ export class Web3SolanaProgramInteraction {
         return {
           ...coinData,
           token: mintKp.publicKey,
-          result: res,
+          result: res
         };
       }
     } catch (error) {
@@ -394,7 +394,7 @@ export class Web3SolanaProgramInteraction {
     try {
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000,
+        microLamports: 1_000_000
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
@@ -424,7 +424,7 @@ export class Web3SolanaProgramInteraction {
         .accounts({
           teamWallet: configAccount.teamWallet,
           user: wallet.publicKey,
-          tokenMint: mint,
+          tokenMint: mint
         })
         .instruction();
 
@@ -432,7 +432,7 @@ export class Web3SolanaProgramInteraction {
         let [stakeConfigPda] = PublicKey.findProgramAddressSync(
           [
             Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
-            new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
+            new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes()
           ],
           new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
@@ -441,7 +441,7 @@ export class Web3SolanaProgramInteraction {
           [
             Buffer.from(FUNGIBLE_VAULT_SEED),
             stakeConfigPda.toBytes(),
-            mint.toBytes(),
+            mint.toBytes()
           ],
           new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
@@ -449,7 +449,7 @@ export class Web3SolanaProgramInteraction {
           [
             Buffer.from('stake_info'),
             vaultPda.toBytes(),
-            wallet.publicKey.toBytes(),
+            wallet.publicKey.toBytes()
           ],
           new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
         );
@@ -459,29 +459,29 @@ export class Web3SolanaProgramInteraction {
           .accounts({
             teamWallet: configAccount.teamWallet,
             user: wallet.publicKey,
-            tokenMint: mint,
+            tokenMint: mint
           })
           .remainingAccounts([
             {
               isWritable: true,
               isSigner: false,
-              pubkey: stakeConfigPda,
+              pubkey: stakeConfigPda
             },
             {
               isWritable: true,
               isSigner: false,
-              pubkey: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
+              pubkey: new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
             },
             {
               isWritable: true,
               isSigner: false,
-              pubkey: vaultPda,
+              pubkey: vaultPda
             },
             {
               isWritable: true,
               isSigner: false,
-              pubkey: userStakePda,
-            },
+              pubkey: userStakePda
+            }
           ])
           .instruction();
       }
@@ -498,7 +498,7 @@ export class Web3SolanaProgramInteraction {
         const sTx = signedTx.serialize();
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false,
+          skipPreflight: false
         });
         const blockhash = await this.connection.getLatestBlockhash();
 
@@ -506,7 +506,7 @@ export class Web3SolanaProgramInteraction {
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
           },
           'confirmed' // FIXME: trick lord confirmed / finalized;
         );
@@ -519,7 +519,7 @@ export class Web3SolanaProgramInteraction {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: this.connection
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -543,12 +543,7 @@ export class Web3SolanaProgramInteraction {
       console.log('Warning: Wallet not connected');
       return;
     }
-    // const poolKeys = await PoolKeys.fetchPoolKeyInfo(
-    //   this.connection,
-    //   mint,
-    //   NATIVE_MINT
-    // );
-    // const poolId = poolKeys.id;
+
     const poolId = new PublicKey(poolKey);
     try {
       const coinDecimal = type === 0 ? 9 : 6;
@@ -599,14 +594,14 @@ export class Web3SolanaProgramInteraction {
         // );
         const signature = await this.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false,
+          skipPreflight: false
         });
         const blockhash = await this.connection.getLatestBlockhash();
         const res = await this.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight,
+            lastValidBlockHeight: blockhash.lastValidBlockHeight
           },
           'confirmed'
         );
@@ -618,7 +613,7 @@ export class Web3SolanaProgramInteraction {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: this.connection
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -653,7 +648,7 @@ export class Web3SolanaProgramInteraction {
         baseMint: mint,
         amount: Number(amount),
         wallet,
-        poolId,
+        poolId
       });
 
       if (res) {
@@ -694,7 +689,7 @@ export class Web3SolanaProgramInteraction {
 
     const providerOnFunction = new anchor.AnchorProvider(connection, wallet, {
       commitment: 'confirmed',
-      preflightCommitment: 'confirmed',
+      preflightCommitment: 'confirmed'
     });
     console.log('providerOnFunction', providerOnFunction);
     const provider = anchor.getProvider();
@@ -708,7 +703,7 @@ export class Web3SolanaProgramInteraction {
       const tx = await program.methods
         .simulateSwap(new BN(amount), type)
         .accounts({
-          tokenMint: mint,
+          tokenMint: mint
         })
         .view();
 
@@ -725,7 +720,7 @@ export class Web3SolanaProgramInteraction {
 
     // Fetch the token account details
     const response = await this.connection.getTokenAccountsByOwner(wallet, {
-      mint: tokenMint,
+      mint: tokenMint
     });
 
     if (response.value.length == 0) {
@@ -761,7 +756,7 @@ export class Web3SolanaProgramInteraction {
         {
           programId: new PublicKey(
             'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-          ), // SPL Token Program ID
+          ) // SPL Token Program ID
         }
       );
 
@@ -785,13 +780,13 @@ export class Web3SolanaProgramInteraction {
 
       return {
         uniqueTokenCount: uniqueTokens.size,
-        tokenDetails: tokens,
+        tokenDetails: tokens
       };
     } catch (error) {
       console.error('Error fetching token balances:', error);
       return {
         uniqueTokenCount: 0,
-        tokenDetails: [],
+        tokenDetails: []
       };
     }
   };
@@ -803,7 +798,7 @@ export class Web3SolanaProgramInteraction {
       [
         ownerPubkey.toBytes(),
         TOKEN_PROGRAM_ID.toBytes(),
-        mintPk.toBytes(), // mint address
+        mintPk.toBytes() // mint address
       ],
       ASSOCIATED_TOKEN_PROGRAM_ID
     )[0];
@@ -881,7 +876,7 @@ export class Web3SolanaProgramInteraction {
       const res = (dataSnap || []).map((e) => {
         return {
           ...e,
-          metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+          metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString())
         };
       });
 
@@ -914,9 +909,9 @@ export class Web3SolanaProgramInteraction {
           commitment: 'confirmed',
           filters: [
             {
-              dataSize: 136,
-            },
-          ],
+              dataSize: 136
+            }
+          ]
         }
       );
       const [configPda] = PublicKey.findProgramAddressSync(
@@ -982,7 +977,7 @@ export class Web3SolanaProgramInteraction {
             metadata: {
               ...metadata,
               ...metadataJson,
-              agentAddress: metadata.address.toBase58(),
+              agentAddress: metadata.address.toBase58()
             } as metadataInfo,
             listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
             tradingTime: new Date(
@@ -992,7 +987,7 @@ export class Web3SolanaProgramInteraction {
               detail.curveCreationDate
                 .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
                 .toNumber()
-            ),
+            )
           };
 
           return { ...detail, ...tokenDetail };
@@ -1003,13 +998,13 @@ export class Web3SolanaProgramInteraction {
       return {
         coins: listFmt,
         total: listFmt.length,
-        fromRpc: true,
+        fromRpc: true
       };
     } catch (error) {
       console.log('getListTokenFromContract error', error);
       return {
         coins: [],
-        total: 0,
+        total: 0
       };
     }
   };
@@ -1060,7 +1055,7 @@ export class Web3SolanaProgramInteraction {
 
       const [configAccount, bondingCurve] = await Promise.all([
         program.account.config.fetch(configPda),
-        program.account.bondingCurve.fetch(bondingCurvePda),
+        program.account.bondingCurve.fetch(bondingCurvePda)
       ]);
 
       const solPrice = Number(localStorage.getItem('solPrice'));
@@ -1093,7 +1088,7 @@ export class Web3SolanaProgramInteraction {
         metadata: {
           ...metadata,
           ...metadataJson,
-          agentAddress: metadata.address.toBase58(),
+          agentAddress: metadata.address.toBase58()
         } as metadataInfo,
         listed: raydiumPoolAddr || oraidexPoolAddr,
         tradingTime: new Date(
@@ -1106,7 +1101,7 @@ export class Web3SolanaProgramInteraction {
           bondingCurve.curveCreationDate
             .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
             .toNumber()
-        ),
+        )
       };
 
       return tokenDetail;
@@ -1176,7 +1171,7 @@ export class Web3SolanaProgramInteraction {
         [
           Buffer.from(PARRY_STATUS),
           bondingCurvePda.toBytes(),
-          wallet.publicKey.toBytes(),
+          wallet.publicKey.toBytes()
         ],
         program.programId
       );
