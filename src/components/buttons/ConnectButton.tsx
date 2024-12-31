@@ -156,7 +156,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
           </>
         ) : (
           <div
-            className="flex items-center justify-center gap-1 text-md uppercase cursor-pointer"
+            className="flex text-nowrap whitespace-nowrap break-keep items-center justify-center gap-1 text-md uppercase cursor-pointer"
             onClick={() => setVisible(true)}
           >
             Connect wallet
