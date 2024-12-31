@@ -24,15 +24,6 @@ import MarqueeToken from './MarqueeToken';
 const web3Solana = new Web3SolanaProgramInteraction();
 const web3FungStake = new web3FungibleStake();
 
-const getProviderApp = () => {
-  try {
-    return getProvider();
-  } catch (e) {
-    console.log('init provider failed', e);
-    return;
-  }
-};
-
 const Header: FC = () => {
   const {
     handleSetBondingCurveConfig,
@@ -42,44 +33,44 @@ const Header: FC = () => {
   const { handleSetStakeConfig: handleStrongboxConfig } = useCoinActions();
   const bondingCurveConfig = useGetConfigState('bondingCurveConfig');
   const stakeConfig = useGetConfigState('stakeConfig');
+  const configSnapshot = useGetConfigState('configSnapshot');
   const [pathname] = useLocation();
   const { solPrice, setSolPrice, setRpcUrl, rpcUrl } = useContext(UserContext);
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const oraiEndpoint = 'https://rpc.orai.io';
-        const whitelistContractAddress =
-          'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
-        const cwClient = await CosmWasmClient.connect(oraiEndpoint);
-        const contract = new AgentsLandSnapshotContractQueryClient(
-          cwClient,
-          whitelistContractAddress
-        );
+  // useEffect(() => {
+  //   if (configSnapshot.length > 0) {
+  //     return;
+  //   }
 
-        // query list token metadata
-        /// return:
-        /// - token: token addr
-        /// - metadata: base64 encode of token metadata
-        const dataSnap = await contract.tokensMetadata();
+  //   (async () => {
+  //     try {
+  //       const oraiEndpoint = 'https://rpc.orai.io';
+  //       const whitelistContractAddress =
+  //         'orai14z64p3yp8rv99ewvycpeef7h4jlyqwmpyt63m86wyyh0dhjxhqescyclm0';
 
-        const res = (dataSnap || []).map((e) => {
-          return {
-            ...e,
-            metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
-          };
-        });
-        // console.log('res', res);
+  //       const cwClient = await CosmWasmClient.connect(oraiEndpoint);
+  //       const contract = new AgentsLandSnapshotContractQueryClient(
+  //         cwClient,
+  //         whitelistContractAddress,
+  //       );
+  //       const dataSnap = await contract.tokensMetadata();
 
-        handleSetSnapshotConfig(res);
-      } catch (error) {
-        console.log('error get snapshot', error);
-      }
-    })();
-  }, []);
+  //       const res = (dataSnap || []).map((e) => {
+  //         return {
+  //           ...e,
+  //           metadata: JSON.parse(Buffer.from(e.metadata, 'base64').toString()),
+  //         };
+  //       });
+
+  //       handleSetSnapshotConfig(res);
+  //     } catch (error) {
+  //       console.log('error get snapshot', error);
+  //     }
+  //   })();
+  // }, []);
 
   useEffect(() => {
     (async () => {
@@ -100,15 +91,15 @@ const Header: FC = () => {
     (async () => {
       if (!stakeConfig) {
         const configStake = await web3FungStake.getStakeConfig(
-          new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
+          new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT),
         );
 
         if (configStake) {
           handleSetStakeConfig(configStake);
         }
       }
-    })
-  },[])
+    })();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,7 +112,9 @@ const Header: FC = () => {
       }
     };
 
-    fetchData();
+    if (!solPrice) {
+      fetchData();
+    }
   }, []);
 
   useEffect(() => {
@@ -270,7 +263,7 @@ const Header: FC = () => {
               >
                 {item.text}
               </Link>
-            )
+            ),
           )}
         </div>
         <div className="w-full">

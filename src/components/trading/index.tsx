@@ -118,6 +118,8 @@ export default function TradingPage() {
 
   const isNotForSale = !isCountdownPartyStart && !isOnSaleCountdown; // not start
 
+  console.log('isNotForSale', isNotForSale);
+
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
 
@@ -150,6 +152,7 @@ export default function TradingPage() {
       );
 
     setCurveLimit(maxSolSwapIncludeFee || 0);
+    console.log('153', 153);
     handleSetCurveInfo(curveAccount);
 
     const bondingCurveValue = new BigNumber(

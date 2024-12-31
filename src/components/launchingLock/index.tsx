@@ -38,7 +38,7 @@ export default function LaunchingLock() {
   const { handleSetRefreshCheck, handleSetStakeMintBalance } = useCoinActions();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedLockTime, setSelectedLockTime] = useState(
-    LOCK_TIME_OPTIONS[0]
+    LOCK_TIME_OPTIONS[0],
   );
   const wallet = useWallet();
   const [tokenBal, setTokenBal] = useState<number>(0);
@@ -68,8 +68,6 @@ export default function LaunchingLock() {
   const isEndStake =
     stakeEndTime && stakeEndTime * ALL_CONFIGS.TIMER.MILLISECONDS < Date.now();
 
-  // console.log('stakeEndTime', stakeEndTime);
-
   const genMsgTextBtn = () => {
     if (!stakeAmount || !Number(stakeAmount)) {
       return 'Lock amount required';
@@ -90,7 +88,7 @@ export default function LaunchingLock() {
       const [tokenBal] = await Promise.all([
         web3Solana.getTokenBalance(
           wallet.publicKey.toString(),
-          ALL_CONFIGS.STAKE_CURRENCY_MINT
+          ALL_CONFIGS.STAKE_CURRENCY_MINT,
         ),
         // web3Solana.getSolanaBalance(wallet.publicKey),
       ]);
@@ -195,7 +193,7 @@ export default function LaunchingLock() {
             {dayjs(
               Date.now() +
                 (stakeConfig?.lockPeriod || ALL_CONFIGS.LOCK_FUNGIBLE_STAKE) *
-                  1000
+                  1000,
             ).format('MMM DD YYYY HH:mm')}
           </div>
         </div>
@@ -218,13 +216,13 @@ export default function LaunchingLock() {
               const amount = toBN(
                 toBN(stakeAmount || 0)
                   .multipliedBy(10 ** coin.decimals || SPL_DECIMAL)
-                  .toFixed(0, 1)
+                  .toFixed(0, 1),
               ).toNumber();
               const res = await web3Stake.stake(
                 ALL_CONFIGS.STAKE_CURRENCY_MINT,
                 coin.token,
                 amount,
-                wallet
+                wallet,
               );
               if (res) {
                 successAlert('Lock successfully!');

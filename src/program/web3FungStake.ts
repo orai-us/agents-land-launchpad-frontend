@@ -2,7 +2,7 @@ import {
   ALL_CONFIGS,
   FUNGIBLE_STAKE_CONFIG_SEED,
   STAKE_FUNGIBLE_INFO_SEED,
-  FUNGIBLE_VAULT_SEED
+  FUNGIBLE_VAULT_SEED,
 } from '@/config';
 import { toPublicKey } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
@@ -17,14 +17,40 @@ import { commitmentLevel, endpoint } from './web3';
 export const stakeProgramId = new PublicKey(idl.address);
 export const stakeInterface = JSON.parse(JSON.stringify(idl));
 
+let globalStakeConfig: anchor.IdlAccounts<Fungstake>['stakeConfig'];
+let globalStakeConfigPDA: PublicKey;
 export class web3FungibleStake {
   constructor() {}
+
+  private async getStakeGlobalConfig(stakeCurrencyMint: PublicKey) {
+    if (!globalStakeConfig) {
+      const provider = anchor.getProvider();
+
+      const program = new Program(
+        stakeInterface,
+        provider,
+      ) as Program<Fungstake>;
+
+      let [globalStakeConfigPDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
+        program.programId,
+      );
+      const globalStakeConfig = await program.account.stakeConfig.fetch(
+        globalStakeConfigPDA,
+      );
+      return { globalStakeConfig, globalStakeConfigPDA };
+    }
+    return {
+      globalStakeConfigPDA,
+      globalStakeConfig,
+    };
+  }
 
   async stake(
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
     amount: number,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
     let provider;
     try {
@@ -35,12 +61,12 @@ export class web3FungibleStake {
       }
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000
+        microLamports: 1_000_000,
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
@@ -49,7 +75,7 @@ export class web3FungibleStake {
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .instruction();
 
@@ -65,7 +91,7 @@ export class web3FungibleStake {
         const sTx = signedTx.serialize();
         const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false
+          skipPreflight: false,
         });
         const blockhash = await provider.connection.getLatestBlockhash();
 
@@ -73,9 +99,9 @@ export class web3FungibleStake {
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight
+            lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed' // FIXME: trick lord confirmed / finalized;
+          'confirmed', // FIXME: trick lord confirmed / finalized;
         );
 
         console.log('Successfully locking token.\n Signature: ', signature);
@@ -90,7 +116,7 @@ export class web3FungibleStake {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: provider.connection
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -104,7 +130,7 @@ export class web3FungibleStake {
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
     amount: number,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
     let provider;
     try {
@@ -115,12 +141,12 @@ export class web3FungibleStake {
       }
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
-        microLamports: 1_000_000
+        microLamports: 1_000_000,
       });
       const cuIx = ComputeBudgetProgram.setComputeUnitLimit({ units: 200_000 });
 
@@ -129,7 +155,7 @@ export class web3FungibleStake {
         .accounts({
           signer: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .instruction();
 
@@ -145,7 +171,7 @@ export class web3FungibleStake {
         const sTx = signedTx.serialize();
         const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
-          skipPreflight: false
+          skipPreflight: false,
         });
         const blockhash = await provider.connection.getLatestBlockhash();
 
@@ -153,9 +179,9 @@ export class web3FungibleStake {
           {
             signature,
             blockhash: blockhash.blockhash,
-            lastValidBlockHeight: blockhash.lastValidBlockHeight
+            lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed' // FIXME: trick lord confirmed / finalized;
+          'confirmed', // FIXME: trick lord confirmed / finalized;
         );
 
         console.log('Successfully unlocking token.\n Signature: ', signature);
@@ -170,7 +196,7 @@ export class web3FungibleStake {
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: provider.connection
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -183,7 +209,7 @@ export class web3FungibleStake {
   async getStakeInfo(
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
     let vaultInfo = { totalStaked: new BN('0'), stakeEndTime: new BN('0') };
     try {
@@ -194,28 +220,25 @@ export class web3FungibleStake {
       }
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
-          toPublicKey(stakeCurrencyMint).toBytes()
-        ],
-        program.programId
+      const { globalStakeConfigPDA } = await this.getStakeGlobalConfig(
+        toPublicKey(stakeCurrencyMint),
       );
+
       let [vaultPda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from(FUNGIBLE_VAULT_SEED),
-          configPda.toBytes(),
-          new PublicKey(rewardCurrencyMint).toBytes()
+          globalStakeConfigPDA.toBytes(),
+          new PublicKey(rewardCurrencyMint).toBytes(),
         ],
-        program.programId
+        program.programId,
       );
 
       vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
         totalStaked: new BN('0'),
-        stakeEndTime: new BN('0')
+        stakeEndTime: new BN('0'),
       };
 
       if (!wallet.publicKey) {
@@ -226,22 +249,22 @@ export class web3FungibleStake {
         [
           Buffer.from(STAKE_FUNGIBLE_INFO_SEED),
           vaultPda.toBytes(),
-          wallet.publicKey.toBytes()
+          wallet.publicKey.toBytes(),
         ],
-        program.programId
+        program.programId,
       );
       const stakerInfo = await program.account.stakeInfo.fetch(stakerInfoPda);
 
       return {
         stakerInfo,
-        vaultInfo
+        vaultInfo,
       };
     } catch (error) {
       console.log('Error in get stake token transaction', error, error.error);
 
       return {
         stakerInfo: null,
-        vaultInfo
+        vaultInfo,
       };
     }
   }
@@ -253,18 +276,11 @@ export class web3FungibleStake {
         console.log('Warning: connection not connected');
         return;
       }
-      const program = new Program(
-        stakeInterface,
-        provider
-      ) as Program<Fungstake>;
 
-      // console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
-        program.programId
+      const { globalStakeConfig } = await this.getStakeGlobalConfig(
+        stakeCurrencyMint,
       );
-      const config = await program.account.stakeConfig.fetch(configPda);
-      return config;
+      return globalStakeConfig;
     } catch (error) {
       console.log('Error in get stake config transaction', error, error.error);
 
@@ -275,7 +291,7 @@ export class web3FungibleStake {
   async getReward(
     wallet: WalletContextState,
     stakeCurrencyMint: string,
-    rewardCurrencyMint: string
+    rewardCurrencyMint: string,
   ) {
     try {
       const provider = anchor.getProvider();
@@ -285,7 +301,7 @@ export class web3FungibleStake {
       }
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const tx = await program.methods
@@ -293,7 +309,7 @@ export class web3FungibleStake {
         .accounts({
           user: wallet.publicKey,
           stakeCurrencyMint: stakeCurrencyMint,
-          rewardCurrencyMint: new PublicKey(rewardCurrencyMint)
+          rewardCurrencyMint: new PublicKey(rewardCurrencyMint),
         })
         .view();
 
