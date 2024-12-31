@@ -15,7 +15,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const [customUrl, setCustomUrl] = useState<string>(RPC_MAPS['Custom']);
   const [tab, setTab] = useState<string>(RPC_MAPS.Agents);
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setCustomUrl(e.target.value);
   };
@@ -32,7 +32,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
     <div
       className={twMerge(
         'fixed w-full inset-0 flex items-center justify-center z-50 backdrop-blur-md',
-        !isOpen && 'hidden'
+        !isOpen && 'hidden',
       )}
     >
       <div className="flex w-full max-w-[580px] sm:max-w-xl flex-col p-6 rounded-lg gap-3 bg-[#13141D] relative">
@@ -64,8 +64,8 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
                   <div id={rpcType} key={i}>
                     <button
                       className={twMerge(
-                        'uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-                        tab === rpcUrl && 'bg-[#585A6B] text-[#E8E9EE]'
+                        'uppercase cursor-pointer px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[#30344A] bg-[#080A14] text-[#9192A0]',
+                        tab === rpcUrl && 'border-[#E8E9EE] text-[#E8E9EE]',
                       )}
                       onClick={() => handleSetRpcType(rpcType)}
                     >
@@ -89,7 +89,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
             }}
             className={twMerge(
               `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`,
-              inputRpcType !== 'Custom' && 'opacity-50'
+              inputRpcType !== 'Custom' && 'opacity-50',
             )}
           />
         </div>

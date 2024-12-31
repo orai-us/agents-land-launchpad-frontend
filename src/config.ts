@@ -2,11 +2,11 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export const RPC_MAPS = {
   Agents: import.meta.env.VITE_SOLANA_RPC,
+  GetBlock: 'https://solana-getblock.agents.land',
   Helius:
     'https://mainnet.helius-rpc.com/?api-key=d3c2e3b9-6d5d-48e7-bf08-20f61954a556',
-  Public: 'https://api.mainnet-beta.solana.com',
-  Public1: 'https://rpc.ankr.com/solana',
-  Public2: 'https://solana-rpc.publicnode.com',
+  Ankr: 'https://rpc.ankr.com/solana',
+  PublicNode: 'https://solana-rpc.publicnode.com',
   Custom: 'https://',
 };
 

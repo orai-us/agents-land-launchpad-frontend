@@ -16,7 +16,7 @@ export type ConnectButtonProps = {
 };
 
 export const ConnectButton: FC<ConnectButtonProps> = ({
-  setSettingModal
+  setSettingModal,
 }: ConnectButtonProps) => {
   const [, setLocation] = useLocation();
 
@@ -30,7 +30,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
     connecting,
     wallet,
     wallets,
-    select
+    select,
   } = useWallet();
   const { visible, setVisible } = useWalletModal();
 
@@ -42,7 +42,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
         const updatedUser: userInfo = {
           name: publicKey.toBase58().slice(0, 6),
           wallet: publicKey.toBase58(),
-          isLedger: false
+          isLedger: false,
         };
         await sign(updatedUser);
       }
@@ -59,7 +59,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
           name: connection.name,
           wallet: connection.wallet,
           _id: connection._id,
-          avatar: connection.avatar
+          avatar: connection.avatar,
         };
         setUser(newUser as userInfo);
         setLogin(true);
@@ -67,7 +67,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
       }
 
       const msg = new TextEncoder().encode(
-        `Sign in to Agent.land: ${connection.nonce}`
+        `Sign in to Agent.land: ${connection.nonce}`,
       );
 
       const sig = await signMessage?.(msg);
@@ -133,7 +133,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
                     </Link>
                   </li>
                 )}
-                <li>
+                {/* <li>
                   <div
                     className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
                     onClick={() => setSettingModal(true)}
@@ -141,7 +141,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
                     <VscSettings />
                     Settings
                   </div>
-                </li>
+                </li> */}
                 <li>
                   <div
                     className="p-2 flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
@@ -174,7 +174,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
               View Profile
             </Link>
           )}
-          <div
+          {/* <div
             className="p-2 border-r flex-1  justify-center border-[#4d4f58] text-[12px] flex gap-2 items-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125"
             onClick={() => {
               setSettingModal(true);
@@ -182,7 +182,7 @@ export const ConnectButton: FC<ConnectButtonProps> = ({
           >
             <VscSettings />
             Settings
-          </div>
+          </div> */}
           <div
             className="p-2 text-[12px] flex flex-1 gap-2 items-center justify-center text-primary-100 text-md tracking-[-0.32px] brightness-75 hover:brightness-125 text-[#E75787]"
             onClick={logOut}
