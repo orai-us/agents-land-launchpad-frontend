@@ -30,7 +30,7 @@ export const CoinGeckoChart: React.FC<TradingChartProps> = ({ param }) => {
         width="100%"
         id="geckoterminal-embed"
         title="GeckoTerminal Embed"
-        src="https://www.geckoterminal.com/solana/pools/Gba9Nhz42yH94U63xJkLiwt9GuWgxyssarBnf91r1Jri?embed=1&info=0&swaps=0&grayscale=1&light_chart=0"
+        src={`https://www.geckoterminal.com/solana/pools/${poolId}?embed=1&info=0&swaps=0&grayscale=1&light_chart=0`}
         style={{ border: 'none' }}
         allow="clipboard-write"
         allowFullScreen
