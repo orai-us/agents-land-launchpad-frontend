@@ -8,12 +8,7 @@ import { toPublicKey } from '@/utils/util';
 import * as anchor from '@coral-xyz/anchor';
 import { BN, Program } from '@coral-xyz/anchor';
 import { WalletContextState } from '@solana/wallet-adapter-react';
-import {
-  ComputeBudgetProgram,
-  Connection,
-  PublicKey,
-  Transaction,
-} from '@solana/web3.js';
+import { ComputeBudgetProgram, PublicKey, Transaction } from '@solana/web3.js';
 import { Fungstake } from './fungstake/fungstake';
 import idl from './fungstake/fungstake.json';
 import { handleTransaction } from './utils';
@@ -22,29 +17,51 @@ import { commitmentLevel, endpoint } from './web3';
 export const stakeProgramId = new PublicKey(idl.address);
 export const stakeInterface = JSON.parse(JSON.stringify(idl));
 
+let globalStakeConfig: anchor.IdlAccounts<Fungstake>['stakeConfig'];
+let globalStakeConfigPDA: PublicKey;
 export class web3FungibleStake {
-  constructor(
-    private readonly connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    })
-  ) {}
+  constructor() {}
+
+  private async getStakeGlobalConfig(stakeCurrencyMint: PublicKey) {
+    if (!globalStakeConfig) {
+      const provider = anchor.getProvider();
+
+      const program = new Program(
+        stakeInterface,
+        provider,
+      ) as Program<Fungstake>;
+
+      let [globalStakeConfigPDA] = PublicKey.findProgramAddressSync(
+        [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
+        program.programId,
+      );
+      const globalStakeConfig = await program.account.stakeConfig.fetch(
+        globalStakeConfigPDA,
+      );
+      return { globalStakeConfig, globalStakeConfigPDA };
+    }
+    return {
+      globalStakeConfigPDA,
+      globalStakeConfig,
+    };
+  }
 
   async stake(
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
     amount: number,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
+    let provider;
     try {
-      if (!this.connection || !wallet.publicKey) {
+      provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const transaction = new Transaction();
@@ -66,25 +83,25 @@ export class web3FungibleStake {
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
+        const blockhash = await provider.connection.getLatestBlockhash();
 
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed' // FIXME: trick lord confirmed / finalized;
+          'confirmed', // FIXME: trick lord confirmed / finalized;
         );
 
         console.log('Successfully locking token.\n Signature: ', signature);
@@ -92,10 +109,14 @@ export class web3FungibleStake {
       }
     } catch (error) {
       console.log('Error in locking token transaction', error, error.error);
+
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -109,17 +130,18 @@ export class web3FungibleStake {
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
     amount: number,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
+    let provider;
     try {
-      if (!this.connection || !wallet.publicKey) {
+      provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const transaction = new Transaction();
@@ -141,25 +163,25 @@ export class web3FungibleStake {
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
+        const blockhash = await provider.connection.getLatestBlockhash();
 
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed' // FIXME: trick lord confirmed / finalized;
+          'confirmed', // FIXME: trick lord confirmed / finalized;
         );
 
         console.log('Successfully unlocking token.\n Signature: ', signature);
@@ -167,10 +189,14 @@ export class web3FungibleStake {
       }
     } catch (error) {
       console.log('Error in locking token transaction', error, error.error);
+
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -183,34 +209,31 @@ export class web3FungibleStake {
   async getStakeInfo(
     stakeCurrencyMint: string,
     rewardCurrencyMint: string,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) {
     let vaultInfo = { totalStaked: new BN('0'), stakeEndTime: new BN('0') };
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: connection not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [
-          Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
-          toPublicKey(stakeCurrencyMint).toBytes(),
-        ],
-        program.programId
+      const { globalStakeConfigPDA } = await this.getStakeGlobalConfig(
+        toPublicKey(stakeCurrencyMint),
       );
+
       let [vaultPda] = PublicKey.findProgramAddressSync(
         [
           Buffer.from(FUNGIBLE_VAULT_SEED),
-          configPda.toBytes(),
+          globalStakeConfigPDA.toBytes(),
           new PublicKey(rewardCurrencyMint).toBytes(),
         ],
-        program.programId
+        program.programId,
       );
 
       vaultInfo = (await program.account.vault.fetch(vaultPda)) || {
@@ -228,7 +251,7 @@ export class web3FungibleStake {
           vaultPda.toBytes(),
           wallet.publicKey.toBytes(),
         ],
-        program.programId
+        program.programId,
       );
       const stakerInfo = await program.account.stakeInfo.fetch(stakerInfoPda);
 
@@ -248,23 +271,16 @@ export class web3FungibleStake {
 
   async getStakeConfig(stakeCurrencyMint: PublicKey) {
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: connection not connected');
         return;
       }
-      const provider = anchor.getProvider();
-      const program = new Program(
-        stakeInterface,
-        provider
-      ) as Program<Fungstake>;
 
-      // console.log('stake currency mint: ', stakeCurrencyMint.toBase58());
-      let [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED), stakeCurrencyMint.toBytes()],
-        program.programId
+      const { globalStakeConfig } = await this.getStakeGlobalConfig(
+        stakeCurrencyMint,
       );
-      const config = await program.account.stakeConfig.fetch(configPda);
-      return config;
+      return globalStakeConfig;
     } catch (error) {
       console.log('Error in get stake config transaction', error, error.error);
 
@@ -275,21 +291,17 @@ export class web3FungibleStake {
   async getReward(
     wallet: WalletContextState,
     stakeCurrencyMint: string,
-    rewardCurrencyMint: string
+    rewardCurrencyMint: string,
   ) {
     try {
-      if (!this.connection || !wallet.publicKey) {
+      const provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      // const provider = anchor.getProvider();
-      const provider = new anchor.AnchorProvider(this.connection, wallet, {
-        commitment: 'confirmed',
-        preflightCommitment: 'confirmed',
-      });
       const program = new Program(
         stakeInterface,
-        provider
+        provider,
       ) as Program<Fungstake>;
 
       const tx = await program.methods

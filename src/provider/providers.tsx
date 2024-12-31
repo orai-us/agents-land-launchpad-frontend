@@ -2,6 +2,7 @@ import { RPC_MAPS } from '@/config';
 import UserContext, { UserProvider } from '@/context/UserContext';
 import { ModalProvider } from '@/contexts/ModalProvider';
 import { PageProvider } from '@/contexts/PageContext';
+import SocketProvider from '@/contexts/SocketContext';
 import { SolanaWalletProvider } from '@/contexts/SolanaWalletProvider';
 import { msgInfo, userInfo } from '@/utils/types';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -63,7 +64,7 @@ export default function Providers({ children }: { children: ReactNode }) {
                 setRpcUrl,
               }}
             >
-              {children}
+              <SocketProvider>{children}</SocketProvider>
               <ToastContainer pauseOnFocusLoss={false} theme="colored" />
             </UserProvider>
           </PageProvider>

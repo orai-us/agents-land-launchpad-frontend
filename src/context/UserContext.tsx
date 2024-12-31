@@ -71,20 +71,26 @@ export function UserProvider({
   value: UserContextValue;
 }) {
   const [providerApp, setProviderApp] = useState(null);
+  // const [connection, setConnection] = useState(null);
 
   const { rpcUrl } = value;
   const wallet = useWallet();
+  const publicKey = wallet?.publicKey ? wallet.publicKey.toBase58() : '';
   useEffect(() => {
     const setAnchorProvider = async () => {
       try {
-        const connection = new Connection(value.rpcUrl, 'confirmed');
-        // await connection.getEpochInfo();
+        const wsUrl = rpcUrl.replace(/^https:/, 'wss:');
+        const connection = new Connection(value.rpcUrl, {
+          commitment: 'confirmed',
+          disableRetryOnRateLimit: true,
+          wsEndpoint: wsUrl,
+        });
+        // setConnection(connection);
 
         if (wallet.publicKey) {
           const provider = new AnchorProvider(connection, wallet, {
             commitment: 'confirmed',
             preflightCommitment: 'confirmed',
-            // maxRetries: 1,
           });
           setProvider(provider);
           setProviderApp(provider);
@@ -106,7 +112,7 @@ export function UserProvider({
     };
 
     setAnchorProvider();
-  }, [rpcUrl, wallet]);
+  }, [rpcUrl, publicKey]);
 
   if (!providerApp) {
     return <Spinner />;

@@ -33,7 +33,7 @@ const HomePage: FC = () => {
   const dropdownRef1 = useRef(null);
   const [location, setLocation] = useLocation();
   const [currentTab, setCurrentTab] = useState(
-    KeyByStatus[STATUS_TOKEN.UPCOMING]
+    KeyByStatus[STATUS_TOKEN.UPCOMING],
   );
 
   const [filterState, setFilterState] = useState<{
@@ -99,31 +99,31 @@ const HomePage: FC = () => {
       }
 
       if (coins !== null) {
-        try {
-          await Promise.all(
-            coins.map(async (coin) => {
-              const { partyTradingTime, token } = coin || {};
-              if (!partyTradingTime) {
-                // TODO: remove later, user when BE not work trigger update party time
-                console.log('===== Query party Time =====', coin.ticker);
-                const { curveAccount } =
-                  await web3Solana.getMaxBondingCurveLimit(
-                    new PublicKey(token),
-                    wallet
-                  );
+        // try {
+        //   await Promise.all(
+        //     coins.map(async (coin) => {
+        //       const { partyTradingTime, token } = coin || {};
+        //       if (!partyTradingTime) {
+        //         // TODO: remove later, user when BE not work trigger update party time
+        //         console.log('===== Query party Time =====', coin.ticker);
+        //         const { curveAccount } =
+        //           await web3Solana.getMaxBondingCurveLimit(
+        //             new PublicKey(token),
+        //             wallet
+        //           );
 
-                const partyStart = curveAccount?.partyStart?.toNumber();
+        //         const partyStart = curveAccount?.partyStart?.toNumber();
 
-                coin['partyTradingTime'] = !partyStart
-                  ? undefined
-                  : new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS);
-                return partyStart;
-              }
-            })
-          );
-        } catch (error) {
-          console.log('Query party Time', error);
-        }
+        //         coin['partyTradingTime'] = !partyStart
+        //           ? undefined
+        //           : new Date(partyStart * ALL_CONFIGS.TIMER.MILLISECONDS);
+        //         return partyStart;
+        //       }
+        //     })
+        //   );
+        // } catch (error) {
+        //   console.log('Query party Time', error);
+        // }
 
         setTotalData(total);
         setData((data) => {
@@ -167,7 +167,7 @@ const HomePage: FC = () => {
           break;
         case 'creation time':
           sortedData.sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
           );
           break;
         default:
@@ -190,7 +190,7 @@ const HomePage: FC = () => {
           break;
         case 'creation time':
           sortedData.sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
           );
           break;
         default:

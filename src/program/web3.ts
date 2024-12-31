@@ -59,34 +59,48 @@ export const stakeProgramId = new PublicKey(idlStake.address);
 export const pumpProgramInterface = JSON.parse(JSON.stringify(idl));
 export const stakeProgramInterface = JSON.parse(JSON.stringify(idlStake));
 
+let globalLaunchpadConfig: anchor.IdlAccounts<Pumpfun>['config'];
 export class Web3SolanaProgramInteraction {
-  constructor(
-    private readonly connection = new Connection(endpoint, {
-      commitment: commitmentLevel,
-      wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-    })
-  ) {}
+  constructor() {}
+
+  private async getLaunchpadGlobalConfig() {
+    if (!globalLaunchpadConfig) {
+      const provider = anchor.getProvider();
+      const program = new Program(
+        pumpProgramInterface as Pumpfun,
+        provider,
+      ) as Program<Pumpfun>;
+
+      const [configPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_CONFIG)],
+        program.programId,
+      );
+      const configAccount = await program.account.config.fetch(configPda);
+      globalLaunchpadConfig = configAccount;
+    }
+    return globalLaunchpadConfig;
+  }
 
   // Send Fee to the Fee destination
   createToken = async (
     wallet: WalletContextState,
-    coinData: launchDataInfo
+    coinData: launchDataInfo,
   ) => {
     const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface as Pumpfun,
-      provider
+      provider,
     ) as Program<Pumpfun>;
 
     const programStake = new Program(
       stakeProgramInterface as Fungstake,
-      provider
+      provider,
     ) as Program<Fungstake>;
 
     console.log('========Fee Pay==============');
 
     // check the connection
-    if (!wallet.publicKey || !this.connection) {
+    if (!wallet.publicKey || !provider.connection) {
       errorAlert('Wallet Not Connected');
       console.log('Warning: Wallet not connected');
       return 'WalletError';
@@ -94,11 +108,7 @@ export class Web3SolanaProgramInteraction {
 
     try {
       console.log('coinData--->', coinData);
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
-      const configAccount = await program.account.config.fetch(configPda);
+      const configAccount = await this.getLaunchpadGlobalConfig();
 
       const envMode = import.meta.env.VITE_APP_SOLANA_ENV;
       let mintKp = Keypair.generate();
@@ -111,21 +121,21 @@ export class Web3SolanaProgramInteraction {
 
       const aiAgentTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(coinData.metadata.agentAddress),
-        mintKp.publicKey
+        mintKp.publicKey,
       );
       const creatorTokenAccount = this.getAssociatedTokenAccount(
         wallet.publicKey,
-        mintKp.publicKey
+        mintKp.publicKey,
       );
 
       const stakingTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(ALL_CONFIGS.STRONGBOX_VAULT_PROGRAM_ID),
-        mintKp.publicKey
+        mintKp.publicKey,
       );
 
       const communityPoolTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET),
-        mintKp.publicKey
+        mintKp.publicKey,
       );
 
       const transaction = new Transaction();
@@ -177,7 +187,7 @@ export class Web3SolanaProgramInteraction {
           .swap(
             new anchor.BN(coinData.presale * Math.pow(10, 9)),
             0,
-            new anchor.BN(0)
+            new anchor.BN(0),
           )
           .accounts({
             teamWallet: configAccount.teamWallet,
@@ -200,7 +210,7 @@ export class Web3SolanaProgramInteraction {
       transaction.add(ixInstructions);
 
       transaction.feePayer = wallet.publicKey;
-      const blockhash = await this.connection.getLatestBlockhash();
+      const blockhash = await provider.connection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash.blockhash;
 
       transaction.sign(mintKp);
@@ -212,19 +222,19 @@ export class Web3SolanaProgramInteraction {
         const sTx = signedTx.serialize();
         console.log(
           '---- simulate tx',
-          await this.connection.simulateTransaction(signedTx)
+          await provider.connection.simulateTransaction(signedTx),
         );
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'finalized'
+          'finalized',
         );
         console.log('Successfully initialized.\n Signature: ', signature);
         return {
@@ -241,34 +251,30 @@ export class Web3SolanaProgramInteraction {
 
   getMaxBondingCurveLimit = async (
     mint: PublicKey,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ): Promise<any> => {
+    const provider = anchor.getProvider();
     // check the connection
-    if (!this.connection) {
+    if (!provider.connection) {
       console.log('Warning: connection not connected');
       return;
     }
-    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
-      provider
+      provider,
     ) as Program<Pumpfun>;
 
     try {
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
-      const configAccount = await program.account.config.fetch(configPda);
+      const configAccount = await this.getLaunchpadGlobalConfig();
 
       const platformBuyFee = configAccount.platformBuyFee || 0;
       const curveLimit = configAccount.curveLimit.toNumber();
       const [bondingCurvePda] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
-        program.programId
+        program.programId,
       );
       const curveAccount = await program.account.bondingCurve.fetch(
-        bondingCurvePda
+        bondingCurvePda,
       );
 
       const solReserve = curveAccount.reserveLamport.toNumber();
@@ -288,26 +294,26 @@ export class Web3SolanaProgramInteraction {
 
   getBondingCurveOfToken = async (
     mint: PublicKey,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ): Promise<any> => {
+    const provider = anchor.getProvider();
     // check the connection
-    if (!this.connection) {
+    if (!provider.connection) {
       console.log('Warning: connection not connected');
       return;
     }
-    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
-      provider
+      provider,
     ) as Program<Pumpfun>;
 
     try {
       const [bondingCurvePda] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
-        program.programId
+        program.programId,
       );
       const curveInfo = await program.account.bondingCurve.fetch(
-        bondingCurvePda
+        bondingCurvePda,
       );
 
       console.log('curveInfo', curveInfo);
@@ -320,23 +326,19 @@ export class Web3SolanaProgramInteraction {
   };
 
   getConfigData = async (wallet: WalletContextState): Promise<any> => {
+    const provider = anchor.getProvider();
     // check the connection
-    if (!this.connection) {
+    if (!provider.connection) {
       console.log('Warning: connection not connected');
       return;
     }
-    const provider = anchor.getProvider();
     const program = new Program(
       pumpProgramInterface,
-      provider
+      provider,
     ) as Program<Pumpfun>;
 
     try {
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
-      const configAccount = await program.account.config.fetch(configPda);
+      const configAccount = await this.getLaunchpadGlobalConfig();
 
       const platformBuyFee = configAccount.platformBuyFee;
       return platformBuyFee;
@@ -354,44 +356,41 @@ export class Web3SolanaProgramInteraction {
     type: number,
     simulateReceive: string,
     slippage: string,
-    isParty?: boolean
+    isParty?: boolean,
   ): Promise<any> => {
     console.log('==============trade swap==============');
 
-    // check the connection
-    if (!wallet.publicKey || !this.connection) {
-      console.log('Warning: Wallet not connected');
-      return;
-    }
-    const provider = anchor.getProvider();
-    const program = new Program(
-      pumpProgramInterface,
-      provider
-    ) as Program<Pumpfun>;
-    const [configPda] = PublicKey.findProgramAddressSync(
-      [Buffer.from(SEED_CONFIG)],
-      program.programId
-    );
-
-    const configAccount = await program.account.config.fetch(configPda);
-
-    const curveLimit = configAccount.curveLimit.toNumber();
-    // check launch phase is 'Presale'
-    const [bondingCurvePda] = PublicKey.findProgramAddressSync(
-      [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
-      program.programId
-    );
-
-    const curveAccount = await program.account.bondingCurve.fetch(
-      bondingCurvePda
-    );
-
-    const solReserve = curveAccount.reserveLamport.toNumber();
-
-    const maxSolSwap = curveLimit - solReserve;
-    console.log(maxSolSwap, amount);
-
+    let provider;
     try {
+      provider = anchor.getProvider();
+      // check the connection
+      if (!wallet.publicKey || !provider.connection) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider,
+      ) as Program<Pumpfun>;
+
+      const configAccount = await this.getLaunchpadGlobalConfig();
+
+      const curveLimit = configAccount.curveLimit.toNumber();
+      // check launch phase is 'Presale'
+      const [bondingCurvePda] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), mint.toBytes()],
+        program.programId,
+      );
+
+      const curveAccount = await program.account.bondingCurve.fetch(
+        bondingCurvePda,
+      );
+
+      const solReserve = curveAccount.reserveLamport.toNumber();
+
+      const maxSolSwap = curveLimit - solReserve;
+      console.log(maxSolSwap, amount);
+
       const transaction = new Transaction();
       const cpIx = ComputeBudgetProgram.setComputeUnitPrice({
         microLamports: 1_000_000,
@@ -402,7 +401,7 @@ export class Web3SolanaProgramInteraction {
       const receiveDecimal = type !== 0 ? 9 : 6;
       const addFee = type === 0 ? slippage : Number(slippage) + 1; // fee
       const fmtAmount = new anchor.BN(
-        parseFloat(amount) * Math.pow(10, coinDecimal)
+        parseFloat(amount) * Math.pow(10, coinDecimal),
       );
 
       // FIXME: uncomment to check limit curve
@@ -434,7 +433,7 @@ export class Web3SolanaProgramInteraction {
             Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
             new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT).toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID),
         );
 
         let [vaultPda] = PublicKey.findProgramAddressSync(
@@ -443,7 +442,7 @@ export class Web3SolanaProgramInteraction {
             stakeConfigPda.toBytes(),
             mint.toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID),
         );
         let [userStakePda] = PublicKey.findProgramAddressSync(
           [
@@ -451,7 +450,7 @@ export class Web3SolanaProgramInteraction {
             vaultPda.toBytes(),
             wallet.publicKey.toBytes(),
           ],
-          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID)
+          new PublicKey(ALL_CONFIGS.STAKING_PROGRAM_ID),
         );
 
         swapIx = await program.methods
@@ -490,25 +489,25 @@ export class Web3SolanaProgramInteraction {
       transaction.add(cpIx, cuIx);
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
         const signedTx = await wallet.signTransaction(transaction);
         const sTx = signedTx.serialize();
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
+        const blockhash = await provider.connection.getLatestBlockhash();
 
-        const res = await this.connection.confirmTransaction(
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed' // FIXME: trick lord confirmed / finalized;
+          'confirmed', // FIXME: trick lord confirmed / finalized;
         );
 
         console.log('Successfully initialized.\n Signature: ', signature);
@@ -516,10 +515,14 @@ export class Web3SolanaProgramInteraction {
       }
     } catch (error) {
       console.log('Error in swap transaction', error, error.error);
+
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -536,45 +539,42 @@ export class Web3SolanaProgramInteraction {
     amount: string,
     type: number,
     poolKey: string,
-    slippage: string
+    slippage: string,
   ) => {
-    // check the connection
-    if (!wallet.publicKey || !this.connection) {
-      console.log('Warning: Wallet not connected');
-      return;
-    }
-    // const poolKeys = await PoolKeys.fetchPoolKeyInfo(
-    //   this.connection,
-    //   mint,
-    //   NATIVE_MINT
-    // );
-    // const poolId = poolKeys.id;
-    const poolId = new PublicKey(poolKey);
+    let provider;
     try {
+      provider = anchor.getProvider();
+      // check the connection
+      if (!wallet.publicKey || !provider.connection) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+
+      const poolId = new PublicKey(poolKey);
       const coinDecimal = type === 0 ? 9 : 6;
       const fmtAmount = new anchor.BN(
-        parseFloat(amount) * Math.pow(10, coinDecimal)
+        parseFloat(amount) * Math.pow(10, coinDecimal),
       ).toNumber();
       const transaction = new Transaction();
 
       let swapTx;
       if (type == 0) {
         swapTx = await rayBuyTx(
-          this.connection,
+          provider.connection,
           mint,
           fmtAmount,
           wallet,
           poolId,
-          slippage
+          slippage,
         );
       } else {
         swapTx = await raySellTx(
-          this.connection,
+          provider.connection,
           mint,
           fmtAmount,
           wallet,
           poolId,
-          slippage
+          slippage,
         );
       }
       if (swapTx == null) {
@@ -587,7 +587,7 @@ export class Web3SolanaProgramInteraction {
 
       transaction.feePayer = wallet.publicKey;
       transaction.recentBlockhash = (
-        await this.connection.getLatestBlockhash()
+        await provider.connection.getLatestBlockhash()
       ).blockhash;
 
       if (wallet.signTransaction) {
@@ -597,28 +597,31 @@ export class Web3SolanaProgramInteraction {
         //   "----",
         //   await this.connection.simulateTransaction(signedTx)
         // );
-        const signature = await this.connection.sendRawTransaction(sTx, {
+        const signature = await provider.connection.sendRawTransaction(sTx, {
           preflightCommitment: 'confirmed',
           skipPreflight: false,
         });
-        const blockhash = await this.connection.getLatestBlockhash();
-        const res = await this.connection.confirmTransaction(
+        const blockhash = await provider.connection.getLatestBlockhash();
+        const res = await provider.connection.confirmTransaction(
           {
             signature,
             blockhash: blockhash.blockhash,
             lastValidBlockHeight: blockhash.lastValidBlockHeight,
           },
-          'confirmed'
+          'confirmed',
         );
         console.log('Successfully initialized.\n Signature: ', signature);
         return res;
       }
     } catch (error) {
       console.log('Error in swap transaction', error, error.error);
+      if (!provider) {
+        return;
+      }
       const { transaction = '', result } =
         (await handleTransaction({
           error,
-          connection: this.connection,
+          connection: provider.connection,
         })) || {};
 
       if (result?.value?.confirmationStatus) {
@@ -634,22 +637,23 @@ export class Web3SolanaProgramInteraction {
     wallet: WalletContextState,
     amount: string,
     type: number,
-    poolKey: string
+    poolKey: string,
   ) => {
-    if (!poolKey) {
-      console.log('Coin not listed');
-      return;
-    }
-
-    // check the connection
-    if (!wallet.publicKey || !this.connection) {
-      console.log('Warning: Wallet not connected');
-      return;
-    }
-    const poolId = new PublicKey(poolKey);
     try {
+      const provider = anchor.getProvider();
+      if (!poolKey) {
+        console.log('Coin not listed');
+        return;
+      }
+
+      // check the connection
+      if (!wallet.publicKey || !provider.connection) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      const poolId = new PublicKey(poolKey);
       const res = await simulateSwapOnRaydium(type, {
-        solanaConnection: this.connection,
+        solanaConnection: provider.connection,
         baseMint: mint,
         amount: Number(amount),
         wallet,
@@ -678,30 +682,21 @@ export class Web3SolanaProgramInteraction {
     mint: PublicKey,
     wallet: WalletContextState,
     amount: string,
-    type: number
+    type: number,
   ): Promise<string> => {
     console.log('========Simulate swap==============');
 
+    const provider = anchor.getProvider();
     // check the connection
-    if (!wallet.publicKey || !this.connection) {
+    if (!wallet.publicKey || !provider.connection) {
       console.log('Warning: Wallet not connected');
       return;
     }
-    const connection = new Connection(
-      'https://devnet.helius-rpc.com/?api-key=3b28a0fc-0ef6-48ef-b55c-c55ae74cb6a6',
-      'confirmed'
-    );
 
-    const providerOnFunction = new anchor.AnchorProvider(connection, wallet, {
-      commitment: 'confirmed',
-      preflightCommitment: 'confirmed',
-    });
-    console.log('providerOnFunction', providerOnFunction);
-    const provider = anchor.getProvider();
     console.log('simulateSwapTx', provider);
     const program = new Program(
       pumpProgramInterface,
-      provider
+      provider,
     ) as Program<Pumpfun>;
 
     try {
@@ -723,26 +718,21 @@ export class Web3SolanaProgramInteraction {
     const wallet = new PublicKey(walletAddress);
     const tokenMint = new PublicKey(tokenMintAddress);
 
+    const provider = anchor.getProvider();
     // Fetch the token account details
-    const response = await this.connection.getTokenAccountsByOwner(wallet, {
-      mint: tokenMint,
-    });
-
-    if (response.value.length == 0) {
-      console.log('No token account found for the specified mint address.');
-      return;
-    }
+    const response = this.getAssociatedTokenAccount(wallet, tokenMint);
 
     // Get the balance
-    const tokenAccountInfo = await this.connection.getTokenAccountBalance(
-      response.value[0].pubkey
+    const tokenAccountInfo = await provider.connection.getTokenAccountBalance(
+      response,
     );
 
     return tokenAccountInfo.value.uiAmount;
   };
 
   getSolanaBalance = async (publicKey: PublicKey) => {
-    const balance = await this.connection.getBalance(publicKey);
+    const provider = anchor.getProvider();
+    const balance = await provider.connection.getBalance(publicKey);
     const balanceSolana = new BigNumber(balance)
       .dividedBy(LAMPORTS_PER_SOL)
       .toNumber();
@@ -752,18 +742,20 @@ export class Web3SolanaProgramInteraction {
 
   getNumberOfOwnedToken = async (walletPublicKey: PublicKey) => {
     try {
+      const provider = anchor.getProvider();
       // // Convert the wallet address to PublicKey
       // const walletPublicKey = new PublicKey(walletAddress);
 
       // Fetch all token accounts owned by the wallet
-      const tokenAccounts = await this.connection.getParsedTokenAccountsByOwner(
-        walletPublicKey,
-        {
-          programId: new PublicKey(
-            'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-          ), // SPL Token Program ID
-        }
-      );
+      const tokenAccounts =
+        await provider.connection.getParsedTokenAccountsByOwner(
+          walletPublicKey,
+          {
+            programId: new PublicKey(
+              'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA',
+            ), // SPL Token Program ID
+          },
+        );
 
       // Process token accounts to list balances and mint addresses
       const tokens = tokenAccounts.value
@@ -797,7 +789,7 @@ export class Web3SolanaProgramInteraction {
   };
   getAssociatedTokenAccount = (
     ownerPubkey: PublicKey,
-    mintPk: PublicKey
+    mintPk: PublicKey,
   ): PublicKey => {
     let associatedTokenAccountPubkey = PublicKey.findProgramAddressSync(
       [
@@ -805,53 +797,58 @@ export class Web3SolanaProgramInteraction {
         TOKEN_PROGRAM_ID.toBytes(),
         mintPk.toBytes(), // mint address
       ],
-      ASSOCIATED_TOKEN_PROGRAM_ID
+      ASSOCIATED_TOKEN_PROGRAM_ID,
     )[0];
 
     return associatedTokenAccountPubkey;
   };
 
   getConfigGlobal = async (wallet, token) => {
-    if (!this.connection) {
-      console.log('Warning: Connection not connected');
-      return;
-    }
-    const provider = anchor.getProvider();
-    const program = new Program(
-      pumpProgramInterface,
-      provider
-    ) as Program<Pumpfun>;
-
-    const [global_vault] = PublicKey.findProgramAddressSync(
-      [Buffer.from(SEED_GLOBAL)],
-      program.programId
-    );
-    const globalVaultTokenAccount = this.getAssociatedTokenAccount(
-      global_vault,
-      token
-    );
-    const globalVaultBalance = await this.connection.getTokenAccountBalance(
-      globalVaultTokenAccount
-    );
-
-    return globalVaultBalance;
-  };
-
-  getBondingAddressToken = async (wallet) => {
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: Connection not connected');
         return;
       }
-      const provider = anchor.getProvider();
       const program = new Program(
         pumpProgramInterface,
-        provider
+        provider,
       ) as Program<Pumpfun>;
 
       const [global_vault] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_GLOBAL)],
-        program.programId
+        program.programId,
+      );
+      const globalVaultTokenAccount = this.getAssociatedTokenAccount(
+        global_vault,
+        token,
+      );
+      const globalVaultBalance =
+        await provider.connection.getTokenAccountBalance(
+          globalVaultTokenAccount,
+        );
+
+      return globalVaultBalance;
+    } catch (error) {
+      console.log('getConfigGlobal error', error);
+    }
+  };
+
+  getBondingAddressToken = async (wallet) => {
+    try {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider,
+      ) as Program<Pumpfun>;
+
+      const [global_vault] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_GLOBAL)],
+        program.programId,
       );
 
       return global_vault.toBase58();
@@ -869,7 +866,7 @@ export class Web3SolanaProgramInteraction {
       const cwClient = await CosmWasmClient.connect(oraiEndpoint);
       const contract = new AgentsLandSnapshotContractQueryClient(
         cwClient,
-        whitelistContractAddress
+        whitelistContractAddress,
       );
 
       // query list token metadata
@@ -895,20 +892,20 @@ export class Web3SolanaProgramInteraction {
   // allowedAddresses: ConfigState['configSnapshot']
   getListTokenFromContract = async () => {
     try {
+      const provider = anchor.getProvider();
       const allowedAddresses = await this.getSnapShotAgent();
 
-      if (!this.connection) {
+      if (!provider.connection) {
         console.log('Warning: Connection not connected');
         return;
       }
-      const metaplex = Metaplex.make(this.connection);
-      const provider = anchor.getProvider();
+      const metaplex = Metaplex.make(provider.connection);
       const program = new Program(
         pumpProgramInterface,
-        provider
+        provider,
       ) as Program<Pumpfun>;
 
-      const tokens = await this.connection.getParsedProgramAccounts(
+      const tokens = await provider.connection.getParsedProgramAccounts(
         program.programId,
         {
           commitment: 'confirmed',
@@ -917,13 +914,9 @@ export class Web3SolanaProgramInteraction {
               dataSize: 136,
             },
           ],
-        }
+        },
       );
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
-      const configAccount = await program.account.config.fetch(configPda);
+      const configAccount = await this.getLaunchpadGlobalConfig();
 
       const list = await Promise.all(
         tokens.map(async (item) => {
@@ -944,7 +937,7 @@ export class Web3SolanaProgramInteraction {
             .nfts()
             .findByMint(
               { mintAddress: detail.tokenMint },
-              { commitment: 'confirmed' }
+              { commitment: 'confirmed' },
             );
 
           let metadataJson: metadataInfo = {} as any;
@@ -958,12 +951,12 @@ export class Web3SolanaProgramInteraction {
             detail.reserveToken,
             detail.reserveLamport,
             configAccount.tokenDecimalsConfig || SPL_DECIMAL,
-            solPrice
+            solPrice,
           );
           const marketcap = calculateMarketCap(
             detail.reserveToken,
             configAccount.tokenDecimalsConfig || SPL_DECIMAL,
-            newPrice
+            newPrice,
           );
 
           const tokenDetail = {
@@ -986,17 +979,17 @@ export class Web3SolanaProgramInteraction {
             } as metadataInfo,
             listed: detail.isCompleted, // TODO: this value in contract is bonding curve isCompleted, but when data BE failed we only need to check isComplete is true and user can trade via raydium
             tradingTime: new Date(
-              detail.partyStart.muln(ALL_CONFIGS.TIMER.MILLISECONDS).toNumber()
+              detail.partyStart.muln(ALL_CONFIGS.TIMER.MILLISECONDS).toNumber(),
             ),
             date: new Date(
               detail.curveCreationDate
                 .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
-                .toNumber()
+                .toNumber(),
             ),
           };
 
           return { ...detail, ...tokenDetail };
-        })
+        }),
       );
 
       const listFmt = list.filter(Boolean);
@@ -1016,27 +1009,27 @@ export class Web3SolanaProgramInteraction {
 
   getTokenDetailFromContract = async (
     wallet: WalletContextState,
-    tokenMint: PublicKey
+    tokenMint: PublicKey,
   ) => {
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: Connection not connected');
         return;
       }
       const allowedAddresses = await this.getSnapShotAgent();
       const currentTokenData = allowedAddresses.find(
-        (e) => e.token === tokenMint.toBase58()
+        (e) => e.token === tokenMint.toBase58(),
       );
       const raydiumPoolAddr =
-        currentTokenData.metadata?.['raydiumPoolAddr'] || '';
+        currentTokenData?.metadata?.['raydiumPoolAddr'] || '';
       const oraidexPoolAddr =
-        currentTokenData.metadata?.['oraidexPoolAddr'] || '';
+        currentTokenData?.metadata?.['oraidexPoolAddr'] || '';
 
-      const metaplex = Metaplex.make(this.connection);
-      const provider = anchor.getProvider();
+      const metaplex = Metaplex.make(provider.connection);
       const program = new Program(
         pumpProgramInterface,
-        provider
+        provider,
       ) as Program<Pumpfun>;
 
       const metadata = await metaplex
@@ -1048,18 +1041,13 @@ export class Web3SolanaProgramInteraction {
         const dataJson = (await fetchJSONDataFromUrl(metadata.uri)) || {};
         metadataJson = dataJson;
       }
-
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
       const [bondingCurvePda, _] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_BONDING_CURVE), tokenMint.toBytes()],
-        program.programId
+        program.programId,
       );
 
       const [configAccount, bondingCurve] = await Promise.all([
-        program.account.config.fetch(configPda),
+        this.getLaunchpadGlobalConfig(),
         program.account.bondingCurve.fetch(bondingCurvePda),
       ]);
 
@@ -1068,12 +1056,12 @@ export class Web3SolanaProgramInteraction {
         bondingCurve.reserveToken,
         bondingCurve.reserveLamport,
         SPL_DECIMAL,
-        solPrice
+        solPrice,
       );
       const marketcap = calculateMarketCap(
         bondingCurve.reserveToken,
         SPL_DECIMAL,
-        newPrice
+        newPrice,
       );
 
       const tokenDetail = {
@@ -1099,13 +1087,13 @@ export class Web3SolanaProgramInteraction {
         tradingTime: new Date(
           toBN(bondingCurve.partyStart.toNumber())
             .multipliedBy(ALL_CONFIGS.TIMER.MILLISECONDS)
-            .toNumber()
+            .toNumber(),
         ),
         marketcap,
         date: new Date(
           bondingCurve.curveCreationDate
             .muln(ALL_CONFIGS.TIMER.MILLISECONDS)
-            .toNumber()
+            .toNumber(),
         ),
       };
 
@@ -1118,32 +1106,23 @@ export class Web3SolanaProgramInteraction {
 
   getConfigCurve = async () => {
     try {
-      if (!this.connection) {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
         console.log('Warning: Connection not connected');
         return;
       }
-      const provider = anchor.getProvider();
       if (!provider) {
         return;
       }
-      const program = new Program(
-        pumpProgramInterface,
-        provider
-      ) as Program<Pumpfun>;
 
-      const [configPda] = PublicKey.findProgramAddressSync(
-        [Buffer.from(SEED_CONFIG)],
-        program.programId
-      );
-
-      const configAccount = await program.account.config.fetch(configPda);
+      const configAccount = await this.getLaunchpadGlobalConfig();
 
       return configAccount;
     } catch (error) {
       console.log('getConfigCurve error', error);
 
       errorAlert(
-        'RPC call limit reached. Please wait or switch networks to continue!'
+        'RPC call limit reached. Please wait or switch networks to continue!',
       );
 
       return;
@@ -1152,24 +1131,24 @@ export class Web3SolanaProgramInteraction {
 
   getAmountBoughtByUser = async (
     token: PublicKey,
-    wallet: WalletContextState
+    wallet: WalletContextState,
   ) => {
     try {
-      if (!this.connection || !wallet.publicKey) {
+      const provider = anchor.getProvider();
+      if (!provider.connection || !wallet.publicKey) {
         console.log('Warning: Wallet not connected');
         return;
       }
-      const provider = anchor.getProvider();
       if (!provider) {
         return;
       }
       const program = new Program(
         pumpProgramInterface,
-        provider
+        provider,
       ) as Program<Pumpfun>;
       const [bondingCurvePda] = PublicKey.findProgramAddressSync(
         [Buffer.from(SEED_BONDING_CURVE), token.toBytes()],
-        program.programId
+        program.programId,
       );
 
       const [userPartyPda] = PublicKey.findProgramAddressSync(
@@ -1178,11 +1157,11 @@ export class Web3SolanaProgramInteraction {
           bondingCurvePda.toBytes(),
           wallet.publicKey.toBytes(),
         ],
-        program.programId
+        program.programId,
       );
 
       const userPartyInfo = await program.account.partyStatus.fetch(
-        userPartyPda
+        userPartyPda,
       );
 
       const amount = (userPartyInfo.totalAmount || '0').toString();

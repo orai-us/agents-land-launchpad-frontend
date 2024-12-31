@@ -3,9 +3,16 @@ import { createContext, useState, useEffect, useContext } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { errorAlert, successAlert } from '@/components/others/ToastGroup';
-import { msgInfo } from '@/utils/types';
+import { msgInfo, RawChart } from '@/utils/types';
 import UserContext from '@/context/UserContext';
 import { useLocation } from 'wouter';
+import { queryClient } from '@/provider/providers';
+import { EVENT_CHART_SOCKET } from '@/components/TVChart/config';
+import {
+  channelToSubscription,
+  genOhlcData,
+} from '@/components/TVChart/streaming';
+import { Bar } from '@/charting_library';
 
 interface Context {
   socket?: Socket;
@@ -45,7 +52,7 @@ const SocketProvider = (props: { children: any }) => {
   const [alertState, setAlertState] = useState<AlertState>({
     open: false,
     message: '',
-    severity: undefined
+    severity: undefined,
   });
 
   const [, setLocation] = useLocation();
@@ -62,7 +69,7 @@ const SocketProvider = (props: { children: any }) => {
     setAlertState({
       open: true,
       message: 'Success',
-      severity: 'success'
+      severity: 'success',
     });
     successAlert(`Successfully Created token: ${name} \n ${mint}`);
     setIsLoading(false);
@@ -73,7 +80,7 @@ const SocketProvider = (props: { children: any }) => {
     setAlertState({
       open: true,
       message: 'Failed',
-      severity: 'error'
+      severity: 'error',
     });
     errorAlert(`Failed Create token: ${name} \n ${mint}`);
     setIsLoading(false);
@@ -83,6 +90,50 @@ const SocketProvider = (props: { children: any }) => {
     console.log('Updated Message', updateCoinId, updateMsg);
     setCoinId(updateCoinId);
     setNewMsg(updateMsg);
+  };
+
+  const listenChartSocket = (tokenId: string, priceUpdates: RawChart) => {
+    try {
+    } catch (error) {}
+    const tradeTime = priceUpdates.ts * 1000;
+
+    const state = queryClient.getQueryState<RawChart[]>([
+      'chartTable',
+      tokenId,
+    ]);
+
+    if (!state || !state.data || !priceUpdates) {
+      return;
+    }
+    console.log('SOCKET :>> state-chart :>>', tokenId, priceUpdates);
+
+    const priceHistory = [...state.data, priceUpdates];
+    const subscriptionItem = channelToSubscription.get(tokenId);
+
+    const dataChartTable = genOhlcData({
+      priceHistory,
+      range: Number(subscriptionItem?.resolution),
+    });
+
+    const bars = dataChartTable.map((bar) => ({
+      ...bar,
+      time: bar.time * 1000, // Convert from seconds to milliseconds
+    }));
+
+    const lastBar = bars[bars.length - 1];
+    let bar: Bar =
+      lastBar.close === lastBar.open && lastBar.high === lastBar.low
+        ? bars[bars.length - 2]
+        : lastBar;
+
+    if (!bar) return;
+    subscriptionItem.lastBar = bar;
+
+    subscriptionItem.handlers.forEach((handler) => handler.callback(bar));
+
+    queryClient.setQueryData(['chartTable', tokenId], (oldData: RawChart[]) => {
+      return [...(oldData || []), priceUpdates];
+    });
   };
   // Listen for the "connectionUpdated" event and update the state
   // const transFailHandler = (address: string, txt: string, walletAddr: string) => {
@@ -114,13 +165,22 @@ const SocketProvider = (props: { children: any }) => {
   // init socket client object
   useEffect(() => {
     const socket = io(import.meta.env.VITE_BACKEND_URL!, {
-      transports: ['websocket']
+      transports: ['websocket'],
     });
     socket.on('connect', async () => {
       console.log(' --@ connected to backend', socket.id);
     });
     socket.on('disconnect', () => {
       console.log(' --@ disconnected from backend', socket.id);
+    });
+    socket.on('connect_error', (error) => {
+      if (socket!.active) {
+        // temporary failure, the socket will automatically try to reconnect
+      } else {
+        // the connection was denied by the server
+        // in that case, `socket.connect()` must be manually called in order to reconnect
+        console.log('[socket] Error:', error.message);
+      }
     });
     setSocket(socket);
 
@@ -133,6 +193,10 @@ const SocketProvider = (props: { children: any }) => {
   }, []);
 
   useEffect(() => {
+    if (!socket) {
+      return;
+    }
+
     socket?.on('connectionUpdated', async (counter: number) => {
       // console.log("--------@ Connection Updated: ", counter);
 
@@ -154,19 +218,25 @@ const SocketProvider = (props: { children: any }) => {
       createFailedHandler(name, mint);
     });
 
-    socket?.on('MessageUpdated', async (updateCoinId: string, newMessage: msgInfo) => {
-      if (updateCoinId && newMessage) {
-        console.log('--------@ Message Updated:', updateCoinId, newMessage);
+    socket?.on(
+      'MessageUpdated',
+      async (updateCoinId: string, newMessage: msgInfo) => {
+        if (updateCoinId && newMessage) {
+          console.log('--------@ Message Updated:', updateCoinId, newMessage);
 
-        createMessageHandler(updateCoinId, newMessage);
+          createMessageHandler(updateCoinId, newMessage);
+        }
       }
-    });
+    );
+
+    socket?.on(EVENT_CHART_SOCKET, listenChartSocket);
 
     return () => {
       socket?.off('Creation', createSuccessHandler);
       socket?.off('TokenCreated', createSuccessHandler);
       socket?.off('TokenNotCreated', createFailedHandler);
       socket?.off('MessageUpdated', createMessageHandler);
+      socket?.off(EVENT_CHART_SOCKET, listenChartSocket);
 
       socket?.disconnect();
     };
@@ -191,7 +261,7 @@ const SocketProvider = (props: { children: any }) => {
         setCurrentDepositAmount,
         numberDecimals,
         alertState,
-        setAlertState
+        setAlertState,
       }}
     >
       {props.children}

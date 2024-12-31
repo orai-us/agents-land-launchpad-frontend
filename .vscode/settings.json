@@ -1,0 +1,9 @@
+{
+  "beautify.onSave": true,
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "prettier.useEditorConfig": false,
+  "prettier.useTabs": false,
+  "prettier.trailingComma": "all",
+  "prettier.singleQuote": true
+}

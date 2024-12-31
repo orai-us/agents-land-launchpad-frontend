@@ -5,28 +5,18 @@ import defaultUserImg from '@/assets/images/userAgentDefault.svg';
 import { Chatting } from '@/components/trading/Chatting';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradingChart } from '@/components/TVChart/TradingChart';
-import {
-  ALL_CONFIGS,
-  BLACK_LIST_ADDRESS,
-  PROGRAM_ID,
-  SOL_DECIMAL,
-} from '@/config';
+import { ALL_CONFIGS, BLACK_LIST_ADDRESS, SOL_DECIMAL } from '@/config';
 import UserContext from '@/context/UserContext';
 import useWindowSize from '@/hooks/useWindowSize';
-import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
-import { ResultType } from '@/program/logListeners/types';
-import {
-  commitmentLevel,
-  endpoint,
-  Web3SolanaProgramInteraction,
-} from '@/program/web3';
+import { Web3SolanaProgramInteraction } from '@/program/web3';
+import { web3FungibleStake } from '@/program/web3FungStake';
 import {
   formatLargeNumber,
   formatNumberKMB,
   numberWithCommas,
 } from '@/utils/format';
 import { coinInfo } from '@/utils/types';
-import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
+import { fromBig, getCoinInfo, reduceString, sleep } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
@@ -34,7 +24,7 @@ import {
 import { BN } from '@coral-xyz/anchor';
 import { toPublicKey } from '@metaplex-foundation/js';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import BigNumber from 'bignumber.js';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -42,13 +32,11 @@ import updateLocale from 'dayjs/plugin/updateLocale';
 import { useContext, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { Link, useLocation } from 'wouter';
-import LaunchingLock from '../launchingLock';
 import { errorAlert } from '../others/ToastGroup';
 import TokenDistribution from '../others/TokenDistribution';
 import { DexToolsChart } from '../TVChart/DexToolsChart';
 import useListenEventSwapChart from './hooks/useListenEventSwapChart';
 import NotForSale from './NotForSale';
-import { web3FungibleStake } from '@/program/web3FungStake';
 // Extend dayjs with the relativeTime plugin
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -91,8 +79,6 @@ export default function TradingPage() {
   const [simulatePrice, setSimulatePrice] = useState<string>('');
   const [isAgentChart, setIsAgentChart] = useState<Boolean>(true);
   const [isOnSaleCountdown, setIsOnSaleCountdown] = useState<Boolean>(false);
-  const [isPublicCountdownStart, setIsPublicCountdownStart] =
-    useState<Boolean>(false);
   const [fromRpc, setFromRpc] = useState(false);
   const { handleSetCurveInfo, handleSetCoinInfo } = useCoinActions();
   const curveInfo = useGetCoinInfoState('curveInfo');
@@ -102,7 +88,7 @@ export default function TradingPage() {
     stakerInfo && (stakerInfo['stakeAmount'] || new BN(0)).gtn(0);
 
   const bondingCurveValue = new BigNumber(
-    (coin.lamportReserves || 0).toString()
+    (coin.lamportReserves || 0).toString(),
   )
     .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
     .div(10 ** 9)
@@ -135,7 +121,7 @@ export default function TradingPage() {
       // data =
       data = (await web3Solana.getTokenDetailFromContract(
         wallet,
-        toPublicKey(parameter)
+        toPublicKey(parameter),
       )) as any;
 
       if (data) {
@@ -146,14 +132,14 @@ export default function TradingPage() {
     const { curveAccount, maxSolSwapIncludeFee } =
       await web3Solana.getMaxBondingCurveLimit(
         new PublicKey(data.token),
-        wallet
+        wallet,
       );
 
     setCurveLimit(maxSolSwapIncludeFee || 0);
     handleSetCurveInfo(curveAccount);
 
     const bondingCurveValue = new BigNumber(
-      (data.lamportReserves || new BN(0)).toString()
+      (data.lamportReserves || new BN(0)).toString(),
     )
       .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
       .toNumber();
@@ -162,8 +148,8 @@ export default function TradingPage() {
       .multipliedBy(new BigNumber(100))
       .div(
         new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
-          ALL_CONFIGS.INIT_SOL_BONDING_CURVE
-        )
+          ALL_CONFIGS.INIT_SOL_BONDING_CURVE,
+        ),
       )
       .toNumber();
 
@@ -194,7 +180,7 @@ export default function TradingPage() {
       await fetchDataCoin(parameter);
     };
     fetchData();
-  }, [pathname, wallet.publicKey, totalVault]);
+  }, [pathname, totalVault]); // wallet.publicKey,
 
   useEffect(() => {
     if (coin.token) {
@@ -219,7 +205,7 @@ export default function TradingPage() {
       //   errorAlert('Token not valid!');
       // }
     }
-  }, [coin]);
+  }, [coin._id]);
 
   // realtime bonding curve
   // useEffect(() => {
@@ -270,13 +256,13 @@ export default function TradingPage() {
               wallet,
               amountWithDecimal,
               1,
-              coin.raydiumPoolAddr
+              coin.raydiumPoolAddr,
             )) || {};
 
           setSimulatePrice(
             new BigNumber((numerator || 0).toString())
               .div(new BigNumber(10).pow(SOL_DECIMAL))
-              .toString()
+              .toString(),
           );
         } catch (error) {
           console.log('simulate failed', error);
@@ -345,7 +331,7 @@ export default function TradingPage() {
             {isListed && (isOraidexListed || isCanBuyOnRaydium) && (
               <a
                 href={`https://app.oraidex.io/pools/v2/${encodeURIComponent(
-                  `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`
+                  `factory/orai1wuvhex9xqs3r539mvc6mtm7n20fcj3qr2m0y9khx6n5vtlngfzes3k0rq9/${coin.token}`,
                 )}_orai`}
                 target="_blank"
                 className="mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[#AEE67F] p-1"
@@ -367,7 +353,7 @@ export default function TradingPage() {
             <div
               className={twMerge(
                 'relative bg-[#1A1C28] rounded-t p-6',
-                isNotForSale && 'rounded'
+                isNotForSale && 'rounded',
               )}
             >
               {hasStaked && (
@@ -381,7 +367,7 @@ export default function TradingPage() {
               <div
                 className={twMerge(
                   'relative mb-4 flex justify-between items-start flex-wrap gap-4',
-                  isNotForSale && 'mb-0'
+                  isNotForSale && 'mb-0',
                 )}
               >
                 <div className="flex gap-2 items-start md:items-center">
@@ -430,7 +416,7 @@ export default function TradingPage() {
                       {reduceString(
                         coin.creator?.['wallet'] || coin.creator || '',
                         4,
-                        4
+                        4,
                       )}
                     </Link>
                   </div>
@@ -551,7 +537,7 @@ export default function TradingPage() {
                         {
                           maximumFractionDigits:
                             ALL_CONFIGS.SHOW_DECIMALS_PRICE,
-                        }
+                        },
                       )
                     ) : (
                       <img src={LoadingImg} />
@@ -560,7 +546,7 @@ export default function TradingPage() {
                   </p>
                   <p
                     className={twMerge(
-                      'mt-1 font-medium text-[14px] text-[#84869A]'
+                      'mt-1 font-medium text-[14px] text-[#84869A]',
                     )}
                   >
                     ≈ ${isNaN(Number(priceUsd)) ? '--' : priceUsd}
@@ -610,7 +596,7 @@ export default function TradingPage() {
                           onClick={() => setIsAgentChart(true)}
                           className={twMerge(
                             'cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-                            isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]'
+                            isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]',
                           )}
                         >
                           Agent Land Chart
@@ -619,7 +605,7 @@ export default function TradingPage() {
                           onClick={() => setIsAgentChart(false)}
                           className={twMerge(
                             'cursor-pointer hover:brightness-125 uppercase mr-4 px-2 py-[4px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-                            !isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]'
+                            !isAgentChart && 'bg-[#585A6B] text-[#E8E9EE]',
                           )}
                         >
                           Current Chart
@@ -691,7 +677,7 @@ export default function TradingPage() {
                         <span className="text-[#585A6B]">no</span>
                       ) : (
                         formatLargeNumber(
-                          fromBig(coin.tokenReserves, coin.decimals)
+                          fromBig(coin.tokenReserves, coin.decimals),
                         )
                       )}
                     </span>{' '}
@@ -709,7 +695,7 @@ export default function TradingPage() {
                         new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT)
                           .multipliedBy(solPrice)
                           .div(LAMPORTS_PER_SOL)
-                          .toNumber()
+                          .toNumber(),
                       )}
                     </span>
                     &nbsp; all the liquidity from the bonding curve will be
