@@ -16,11 +16,11 @@ export const CoinGeckoChart: React.FC<TradingChartProps> = ({ param }) => {
 
   const getInfo = async () => {
     try {
-      setPoolId('B4Jag7SokpCb5MwVZEVck7WqWSqwbB7GibV5F1NMsMgM');
+      setPoolId(param.raydiumPoolAddr);
       console.log('poolId--->', param.raydiumPoolAddr);
     } catch (error) {
       console.log('error: Not found poolId');
-      setPoolId('APyQX9Q3FwHkxNvSa7vT8iB4AGm38iaMkiAcpSNbVyZY');
+      setPoolId('');
     }
   };
   return (
