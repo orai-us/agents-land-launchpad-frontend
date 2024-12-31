@@ -47,7 +47,6 @@ const Header: FC = () => {
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false);
   const [showStepWork, setShowStepWork] = useState(false);
   const [isOpenSetting, setIsOpenSetting] = useState(false);
-  const provider = getProviderApp();
 
   useEffect(() => {
     (async () => {
@@ -84,10 +83,6 @@ const Header: FC = () => {
 
   useEffect(() => {
     (async () => {
-      if (!provider) {
-        return;
-      }
-
       if (!bondingCurveConfig) {
         const config = await web3Solana.getConfigCurve();
         if (config) {
@@ -98,6 +93,11 @@ const Header: FC = () => {
           handleSetBondingCurveConfig(config);
         }
       }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       if (!stakeConfig) {
         const configStake = await web3FungStake.getStakeConfig(
           new PublicKey(ALL_CONFIGS.STAKE_CURRENCY_MINT)
@@ -107,8 +107,8 @@ const Header: FC = () => {
           handleSetStakeConfig(configStake);
         }
       }
-    })();
-  }, [provider]);
+    })
+  },[])
 
   useEffect(() => {
     const fetchData = async () => {
