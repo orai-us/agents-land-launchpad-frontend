@@ -75,6 +75,7 @@ export function UserProvider({
 
   const { rpcUrl } = value;
   const wallet = useWallet();
+  const publicKey = wallet?.publicKey ? wallet.publicKey.toBase58() : '';
   useEffect(() => {
     const setAnchorProvider = async () => {
       try {
@@ -111,7 +112,7 @@ export function UserProvider({
     };
 
     setAnchorProvider();
-  }, [rpcUrl, wallet]);
+  }, [rpcUrl, publicKey]);
 
   if (!providerApp) {
     return <Spinner />;
