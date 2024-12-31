@@ -1022,9 +1022,9 @@ export class Web3SolanaProgramInteraction {
         (e) => e.token === tokenMint.toBase58(),
       );
       const raydiumPoolAddr =
-        currentTokenData.metadata?.['raydiumPoolAddr'] || '';
+        currentTokenData?.metadata?.['raydiumPoolAddr'] || '';
       const oraidexPoolAddr =
-        currentTokenData.metadata?.['oraidexPoolAddr'] || '';
+        currentTokenData?.metadata?.['oraidexPoolAddr'] || '';
 
       const metaplex = Metaplex.make(provider.connection);
       const program = new Program(
