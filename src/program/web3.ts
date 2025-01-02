@@ -1176,7 +1176,55 @@ export class Web3SolanaProgramInteraction {
 
       return amount;
     } catch (error) {
-      console.log('getTokenDetailFromContract error', error);
+      console.log('getAmountBoughtByUser error', error);
+      return '0';
+    }
+  };
+
+  getCurvePDA = (tokenMint: PublicKey) => {
+    try {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
+        console.log('Warning: Connection not connected');
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider,
+      ) as Program<Pumpfun>;
+
+      const [bondingCurvePda, _] = PublicKey.findProgramAddressSync(
+        [Buffer.from(SEED_BONDING_CURVE), tokenMint.toBytes()],
+        program.programId,
+      );
+
+      return bondingCurvePda;
+    } catch (error) {
+      console.log('getCurvePDA', error);
+    }
+  };
+
+  decodeCurveData = (data: Buffer) => {
+    try {
+      const provider = anchor.getProvider();
+      if (!provider.connection) {
+        console.log('Warning: Wallet not connected');
+        return;
+      }
+      if (!provider) {
+        return;
+      }
+      const program = new Program(
+        pumpProgramInterface,
+        provider,
+      ) as Program<Pumpfun>;
+      const bondingCurveInfo = program.coder.accounts.decode<
+        anchor.IdlAccounts<Pumpfun>['bondingCurve']
+      >('bondingCurve', data as Buffer);
+
+      return bondingCurveInfo;
+    } catch (error) {
+      console.log('decodeCurveData error', error);
       return '0';
     }
   };

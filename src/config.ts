@@ -10,6 +10,8 @@ export const RPC_MAPS = {
   Custom: 'https://',
 };
 
+export const AXIOS_TIMEOUT = 10000;
+
 export const SOL_PRICE_KEY = 'SOL_PRICE_KEY';
 
 export const SOLANA_ENV =

@@ -1,4 +1,4 @@
-import { ALL_CONFIGS } from '@/config';
+import { ALL_CONFIGS, AXIOS_TIMEOUT } from '@/config';
 import { BN } from '@coral-xyz/anchor';
 import { PublicKey, PublicKeyInitData } from '@solana/web3.js';
 import axios, { AxiosRequestConfig } from 'axios';
@@ -24,6 +24,7 @@ const headers: Record<string, string> = {
 };
 
 const config: AxiosRequestConfig = {
+  timeout: AXIOS_TIMEOUT,
   headers,
 };
 
@@ -341,8 +342,9 @@ export const findHoldersFromBE = async (mint: string, limit: number = 20) => {
   try {
     // Fetch the price data from CoinGecko
     const response = await axios.get(
-      // `${BACKEND_URL}/coin/token/${mint}/holder?limit=${limit}`,
-      `${BACKEND_URL}/coin/token/${'D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck'}/holder?limit=${limit}`,
+      `${BACKEND_URL}/coin/token/${mint}/holder?limit=${limit}`,
+      config,
+      // `${BACKEND_URL}/coin/token/${'D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck'}/holder?limit=${limit}`,
     );
     return response.data;
   } catch (error) {

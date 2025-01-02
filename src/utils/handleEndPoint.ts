@@ -10,18 +10,26 @@ interface UserData {
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Define the `handleEndpoint` function
-const handleEndpoint = async (userData: UserData, endpoint: string, method: Method, token: boolean): Promise<any> => {
-  const bippleToken = typeof window !== 'undefined' ? localStorage?.getItem('auth_token') : null;
+const handleEndpoint = async (
+  userData: UserData,
+  endpoint: string,
+  method: Method,
+  token: boolean,
+): Promise<any> => {
+  const bippleToken =
+    typeof window !== 'undefined' ? localStorage?.getItem('auth_token') : null;
 
   try {
     // Configure the request
     const config: AxiosRequestConfig = {
+      timeout: 10000,
       method: method.toUpperCase() as Method,
       url: `${API_BASE_URL}/${endpoint}`,
       data: method.toUpperCase() !== 'GET' ? userData : null,
       headers: {
-        authorization: token && bippleToken ? `Bearer ${bippleToken}` : undefined
-      }
+        authorization:
+          token && bippleToken ? `Bearer ${bippleToken}` : undefined,
+      },
     };
 
     // Send the request

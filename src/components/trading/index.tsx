@@ -10,6 +10,7 @@ import UserContext from '@/context/UserContext';
 import useWindowSize from '@/hooks/useWindowSize';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
 import { web3FungibleStake } from '@/program/web3FungStake';
+import * as anchor from '@coral-xyz/anchor';
 import {
   formatLargeNumber,
   formatNumberKMB,
@@ -206,6 +207,46 @@ export default function TradingPage() {
       // }
     }
   }, [coin._id]);
+
+  // realtime bonding curve
+  useEffect(() => {
+    (async () => {
+      // Split the pathname and extract the last segment
+      const segments = pathname.split('/');
+      const parameter = segments[segments.length - 1];
+      const provider = anchor.getProvider();
+
+      const configBondingAddr = await web3Solana.getBondingAddressToken(wallet);
+      const curvePDA = await web3Solana.getCurvePDA(toPublicKey(parameter));
+
+      if (provider && configBondingAddr) {
+        anchor.getProvider().connection.onAccountChange(curvePDA, (account) => {
+          if (account.data) {
+            const data = web3Solana.decodeCurveData(account.data);
+
+            console.log('data', data);
+
+            const bondingCurveValue = new BigNumber(
+              (data['reserveLamport'] || new BN(0)).toString(),
+            )
+              .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+              .toNumber();
+
+            const bondingCurvePercent = new BigNumber(bondingCurveValue)
+              .multipliedBy(new BigNumber(100))
+              .div(
+                new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+                  ALL_CONFIGS.INIT_SOL_BONDING_CURVE,
+                ),
+              )
+              .toNumber();
+
+            setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
+          }
+        });
+      }
+    })();
+  }, [pathname]);
 
   // realtime bonding curve
   // useEffect(() => {
