@@ -715,29 +715,37 @@ export class Web3SolanaProgramInteraction {
   };
 
   getTokenBalance = async (walletAddress: string, tokenMintAddress: string) => {
-    const wallet = new PublicKey(walletAddress);
-    const tokenMint = new PublicKey(tokenMintAddress);
+    try {
+      const wallet = new PublicKey(walletAddress);
+      const tokenMint = new PublicKey(tokenMintAddress);
 
-    const provider = anchor.getProvider();
-    // Fetch the token account details
-    const response = this.getAssociatedTokenAccount(wallet, tokenMint);
+      const provider = anchor.getProvider();
+      // Fetch the token account details
+      const response = this.getAssociatedTokenAccount(wallet, tokenMint);
 
-    // Get the balance
-    const tokenAccountInfo = await provider.connection.getTokenAccountBalance(
-      response,
-    );
+      // Get the balance
+      const tokenAccountInfo = await provider.connection.getTokenAccountBalance(
+        response,
+      );
 
-    return tokenAccountInfo.value.uiAmount;
+      return tokenAccountInfo.value.uiAmount;
+    } catch (error) {
+      return 0;
+    }
   };
 
   getSolanaBalance = async (publicKey: PublicKey) => {
-    const provider = anchor.getProvider();
-    const balance = await provider.connection.getBalance(publicKey);
-    const balanceSolana = new BigNumber(balance)
-      .dividedBy(LAMPORTS_PER_SOL)
-      .toNumber();
+    try {
+      const provider = anchor.getProvider();
+      const balance = await provider.connection.getBalance(publicKey);
+      const balanceSolana = new BigNumber(balance)
+        .dividedBy(LAMPORTS_PER_SOL)
+        .toNumber();
 
-    return balanceSolana;
+      return balanceSolana;
+    } catch (error) {
+      return 0;
+    }
   };
 
   getNumberOfOwnedToken = async (walletPublicKey: PublicKey) => {
