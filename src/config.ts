@@ -12,6 +12,7 @@ export const RPC_MAPS = {
   PublicNode: 'https://solana-rpc.publicnode.com',
   Custom: 'https://',
 };
+export const DEFAULT_RPC = RPC_MAPS.Agents;
 
 export const AXIOS_TIMEOUT = 10000;
 
