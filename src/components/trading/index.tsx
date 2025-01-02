@@ -224,8 +224,6 @@ export default function TradingPage() {
           if (account.data) {
             const data = web3Solana.decodeCurveData(account.data);
 
-            console.log('data', data);
-
             const bondingCurveValue = new BigNumber(
               (data['reserveLamport'] || new BN(0)).toString(),
             )
