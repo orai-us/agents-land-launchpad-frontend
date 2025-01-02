@@ -65,7 +65,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
           data.lamportReserves,
           data.bondingCurveLimit,
         );
-        setKotHProgress(currentKotHProgress);
+        setKotHProgress(currentKotHProgress < 0 ? 100 : currentKotHProgress);
       }
     };
     fetchData();
