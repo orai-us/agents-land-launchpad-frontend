@@ -52,11 +52,12 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
     const fetchData = async () => {
       let holderData = [];
       if (data.token) {
-        if (isDevnet) {
+        const holderDataBE = await findHoldersFromBE(data.token);
+        holderData = holderDataBE ? holderDataBE.items : [];
+
+        if (holderData?.length <= 0) {
+          // fallback call rpc
           holderData = await findHolders(data.token);
-        } else {
-          const holderDataBE = await findHoldersFromBE(data.token);
-          holderData = holderDataBE ? holderDataBE.items : [];
         }
         setHolders(holderData ? holderData : []);
 

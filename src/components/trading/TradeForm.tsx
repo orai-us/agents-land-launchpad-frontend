@@ -576,7 +576,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
         )}
         <div className="mt-2 flex items-center justify-between gap-1 text-[12px]">
           <span>Receive:</span>
-          <span className="text-right">
+          <span className="text-right flex gap-1 items-center">
             ≈{' '}
             {isInsufficientFund ? (
               '--'

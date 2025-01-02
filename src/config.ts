@@ -2,6 +2,9 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export const RPC_MAPS = {
   Agents: import.meta.env.VITE_SOLANA_RPC,
+  SolanaOrai: 'https://solana-rpc.orai.network',
+  Phantom:
+    'https://solana-mainnet.phantom.app/YBPpkkN4g91xDiAnTE9r0RcMkjg0sKUIWvAfoFVJ',
   GetBlock: 'https://solana-getblock.agents.land',
   Helius:
     'https://mainnet.helius-rpc.com/?api-key=d3c2e3b9-6d5d-48e7-bf08-20f61954a556',
