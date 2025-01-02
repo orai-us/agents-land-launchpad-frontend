@@ -23,7 +23,7 @@ const headers: Record<string, string> = {
   'ngrok-skip-browser-warning': 'true',
 };
 
-const config: AxiosRequestConfig = {
+export const config: AxiosRequestConfig = {
   timeout: AXIOS_TIMEOUT,
   headers,
 };
@@ -87,7 +87,7 @@ export const walletConnect = async ({
   data: userInfo;
 }): Promise<any> => {
   try {
-    const response = await axios.post(`${BACKEND_URL}/user/`, data);
+    const response = await axios.post(`${BACKEND_URL}/user/`, data, config);
     return response.data;
   } catch (err) {
     return { error: 'error setting up the request' };

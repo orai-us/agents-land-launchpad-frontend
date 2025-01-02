@@ -555,36 +555,47 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           </div>
         ) : ( */}
 
-        <div className="mt-2 flex items-center gap-1">
-          Receive: ≈{' '}
-          {isInsufficientFund ? (
-            '--'
-          ) : !loadingEst ? (
-            simulateReceive ? (
-              numberWithCommas(
-                new BigNumber(simulateReceive || 0).toNumber(),
-                undefined,
-                { maximumFractionDigits: 6 },
-              )
-            ) : (
-              '--'
-            )
-          ) : (
-            <img src={LoadingImg} />
-          )}{' '}
-          {!isBuy ? coin.ticker : 'SOL'}
-        </div>
         {isBuy === 0 && isShowLocked && !isPublicStart && (
           <div
-            className="mt-2 flex items-center gap-1 text-[12px] cursor-pointer text-[#9ff4cf] hover:underline"
+            className="mt-2 flex items-center justify-between gap-1 text-[12px] cursor-pointer "
             onClick={() => {
               setSol(Number(solAmtBuy).toFixed(3));
             }}
           >
-            Remaining to buy: {numberWithCommas(rewardAmt)} {coin.ticker} ≈{' '}
-            {numberWithCommas(solAmtBuy)} SOL
+            <span className="text-[#9192A0]">Your Allowance:</span>
+            <div className="flex justify-end flex-wrap">
+              <span className="text-[#FCFCFC]">
+                {numberWithCommas(rewardAmt)} {coin.ticker} ≈{' '}
+                {numberWithCommas(solAmtBuy)} SOL
+              </span>
+              <span className="ml-1 cursor-pointer text-[#9ff4cf] hover:underline">
+                BUY
+              </span>
+            </div>
           </div>
         )}
+        <div className="mt-2 flex items-center justify-between gap-1 text-[12px]">
+          <span>Receive:</span>
+          <span className="text-right">
+            ≈{' '}
+            {isInsufficientFund ? (
+              '--'
+            ) : !loadingEst ? (
+              simulateReceive ? (
+                numberWithCommas(
+                  new BigNumber(simulateReceive || 0).toNumber(),
+                  undefined,
+                  { maximumFractionDigits: 6 },
+                )
+              ) : (
+                '--'
+              )
+            ) : (
+              <img src={LoadingImg} />
+            )}{' '}
+            {!isBuy ? coin.ticker : 'SOL'}
+          </span>
+        </div>
         {/* {isBuy === 1 && disableSellOnParty && (
           <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
             * You are not allowed to sell token in party round

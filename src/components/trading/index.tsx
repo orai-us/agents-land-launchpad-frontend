@@ -109,15 +109,16 @@ export default function TradingPage() {
   const fetchDataCoin = async (parameter) => {
     let data = await getCoinInfo(parameter);
 
-    if (!data?.token) {
-      let retry = 1;
-      while (retry < 3 && !data) {
-        console.log('Retry LoadToken', retry);
-        await sleep(SLEEP_TIMEOUT);
-        ++retry;
-        data = await getCoinInfo(parameter);
-      }
-    }
+    // // TODO: remove retry get token from BE
+    // if (!data?.token) {
+    //   let retry = 1;
+    //   while (retry < 3 && !data) {
+    //     console.log('Retry LoadToken', retry);
+    //     await sleep(SLEEP_TIMEOUT);
+    //     ++retry;
+    //     data = await getCoinInfo(parameter);
+    //   }
+    // }
 
     if (!data?.token) {
       // data =

@@ -1,5 +1,6 @@
+import axios from 'axios';
 import { ChartTable } from './types';
-import { BACKEND_URL } from './util';
+import { BACKEND_URL, config } from './util';
 
 export async function getChartTable({
   pairIndex,
@@ -17,14 +18,15 @@ export async function getChartTable({
   countBack: number;
 }): Promise<ChartTable> {
   try {
-    const res = await fetch(
-      `${BACKEND_URL}/chart/${pairIndex}/${from}/${to}/${range}/${token}/${countBack}`
-    ).then((data) => data.json());
+    const res = await axios.get(
+      `${BACKEND_URL}/chart/${pairIndex}/${from}/${to}/${range}/${token}/${countBack}`,
+      { ...config },
+    );
 
     if (!res) {
-      throw new Error();
+      throw new Error('Get chart failed!');
     }
-    return res as ChartTable;
+    return res.data as ChartTable;
   } catch (err) {
     console.log('error get chart', err);
     return {
