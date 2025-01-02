@@ -30,10 +30,10 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
-        }
+        },
       ];
       args: [];
     },
@@ -48,7 +48,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -59,7 +59,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [112, 97, 117, 115, 101];
-              }
+              },
             ];
           };
         },
@@ -91,13 +91,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
@@ -121,7 +121,7 @@ export type Pumpfun = {
                   97,
                   116,
                   117,
-                  115
+                  115,
                 ];
               },
               {
@@ -131,7 +131,7 @@ export type Pumpfun = {
               {
                 kind: 'account';
                 path: 'user';
-              }
+              },
             ];
           };
         },
@@ -143,7 +143,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -193,13 +193,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -235,7 +235,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -283,13 +283,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -325,7 +325,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -346,7 +346,7 @@ export type Pumpfun = {
         {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-        }
+        },
       ];
       args: [
         {
@@ -354,9 +354,13 @@ export type Pumpfun = {
           type: 'u64';
         },
         {
+          name: 'direction';
+          type: 'u8';
+        },
+        {
           name: 'minimumReceiveAmount';
           type: 'u64';
-        }
+        },
       ];
       returns: 'u64';
     },
@@ -371,7 +375,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -399,13 +403,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
@@ -435,13 +439,13 @@ export type Pumpfun = {
                   117,
                   116,
                   111,
-                  114
+                  114,
                 ];
               },
               {
                 kind: 'account';
                 path: 'bondingCurve';
-              }
+              },
             ];
           };
         },
@@ -462,7 +466,7 @@ export type Pumpfun = {
               {
                 kind: 'arg';
                 path: 'index';
-              }
+              },
             ];
           };
         },
@@ -474,7 +478,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -524,13 +528,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -566,7 +570,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -614,13 +618,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -656,7 +660,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -677,7 +681,7 @@ export type Pumpfun = {
         {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-        }
+        },
       ];
       args: [
         {
@@ -703,7 +707,7 @@ export type Pumpfun = {
               array: ['u8', 32];
             };
           };
-        }
+        },
       ];
       returns: 'u64';
     },
@@ -724,7 +728,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -736,7 +740,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [112, 97, 117, 115, 101];
-              }
+              },
             ];
           };
         },
@@ -748,7 +752,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -795,13 +799,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'nativeMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -837,7 +841,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -857,7 +861,7 @@ export type Pumpfun = {
         {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-        }
+        },
       ];
       args: [
         {
@@ -867,7 +871,7 @@ export type Pumpfun = {
               name: 'config';
             };
           };
-        }
+        },
       ];
     },
     {
@@ -882,7 +886,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -894,7 +898,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -928,13 +932,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'token';
-              }
+              },
             ];
           };
         },
@@ -981,13 +985,13 @@ export type Pumpfun = {
                   3,
                   248,
                   41,
-                  70
+                  70,
                 ];
               },
               {
                 kind: 'account';
                 path: 'token';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -1023,7 +1027,7 @@ export type Pumpfun = {
                 3,
                 248,
                 41,
-                70
+                70,
               ];
             };
           };
@@ -1071,13 +1075,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'token';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -1113,7 +1117,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -1150,7 +1154,7 @@ export type Pumpfun = {
         {
           name: 'mplTokenMetadataProgram';
           address: 'metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s';
-        }
+        },
       ];
       args: [
         {
@@ -1164,7 +1168,7 @@ export type Pumpfun = {
         {
           name: 'uri';
           type: 'string';
-        }
+        },
       ];
     },
     {
@@ -1184,16 +1188,16 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
-        }
+        },
       ];
       args: [
         {
           name: 'newAdmin';
           type: 'pubkey';
-        }
+        },
       ];
     },
     {
@@ -1212,7 +1216,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1224,16 +1228,16 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [112, 97, 117, 115, 101];
-              }
+              },
             ];
           };
-        }
+        },
       ];
       args: [
         {
           name: 'status';
           type: 'bool';
-        }
+        },
       ];
     },
     {
@@ -1253,7 +1257,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1264,7 +1268,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [112, 97, 117, 115, 101];
-              }
+              },
             ];
           };
         },
@@ -1288,13 +1292,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
@@ -1323,13 +1327,13 @@ export type Pumpfun = {
                   117,
                   116,
                   111,
-                  114
+                  114,
                 ];
               },
               {
                 kind: 'account';
                 path: 'bondingCurve';
-              }
+              },
             ];
           };
         },
@@ -1341,7 +1345,7 @@ export type Pumpfun = {
           name: 'systemProgram';
           docs: ['The [System] program.'];
           address: '11111111111111111111111111111111';
-        }
+        },
       ];
       args: [
         {
@@ -1357,7 +1361,7 @@ export type Pumpfun = {
         {
           name: 'maxNumNodes';
           type: 'u64';
-        }
+        },
       ];
     },
     {
@@ -1371,7 +1375,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1394,19 +1398,19 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
         {
           name: 'tokenMint';
-        }
+        },
       ];
       args: [
         {
@@ -1416,7 +1420,7 @@ export type Pumpfun = {
         {
           name: 'direction';
           type: 'u8';
-        }
+        },
       ];
       returns: 'u64';
     },
@@ -1431,7 +1435,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1442,7 +1446,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [112, 97, 117, 115, 101];
-              }
+              },
             ];
           };
         },
@@ -1470,13 +1474,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
@@ -1488,7 +1492,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -1538,13 +1542,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -1580,7 +1584,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -1628,13 +1632,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -1670,7 +1674,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -1691,7 +1695,7 @@ export type Pumpfun = {
               {
                 kind: 'account';
                 path: 'user';
-              }
+              },
             ];
           };
         },
@@ -1711,7 +1715,7 @@ export type Pumpfun = {
         {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-        }
+        },
       ];
       args: [
         {
@@ -1725,7 +1729,7 @@ export type Pumpfun = {
         {
           name: 'minimumReceiveAmount';
           type: 'u64';
-        }
+        },
       ];
       returns: 'u64';
     },
@@ -1746,7 +1750,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1770,21 +1774,87 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
         {
           name: 'tokenMint';
-        }
+        },
       ];
       args: [];
+    },
+    {
+      name: 'updateTradingTime';
+      discriminator: [136, 225, 209, 149, 57, 68, 199, 119];
+      accounts: [
+        {
+          name: 'signer';
+          writable: true;
+          signer: true;
+        },
+        {
+          name: 'globalConfig';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [99, 111, 110, 102, 105, 103];
+              },
+            ];
+          };
+        },
+        {
+          name: 'bondingCurve';
+          writable: true;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                value: [
+                  98,
+                  111,
+                  110,
+                  100,
+                  105,
+                  110,
+                  103,
+                  95,
+                  99,
+                  117,
+                  114,
+                  118,
+                  101,
+                ];
+              },
+              {
+                kind: 'account';
+                path: 'tokenMint';
+              },
+            ];
+          };
+        },
+        {
+          name: 'tokenMint';
+        },
+      ];
+      args: [
+        {
+          name: 'partyStart';
+          type: 'u64';
+        },
+        {
+          name: 'publicStart';
+          type: 'u64';
+        },
+      ];
     },
     {
       name: 'withdraw';
@@ -1798,7 +1868,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [99, 111, 110, 102, 105, 103];
-              }
+              },
             ];
           };
         },
@@ -1810,7 +1880,7 @@ export type Pumpfun = {
               {
                 kind: 'const';
                 value: [103, 108, 111, 98, 97, 108];
-              }
+              },
             ];
           };
         },
@@ -1842,13 +1912,13 @@ export type Pumpfun = {
                   117,
                   114,
                   118,
-                  101
+                  101,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
           };
         },
@@ -1895,13 +1965,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -1937,7 +2007,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -1985,13 +2055,13 @@ export type Pumpfun = {
                   126,
                   255,
                   0,
-                  169
+                  169,
                 ];
               },
               {
                 kind: 'account';
                 path: 'tokenMint';
-              }
+              },
             ];
             program: {
               kind: 'const';
@@ -2027,7 +2097,7 @@ export type Pumpfun = {
                 219,
                 233,
                 248,
-                89
+                89,
               ];
             };
           };
@@ -2043,10 +2113,10 @@ export type Pumpfun = {
         {
           name: 'associatedTokenProgram';
           address: 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL';
-        }
+        },
       ];
       args: [];
-    }
+    },
   ];
   accounts: [
     {
@@ -2076,7 +2146,7 @@ export type Pumpfun = {
     {
       name: 'userInfo';
       discriminator: [83, 134, 200, 56, 144, 56, 10, 62];
-    }
+    },
   ];
   events: [
     {
@@ -2098,7 +2168,7 @@ export type Pumpfun = {
     {
       name: 'withdrawEvent';
       discriminator: [22, 9, 133, 26, 160, 44, 71, 192];
-    }
+    },
   ];
   errors: [
     {
@@ -2215,7 +2285,17 @@ export type Pumpfun = {
       code: 6022;
       name: 'paused';
       msg: 'paused';
-    }
+    },
+    {
+      code: 6023;
+      name: 'invalidDirection';
+      msg: 'Invalid swap direction';
+    },
+    {
+      code: 6024;
+      name: 'invalidTradingTime';
+      msg: 'Invalid trading time';
+    },
   ];
   types: [
     {
@@ -2262,7 +2342,7 @@ export type Pumpfun = {
           {
             name: 'curveCreationDate';
             type: 'i64';
-          }
+          },
         ];
       };
     },
@@ -2271,7 +2351,7 @@ export type Pumpfun = {
       docs: [
         'Holds whether or not a claimant has claimed tokens.',
         '',
-        'TODO: this is probably better stored as the node that was verified.'
+        'TODO: this is probably better stored as the node that was verified.',
       ];
       type: {
         kind: 'struct';
@@ -2295,7 +2375,7 @@ export type Pumpfun = {
             name: 'amount';
             docs: ['Amount of tokens claimed.'];
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2319,7 +2399,7 @@ export type Pumpfun = {
           {
             name: 'completeTimestamp';
             type: 'i64';
-          }
+          },
         ];
       };
     },
@@ -2423,7 +2503,7 @@ export type Pumpfun = {
           {
             name: 'txBuyLimit';
             type: 'u16';
-          }
+          },
         ];
       };
     },
@@ -2463,7 +2543,7 @@ export type Pumpfun = {
           {
             name: 'reserveToken';
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2488,14 +2568,14 @@ export type Pumpfun = {
           {
             name: 'maxTotalClaim';
             docs: [
-              'Maximum number of tokens that can ever be claimed from this [MerkleDistributor].'
+              'Maximum number of tokens that can ever be claimed from this [MerkleDistributor].',
             ];
             type: 'u64';
           },
           {
             name: 'maxNumNodes';
             docs: [
-              'Maximum number of nodes that can ever be claimed from this [MerkleDistributor].'
+              'Maximum number of nodes that can ever be claimed from this [MerkleDistributor].',
             ];
             type: 'u64';
           },
@@ -2508,7 +2588,7 @@ export type Pumpfun = {
             name: 'numNodesClaimed';
             docs: ['Number of nodes that have been claimed.'];
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2521,7 +2601,7 @@ export type Pumpfun = {
             name: 'totalAmount';
             docs: ['Amount of tokens claimed.'];
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2533,7 +2613,7 @@ export type Pumpfun = {
           {
             name: 'paused';
             type: 'bool';
-          }
+          },
         ];
       };
     },
@@ -2577,7 +2657,7 @@ export type Pumpfun = {
           {
             name: 'reserveToken';
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2597,7 +2677,7 @@ export type Pumpfun = {
           {
             name: 'publicStart';
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2610,7 +2690,7 @@ export type Pumpfun = {
             name: 'lastBuy';
             docs: ['last buy'];
             type: 'u64';
-          }
+          },
         ];
       };
     },
@@ -2634,9 +2714,9 @@ export type Pumpfun = {
           {
             name: 'tokenAmount';
             type: 'u64';
-          }
+          },
         ];
       };
-    }
+    },
   ];
 };

@@ -1,6 +1,12 @@
 import defaultUserImg from '@/assets/images/userAgentDefault.svg';
 import { coinInfo, holderInfo } from '@/utils/types';
-import { calculateKotHProgress, findHolders, getKoth } from '@/utils/util';
+import {
+  calculateKotHProgress,
+  findHolders,
+  findHoldersFromBE,
+  getKoth,
+  reduceString,
+} from '@/utils/util';
 import { FC, useEffect, useState } from 'react';
 
 import { ALL_CONFIGS } from '@/config';
@@ -11,6 +17,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 interface ModalProps {
   data: coinInfo;
 }
+const isDevnet = import.meta.env.VITE_APP_SOLANA_ENV === 'devnet';
 
 const TokenDistribution: FC<ModalProps> = ({ data }) => {
   const [holders, setHolders] = useState<holderInfo[]>([]);
@@ -43,13 +50,19 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      let holderData = [];
       if (data.token) {
-        const holderData = await findHolders(data.token);
+        if (isDevnet) {
+          holderData = await findHolders(data.token);
+        } else {
+          const holderDataBE = await findHoldersFromBE(data.token);
+          holderData = holderDataBE ? holderDataBE.items : [];
+        }
         setHolders(holderData ? holderData : []);
 
         const currentKotHProgress = calculateKotHProgress(
           data.lamportReserves,
-          data.bondingCurveLimit
+          data.bondingCurveLimit,
         );
         setKotHProgress(currentKotHProgress);
       }
@@ -142,7 +155,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                 const isCommunityPool =
                   String(item.owner).toLowerCase() ===
                   String(
-                    ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET
+                    ALL_CONFIGS.DISTILL_COMMUNITY_POOL_WALLET,
                   ).toLowerCase();
 
                 return (
@@ -155,7 +168,7 @@ const TokenDistribution: FC<ModalProps> = ({ data }) => {
                         href={`https://solscan.io/account/${item.owner}`}
                         target="_blank"
                       >
-                        {item.slice}
+                        {reduceString(item.owner)}
                         {isCreator && (
                           <span className="ml-1 text-[#585A6B] text-[12px]">
                             (Creator)

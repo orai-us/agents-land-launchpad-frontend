@@ -56,7 +56,7 @@ export const getUserByWalletAddress = async ({
   try {
     const response = await axios.get(
       `${BACKEND_URL}/user/wallet/${wallet}`,
-      config
+      config,
     );
     // console.log("response:", response.data);
     return response.data;
@@ -72,7 +72,7 @@ export const updateUser = async (id: string, data: userInfo): Promise<any> => {
     const response = await axios.post(
       `${BACKEND_URL}/user/update/${id}`,
       data,
-      config
+      config,
     );
     return response.data;
   } catch (err) {
@@ -102,7 +102,7 @@ export const confirmWallet = async ({
     const response = await axios.post(
       `${BACKEND_URL}/user/confirm`,
       data,
-      config
+      config,
     );
     return response.data;
   } catch (err) {
@@ -111,7 +111,7 @@ export const confirmWallet = async ({
 };
 
 export const getCoinsInfo = async (
-  params
+  params,
 ): Promise<{ coins: coinInfo[]; total: number; isError?: boolean }> => {
   try {
     const res = await axios.get(`${BACKEND_URL}/coin`, {
@@ -164,7 +164,7 @@ export const getAgentsDataByUser = async (params): Promise<any[]> => {
 export const getCoinsInfoBy = async (id: string): Promise<coinInfo[]> => {
   const res = await axios.get<coinInfo[]>(
     `${BACKEND_URL}/coin/user/${id}`,
-    config
+    config,
   );
   return res.data.map((info) => ({
     ...info,
@@ -210,7 +210,7 @@ export type RetryOptions = {
 
 export const fetchRetry = async (
   url: RequestInfo | URL,
-  options: RequestInit & RetryOptions = {}
+  options: RequestInit & RetryOptions = {},
 ) => {
   let retry = options.retry ?? 3;
   const { callback, timeout = 30000, ...init } = options;
@@ -232,7 +232,7 @@ export const getMessageByCoin = async (data: string): Promise<msgInfo[]> => {
   try {
     const response = await axios.get(
       `${BACKEND_URL}/feedback/coin/${data}`,
-      config
+      config,
     );
     return response.data;
   } catch (err) {
@@ -244,7 +244,7 @@ export const getCoinTrade = async (data: string): Promise<tradeInfo> => {
   try {
     const response = await axios.get(
       `${BACKEND_URL}/cointrade/${data}`,
-      config
+      config,
     );
     console.log('trade response::', response);
     return {
@@ -314,7 +314,7 @@ export const findHolders = async (mint: string) => {
             mint: mint,
           },
         }),
-      }
+      },
     );
     const data = await response.json();
     // error when querying -> return empty holder
@@ -336,12 +336,27 @@ export const findHolders = async (mint: string) => {
   }
 };
 
+export const findHoldersFromBE = async (mint: string, limit: number = 20) => {
+  // D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck
+  try {
+    // Fetch the price data from CoinGecko
+    const response = await axios.get(
+      // `${BACKEND_URL}/coin/token/${mint}/holder?limit=${limit}`,
+      `${BACKEND_URL}/coin/token/${'D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck'}/holder?limit=${limit}`,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching SOL price:', error);
+    // throw error;
+  }
+};
+
 export const getSolPriceInUSD = async () => {
   try {
     // Fetch the price data from CoinGecko
     const response = await axios.get(
       // "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd"
-      'https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd'
+      'https://price.market.orai.io/simple/price?ids=solana&vs_currencies=usd',
     );
     const solPriceInUSD = response.data.solana.usd;
     return solPriceInUSD;
@@ -394,7 +409,11 @@ export const uploadImagePinata = async (url: string) => {
  * @param end The number of characters to be kept as-is at the end of the resulting string.
  * @returns The shortened string, or '-' if the input string is null or undefined.
  */
-export const reduceString = (str: string, from: number, end: number) => {
+export const reduceString = (
+  str: string,
+  from: number = 4,
+  end: number = 4,
+) => {
   if (!str) {
     return '-';
   }
@@ -426,7 +445,7 @@ export const calculateTokenPrice = (
   tokenReserves: BN,
   lamportReserves: BN,
   tokenDecimals: number,
-  solPriceinUSD?: number
+  solPriceinUSD?: number,
 ): number => {
   if (!(tokenReserves instanceof BN)) {
     tokenReserves = new BN(tokenReserves);
@@ -441,7 +460,7 @@ export const calculateTokenPrice = (
 
 export function calculateKotHProgress(
   lamportReserves: BN,
-  bondingCurveLimit: BN
+  bondingCurveLimit: BN,
 ) {
   if (!(lamportReserves instanceof BN)) {
     lamportReserves = new BN(lamportReserves);
@@ -451,10 +470,10 @@ export function calculateKotHProgress(
   }
   if (bondingCurveLimit.toNumber() === 0) return 0;
   const calcLamportReserves = lamportReserves.sub(
-    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE),
   );
   const calcBondingCurveLimit = bondingCurveLimit.sub(
-    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+    new BN(ALL_CONFIGS.INIT_SOL_BONDING_CURVE),
   );
   let currentKotHProgress =
     (fromBig(calcLamportReserves, 9) /
@@ -487,7 +506,7 @@ export const toPublicKey = (val: PublicKeyInitData) => {
 export const calculateMarketCap = (
   tokenReserves: BN,
   decimals: number,
-  tokenPrice: number
+  tokenPrice: number,
 ): number => {
   if (!(tokenReserves instanceof BN)) {
     tokenReserves = new BN(tokenReserves);

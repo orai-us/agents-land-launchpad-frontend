@@ -83,19 +83,19 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   const isOnParty = !isPublicStart && isPartyStart;
 
   // const disableBuyOnParty = isBuy === 0 && isOnParty && !isShowLocked;
-  const disableSellOnParty = isBuy === 1 && isOnParty;
+  // const disableSellOnParty = isBuy === 1 && isOnParty;
 
   const simulateOut = (coin, maxAmount, fee = 0.01) => {
     if (!coin) return 0;
     return toBN(
       toBN(maxAmount).multipliedBy(
-        toBN(coin.lamportReserves).div(10 ** SOL_DECIMAL)
-      )
+        toBN(coin.lamportReserves).div(10 ** SOL_DECIMAL),
+      ),
     )
       .div(
         toBN(
-          toBN(coin.tokenReserves).div(10 ** (coin.decimals || SPL_DECIMAL))
-        ).minus(maxAmount)
+          toBN(coin.tokenReserves).div(10 ** (coin.decimals || SPL_DECIMAL)),
+        ).minus(maxAmount),
       )
       .div(1 - fee)
       .multipliedBy(10 ** SOL_DECIMAL)
@@ -121,18 +121,18 @@ export const TradeForm: React.FC<TradingFormProps> = ({
       // const boughtTokenAmount = toBN(tokenBal).minus(isCreator ? 10 ** 7 : 0);
       const boughtTokenAmount = await web3Solana.getAmountBoughtByUser(
         toPublicKey(coin.token),
-        wallet
+        wallet,
       );
       const rw = await web3Stake.getReward(
         wallet,
         ALL_CONFIGS.STAKE_CURRENCY_MINT,
-        coin.token
+        coin.token,
       );
       const rwNumber = toBN(rw || 0)
         .div(10 ** coin.decimals || SPL_DECIMAL)
         .toNumber();
       const maxTokenBuyInParty = toBN(
-        curveConfig.maxTokenBuyInParty?.toNumber() || 0
+        curveConfig.maxTokenBuyInParty?.toNumber() || 0,
       )
         .div(10 ** coin.decimals || SPL_DECIMAL)
         .toNumber();
@@ -145,7 +145,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             ? 0
             : new BN(boughtTokenAmount)
                 .div(new BN(10 ** (coin.decimals || SPL_DECIMAL)))
-                .toString()
+                .toString(),
         )
         .toNumber();
 
@@ -164,7 +164,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
   }, [partyStart, coin, tokenBal]);
 
   const fmtCurve = new BigNumber(
-    new BigNumber(curveLimit).div(10 ** 9).toFixed(3, 1)
+    new BigNumber(curveLimit).div(10 ** 9).toFixed(3, 1),
   )
     .plus(0.001)
     .toString();
@@ -201,7 +201,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           setLoadingEst(true);
           const amountWithDecimal = new BigNumber(sol)
             .multipliedBy(
-              new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL)
+              new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL),
             )
             .toFixed(0, 1);
           const mint = new PublicKey(coin.token);
@@ -212,7 +212,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             if (isSimulateWhenExceedCurve) {
               amt = new BigNumber(fmtCurve)
                 .multipliedBy(
-                  new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL)
+                  new BigNumber(10).pow(isBuy ? coin.decimals : SOL_DECIMAL),
                 )
                 .toFixed(0, 1);
             }
@@ -224,7 +224,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
                 wallet,
                 amountWithDecimal,
                 isBuy,
-                coin.raydiumPoolAddr
+                coin.raydiumPoolAddr,
               );
 
             receive = (numerator || 0).toString();
@@ -235,7 +235,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           setSimulateReceive(() =>
             new BigNumber(receive)
               .div(new BigNumber(10).pow(!isBuy ? coin.decimals : SOL_DECIMAL))
-              .toString()
+              .toString(),
           );
         } catch (error) {
           console.log('simulate failed', error);
@@ -291,7 +291,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           isBuy,
           simulateReceive,
           slippage,
-          hasParty
+          hasParty,
         );
       } else {
         res = await web3Solana.raydiumSwapTx(
@@ -300,7 +300,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
           sol,
           isBuy,
           coin.raydiumPoolAddr,
-          slippage
+          slippage,
         );
       }
 
@@ -564,7 +564,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
               numberWithCommas(
                 new BigNumber(simulateReceive || 0).toNumber(),
                 undefined,
-                { maximumFractionDigits: 6 }
+                { maximumFractionDigits: 6 },
               )
             ) : (
               '--'
@@ -585,11 +585,11 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             {numberWithCommas(solAmtBuy)} SOL
           </div>
         )}
-        {isBuy === 1 && disableSellOnParty && (
+        {/* {isBuy === 1 && disableSellOnParty && (
           <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
             * You are not allowed to sell token in party round
           </div>
-        )}
+        )} */}
         {isBuy === 0 && isPublicStart && !isListedOnRay && (
           <div className="mt-2 flex items-center gap-1 text-[12px] text-[#e75787]">
             * You are limited to buy maximum 0.5 SOL per transaction
@@ -605,7 +605,7 @@ export const TradeForm: React.FC<TradingFormProps> = ({
             isDisableSwapOnAgent ||
             isNegativeAmount ||
             // disableBuyOnParty ||
-            disableSellOnParty ||
+            // disableSellOnParty ||
             isDisableWhenExceedBuy
           }
           onClick={handlTrade}

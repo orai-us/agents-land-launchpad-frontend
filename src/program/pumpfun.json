@@ -209,6 +209,10 @@
           "type": "u64"
         },
         {
+          "name": "direction",
+          "type": "u8"
+        },
+        {
           "name": "minimum_receive_amount",
           "type": "u64"
         }
@@ -1134,6 +1138,60 @@
       "args": []
     },
     {
+      "name": "update_trading_time",
+      "discriminator": [136, 225, 209, 149, 57, 68, 199, 119],
+      "accounts": [
+        {
+          "name": "signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "global_config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [99, 111, 110, 102, 105, 103]
+              }
+            ]
+          }
+        },
+        {
+          "name": "bonding_curve",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98, 111, 110, 100, 105, 110, 103, 95, 99, 117, 114, 118, 101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "token_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "token_mint"
+        }
+      ],
+      "args": [
+        {
+          "name": "party_start",
+          "type": "u64"
+        },
+        {
+          "name": "public_start",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "withdraw",
       "discriminator": [183, 18, 70, 156, 148, 109, 161, 34],
       "accounts": [
@@ -1434,6 +1492,16 @@
       "code": 6022,
       "name": "Paused",
       "msg": "Paused"
+    },
+    {
+      "code": 6023,
+      "name": "InvalidDirection",
+      "msg": "Invalid swap direction"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidTradingTime",
+      "msg": "Invalid trading time"
     }
   ],
   "types": [

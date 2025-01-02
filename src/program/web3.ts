@@ -427,7 +427,7 @@ export class Web3SolanaProgramInteraction {
         })
         .instruction();
 
-      if (isParty && type === 0) {
+      if (isParty) {
         let [stakeConfigPda] = PublicKey.findProgramAddressSync(
           [
             Buffer.from(FUNGIBLE_STAKE_CONFIG_SEED),
@@ -454,7 +454,7 @@ export class Web3SolanaProgramInteraction {
         );
 
         swapIx = await program.methods
-          .buyParty(fmtAmount, new anchor.BN(minAmount || 0))
+          .buyParty(fmtAmount, type, new anchor.BN(minAmount || 0))
           .accounts({
             teamWallet: configAccount.teamWallet,
             user: wallet.publicKey,

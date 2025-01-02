@@ -198,6 +198,7 @@ const Header: FC = () => {
                 height="8"
                 viewBox="0 0 8 8"
                 fill="none"
+                className="animate-pulse animate-duration-1000 animate-ease-in animate-infinite"
               >
                 <circle cx="4" cy="4" r="4" fill="#9FF4CF" />
               </svg>
@@ -229,6 +230,7 @@ const Header: FC = () => {
                 height="8"
                 viewBox="0 0 8 8"
                 fill="none"
+                className="animate-pulse animate-duration-1000 animate-ease-in animate-infinite"
               >
                 <circle cx="4" cy="4" r="4" fill="#9FF4CF" />
               </svg>
