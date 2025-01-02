@@ -89,14 +89,6 @@ export default function TradingPage() {
   const hasStaked =
     stakerInfo && (stakerInfo['stakeAmount'] || new BN(0)).gtn(0);
 
-  // const bondingCurveValue = new BigNumber(
-  //   (coin.lamportReserves || 0).toString(),
-  // )
-  //   .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
-  //   .div(10 ** 9)
-  //   .toNumber();
-  // const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
-
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
   const partyStart = curveInfo?.partyStart?.toNumber();
@@ -254,39 +246,6 @@ export default function TradingPage() {
     })();
   }, [pathname]);
 
-  // realtime bonding curve
-  // useEffect(() => {
-  //   if (!coinId || !wallet.publicKey) return;
-  //   const connection = new Connection(endpoint, {
-  //     commitment: commitmentLevel,
-  //     wsEndpoint: import.meta.env.VITE_SOLANA_WS,
-  //   });
-  //   const listener = new AgentsLandEventListener(connection);
-  //   listener.setProgramEventCallback(
-  //     'swapEvent',
-  //     async (result: ResultType) => {
-  //       const segments = pathname.split('/');
-  //       const parameter = segments[segments.length - 1];
-
-  //       if (result.mint === parameter) {
-  //         console.log('==== UPDATE BONDING CURVE ====');
-  //         await fetchDataCoin(parameter);
-  //       }
-  //     },
-  //     []
-  //   );
-
-  //   const { program, listenerIds } = listener.listenProgramEvents(
-  //     new PublicKey(PROGRAM_ID).toBase58()
-  //   );
-
-  //   return () => {
-  //     if (!program) return;
-  //     console.log('bonding-curve----ready to remove listeners');
-  //     Promise.all(listenerIds.map((id) => program.removeEventListener(id)));
-  //   };
-  // }, [coinId, wallet.publicKey]);
-
   useEffect(() => {
     if (coin.token && coin.raydiumPoolAddr) {
       (async () => {
@@ -338,10 +297,7 @@ export default function TradingPage() {
   return (
     <div className="w-full flex flex-col mx-auto gap-5">
       <div className="text-center">
-        <div
-          className="mt-0 md:mt-12"
-          // onClick={() => setLocation("/")}
-        >
+        <div className="mt-0 md:mt-12">
           <div className="cursor-pointer text-white text-2xl flex flex-row items-center gap-2 pb-2">
             {/* <IoMdArrowRoundBack />
             Back */}
@@ -359,7 +315,6 @@ export default function TradingPage() {
           <div className="flex mb-4">
             {isListed && (isRaydiumListed || isCanBuyOnRaydium) && (
               <a
-                // liquidity/increase/?mode=add&pool_id=${coin.raydiumPoolAddr}
                 href={`https://raydium.io/swap/?inputMint=sol&outputMint=${coin.token}`}
                 target="_blank"
                 className="mr-2 mb-6 animate-pulse animate-duration-200 animate-infinite text-[#080A14] rounded flex items-center uppercase text-[10px] md:text-[12px] font-medium bg-[linear-gradient(48deg,_#B170FF_0.56%,_#B3A7F1_20.34%,_#1FFFB5_99.44%)] p-1"

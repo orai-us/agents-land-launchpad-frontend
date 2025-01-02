@@ -1,15 +1,9 @@
-import { ALL_CONFIGS, PROGRAM_ID } from '@/config';
+import { ALL_CONFIGS } from '@/config';
 import UserContext from '@/context/UserContext';
-import { AgentsLandEventListener } from '@/program/logListeners/AgentsLandEventListener';
-import { ResultType } from '@/program/logListeners/types';
-import { commitmentLevel, endpoint } from '@/program/web3';
+import { useSocket } from '@/contexts/SocketContext';
 import { coinInfo, recordInfo, tradeInfo } from '@/utils/types';
-import {
-  calculateTokenPrice,
-  getCoinTrade,
-  getMessageByCoin,
-} from '@/utils/util';
-import { Connection, PublicKey } from '@solana/web3.js';
+import { calculateTokenPrice, getCoinTrade } from '@/utils/util';
+import { BN } from 'bn.js';
 import _ from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -39,6 +33,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     setPostReplyModal,
     solPrice,
   } = useContext(UserContext);
+  const { socket } = useSocket();
   const [trades, setTrades] = useState<tradeInfo>({} as tradeInfo);
   const [loaded, setLoaded] = useState<boolean>(false);
   const [isTrades, setIsTrades] = useState<CHAT_TAB>(CHAT_TAB.LOCK);
@@ -51,6 +46,41 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     ? new Date(coin?.tradingTime).getTime()
     : ENDDATE;
   // const isNotForSale = tradingTime > Date.now();
+
+  // subscribe to real-time swap txs on trade
+  useEffect(() => {
+    if (_.isEmpty(trades) || _.isEmpty(coin)) return;
+    const listenTrade = async (tokenId: string, data: any) => {
+      console.log('data', data);
+      const newRecordInfo: recordInfo = {
+        holder: { wallet: data.user } as any,
+        lamportAmount: new BN(data.lamportAmount),
+        tokenAmount: new BN(data.tokenAmount),
+        time: new Date(),
+        tx: data.tx,
+        price: calculateTokenPrice(
+          new BN(data.tokenReserves),
+          new BN(data.lamportReserves),
+          coin.decimals,
+          solPrice,
+        ),
+        swapDirection: data.swapDirection as any,
+      };
+
+      setTrades((trades) => {
+        const newTradeRecords = [newRecordInfo, ...trades.record];
+        return { ...trades, record: newTradeRecords };
+      });
+    };
+
+    if (socket) {
+      socket.on('tradeCreated', listenTrade);
+    }
+
+    return () => {
+      socket?.off('tradeCreated', listenTrade);
+    };
+  }, [socket, coin?._id, loaded]);
 
   // subscribe to real-time swap txs on trade
   // // useEffect(() => {
@@ -132,7 +162,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
             onClick={() => setIsTrades(CHAT_TAB.LOCK)}
             className={twMerge(
               'uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-              isTrades === CHAT_TAB.LOCK && 'bg-[#585A6B] text-[#E8E9EE]'
+              isTrades === CHAT_TAB.LOCK && 'bg-[#585A6B] text-[#E8E9EE]',
             )}
           >
             {coin.ticker} Subscription Vaults
@@ -141,7 +171,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
             onClick={() => setIsTrades(CHAT_TAB.TRADE)}
             className={twMerge(
               'uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-              isTrades === CHAT_TAB.TRADE && 'bg-[#585A6B] text-[#E8E9EE]'
+              isTrades === CHAT_TAB.TRADE && 'bg-[#585A6B] text-[#E8E9EE]',
             )}
           >
             Trades
@@ -150,7 +180,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
             onClick={() => setIsTrades(CHAT_TAB.TOKENOMICS)}
             className={twMerge(
               'uppercase cursor-pointer mr-2 md:mr-4 px-2 md:px-4 py-[6px] text-[12px] md:text-[14px] rounded border border-[rgba(88,_90,_107,_0.32)] text-[#585A6B]',
-              isTrades === CHAT_TAB.TOKENOMICS && 'bg-[#585A6B] text-[#E8E9EE]'
+              isTrades === CHAT_TAB.TOKENOMICS && 'bg-[#585A6B] text-[#E8E9EE]',
             )}
           >
             Tokenomics
@@ -212,7 +242,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                       .filter(
                         (trans) =>
                           trans.tokenAmount?.toNumber() &&
-                          trans.lamportAmount?.toNumber()
+                          trans.lamportAmount?.toNumber(),
                       )
                       .map((trade, index) => (
                         <Trade key={index} trade={trade}></Trade>
@@ -233,7 +263,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
                 >
                   <div
                     className={twMerge(
-                      `w-3 h-3 rounded-[2px] mr-2 bg-[${e.color}]`
+                      `w-3 h-3 rounded-[2px] mr-2 bg-[${e.color}]`,
                     )}
                     style={{
                       backgroundColor: e.color,
