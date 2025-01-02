@@ -17,7 +17,7 @@ import {
   numberWithCommas,
 } from '@/utils/format';
 import { coinInfo } from '@/utils/types';
-import { fromBig, getCoinInfo, reduceString, sleep } from '@/utils/util';
+import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
@@ -71,6 +71,7 @@ export default function TradingPage() {
   const { solPrice } = useContext(UserContext);
   const { coinId, setCoinId } = useContext(UserContext);
   const [param, setParam] = useState<string>('');
+  const [shownBondingCurve, setShownBondingCurve] = useState(0);
   const [progress, setProgress] = useState<Number>(0);
   const [curveLimit, setCurveLimit] = useState<number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
@@ -88,13 +89,13 @@ export default function TradingPage() {
   const hasStaked =
     stakerInfo && (stakerInfo['stakeAmount'] || new BN(0)).gtn(0);
 
-  const bondingCurveValue = new BigNumber(
-    (coin.lamportReserves || 0).toString(),
-  )
-    .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
-    .div(10 ** 9)
-    .toNumber();
-  const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
+  // const bondingCurveValue = new BigNumber(
+  //   (coin.lamportReserves || 0).toString(),
+  // )
+  //   .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+  //   .div(10 ** 9)
+  //   .toNumber();
+  // const shownBondingCurve = bondingCurveValue < 0 ? 0 : bondingCurveValue;
 
   const imgSrc = coin.metadata?.image || coin.url || defaultUserImg;
 
@@ -156,10 +157,15 @@ export default function TradingPage() {
 
     const showCurrentChart = data.raydiumPoolAddr; // bondingCurvePercent >= 100 &&
 
+    const showCurve = toBN(bondingCurveValue < 0 ? 0 : bondingCurveValue)
+      .div(10 ** 9)
+      .toNumber();
+
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
     setCoin(data);
     handleSetCoinInfo(data);
+    setShownBondingCurve(showCurve);
   };
 
   useEffect(() => {
@@ -239,6 +245,7 @@ export default function TradingPage() {
               )
               .toNumber();
 
+            setShownBondingCurve(bondingCurveValue < 0 ? 0 : bondingCurveValue);
             setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
           }
         });
