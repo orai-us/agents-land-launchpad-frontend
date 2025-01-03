@@ -85,6 +85,7 @@ export class Web3SolanaProgramInteraction {
   createToken = async (
     wallet: WalletContextState,
     coinData: launchDataInfo,
+    mintKp: Keypair,
   ) => {
     const provider = anchor.getProvider();
     const program = new Program(
@@ -109,15 +110,6 @@ export class Web3SolanaProgramInteraction {
     try {
       console.log('coinData--->', coinData);
       const configAccount = await this.getLaunchpadGlobalConfig();
-
-      const envMode = import.meta.env.VITE_APP_SOLANA_ENV;
-      let mintKp = Keypair.generate();
-      if (envMode === 'mainnet-beta') {
-        console.log('gen Orai prefix');
-        const key = await genTokenKeypair();
-        mintKp = Keypair.fromSecretKey(base58.decode(key));
-      }
-      console.log('tokenAddress:', mintKp.publicKey.toBase58());
 
       const aiAgentTokenAccount = this.getAssociatedTokenAccount(
         new PublicKey(coinData.metadata.agentAddress),
