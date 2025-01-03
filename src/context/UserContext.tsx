@@ -1,6 +1,6 @@
 import { Spinner } from '@/components/loadings/Spinner';
 import { errorAlert, successAlert } from '@/components/others/ToastGroup';
-import { RPC_MAPS } from '@/config';
+import { DEFAULT_RPC, RPC_MAPS } from '@/config';
 import { msgInfo, userInfo } from '@/utils/types';
 import { AnchorProvider, setProvider } from '@coral-xyz/anchor';
 import NodeWallet from '@coral-xyz/anchor/dist/cjs/nodewallet';
@@ -94,7 +94,7 @@ export function UserProvider({
           });
           setProvider(provider);
           setProviderApp(provider);
-          if (value.rpcUrl !== RPC_MAPS.Agents) {
+          if (value.rpcUrl !== DEFAULT_RPC) {
             successAlert('Switch RPC successfully');
           }
         } else {
