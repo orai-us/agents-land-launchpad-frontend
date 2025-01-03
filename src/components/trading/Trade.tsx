@@ -26,7 +26,7 @@ export const Trade: React.FC<TradePropsInfo> = ({ trade }) => {
       <td
         className={twMerge(
           'text-[10px] break-keep md:text-[12px] text-center py-2 text-[#E75787]',
-          trade.swapDirection == 0 && 'text-[#9FF4CF]'
+          trade.swapDirection == 0 && 'text-[#9FF4CF]',
         )}
       >
         {trade.swapDirection == 0 ? 'BUY' : 'SELL'}

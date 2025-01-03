@@ -1,8 +1,8 @@
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 export const RPC_MAPS = {
-  Agents: import.meta.env.VITE_SOLANA_RPC,
   SolanaOrai: 'https://solana-rpc.orai.network',
+  'Agents.Land': import.meta.env.VITE_SOLANA_RPC,
   Phantom:
     'https://solana-mainnet.phantom.app/YBPpkkN4g91xDiAnTE9r0RcMkjg0sKUIWvAfoFVJ',
   GetBlock: 'https://solana-getblock.agents.land',
@@ -12,7 +12,8 @@ export const RPC_MAPS = {
   PublicNode: 'https://solana-rpc.publicnode.com',
   Custom: 'https://',
 };
-export const DEFAULT_RPC = RPC_MAPS.Agents;
+export const RPC_DEFAULT_KEY = 'SolanaOrai';
+export const DEFAULT_RPC = RPC_MAPS[RPC_DEFAULT_KEY];
 
 export const AXIOS_TIMEOUT = 10000;
 

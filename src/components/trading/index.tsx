@@ -5,7 +5,12 @@ import defaultUserImg from '@/assets/images/userAgentDefault.svg';
 import { Chatting } from '@/components/trading/Chatting';
 import { TradeForm } from '@/components/trading/TradeForm';
 import { TradingChart } from '@/components/TVChart/TradingChart';
-import { ALL_CONFIGS, BLACK_LIST_ADDRESS, SOL_DECIMAL } from '@/config';
+import {
+  ALL_CONFIGS,
+  BLACK_LIST_ADDRESS,
+  SOL_DECIMAL,
+  SPL_DECIMAL,
+} from '@/config';
 import UserContext from '@/context/UserContext';
 import useWindowSize from '@/hooks/useWindowSize';
 import { Web3SolanaProgramInteraction } from '@/program/web3';
@@ -17,7 +22,15 @@ import {
   numberWithCommas,
 } from '@/utils/format';
 import { coinInfo } from '@/utils/types';
-import { fromBig, getCoinInfo, reduceString, sleep, toBN } from '@/utils/util';
+import {
+  calculateMarketCap,
+  calculateTokenPrice,
+  fromBig,
+  getCoinInfo,
+  reduceString,
+  sleep,
+  toBN,
+} from '@/utils/util';
 import {
   useCoinActions,
   useGetCoinInfoState,
@@ -74,6 +87,7 @@ export default function TradingPage() {
   const [shownBondingCurve, setShownBondingCurve] = useState(0);
   const [progress, setProgress] = useState<Number>(0);
   const [curveLimit, setCurveLimit] = useState<number>(0);
+  const [marketCap, setMarketCap] = useState<number>(0);
   const [coin, setCoin] = useState<coinInfo>({} as coinInfo);
   const [pathname, setLocation] = useLocation();
   const [loadingEst, setLoadingEst] = useState<boolean>(true);
@@ -133,6 +147,18 @@ export default function TradingPage() {
     setCurveLimit(maxSolSwapIncludeFee || 0);
     handleSetCurveInfo(curveAccount);
 
+    const newPrice = calculateTokenPrice(
+      curveAccount['reserveToken'],
+      curveAccount['reserveLamport'],
+      SPL_DECIMAL,
+      solPrice,
+    );
+    const marketCap = calculateMarketCap(
+      curveAccount['reserveToken'],
+      SPL_DECIMAL,
+      newPrice,
+    );
+
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString(),
     )
@@ -157,6 +183,9 @@ export default function TradingPage() {
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
     setCoin(data);
+    if (marketCap) {
+      setMarketCap(marketCap || data.marketcap || 0);
+    }
     handleSetCoinInfo(data);
     setShownBondingCurve(showCurve);
   };
@@ -209,39 +238,70 @@ export default function TradingPage() {
 
   // realtime bonding curve
   useEffect(() => {
+    if (Number(progress) >= 100) {
+      return;
+    }
+
     (async () => {
-      // Split the pathname and extract the last segment
-      const segments = pathname.split('/');
-      const parameter = segments[segments.length - 1];
-      const provider = anchor.getProvider();
+      try {
+        // Split the pathname and extract the last segment
+        const segments = pathname.split('/');
+        const parameter = segments[segments.length - 1];
+        const provider = anchor.getProvider();
 
-      const configBondingAddr = await web3Solana.getBondingAddressToken(wallet);
-      const curvePDA = await web3Solana.getCurvePDA(toPublicKey(parameter));
+        const configBondingAddr = await web3Solana.getBondingAddressToken(
+          wallet,
+        );
+        const curvePDA = await web3Solana.getCurvePDA(toPublicKey(parameter));
 
-      if (provider && configBondingAddr) {
-        anchor.getProvider().connection.onAccountChange(curvePDA, (account) => {
-          if (account.data) {
-            const data = web3Solana.decodeCurveData(account.data);
+        if (provider && configBondingAddr) {
+          anchor
+            .getProvider()
+            .connection.onAccountChange(curvePDA, (account) => {
+              if (account.data) {
+                const data = web3Solana.decodeCurveData(account.data);
 
-            const bondingCurveValue = new BigNumber(
-              (data['reserveLamport'] || new BN(0)).toString(),
-            )
-              .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
-              .toNumber();
+                const bondingCurveValue = new BigNumber(
+                  (data['reserveLamport'] || new BN(0)).toString(),
+                )
+                  .minus(ALL_CONFIGS.INIT_SOL_BONDING_CURVE)
+                  .toNumber();
 
-            const bondingCurvePercent = new BigNumber(bondingCurveValue)
-              .multipliedBy(new BigNumber(100))
-              .div(
-                new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
-                  ALL_CONFIGS.INIT_SOL_BONDING_CURVE,
-                ),
-              )
-              .toNumber();
+                const bondingCurvePercent = new BigNumber(bondingCurveValue)
+                  .multipliedBy(new BigNumber(100))
+                  .div(
+                    new BigNumber(ALL_CONFIGS.BONDING_CURVE_LIMIT).minus(
+                      ALL_CONFIGS.INIT_SOL_BONDING_CURVE,
+                    ),
+                  )
+                  .toNumber();
 
-            setShownBondingCurve(bondingCurveValue < 0 ? 0 : bondingCurveValue);
-            setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
-          }
-        });
+                const newPrice = calculateTokenPrice(
+                  data['reserveToken'],
+                  data['reserveLamport'],
+                  SPL_DECIMAL,
+                  solPrice,
+                );
+                const marketCap = calculateMarketCap(
+                  data['reserveToken'],
+                  SPL_DECIMAL,
+                  newPrice,
+                );
+
+                if (marketCap) {
+                  setMarketCap(marketCap || 0);
+                }
+                setShownBondingCurve(
+                  bondingCurveValue < 0 ? 0 : bondingCurveValue,
+                );
+                setProgress(
+                  bondingCurvePercent > 100 ? 100 : bondingCurvePercent,
+                );
+              }
+            });
+        }
+      } catch (error) {
+        console.log('error update curve info', error);
       }
     })();
   }, [pathname]);
@@ -398,7 +458,11 @@ export default function TradingPage() {
                       <div className="text-[#84869A] text-[10px] md:text-[12px] font-medium ml-1">
                         &#x2022; Marketcap{' '}
                         <span className="text-[#E8E9EE]">
-                          {formatNumberKMB(Number(coin.marketcap || 0))}
+                          {formatNumberKMB(
+                            !!marketCap
+                              ? marketCap
+                              : Number(coin.marketcap || 0),
+                          )}
                         </span>
                       </div>
                     </div>

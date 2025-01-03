@@ -1,7 +1,7 @@
 import UserContext from '@/context/UserContext';
 import React, { ChangeEvent, useContext, useState } from 'react';
 
-import { RPC_MAPS } from '@/config';
+import { DEFAULT_RPC, RPC_DEFAULT_KEY, RPC_MAPS } from '@/config';
 import { twMerge } from 'tailwind-merge';
 
 interface ModalProps {
@@ -11,9 +11,10 @@ interface ModalProps {
 
 const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
   const { rpcUrl, setRpcUrl } = useContext(UserContext);
-  const [inputRpcType, setInputRpcType] = useState<string>('Agents');
+  // const [inputRpcType, setInputRpcType] = useState<string>('Agents');
+  const [inputRpcType, setInputRpcType] = useState<string>(RPC_DEFAULT_KEY);
   const [customUrl, setCustomUrl] = useState<string>(RPC_MAPS['Custom']);
-  const [tab, setTab] = useState<string>(RPC_MAPS.Agents);
+  const [tab, setTab] = useState<string>(DEFAULT_RPC);
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -88,7 +89,7 @@ const SettingModal: React.FC<ModalProps> = ({ isOpen, closeModal }) => {
               setRpcUrl(customUrl);
             }}
             className={twMerge(
-              `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-3 rounded h-12 text-[#E8E9EE] bg-transparent`,
+              `outline-none focus:outline-none w-full px-3 border border-[#585A6B] mt-6 rounded h-12 text-[#E8E9EE] bg-transparent`,
               inputRpcType !== 'Custom' && 'opacity-50',
             )}
           />

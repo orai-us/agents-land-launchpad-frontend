@@ -53,7 +53,7 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
     const listenTrade = async (tokenId: string, data: any) => {
       console.log('data', data);
       const newRecordInfo: recordInfo = {
-        holder: { wallet: data.user } as any,
+        holder: { wallet: data.holder } as any,
         lamportAmount: new BN(data.lamportAmount),
         tokenAmount: new BN(data.tokenAmount),
         time: new Date(),
