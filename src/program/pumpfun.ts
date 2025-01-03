@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/pumpfun.json`.
  */
 export type Pumpfun = {
-  address: 'agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM';
+  address: '69dh5zQEhCMYYpnTvy8tBxZG5PFGsZTBU9ntLxd965Po';
   metadata: {
     name: 'pumpfun';
     version: '0.1.0';
@@ -691,6 +691,10 @@ export type Pumpfun = {
         {
           name: 'swapAmount';
           type: 'u64';
+        },
+        {
+          name: 'direction';
+          type: 'u8';
         },
         {
           name: 'minimumReceiveAmount';
@@ -2357,19 +2361,9 @@ export type Pumpfun = {
         kind: 'struct';
         fields: [
           {
-            name: 'isClaimed';
-            docs: ['If true, the tokens have been claimed.'];
-            type: 'bool';
-          },
-          {
             name: 'claimant';
             docs: ['Authority that claimed the tokens.'];
             type: 'pubkey';
-          },
-          {
-            name: 'claimedAt';
-            docs: ['When the tokens were claimed.'];
-            type: 'i64';
           },
           {
             name: 'amount';

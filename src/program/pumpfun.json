@@ -1,5 +1,5 @@
 {
-  "address": "agentDiuyLRQEZgByNRnDErj1FcXyfyZysaQBDfwNNM",
+  "address": "69dh5zQEhCMYYpnTvy8tBxZG5PFGsZTBU9ntLxd965Po",
   "metadata": {
     "name": "pumpfun",
     "version": "0.1.0",
@@ -404,6 +404,10 @@
         {
           "name": "swap_amount",
           "type": "u64"
+        },
+        {
+          "name": "direction",
+          "type": "u8"
         },
         {
           "name": "minimum_receive_amount",
@@ -1564,19 +1568,9 @@
         "kind": "struct",
         "fields": [
           {
-            "name": "is_claimed",
-            "docs": ["If true, the tokens have been claimed."],
-            "type": "bool"
-          },
-          {
             "name": "claimant",
             "docs": ["Authority that claimed the tokens."],
             "type": "pubkey"
-          },
-          {
-            "name": "claimed_at",
-            "docs": ["When the tokens were claimed."],
-            "type": "i64"
           },
           {
             "name": "amount",
