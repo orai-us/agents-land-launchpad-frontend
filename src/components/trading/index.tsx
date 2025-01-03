@@ -25,6 +25,7 @@ import { coinInfo } from '@/utils/types';
 import {
   calculateMarketCap,
   calculateTokenPrice,
+  findMarketCapFromBE,
   fromBig,
   getCoinInfo,
   reduceString,
@@ -147,18 +148,6 @@ export default function TradingPage() {
     setCurveLimit(maxSolSwapIncludeFee || 0);
     handleSetCurveInfo(curveAccount);
 
-    const newPrice = calculateTokenPrice(
-      curveAccount['reserveToken'],
-      curveAccount['reserveLamport'],
-      SPL_DECIMAL,
-      solPrice,
-    );
-    const marketCap = calculateMarketCap(
-      curveAccount['reserveToken'],
-      SPL_DECIMAL,
-      newPrice,
-    );
-
     const bondingCurveValue = new BigNumber(
       (data.lamportReserves || new BN(0)).toString(),
     )
@@ -183,9 +172,24 @@ export default function TradingPage() {
     setIsAgentChart(!showCurrentChart);
     setProgress(bondingCurvePercent > 100 ? 100 : bondingCurvePercent);
     setCoin(data);
-    if (marketCap) {
-      setMarketCap(marketCap || data.marketcap || 0);
-    }
+
+    const tokenInfoMeta = await findMarketCapFromBE(data.token);
+    const newPrice = calculateTokenPrice(
+      curveAccount['reserveToken'],
+      curveAccount['reserveLamport'],
+      SPL_DECIMAL,
+      solPrice,
+    );
+    const marketCap = calculateMarketCap(
+      curveAccount['reserveToken'],
+      SPL_DECIMAL,
+      newPrice,
+    );
+
+    // if (marketCap) {
+    setMarketCap(tokenInfoMeta?.market_cap || marketCap || data.marketcap || 0);
+    // }
+
     handleSetCoinInfo(data);
     setShownBondingCurve(showCurve);
   };

@@ -338,18 +338,27 @@ export const findHolders = async (mint: string) => {
 };
 
 export const findHoldersFromBE = async (mint: string, limit: number = 20) => {
-  // D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck
   try {
-    // Fetch the price data from CoinGecko
     const response = await axios.get(
       `${BACKEND_URL}/coin/token/${mint}/holder?limit=${limit}`,
       config,
-      // `${BACKEND_URL}/coin/token/${'D7yP4ycfsRWUGYionGpi64sLF2ddZ2JXxuRAti2M7uck'}/holder?limit=${limit}`,
     );
     return response.data;
   } catch (error) {
-    console.error('Error fetching SOL price:', error);
-    // throw error;
+    console.error('Error fetching findHoldersFromBE price:', error);
+  }
+};
+
+export const findMarketCapFromBE = async (mint: string) => {
+  try {
+    const response = await axios.get(
+      `${BACKEND_URL}/coin/token/${mint}/market`,
+      config,
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching findMarketCapFromBE price:', error);
+    return;
   }
 };
 

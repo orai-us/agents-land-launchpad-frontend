@@ -85,7 +85,7 @@ export function UserProvider({
           disableRetryOnRateLimit: true,
           wsEndpoint: wsUrl,
         });
-        // setConnection(connection);
+        await connection.getEpochInfo(); // check status rpc
 
         if (wallet.publicKey) {
           const provider = new AnchorProvider(connection, wallet, {
