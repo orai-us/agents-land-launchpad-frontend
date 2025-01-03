@@ -37,7 +37,9 @@ export enum STEP_TOKEN {
 }
 
 export default function CreateToken() {
-  const isDevnet = import.meta.env.VITE_APP_SOLANA_ENV === 'devnet';
+  const isDevTest = ['devnet', 'mainnet-beta-test'].includes(
+    import.meta.env.VITE_APP_SOLANA_ENV,
+  );
   const [imageUrl, setIamgeUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingConfirm, setIsLoadingConfirm] = useState(false);
@@ -112,7 +114,7 @@ export default function CreateToken() {
 
         if (res) {
           setAgentList(res['items']);
-          if (isDevnet) {
+          if (isDevTest) {
             setSelectedAgent(res['items'][0]); // TODO: only on test
           }
         }
@@ -201,7 +203,7 @@ export default function CreateToken() {
             tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr,
         );
 
-        if (isSelectedAgentHasCoin && !isDevnet) {
+        if (isSelectedAgentHasCoin && !isDevTest) {
           errorAlert(
             'Your agent has been tokenized! Please select another agent!',
           );
@@ -293,7 +295,7 @@ export default function CreateToken() {
     selectedAgent;
 
   const isSelectedAgentHasCoin =
-    !isDevnet &&
+    !isDevTest &&
     unCreatableToken.find(
       (tk) => tk.metadata?.agentAddress === selectedAgent?.botWallet?.solAddr,
     );
@@ -309,6 +311,25 @@ export default function CreateToken() {
         const key = await genTokenKeypair();
         mintKp = Keypair.fromSecretKey(base58.decode(key));
       }
+      if (envMode === 'mainnet-beta-test') {
+        // const LIST = [
+        //   [
+        //     220, 250, 122, 57, 231, 134, 224, 210, 20, 76, 237, 169, 7, 204, 52,
+        //     90, 175, 144, 167, 66, 241, 168, 165, 98, 28, 182, 132, 200, 67,
+        //     186, 71, 116, 9, 99, 127, 245, 179, 208, 234, 113, 6, 225, 221, 111,
+        //     51, 27, 200, 91, 215, 115, 32, 9, 228, 210, 160, 168, 112, 158, 19,
+        //     253, 155, 30, 63, 228,
+        //   ],
+        // ];
+        // console.log('gen Defi prefix');
+        // const key = LIST[0];
+
+        // const privKey = base58.encode(key);
+        // mintKp = Keypair.fromSecretKey(base58.decode(privKey));
+
+        mintKp = Keypair.generate();
+      }
+
       console.log('tokenAddress:', mintKp.publicKey.toBase58());
 
       setMintKp(mintKp);
