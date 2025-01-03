@@ -51,26 +51,27 @@ export const Chatting: React.FC<ChattingProps> = ({ param, coin }) => {
   useEffect(() => {
     if (_.isEmpty(trades) || _.isEmpty(coin)) return;
     const listenTrade = async (tokenId: string, data: any) => {
-      console.log('data', data);
-      const newRecordInfo: recordInfo = {
-        holder: { wallet: data.holder } as any,
-        lamportAmount: new BN(data.lamportAmount),
-        tokenAmount: new BN(data.tokenAmount),
-        time: new Date(),
-        tx: data.tx,
-        price: calculateTokenPrice(
-          new BN(data.tokenReserves),
-          new BN(data.lamportReserves),
-          coin.decimals,
-          solPrice,
-        ),
-        swapDirection: data.swapDirection as any,
-      };
+      if (tokenId === coin.token) {
+        const newRecordInfo: recordInfo = {
+          holder: { wallet: data.holder } as any,
+          lamportAmount: new BN(data.lamportAmount),
+          tokenAmount: new BN(data.tokenAmount),
+          time: new Date(),
+          tx: data.tx,
+          price: calculateTokenPrice(
+            new BN(data.tokenReserves),
+            new BN(data.lamportReserves),
+            coin.decimals,
+            solPrice,
+          ),
+          swapDirection: data.swapDirection as any,
+        };
 
-      setTrades((trades) => {
-        const newTradeRecords = [newRecordInfo, ...trades.record];
-        return { ...trades, record: newTradeRecords };
-      });
+        setTrades((trades) => {
+          const newTradeRecords = [newRecordInfo, ...trades.record];
+          return { ...trades, record: newTradeRecords };
+        });
+      }
     };
 
     if (socket) {

@@ -12,7 +12,10 @@ export const RPC_MAPS = {
   PublicNode: 'https://solana-rpc.publicnode.com',
   Custom: 'https://',
 };
-export const RPC_DEFAULT_KEY = 'SolanaOrai';
+export const RPC_DEFAULT_KEY =
+  import.meta.env.VITE_APP_SOLANA_ENV === 'devnet'
+    ? 'Agents.Land'
+    : 'SolanaOrai';
 export const DEFAULT_RPC = RPC_MAPS[RPC_DEFAULT_KEY];
 
 export const AXIOS_TIMEOUT = 10000;
